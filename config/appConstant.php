@@ -1,0 +1,15 @@
+<?php
+
+return [
+    'maritalStatuses'=>1,
+    'regions'=>6,
+    'positions_in_organization'=>12,
+    'hire_types'=>19,
+    'activity_status'=>24,
+    'sectors'=>29,
+    'food_security_sector'=>30,
+    'clean_water_sector'=>29,
+    'beneficiaries_types'=>36,
+    'aids_primary_missions'=>39,
+    'attchment_types'=>47,
+];
