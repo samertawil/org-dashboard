@@ -4,6 +4,7 @@ namespace App\Livewire\AppSetting\Users;
 
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Gate;
 
 class Create extends Component
 {
@@ -35,6 +36,9 @@ class Create extends Component
     }
     public function render()
     {
+        if (Gate::denies('user.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.users.create');
     }
 }

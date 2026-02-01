@@ -6,6 +6,7 @@ use App\Models\Status;
 use Livewire\Component;
 use App\Models\SystemNames;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class Edit extends Component
 {
@@ -71,6 +72,9 @@ class Edit extends Component
 
     public function render()
     {
+        if (Gate::denies('status.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.status.edit', [
 
             'parentStatuses' => $this->getParentStatuses(),

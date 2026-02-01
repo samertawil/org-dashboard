@@ -6,6 +6,7 @@ use App\Models\Status;
 use Livewire\Component;
 use App\Models\SystemNames;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Index extends Component
@@ -83,6 +84,9 @@ class Index extends Component
     
     public function render()
     {
+        if (Gate::denies('status.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.status.index', [
             'statuses' => $this->getStatuses(),
             'parentStatuses' => $this->getParentStatuses(),

@@ -5,61 +5,23 @@ namespace App\Livewire\OrgApp\Activity;
 use App\Models\City;
 use App\Models\Region;
 use App\Models\Status;
-use App\Models\Activity;
 use Livewire\Component;
+use App\Models\Activity;
 use App\Models\Employee;
 use App\Models\Location;
 use App\Models\Neighbourhood;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
+use App\Concerns\Activity\FormTrait;
+use Illuminate\Support\Facades\Gate;
 
 class Edit extends Component
 {
     public Activity $activity;
-
+    use FormTrait;
 
     public $name = '';
 
-    #[Validate('nullable|string')]
-    public $description = '';
 
-    #[Validate('required|date')]
-    public $start_date = '';
-
-    #[Validate('nullable|date|after_or_equal:start_date')]
-    public $end_date = '';
-
-    #[Validate('nullable|numeric|min:0')]
-    public $cost = 0;
-
-    #[Validate('required|exists:statuses,id')]
-    public $status = '';
-
-    #[Validate('required|integer')]
-    public $activation = '';
-
-    #[Validate('nullable|exists:regions,id')]
-    public $region = '';
-
-    #[Validate('nullable|exists:cities,id')]
-    public $city = '';
-
-    #[Validate('nullable|exists:neighbourhoods,id')]
-    public $neighbourhood = '';
-
-    #[Validate('nullable|exists:locations,id')]
-    public $location = '';
-
-    #[Validate('nullable|string|max:255')]
-    public $address_details = '';
-
-    #[Validate('required|exists:statuses,id')]
-    public $sector_id = '';
-
-    public $parcels = [];
-    public $beneficiaries = [];
-    public $work_teams = [];
 
     public function mount(Activity $activity)
     {
@@ -72,7 +34,6 @@ class Edit extends Component
         $this->end_date = $activity->end_date;
         $this->cost = $activity->cost;
         $this->status = $activity->status;
-        $this->activation = $activity->activation;
         $this->region = $activity->region;
         $this->city = $activity->city;
         $this->neighbourhood = $activity->neighbourhood;
@@ -88,6 +49,9 @@ class Edit extends Component
 
         $this->work_teams = $activity->workTeams->toArray();
         if (empty($this->work_teams)) $this->addWorkTeam();
+
+        $this->feedbacks = $activity->feedbacks->toArray();
+        if (empty($this->feedbacks)) $this->addFeedback();
     }
 
     public function rules() {
@@ -95,74 +59,6 @@ class Edit extends Component
             'name'=>'required|string|max:255',
             // unique:activities,name,'.$this->activity->id
         ];
-    }
-
-    public function addParcel()
-    {
-        $this->parcels[] = [
-            'parcel_type' => '',
-            'distributed_parcels_count' => 0,
-            'cost_for_each_parcel' => 0.00,
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeParcel($index)
-    {
-        unset($this->parcels[$index]);
-        $this->parcels = array_values($this->parcels);
-    }
-
-    public function addBeneficiary()
-    {
-        $this->beneficiaries[] = [
-            'beneficiary_type' => '',
-            'beneficiaries_count' => 0,
-            'cost_for_each_beneficiary' => 0.00,
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeBeneficiary($index)
-    {
-        unset($this->beneficiaries[$index]);
-        $this->beneficiaries = array_values($this->beneficiaries);
-    }
-
-    public function addWorkTeam()
-    {
-        $this->work_teams[] = [
-            'employee_mission_title' => '',
-            'employee_id' => '',
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeWorkTeam($index)
-    {
-        unset($this->work_teams[$index]);
-        $this->work_teams = array_values($this->work_teams);
-    }
-
-    public function updatedRegion()
-    {
-        $this->city = '';
-        $this->neighbourhood = '';
-        $this->location = '';
-    }
-
-    public function updatedCity()
-    {
-        $this->neighbourhood = '';
-        $this->location = '';
-    }
-
-    public function updatedNeighbourhood()
-    {
-        $this->location = '';
     }
 
     public function update()
@@ -209,19 +105,25 @@ class Edit extends Component
             }
         }
 
+        $this->activity->feedbacks()->delete();
+        foreach ($this->feedbacks as $feedback) {
+            if ($feedback['rating'] || $feedback['comment']) {
+                $this->activity->feedbacks()->create($feedback);
+            }
+        }
+
         session()->flash('message', __('Activity successfully updated.'));
 
         return $this->redirect(route('activity.index'), navigate: true);
     }
 
-    #[Computed()]
-    public function allStatuses()
-    {
-        return Status::get();
-    }
+
 
     public function render()
     {
+        if(Gate::denies('activity.create')){
+            return abort(403,'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.activity.edit', [
             'heading' => __('Edit Activity'),
             'type' => 'update',

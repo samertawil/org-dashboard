@@ -166,16 +166,16 @@
             </flux:select>
 
             {{-- Activation --}}
+            <flux:field>
+                <flux:label badge="Required" badgeColor="text-red-600">Status</flux:label>
             <flux:select
                 wire:model="activation"
-                :label="__('Status')"
-                badge="Required" 
-                badgeColor="text-red-600"
             >
                 @foreach($activations as $a)
                     <option value="{{ $a['value'] }}">{{ $a['label'] }}</option>
                 @endforeach
             </flux:select>
+        </flux:field>
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">

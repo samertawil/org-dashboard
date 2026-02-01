@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Department;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
+use Illuminate\Support\Facades\Gate;
 
 class Create extends Component
 {
@@ -47,6 +48,9 @@ class Create extends Component
     }
     public function render()
     {
+        if (Gate::denies('department.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.department.create', [
             'heading' => __('Create Department'),
             'type' => 'save',

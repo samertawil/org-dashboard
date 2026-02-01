@@ -2,9 +2,10 @@
 
 namespace App\Livewire\OrgApp\Department;
 
-use App\Models\Department;
 use Livewire\Component;
+use App\Models\Department;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
 {
@@ -26,6 +27,9 @@ class Index extends Component
 
     public function render()
     {
+        if (Gate::denies('department.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $departments = Department::where('name', 'like', '%' . $this->search . '%')
             ->latest()
             ->paginate(10);

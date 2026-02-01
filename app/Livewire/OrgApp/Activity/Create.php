@@ -3,64 +3,28 @@
 namespace App\Livewire\OrgApp\Activity;
 
 use Carbon\Carbon;
-use App\Models\City;
-use App\Models\Region;
 use App\Models\Status;
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\Employee;
-use App\Models\Location;
-use App\Models\Neighbourhood;
-use App\Reposotries\StatusRepo;
-use Livewire\Attributes\Computed;
+use App\Reposotries\CityRepo;
+use App\Reposotries\RegionRepo;
+use App\Reposotries\employeeRepo;
+use App\Reposotries\LocationRepo;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
+use App\Enums\GlobalSystemConstant;
+use App\Concerns\Activity\FormTrait;
+use Illuminate\Support\Facades\Gate;
+use App\Reposotries\NeighbourhoodRepo;
 
 
 class Create extends Component
 {
+    use FormTrait;
+    
     #[Validate('required|string|max:255|unique:activities,name')]
     public string $name = 'ACTIVITY #';
 
-    #[Validate('nullable|string')]
-    public $description = '';
-
-    #[Validate('required|date')]
-    public $start_date = '';
-
-    #[Validate('nullable|date|after_or_equal:start_date')]
-    public $end_date = '';
-
-    #[Validate('nullable|numeric|min:0')]
-    public $cost = 0;
-
-    #[Validate('required|exists:statuses,id')]
-    public $status = '';
-
-    // #[Validate('required|integer')]
-    // public $activation =  GlobalSystemConstant::ACTIVE->value;
-
-    #[Validate('nullable|exists:regions,id')]
-    public int|null $region = null;
-
-    #[Validate('nullable|exists:cities,id')]
-    public int|null $city = null;
-
-    #[Validate('nullable|exists:neighbourhoods,id')]
-    public int|null $neighbourhood = null;
-
-    #[Validate('nullable|exists:locations,id')]
-    public int|null $location = null;
-
-    #[Validate('nullable|string|max:255')]
-    public string|null$address_details = null;
-
-    #[Validate('required|exists:statuses,id')]
-    public int|null $sector_id = null;
-
-    public $parcels = [];
-    public $beneficiaries = [];
-    public $work_teams = [];
 
     public function mount()
     {
@@ -68,81 +32,13 @@ class Create extends Component
         $this->addParcel();
         $this->addBeneficiary();
         $this->addWorkTeam();
-
-    
+        $this->addFeedback();
     }
 
-    public function addParcel()
-    {
-        $this->parcels[] = [
-            'parcel_type' => '',
-            'distributed_parcels_count' => 0,
-            'cost_for_each_parcel' => 0.00,
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeParcel($index)
-    {
-        unset($this->parcels[$index]);
-        $this->parcels = array_values($this->parcels);
-    }
-
-    public function addBeneficiary()
-    {
-        $this->beneficiaries[] = [
-            'beneficiary_type' => '',
-            'beneficiaries_count' => 0,
-            'cost_for_each_beneficiary' => 0.00,
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeBeneficiary($index)
-    {
-        unset($this->beneficiaries[$index]);
-        $this->beneficiaries = array_values($this->beneficiaries);
-    }
-
-    public function addWorkTeam()
-    {
-        $this->work_teams[] = [
-            'employee_mission_title' => '',
-            'employee_id' => '',
-            'status_id' => '',
-            'notes' => '',
-        ];
-    }
-
-    public function removeWorkTeam($index)
-    {
-        unset($this->work_teams[$index]);
-        $this->work_teams = array_values($this->work_teams);
-    }
-
-    public function updatedRegion()
-    {
-        $this->city = '';
-        $this->neighbourhood = '';
-        $this->location = '';
-    }
-
-    public function updatedCity()
-    {
-        $this->neighbourhood = '';
-        $this->location = '';
-    }
-
-    public function updatedNeighbourhood()
-    {
-        $this->location = '';
-    }
-
+  
     public function save()
     {
-
+      
         $this->validate();
 
         $activityName=  Activity::where('sector_id', $this->sector_id)
@@ -190,6 +86,12 @@ class Create extends Component
                     $project->workTeams()->create($team);
                 }
             }
+
+            foreach ($this->feedbacks as $feedback) {
+                if ($feedback['rating'] || $feedback['comment']) {
+                    $project->feedbacks()->create($feedback);
+                }
+            }
             DB::commit();
         } catch (\Throwable $th) {
           
@@ -204,32 +106,21 @@ class Create extends Component
         return $this->redirect(route('activity.index'), navigate: true);
     }
 
-    // #[Computed()]
-    // public function allStatuses()
-    // {
-    //     return Status::get();
-    // }
-
-    #[Computed()]
-    public function allStatuses()
-    {
-        return StatusRepo::statuses();
-    }
-
  
     public function render()
     {
+        if(Gate::denies('activity.create')){
+            return abort(403,'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.activity.create', [
             'heading' => __('Create Activity'),
             'type' => 'save',
-            'statuses' => Status::whereNull('p_id_sub')->get(),
-            'activityStatuses' => Status::where('p_id_sub', config('appConstant.activity_status'))->get(),
-            'parcelTypes' => Status::where('p_id_sub', $this->sector_id)->get(),
-            'regions' => Region::get(),
-            'cities' => $this->region ? City::where('region_id', $this->region)->get() : collect(),
-            'neighbourhoods' => $this->city ? Neighbourhood::where('city_id', $this->city)->get() : collect(),
-            'locations' => $this->neighbourhood ? Location::where('neighbourhood_id', $this->neighbourhood)->get() : collect(),
-            'employees' => Employee::get(),
+
+            'regions' => RegionRepo::regions(),
+            'cities' => $this->region ? CityRepo::cities()->where('region_id', $this->region):collect(),
+            'neighbourhoods' => $this->city ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city):collect(),
+            'locations' => $this->neighbourhood ? LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood):collect(), 
+            'employees' => employeeRepo::employees()->where('activation',GlobalSystemConstant::ACTIVE->value),
         ]);
     }
 }

@@ -2,8 +2,9 @@
 
 namespace App\Livewire\AppSetting\SystemNames;
 
-use App\Models\SystemNames;
 use Livewire\Component;
+use App\Models\SystemNames;
+use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
 {
@@ -19,6 +20,9 @@ class Index extends Component
 
     public function render()
     {
+        if (Gate::denies('status.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.system-names.index');
     }
 }

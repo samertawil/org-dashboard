@@ -3,38 +3,39 @@
 namespace App\Livewire\AppSetting\Status;
 
 use App\Models\Status;
-use App\Models\SystemNames;
 use Livewire\Component;
- 
+use App\Models\SystemNames;
+use Illuminate\Support\Facades\Gate;
+
 class Create extends Component
 {
     // Form properties
-    public string  $status_name='';
-    public int|null  $p_id_sub=null;
-    public int|null  $c_id_sub=null;
-    public int|null $used_in_system_id=null;
-    public string|null $description=null;
+    public string  $status_name = '';
+    public int|null  $p_id_sub = null;
+    public int|null  $c_id_sub = null;
+    public int|null $used_in_system_id = null;
+    public string|null $description = null;
 
 
     public function store(): void
     {
-        
-        $this->validate([
-            'status_name' => 'required|string|max:255|unique:statuses,status_name',  
-        ]);
-       
 
-       Status::create([
+        $this->validate([
+            'status_name' => 'required|string|max:255|unique:statuses,status_name',
+        ]);
+
+
+        Status::create([
             'status_name' => ucfirst($this->status_name),
             'p_id_sub' => $this->p_id_sub,
             'used_in_system_id' => $this->used_in_system_id,
             'description' => ucfirst($this->description),
-            'c_id_sub'=>$this->c_id_sub,
-       ]);
+            'c_id_sub' => $this->c_id_sub,
+        ]);
 
-       session()->flash('message', 'Status created successfully.');
+        session()->flash('message', 'Status created successfully.');
 
-        $this->reset(['status_name', 'p_id_sub', 'used_in_system_id', 'description','c_id_sub']);
+        $this->reset(['status_name', 'p_id_sub', 'used_in_system_id', 'description', 'c_id_sub']);
     }
 
     public function getParentStatuses()
@@ -59,8 +60,12 @@ class Create extends Component
 
     public function render()
     {
+
+        if (Gate::denies('status.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.status.create', [
-           
+
             'parentStatuses' => $this->getParentStatuses(),
             'childStatuses' => $this->getChildStatuses(),
             'systemNames' => $this->getSystemNames(),

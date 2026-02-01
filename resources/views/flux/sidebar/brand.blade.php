@@ -7,18 +7,20 @@
     'logo' => null,
     'logoDark' => null,
     'alt' => null,
-    'href' => '/',
+    'href' => '',
+    'textSize' => 'text-xs',
 ])
 
 @php
 $classes = Flux::classes()
-    ->add('h-10 flex items-center px-2 in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:px-2')
+    ->add('h-auto py-2 flex items-center px-2 in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:px-2')
     ->add('in-data-flux-sidebar-collapsed-desktop:in-data-flux-sidebar-active:absolute')
     ->add('in-data-flux-sidebar-collapsed-desktop:in-data-flux-sidebar-active:opacity-0')
     ;
 
 $textClasses = Flux::classes()
-    ->add('text-sm font-medium truncate [:where(&)]:text-zinc-800 dark:[:where(&)]:text-zinc-100')
+    ->add($textSize)
+    ->add('font-medium leading-tight whitespace-normal break-words [:where(&)]:text-zinc-800 dark:[:where(&)]:text-zinc-100')
     ;
 @endphp
 

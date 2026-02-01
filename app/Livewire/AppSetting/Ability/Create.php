@@ -9,6 +9,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use App\Rules\ValidStatusConstant;
 use App\Enums\GlobalSystemConstant;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 
 class Create extends Component
@@ -53,6 +54,10 @@ class Create extends Component
     }
     public function render()
     {
+        if (Gate::denies('ability.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
+        
         return view('livewire.app-setting.ability.ability-create');
     }
 }

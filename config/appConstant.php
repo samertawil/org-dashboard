@@ -12,4 +12,5 @@ return [
     'beneficiaries_types'=>36,
     'aids_primary_missions'=>39,
     'attchment_types'=>47,
+    'partner_institutions'=>52,
 ];

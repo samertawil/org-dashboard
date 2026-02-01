@@ -5,6 +5,7 @@ namespace App\Livewire\Appsetting\RoleModuleName;
 use Livewire\Component;
 use App\Models\ModuleName;
 use App\Enums\GlobalSystemConstant;
+use Illuminate\Support\Facades\Gate;
  
 
 class Create extends Component
@@ -48,11 +49,9 @@ class Create extends Component
 
     public function render()
     {
-        // if(Gate::denies('ability.all.resource')) {
-        //     abort(403,'ليس لديك الصلاحية اللازمة');
-        //  }
-
-
+        if (Gate::denies('ability.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.role-module-name.create');
     }
 }

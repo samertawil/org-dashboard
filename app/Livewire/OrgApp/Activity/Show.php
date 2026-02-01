@@ -2,30 +2,27 @@
 
 namespace App\Livewire\OrgApp\Activity;
 
-use App\Models\Project;
+ 
 use Livewire\Component;
 use App\Models\Activity;
 use Livewire\Attributes\Lazy;
+use Illuminate\Support\Facades\Gate;
 
+#[Lazy]
 class Show extends Component
 {
     public Activity $activity;
-    public $readyToLoad = false;
 
     public function mount(Activity $activity)
     {
-        $this->activity =
-
-        $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator']);
+        $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels', 'beneficiaries', 'workTeams']);
     }
-    #[Lazy]
+
     public function render()
     {
-        if ($this->readyToLoad) {
-            $this->project->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator']);
+        if(Gate::denies('activity.index')){
+            return abort(403,'You do not have the necessary permissions');
         }
-        return view('livewire.org-app.activity.show', [
-            'activity' => $this->readyToLoad ? $this->project : null
-        ]);
+        return view('livewire.org-app.activity.show');
     }
 }

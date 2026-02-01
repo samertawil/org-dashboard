@@ -95,12 +95,9 @@ class Edit extends Component
 
     public function render(): View
     {
-
-        // if (Gate::denies('abilities.groups.all.resource')) {
-        //     abort(403, 'ليس لديك الصلاحية اللازمة');
-        // }
-
-
+        if (Gate::denies('role.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $pageTitle = __('Edit Role');
         $abilities_module = Ability::with('module_name')->select('module_id')->groupby('module_id')->get();
 

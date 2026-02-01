@@ -8,6 +8,7 @@ use Livewire\Component;
 use App\Models\ModuleName;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -98,9 +99,9 @@ class Index extends Component
     public function render()
     {
         
-        // if (Gate::denies('ability.all.resource')) {
-        //     abort(403, 'ليس لديك الصلاحية اللازمة');
-        // }
+        if (Gate::denies('ability.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.ability.index');
     }
 }

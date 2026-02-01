@@ -2,9 +2,10 @@
 
 namespace App\Livewire\OrgApp\Employee;
 
-use App\Models\Employee;
 use Livewire\Component;
+use App\Models\Employee;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
 {
@@ -26,6 +27,9 @@ class Index extends Component
 
     public function render()
     {
+        if (Gate::denies('employee.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $employees = Employee::with(['department', 'positionStatus'])
             ->where('full_name', 'like', '%' . $this->search . '%')
             ->orWhere('employee_number', 'like', '%' . $this->search . '%')

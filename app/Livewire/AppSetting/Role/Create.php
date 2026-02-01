@@ -88,11 +88,9 @@ class Create extends Component
     public function render(): View
     {
 
-        // if (Gate::denies('abilities.groups.all.resource')) {
-        //     abort(403, 'ليس لديك الصلاحية اللازمة');
-        // }
-
-
+        if (Gate::denies('role.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $pageTitle = __('Create New Role');
 
 

@@ -6,8 +6,9 @@ use App\Models\Role;
 use App\Models\User;
 use Livewire\Component;
 use App\Models\RoleUser;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class GrantUserRole extends Component
 {
@@ -77,6 +78,9 @@ class GrantUserRole extends Component
 
   public function render(): View
   {
+    if (Gate::denies('grant.role.user')) {
+      abort(403, 'You do not have the necessary permissions');
+  }
     $pageTitle = __('customTrans.user role');
 
     $roles_group = Role::get();

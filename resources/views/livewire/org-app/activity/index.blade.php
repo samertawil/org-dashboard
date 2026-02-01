@@ -55,16 +55,16 @@
 
 
 
-        {{-- Clear Filters --}}
-        @if ($search || $start_date || $status_id|| $region_id || $city_id)
-        <div class="mt-4 flex items-center justify-end">
-            <flux:button
-                wire:click="$set('search', ''); $set('start_date', ''); $set('status_id', ''); $set('region_id', ''); $set('city_id', '')"
-                variant="ghost" size="sm" icon="x-mark">
-                {{ __('Clear Filters') }}
-            </flux:button>
-        </div>
-    @endif
+            {{-- Clear Filters --}}
+            @if ($search || $start_date || $status_id || $region_id || $city_id)
+                <div class="mt-4 flex items-center justify-end">
+                    <flux:button
+                        wire:click="$set('search', ''); $set('start_date', ''); $set('status_id', ''); $set('region_id', ''); $set('city_id', '')"
+                        variant="ghost" size="sm" icon="x-mark">
+                        {{ __('Clear Filters') }}
+                    </flux:button>
+                </div>
+            @endif
 
         </div>
 
@@ -96,6 +96,11 @@
                         </th>
 
                         <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Rating') }}
+                        </th>
+
+                        <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Actions') }}
                         </th>
@@ -103,7 +108,8 @@
                 </thead>
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
                     @forelse($this->activities as $activity)
-                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
+                        <tr wire:key="activity-{{ $activity->id }}"
+                            class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-6 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                 {{ $activity->name }}
                             </td>
@@ -111,7 +117,7 @@
                                 {{ $activity->start_date }}
                             </td>
 
-
+                            {{--
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <span @class([
                                     'text-sm max-w-xs  truncate',
@@ -122,6 +128,11 @@
                                 ])>
                                     {{ $activity->status_name ?? ($activity->activityStatus->status_name ?? '-') }}
                                 </span>
+                            </td> --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <flux:badge :color="$activity->status_info['color']" size="sm" inset="top bottom">
+                                    {{ $activity->status_info['name'] }}
+                                </flux:badge>
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
@@ -129,7 +140,15 @@
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $activity->regions->region_name ?? '-' }} / {{ $activity->cities->city_name ?? '-' }}
+                                {{ $activity->regions->region_name ?? '-' }} /
+                                {{ $activity->cities->city_name ?? '-' }}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                <div class="flex items-center gap-1">
+                                    <flux:icon icon="star" variant="solid" class="{{ $activity->rating_info['color'] }} w-4 h-4" />
+                                    <span>{{ $activity->rating_info['rating'] }}</span>
+                                </div>
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -148,16 +167,19 @@
                                         </flux:button>
                                     </flux:modal.trigger>
 
-                                    <flux:modal :name="$modalName" class="md:w-96" x-on:close-modal="$wire.closeShowModal()">
+                                    <flux:modal :name="$modalName" class="md:w-96"
+                                        x-on:close-modal="$wire.closeShowModal()">
                                         <div class="mt-4">
                                             @if ($selectedactivityIdForShowModal === $activity->id)
-                                                <livewire:OrgApp.activity.show :activity="$activity" wire:key="show-activity-{{ $activity->id }}" />
+                                                <livewire:OrgApp.activity.show :activity="$activity"
+                                                    wire:key="show-activity-{{ $activity->id }}" />
                                             @endif
                                         </div>
                                     </flux:modal>
 
                                     <flux:modal.trigger name="activity-attachments">
-                                        <flux:button wire:click="selectActivity({{ $activity->id }})" icon="paper-clip" variant="ghost" size="sm" tooltip="Attachments">
+                                        <flux:button wire:click="selectActivity({{ $activity->id }})" icon="paper-clip"
+                                            variant="ghost" size="sm" tooltip="Attachments">
                                         </flux:button>
                                     </flux:modal.trigger>
                                 </div>
@@ -176,25 +198,33 @@
 
         <flux:modal name="activity-attachments" class="md:w-[600px]">
             <div class="space-y-6">
-                <flux:heading level="2" size="lg">{{ __('Attachments For') }}: {{ $selectedactivity?->name }}</flux:heading>
+                <flux:heading level="2" size="lg">{{ __('Attachments For') }}:
+                    {{ $selectedactivity?->name }}</flux:heading>
 
-                @if($selectedactivity)
+                @if ($selectedactivity)
                     {{-- Existing Attachments --}}
                     <div class="space-y-2">
                         <flux:heading size="md">{{ __('Existing Files') }}</flux:heading>
                         <div class="grid grid-cols-1 gap-2">
-                            @foreach($attachments as $index => $attachment)
-                                <div wire:key="attachment-{{ $attachment['id'] ?? $index }}" class="flex items-center justify-between p-2 border rounded-lg border-zinc-200 dark:border-zinc-700">
+                            @foreach ($attachments as $index => $attachment)
+                                <div wire:key="attachment-{{ $attachment['id'] ?? $index }}"
+                                    class="flex items-center justify-between p-2 border rounded-lg border-zinc-200 dark:border-zinc-700">
                                     <div class="flex items-center gap-2">
                                         <flux:icon icon="document" size="sm" class="text-zinc-400" />
                                         <div class="flex flex-col">
-                                            <span class="text-sm font-medium">{{ basename($attachment['attchment_path'] ?? '') }}</span>
-                                            <span class="text-xs text-zinc-500">{{ $attachment['notes'] ?? '' }}</span>
+                                            <span
+                                                class="text-sm font-medium">{{ basename($attachment['attchment_path'] ?? '') }}</span>
+                                            <span
+                                                class="text-xs text-zinc-500">{{ $attachment['notes'] ?? '' }}</span>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <flux:button href="{{ asset('storage/' . ($attachment['attchment_path'] ?? '')) }}" target="_blank" variant="ghost" size="sm" icon="eye" />
-                                        <flux:button wire:click="deleteAttachment({{ $attachment['id'] }})" wire:confirm="Are you sure?" variant="ghost" size="sm" icon="trash" class="text-red-500" />
+                                        <flux:button
+                                            href="{{ asset('storage/' . ($attachment['attchment_path'] ?? '')) }}"
+                                            target="_blank" variant="ghost" size="sm" icon="eye" />
+                                        <flux:button wire:click="deleteAttachment({{ $attachment['id'] }})"
+                                            wire:confirm="Are you sure?" variant="ghost" size="sm"
+                                            icon="trash" class="text-red-500" />
                                     </div>
                                 </div>
                             @endforeach
@@ -208,23 +238,28 @@
                             <flux:button wire:click="addAttachment" variant="ghost" size="sm" icon="plus" />
                         </div>
 
-                        @foreach($newAttachments as $index => $item)
-                            <div wire:key="new-attachment-{{ $index }}" class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4">
-                                <flux:input type="file" wire:model="newAttachments.{{ $index }}.file" :label="__('Choose File')" />
-                                <flux:select wire:model="newAttachments.{{ $index }}.attchment_type" :label="__('Type')">
+                        @foreach ($newAttachments as $index => $item)
+                            <div wire:key="new-attachment-{{ $index }}"
+                                class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4">
+                                <flux:input type="file" wire:model="newAttachments.{{ $index }}.file"
+                                    :label="__('Choose File')" />
+                                <flux:select wire:model="newAttachments.{{ $index }}.attchment_type"
+                                    :label="__('Type')">
                                     <option value="">{{ __('Select Type') }}</option>
-                                    @foreach($this->allStatuses->where('p_id_sub', config('appConstant.attchment_types')) as $s)
+                                    @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.attchment_types')) as $s)
                                         <option value="{{ $s->id }}">{{ $s->status_name }}</option>
                                     @endforeach
                                 </flux:select>
                                 <div class="flex items-end gap-2">
-                                    <flux:input wire:model="newAttachments.{{ $index }}.notes" :label="__('Notes')" class="flex-1" />
-                                    <flux:button wire:click="removeNewAttachment({{ $index }})" variant="ghost" icon="trash" class="text-red-500" />
+                                    <flux:input wire:model="newAttachments.{{ $index }}.notes"
+                                        :label="__('Notes')" class="flex-1" />
+                                    <flux:button wire:click="removeNewAttachment({{ $index }})"
+                                        variant="ghost" icon="trash" class="text-red-500" />
                                 </div>
                             </div>
                         @endforeach
 
-                        @if(!empty($newAttachments))
+                        @if (!empty($newAttachments))
                             <div class="flex justify-end">
                                 <flux:button wire:click="saveAttachments" variant="primary" icon="cloud-arrow-up">
                                     {{ __('Save All New Files') }}

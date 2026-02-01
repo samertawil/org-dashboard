@@ -10,8 +10,8 @@
             <flux:button onclick="window.print()" variant="ghost" icon="printer">
                 {{ __('Print') }}
             </flux:button>
-          
-          
+
+
         </div>
     </div>
 
@@ -30,121 +30,256 @@
     </div>
 
     {{-- Main Content Grid --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 print:grid-cols-2 print:gap-4">
+    {{-- <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 print:grid-cols-2 print:gap-4">
 
-        {{-- Activity Overview Card --}}
-        <div
-            class="lg:col-span-2 print:col-span-1 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
-            <flux:heading size="lg"
-                class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
-                {{ __('Activity Overview') }}
-            </flux:heading>
+       
+    </div> --}}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:gap-2">
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Activity Name') }}</label>
-                    <p class="text-base font-medium text-zinc-900 dark:text-zinc-100">{{ $activity->name }}</p>
-                </div>
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Status') }}</label>
-                    <div class="mt-0.5">
-                        <span @class([
-                            'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium print:p-0 print:text-xs',
-                            'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' =>
-                                $activity->status === 27,
-                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' =>
-                                $activity->status === 26,
-                            'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' =>
-                                $activity->status === 25,
-                            'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' =>
-                                $activity->status === 28,
-                        ])>
-                            {{ $activity->status_name ?? ($activity->activityStatus->status_name ?? '-') }}
-                        </span>
-                    </div>
-                </div>
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Start Date') }}</label>
-                    <p class="text-sm text-zinc-800 dark:text-zinc-200">{{ $activity->start_date }}</p>
-                </div>
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('End Date') }}</label>
-                    <p class="text-sm text-zinc-800 dark:text-zinc-200">{{ $activity->end_date ?? __('Ongoing') }}</p>
-                </div>
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Total Cost') }}</label>
-                    <p class="text-lg font-bold text-zinc-900 dark:text-white">
-                        ${{ number_format($activity->cost, 2) }} <span
-                            class="text-[10px] font-normal text-zinc-500 uppercase ml-1">USD</span>
-                    </p>
-                </div>
-                <div>
-                    <label
-                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Sector') }}</label>
-                    <p class="text-sm text-zinc-800 dark:text-zinc-200">
-                        {{ $activity->statusSpecificSector->status_name ?? '-' }}
-                    </p>
+
+    {{-- Activity OverView --}}
+
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
+        <flux:heading size="lg"
+            class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
+            {{ __('Activity Overview') }}
+        </flux:heading>
+        <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Activity Name') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> {{ $activity->name }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Status') }} : </span>
+                {{-- <span
+                    class="text-xs text-zinc-900 dark:text-zinc-100 text-right">  {{ $activity->activityStatus->status_name ?? '-' }}</span> --}}
+                <flux:badge :color="$activity->status_info['color']" size="sm" inset="top bottom">
+                    {{ $activity->status_info['name'] }}
+                </flux:badge>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Start Date') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> {{ $activity->start_date }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('End Date') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    {{ $activity->end_date ?? __('Ongoing') }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Total Cost') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    ${{ number_format($activity->cost, 2) }}<span
+                        class="text-[10px] font-normal text-zinc-500 uppercase ml-1">USD</span></span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Rating') }} : </span>
+                <div class="flex items-center gap-1 justify-end">
+                    <flux:icon icon="star" variant="solid" class="{{ $activity->rating_info['color'] }} w-3 h-3" />
+                    <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                        {{ $activity->rating_info['rating'] }}
+                        @if ($activity->rating_info['rating'] > 0)
+                            <span class="text-[10px] text-zinc-500">({{ $activity->rating_info['text'] }})</span>
+                        @endif
+                    </span>
                 </div>
             </div>
         </div>
-
-        {{-- Location Details Card --}}
-        <div
-            class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
-            <flux:heading size="lg"
-                class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
-                {{ __('Location Details') }}
-            </flux:heading>
-
-            <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-zinc-500">{{ __('Region') }}</span>
-                    <span
-                        class="text-xs text-zinc-900 dark:text-zinc-100 text-right">{{ $activity->regions->region_name ?? '-' }}</span>
-                </div>
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-zinc-500">{{ __('City') }}</span>
-                    <span
-                        class="text-xs text-zinc-900 dark:text-zinc-100 text-right">{{ $activity->cities->city_name ?? '-' }}</span>
-                </div>
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-zinc-500">{{ __('Neighbourhood') }}</span>
-                    <span
-                        class="text-xs text-zinc-900 dark:text-zinc-100 text-right">{{ $activity->activityNeighbourhood->neighbourhood_name ?? '-' }}</span>
-                </div>
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-zinc-500">{{ __('Location') }}</span>
-                    <span
-                        class="text-xs text-zinc-900 dark:text-zinc-100 text-right">{{ $activity->activityLocation->location_name ?? '-' }}</span>
-                </div>
-                @if ($activity->address_details)
-                    <div class="mt-1 pt-1 border-t border-zinc-50 dark:border-zinc-700 print:border-zinc-200">
-                        <span
-                            class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Address Details') }}</span>
-                        <p class="text-xs text-zinc-800 dark:text-zinc-200 italic leading-tight">
-                            {{ $activity->address_details }}</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
         {{-- Description Section (Full width below cards on print) --}}
         @if ($activity->description)
             <div
                 class="lg:col-span-3 print:col-span-2 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300 mt-2">
                 <label
-                    class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('activity Description') }}</label>
+                    class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('activity Description') }}
+                    : </label>
                 <div
                     class="prose prose-sm dark:prose-invert max-w-none mt-1 text-zinc-800 dark:text-zinc-300 text-xs leading-relaxed">
                     {{ $activity->description }}
                 </div>
             </div>
         @endif
+    </div>
+
+
+    {{-- Location Details Card --}}
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
+        <flux:heading size="lg"
+            class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
+            {{ __('Location Details') }}
+        </flux:heading>
+
+        <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Region') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    {{ $activity->regions->region_name ?? '-' }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('City') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    {{ $activity->cities->city_name ?? '-' }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Neighbourhood') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    {{ $activity->activityNeighbourhood->neighbourhood_name ?? '-' }}</span>
+            </div>
+            <div class="flex justify-between items-start">
+                <span class="text-xs font-medium text-zinc-500">{{ __('Location') }} : </span>
+                <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right">
+                    {{ $activity->activityLocation->location_name ?? '-' }}</span>
+            </div>
+            @if ($activity->address_details)
+                <div class="mt-1 pt-1 border-t border-zinc-50 dark:border-zinc-700 print:border-zinc-200">
+                    <span
+                        class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Address Details') }}
+                        : </span>
+                    <p class="text-xs text-zinc-800 dark:text-zinc-200 italic leading-tight">
+                        {{ $activity->address_details }}</p>
+                </div>
+            @endif
+        </div>
+    </div>
+
+
+    {{-- Parcels Details --}}
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
+        <flux:heading size="lg"
+            class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
+            {{ __('Parcels Details') }}
+        </flux:heading>
+
+        <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
+            <div class="flex justify-between items-start">
+
+
+                @forelse ($activity->parcels as  $parcel)
+                    <ul>
+
+
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Parcel') }}</span>
+                                : {{ $parcel->parcelType->status_name ?? '-' }}</span>
+                        </li>
+
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Count') }}</span>
+                                : {{ $parcel->distributed_parcels_count }}</span>
+                        </li>
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Cost each parcel') }}</span>
+                                : {{ $parcel->cost_for_each_parcel }} &nbsp; USD</span>
+                        </li>
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Notes') }}</span>
+                                : {{ $parcel->notes }} </span>
+                        </li>
+                    </ul>
+
+
+
+                @empty
+                    <span>No Parcels Found</span>
+                @endforelse
+
+            </div>
+        </div>
+
+
+    </div>
+
+    {{-- Beneficiaries Details --}}
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
+        <flux:heading size="lg"
+            class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
+            {{ __('Beneficiaries Details') }}
+        </flux:heading>
+
+        <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
+            <div class="flex justify-between items-start">
+
+
+                @forelse ($activity->beneficiaries as  $beneficiary)
+                    <ul>
+
+
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Parcel') }}</span>
+                                : {{ $beneficiary->beneficiaryType->status_name ?? '-' }}</span>
+                        </li>
+
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Count') }}</span>
+                                : {{ $beneficiary->beneficiaries_count }}</span>
+                        </li>
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Cost each parcel') }}</span>
+                                : {{ $beneficiary->cost_for_each_beneficiary }} &nbsp; USD</span>
+                        </li>
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Notes') }}</span>
+                                : {{ $beneficiary->notes }} </span>
+                        </li>
+                    </ul>
+
+
+
+                @empty
+                    <span>No Beneficiaries Found</span>
+                @endforelse
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+    {{-- work teams Details --}}
+    <div
+        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 print:p-4 print:shadow-none print:border print:border-zinc-300">
+        <flux:heading size="lg"
+            class="mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-2 print:mb-2 print:text-base">
+            {{ __('Work Teams Details') }}
+        </flux:heading>
+
+        <div class="flex flex-col gap-2 print:gap-1.5 mt-2">
+            <div class="flex justify-between items-start">
+
+
+                @forelse ($activity->workTeams as  $team)
+                    <ul>
+
+               
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Employee') }}</span>
+                                : {{ $team->employeeRel->full_name ?? '-' }}</span>
+                        </li>
+
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('mission Title') }}</span>
+                                : {{ $team->missionTitle->status_name }}</span>
+                        </li>
+                        <li> <span class="text-xs text-zinc-900 dark:text-zinc-100 text-right"> <span
+                                    class="text-xs font-medium text-zinc-500">{{ __('Notes') }}</span>
+                                : {{ $team->notes }} </span>
+                        </li>
+
+                    </ul>
+
+
+
+                @empty
+                    <span>No Teams Found</span>
+                @endforelse
+
+            </div>
+        </div>
+
+
     </div>
 
     {{-- Metadata (Side-by-side with description or below on print to save space) --}}

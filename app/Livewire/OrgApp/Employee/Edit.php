@@ -2,56 +2,33 @@
 
 namespace App\Livewire\OrgApp\Employee;
 
-use App\Models\User;
-use App\Models\Status;
+
 use Livewire\Component;
 use App\Models\Employee;
-use App\Models\Department;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Validate;
-use App\Enums\GlobalSystemConstant;
+use Illuminate\Support\Facades\Gate;
+use App\Concerns\Employee\EmployeeTrait;
 
 class Edit extends Component
 {
+    use EmployeeTrait;
     public Employee $employee;
 
     public $employee_number = '';
     public $full_name = '';
-    public $gender = 2;
-    public $date_of_birth = '';
-    public $marital_status = '';
-    public $phone = '';
-    public $regions = '';
-    public $email = '';
-    public $department_id = '';
-    public $type_of_employee_hire = '';
-    public $date_of_joining = '';
-    public $position = '';
-    public $user_id = '';
-    public $activation = 1;
+    public $email = null;
 
     public function rules()
     {
         return [
             'employee_number' => 'required|string|unique:employees,employee_number,' . $this->employee->id,
             'full_name' => 'required|string|unique:employees,full_name,' . $this->employee->id,
-            'gender' => 'required|integer',
-            'date_of_birth' => 'nullable|date',
-            'marital_status' => 'nullable|exists:statuses,id',
-            'phone' => 'nullable|string',
-            'regions' => 'nullable|exists:statuses,id',
             'email' => 'nullable|email|unique:employees,email,' . $this->employee->id,
-            'department_id' => 'nullable|exists:departments,id',
-            'type_of_employee_hire' => 'nullable|exists:statuses,id',
-            'date_of_joining' => 'nullable|date',
-            'position' => 'nullable|exists:statuses,id',
-            'user_id' => 'nullable|exists:users,id',
-            'activation' => 'required|integer',
         ];
     }
 
+
     public function mount(Employee $employee)
-    {
+    {     
         $this->employee = $employee;
         $this->employee_number = $employee->employee_number;
         $this->full_name = $employee->full_name;
@@ -95,23 +72,18 @@ class Edit extends Component
         return $this->redirect(route('employee.index'), navigate: true);
     }
 
-    #[Computed()]
-    public function allStatuses()
-    {
-        return Status::get();
-    }
     public function render()
-    {
-        $genders = GlobalSystemConstant::options()->where('type', 'gender');
-        $activations = GlobalSystemConstant::options()->where('type', 'status');
-
+    { 
+        if (Gate::denies('employee.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }  
         return view('livewire.org-app.employee.edit', [
             'heading' => __('Edit Employee'),
             'type' => 'update',
-            'departments' => Department::all(),
-             'users' => User::all(),
-            'genders' => $genders,
-            'activations' => $activations,
+            'departments' => $this->departments,
+            'users' =>$this->users,
+            'genders' => $this->genders,
+            'activations' =>$this->activations,
         ]);
     }
 }

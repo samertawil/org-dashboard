@@ -28,6 +28,17 @@ use App\Livewire\OrgApp\Activity\Create as ActivityCreate;
 use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
 use App\Livewire\OrgApp\Activity\Show as ActivityShow;
 use App\Livewire\OrgApp\ActivitySector\Index;
+use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
+use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
+use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
+
+use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
+use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
+use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
+
+
+
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +51,8 @@ Route::view('dashboard', 'dashboard')
 require __DIR__.'/settings.php';
 
 // Users
+Route::middleware(['auth'])->group(function () {
+   
 Route::get('/dashboard/users/create',UsersCreate::class)->name('user.create');
 Route::get('/dashboard/users/index',UsersIndex::class)->name('user.index');
 Route::get('dashboard/grant-role-to/{userID?}',GrantUserRole::class)->name('grant.role.user');
@@ -80,3 +93,13 @@ Route::get('/dashboard/activity/{activity}/edit', ActivityEdit::class)->name('ac
 Route::get('/dashboard/activity/{activity}/show', ActivityShow::class)->name('activity.show');
 
 Route::get('/dashboard/sectors', Index::class)->name('sector.show');
+
+Route::get('/dashboard/partner/create', PartnerCreate::class)->name('partner.create');
+Route::get('/dashboard/partner/{partner}/edit', PartnerEdit::class)->name('partner.edit');
+Route::get('/dashboard/partner', PartnerIndex::class)->name('partner.index');
+
+Route::get('/dashboard/student-group', StudentGroupIndex::class)->name('student.group.index');
+Route::get('/dashboard/student-group/create', StudentGroupCreate::class)->name('student.group.create');
+Route::get('/dashboard/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
+
+});

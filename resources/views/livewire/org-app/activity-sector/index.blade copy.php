@@ -1,165 +1,211 @@
-<flux:container>
-    <div class="space-y-12 py-10">
-        {{-- Page Header --}}
-        <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-2">
-                <div class="flex items-center gap-3">
+<section class="w-full">
+    <div class="relative mb-2 w-full text-blue-600 flex items-start justify-between bg-zinc-50 dark:bg-zinc-900 ">
+        <div class="flex flex-col gap-2">
+            <flux:heading size="xl" level="1" class="text-blue-600">{{ __('Sectors & Activities') }}
+            </flux:heading>
+            <flux:subheading size="lg">{{ __('monitor and manage your sectors') }}</flux:subheading>
 
-                    <flux:heading size="xl" level="1" class="!font-black tracking-tight">Sector Strategy
-                        <flux:badge color="light-blue" variant="solid" size="sm" class="!rounded-xl px-4 py-0">
-                            <span class="text-lg font-black mx-1">{{ $sectors->count() }}</span> Sectors
-                        </flux:badge>
-                    </flux:heading>
-                </div>
-                <flux:subheading class="max-w-xl">Deep dive into organizational sectors, monitoring real-time
-                    performance and task distribution.</flux:subheading>
+        </div>
+        <div class="self-end">
+            <flux:button href="{{ route('activity.create') }}" wire:navigate variant="ghost" icon="plus">
+                {{ __('New Activity') }}
+            </flux:button>
+        </div>
+
+    </div>
+
+    <flux:separator variant="subtle" />
+
+    <div class="flex items-start max-md:flex-col py-10 mt-6">
+        {{-- Left Sidebar: Sectors --}}
+
+        <div class="me-10 w-full pb-4 md:w-[220px] shrink-0">
+            <div class="mb-4">
+                <flux:input wire:model.live="search" icon="magnifying-glass" placeholder="Search..." />
             </div>
 
-        </header>
-
-        <flux:separator variant="subtle" />
-
-        {{-- Parent-Child Content --}}
-        <div class="space-y-20">
-            @foreach ($sectors as $sector)
-                @php
-                    try {
-                        $sectorDate = \Carbon\Carbon::createFromFormat('m/Y', $sector->activites_date);
-                    } catch (\Exception $e) {
-                        try {
-                            $sectorDate = \Carbon\Carbon::parse($sector->activites_date);
-                        } catch (\Exception $e) {
-                            $sectorDate = \Carbon\Carbon::now();
-                        }
-                    }
-                    $groupKey = $sector->sector_id . '_' . $sectorDate->format('m_Y');
-                    $activities = $groupedActivities->get($groupKey) ?? collect();
-                @endphp
-
-                <section class="space-y-8">
-                    {{-- Sector Header (Parent) --}}
-                    <div
-                        class="flex items-end justify-between border-l-[6px] border-indigo-600 pl-8 py-2 relative overflow-hidden">
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-4">
-
-
-                                <flux:heading level="2"
-                                    class="text-3xl !font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
-                                    {{ $sector->sector_name ?? 'Sector ' . $sector->sector_id }}
-                                </flux:heading>
-                                <div
-                                    class="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-700">
-                                    <flux:icon.calendar class="w-4 h-4 text-indigo-500" />
-                                    <span
-                                        class="text-[11px] font-bold text-zinc-600 dark:text-zinc-400">{{ $sectorDate->format('F Y') }}
-                                    </span>
-                                </div>
-
+            <flux:navlist>
+                @forelse ($this->sectors as $sector)
+                    <div class="mb-6">
+                        <flux:navlist.item
+                            wire:click="selectSector({{ $sector->sector_id }}, '{{ $sector->activites_date }}')"
+                            :current="$selectedSectorId === $sector->sector_id && $selectedSectorDate === $sector->activites_date"
+                            class="cursor-pointer !py-3 !px-3">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="font-medium truncate">{{ $sector->sector_name }}</span>
+                                <span class="text-[10px] opacity-60 font-mono">
+                                    {{ $this->formatDate($sector->activites_date) }}
+                                </span>
                             </div>
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400 font-medium">Monitoring
-                                active operations and team engagement metrics.</flux:text>
-                        </div>
-                        <div class="hidden lg:flex flex-col items-end">
-                            <div class="flex items-baseline gap-1">
-                                <span
-                                    class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-indigo-400">{{ $activities->count() }}</span>
-                                <span class="text-sm font-bold text-indigo-400 uppercase">Live</span>
-                            </div>
-                            <div class="w-32 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mt-2 overflow-hidden">
-                                <div class="h-full bg-indigo-500 w-2/3"></div>
-                            </div>
-                        </div>
+                        </flux:navlist.item>
                     </div>
 
-                    {{-- Activity Cards (Children) --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        @forelse($activities as $index=> $activity)
-                            <flux:card
-                                class=" !p-0 overflow-hidden !rounded-3xl border-zinc-200 dark:border-zinc-800 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 group border-b-4 border-b-transparent hover:border-b-indigo-500 flex flex-col">
-                                <div class="p-6 flex-1 space-y-5">
-                                    <div class="flex items-center justify-between">
+                @empty
+                    <div class="px-3 py-2 text-sm text-zinc-400 italic">
+                        No sectors found.
+                    </div>
+                @endforelse
+            </flux:navlist>
+        </div>
 
-                                        <div>
-                                            <flux:badge variant="outline" size="sm" color="indigo"
-                                                class="font-mono !text-[10px] !px-2 !py-0.5 !rounded-lg border-indigo-200 dark:border-indigo-800 py-2 mb-2" >
-                                                {{ $index + 1 }} / </flux:badge>
-                                            <flux:badge variant="outline" size="sm" color="indigo"
-                                                class="font-mono !text-[10px] !px-2 !py-0.5 !rounded-lg border-indigo-200 dark:border-indigo-800">
-                                                ACTIVITY-NAME : {{ $activity->name }} &nbsp;
-                                                <flux:icon.calendar class="w-4 h-4 text-indigo-500" />
-                                                {{ \Carbon\Carbon::parse($activity->start_date)->format('M d, Y') }}
+        <flux:separator class="md:hidden my-6" />
 
-                                        </div>
-                                        </flux:badge>
+        {{-- Right Content: Activities --}}
+        <div class="flex-1 self-stretch max-md:pt-6 w-full min-w-0">
+            @if ($this->selectedSector)
+                <div class="mb-8">
+                    <flux:heading size="xl" level="1" class="text-center">
+                        {{ $this->selectedSector->sector_name }}</flux:heading>
+                    <flux:subheading class="text-center">
+                        Activity Report for <span
+                            class="font-medium text-zinc-800 dark:text-zinc-200">{{ $this->formatDate($this->selectedSector->activites_date) }}</span>
+                    </flux:subheading>
+                </div>
 
-
-                                        <span @class([
-                                            'text-sm max-w-xs  truncate',
-                                            'text-green-600 dark:text-green-400' => $activity->status === 27,
-                                            'text-yellow-600 dark:text-yellow-400' => $activity->status === 26,
-                                            'text-purple-600 dark:text-purple-400' => $activity->status === 25,
-                                            'text-red-600 dark:text-red-400' => $activity->status === 28,
-                                        ])>
-                                            {{ $activity->status_name ?? ($activity->activityStatus->status_name ?? '-') }}
-                                        </span>
-
-                                    </div>
+                <div class="space-y-4 mt-5">
+                    @forelse ($this->activities as $index => $activity)
+                        <flux:card wire:key="activity-{{ $activity->id }}"
+                            class="p-5 hover:border-indigo-400 transition-colors group">
+                            <div class="flex flex-col gap-4">
+                                <div class="flex items-start justify-between gap-4">
                                     <div>
+                                        <div class="d-flex justify-between">
+
+
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span
+                                                    class=" font-bold text-lg text-blue-800 dark:text-blue  dark:text-white group-hover:text-indigo-600 transition-colors">{{ $index + 1 }}
+                                                    &nbsp;- </span>
+                                                <h3
+                                                    class=" font-bold text-lg text-blue-800 dark:text-blue  dark:text-white group-hover:text-indigo-600 transition-colors">
+                                                    {{ $activity->name }}
+                                                </h3> <span class="flex items-center gap-1">
+                                                    <flux:icon.calendar class="w-3 h-3" />
+                                                    {{ \Carbon\Carbon::parse($activity->start_date)->format('M d, Y') }}
+                                                </span>
+
+                                                <span @class([
+                                                    'max-w-xs  truncate',
+                                                    'text-green-600 dark:text-green-400' => $activity->status === 27,
+                                                    'text-yellow-600 dark:text-yellow-400' => $activity->status === 26,
+                                                    'text-purple-600 dark:text-purple-400' => $activity->status === 25,
+                                                    'text-red-600 dark:text-red-400' => $activity->status === 28,
+                                                ])>
+
+                                                    <flux:badge :color="$activity->status_info['color']" size="sm"
+                                                        inset="top bottom">
+                                                        {{ $activity->status_info['name'] }}
+                                                    </flux:badge>
+
+
+                                            </div>
+                                            <div>
+                                                @if ($activity->rating_info['rating'] > 0)
+                                                    <div class="flex">
+    
+                                                    </div>
+                                                    <div class="flex items-center gap-1 ml-2">
+                                                        <flux:icon icon="star" variant="solid"
+                                                            class="{{ $activity->rating_info['color'] }} w-4 h-4" />
+                                                        <span
+                                                            class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{{ $activity->rating_info['rating'] }}</span>
+                                                        <span
+                                                            class="text-[10px] text-zinc-500">({{ $activity->rating_info['text'] }})</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex flex-wrap gap-y-1 gap-x-2 text-md ">
+
+                                            <span> </span>
+                                            <span>{{ $activity->regions->region_name ?? 'N/A' }}</span>
+                                            @if ($activity->cities->city_name ?? false)
+                                                <span> &nbsp; &bull; &nbsp; </span>
+                                                <span>{{ $activity->cities->city_name }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                </div>
+                                @php
+                                    $report = $activityReport->firstWhere('id', $activity->id);
+                                @endphp
+                                <div class="flex gap-2">
+                                    <flux:badge size="sm" inset="top bottom" color="zinc"
+                                        class="{{ ($report?->parcels_status ?? '') === 'ADDED PARCELS' ? '!text-green-600' : '!text-red-600' }}">
+                                        {{ $report?->parcels_status ?? '' }}
+                                    </flux:badge>
+                                    <flux:badge size="sm" inset="top bottom" color="zinc"
+                                        class="{{ ($report?->beneficiaries_status ?? '') === 'ADDED BENEFICIARIES' ? '!text-green-600' : '!text-red-600' }}">
+                                        {{ $report?->beneficiaries_status ?? '' }}
+                                    </flux:badge>
+                                    <flux:badge size="sm" inset="top bottom" color="zinc"
+                                        class="{{ ($report?->work_teams_status ?? '') === 'ADDED WORK TEAMS' ? '!text-green-600' : '!text-red-600' }}">
+                                        {{ $report?->work_teams_status ?? '' }}
+                                    </flux:badge>
+                                    <flux:badge size="sm" inset="top bottom" color="zinc"
+                                        class="{{ ($report?->attchemnts_status ?? '') === 'ADDED ATTCHMENTS' ? '!text-green-600' : '!text-red-600' }}">
+                                        {{ $report?->attchemnts_status ?? '' }}
+                                    </flux:badge>
+                                </div>
+
+
+                                <flux:separator variant="subtle" />
+                                @if ($activity->parcels->isNotEmpty())
+                                    <div class="flex flex-wrap gap-2 pt-2   dark:border-zinc-800">
                                         @foreach ($activity->parcels as $parcel)
-                                            <flux:badge variant="solid" size="sm" color=""
-                                                class="font-mono !text-[10px] !px-2 !py-0.5 !rounded-lg bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-800 dark:text-purple-200 dark:border-purple-700">
-                                                PARCEL : {{ $parcel->parcelType->status_name }} </flux:badge>
+                                            <flux:badge size="xs" color="zinc" variant="pill" icon="cube">
+                                                {{ $parcel->parcelType->status_name }}
+                                            </flux:badge>
                                         @endforeach
-
                                     </div>
-                                    <div class="space-y-2">
-                                        <flux:heading size="md"
-                                            class="group-hover:text-indigo-600 transition-colors !font-bold leading-tight">
-                                            {{ $activity->regions->region_name ?? 'Not Located' }}
-                                            &nbsp;/&nbsp;{{ $activity->cities->city_name ?? '' }} &nbsp;/&nbsp;
-                                            {{ $activity->activityNeighbourhood->neighbourhood_name ?? '' }}
-                                            &nbsp;/&nbsp; {{ $activity->activityLocation->location_name ?? '' }}
-                                        </flux:heading>
-
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="px-6 py-5 bg-zinc-50/50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-                                    <flux:button variant="subtle" size="sm" icon="eye"
-                                        class="!rounded-xl !font-bold">Explore</flux:button>
-                                    <div class="flex -space-x-3">
-                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1"
-                                            class="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm"
-                                            alt="team">
-                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2"
-                                            class="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm"
-                                            alt="team">
-                                        <div
-                                            class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-black text-zinc-500 shadow-sm">
-                                            +4</div>
-                                    </div>
-                                </div>
-                            </flux:card>
-                        @empty
-                            <div
-                                class="col-span-full py-16 flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] bg-zinc-50/30 dark:bg-zinc-900/30">
-                                <div
-                                    class="w-16 h-16 rounded-2xl bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm border border-zinc-100 dark:border-zinc-700 mb-4">
-                                    <flux:icon.archive-box variant="outline" class="w-8 h-8 text-zinc-300" />
-                                </div>
-                                <flux:heading size="md" class="text-zinc-500 font-bold">No Records Found
-                                </flux:heading>
-                                <flux:subheading size="sm" class="mt-1">This sector is waiting for initial
-                                    activity deployment.</flux:subheading>
-                                <flux:button variant="filled" size="sm" color="indigo" class="mt-6 !rounded-xl">
-                                    Schedule Activity</flux:button>
+                                @endif
                             </div>
-                        @endforelse
-                    </div>
-                </section>
-            @endforeach
+
+
+                            <div class="flex justify-end">
+
+
+
+                                @php $modalName = 'activity-show-' . $activity->id; @endphp
+
+                                <flux:modal.trigger :name="$modalName">
+                                    <flux:button variant="subtle" size="xs" icon="eye" tooltip="Show All Data"
+                                        wire:click="openShowModal({{ $activity->id }})">Details </flux:button>
+                                </flux:modal.trigger>
+
+                                <flux:modal :name="$modalName" class="md:w-96"
+                                    x-on:close-modal="$wire.closeShowModal()">
+                                    <div class="mt-4">
+                                        @if ($selectedactivityIdForShowModal === $activity->id)
+                                            <livewire:OrgApp.activity.show :activity="$activity"
+                                                wire:key="show-activity-{{ $activity->id }}" />
+                                        @endif
+                                    </div>
+                                </flux:modal>
+
+                            </div>
+                        </flux:card>
+                    @empty
+                        <div
+                            class="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50">
+                            <flux:icon.document-magnifying-glass class="w-8 h-8 text-zinc-300 mb-3" />
+                            <h3 class="text-zinc-900 dark:text-white font-medium">No activities found</h3>
+                            <p class="text-zinc-500 text-xs mt-1">This sector currently has no recorded activities.</p>
+                        </div>
+                    @endforelse
+                </div>
+            @else
+                <div
+                    class="h-64 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <flux:icon.cursor-arrow-rays class="w-8 h-8 text-indigo-300 mb-3" />
+                    <h3 class="text-lg font-medium text-zinc-900 dark:text-white">Select a Sector</h3>
+                    <p class="text-zinc-500 text-sm mt-1 max-w-xs">Select a sector from the sidebar to view its
+                        activities.
+                    </p>
+                </div>
+            @endif
         </div>
     </div>
-</flux:container>
+</section>

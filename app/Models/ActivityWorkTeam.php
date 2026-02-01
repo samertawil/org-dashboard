@@ -6,14 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityWorkTeam extends Model
 {
-    protected $guarded = [];
+    protected $fillable = ['activity_id', 'employee_id', 'employee_mission_title', 'notes'];
 
-    public function project()
+    public $employee = [];
+
+    public function activity()
     {
         return $this->belongsTo(Activity::class);
     }
 
-    public function employee()
+    public function employeeRel()
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
@@ -23,8 +25,8 @@ class ActivityWorkTeam extends Model
         return $this->belongsTo(Status::class, 'employee_mission_title');
     }
 
-    public function status()
-    {
-        return $this->belongsTo(Status::class, 'status_id');
-    }
+    // public function status()
+    // {
+    //     return $this->belongsTo(Status::class, 'status_id');
+    // }
 }

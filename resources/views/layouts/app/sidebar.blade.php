@@ -23,25 +23,28 @@
         </flux:sidebar.nav>
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('App')" class="grid">
-                <!-- Status Group -->
+                <!-- Department Group -->
+                @can('department.create')
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Department')" icon="flag"
-                    class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('department.create')"
-                        :current="request()->routeIs('department.create')" wire:navigate>
-                        {{ __('Create Department') }}
-                    </flux:sidebar.item>
+                class="grid">
+                <flux:sidebar.item icon="plus" :href="route('department.create')"
+                    :current="request()->routeIs('department.create')" wire:navigate>
+                    {{ __('Create Department') }}
+                </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="list-bullet" :href="route('department.index')"
-                        :current="request()->routeIs('department.index')" wire:navigate>
-                        {{ __('Department List') }}
-                    </flux:sidebar.item>
+                <flux:sidebar.item icon="list-bullet" :href="route('department.index')"
+                    :current="request()->routeIs('department.index')" wire:navigate>
+                    {{ __('Department List') }}
+                </flux:sidebar.item>
 
-                </flux:sidebar.group>
+            </flux:sidebar.group>     
+                @endcan
+                
 
                 <!-- Employees Group -->
+                @can('employee.create')
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="server-stack"
                     class="grid">
-
                     <flux:sidebar.item icon="plus" :href="route('employee.create')"
                         :current="request()->routeIs('employee.create')" wire:navigate>
                         {{ __('Create Employees') }}
@@ -50,92 +53,113 @@
                         :current="request()->routeIs('employee.index')" wire:navigate>
                         {{ __('Employees List') }}
                     </flux:sidebar.item>
+                </flux:sidebar.group>    
+                @endcan
+                
 
+                <!-- Activities Group -->
+               
+                    
+                @can('activity.index')
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')" icon="server-stack"
+                    class="grid">
+                    <flux:sidebar.item icon="list-bullet" :href="route('sector.show')"
+                        :current="request()->routeIs('sector.show')" wire:navigate>
+                        {{ __('Sectors & Activities') }}
+                    </flux:sidebar.item>
+                  
+                    <flux:sidebar.item icon="list-bullet" :href="route('activity.index')"
+                        :current="request()->routeIs('activity.index')" wire:navigate>
+                        {{ __('Activities List') }}
+                    </flux:sidebar.item>
+                    @endcan
+                    @can('activity.create')
+                    <flux:sidebar.item icon="plus" :href="route('activity.create')"
+                        :current="request()->routeIs('activity.create')" wire:navigate>
+                        {{ __('Create Activities') }}
+                    </flux:sidebar.item>
+                    @endcan
+                   
 
                 </flux:sidebar.group>
 
-                  <!-- Activities Group -->
-                  <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')" icon="server-stack"
-                  class="grid">
 
-                  <flux:sidebar.item icon="plus" :href="route('activity.create')"
-                      :current="request()->routeIs('activity.create')" wire:navigate>
-                      {{ __('Create Activities') }}
-                  </flux:sidebar.item>
-                  <flux:sidebar.item icon="list-bullet" :href="route('activity.index')"
-                      :current="request()->routeIs('activity.index')" wire:navigate>
-                      {{ __('Activities List') }}
-                  </flux:sidebar.item>
-
-
-              </flux:sidebar.group>
-
-                
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
         <flux:spacer />
 
         <flux:sidebar.nav>
+
+
+
             <flux:sidebar.group :heading="__('Admin Setting')" class="grid">
                 <!-- Status Group -->
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Status')" icon="flag"
-                    class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('status.create')"
-                        :current="request()->routeIs('status.create')" wire:navigate>
-                        {{ __('Create Status') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('status.index')"
-                        :current="request()->routeIs('status.index')" wire:navigate>
-                        {{ __('Status List') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="plus" :href="route('system.names.create')"
-                        :current="request()->routeIs('system.names.create')" wire:navigate>
-                        {{ __('Create System Name') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('system.names.index')"
-                        :current="request()->routeIs('system.names.index')" wire:navigate>
-                        {{ __('System Names List') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-
+                @can('status.create')
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Status')" icon="flag"
+                        class="grid">
+                        <flux:sidebar.item icon="plus" :href="route('status.create')"
+                            :current="request()->routeIs('status.create')" wire:navigate>
+                            {{ __('Create Status') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('status.index')"
+                            :current="request()->routeIs('status.index')" wire:navigate>
+                            {{ __('Status List') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="plus" :href="route('system.names.create')"
+                            :current="request()->routeIs('system.names.create')" wire:navigate>
+                            {{ __('Create System Name') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('system.names.index')"
+                            :current="request()->routeIs('system.names.index')" wire:navigate>
+                            {{ __('System Names List') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
                 <!-- System Names Group -->
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Permissions')" icon="server-stack"
-                    class="grid">
+                @can('ability.create')
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Permissions')" icon="server-stack"
+                        class="grid">
 
-                    <flux:sidebar.item icon="plus" :href="route('ability.create')"
-                        :current="request()->routeIs('ability.create')" wire:navigate>
-                        {{ __('Create Abilities') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('ability.index')"
-                        :current="request()->routeIs('system.names.index')" wire:navigate>
-                        {{ __('Abilities List') }}
-                    </flux:sidebar.item>
+                        <flux:sidebar.item icon="plus" :href="route('ability.create')"
+                            :current="request()->routeIs('ability.create')" wire:navigate>
+                            {{ __('Create Abilities') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('ability.index')"
+                            :current="request()->routeIs('system.names.index')" wire:navigate>
+                            {{ __('Abilities List') }}
+                        </flux:sidebar.item>
+                    @endcan
 
-                    <flux:sidebar.item icon="plus" :href="route('role.create')"
-                        :current="request()->routeIs('role.create')" wire:navigate>
-                        {{ __('Create Roles') }}
-                    </flux:sidebar.item>
+                    @can('role.create')
+                        <flux:sidebar.item icon="plus" :href="route('role.create')"
+                            :current="request()->routeIs('role.create')" wire:navigate>
+                            {{ __('Create Roles') }}
+                        </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="list-bullet" :href="route('role.index')"
-                        :current="request()->routeIs('role.index')" wire:navigate>
-                        {{ __('Roles List') }}
-                    </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('role.index')"
+                            :current="request()->routeIs('role.index')" wire:navigate>
+                            {{ __('Roles List') }}
+                        </flux:sidebar.item>
+                    @endcan
+
 
                 </flux:sidebar.group>
 
                 <!-- Users Group -->
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Users')" icon="users"
-                    class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('user.create')"
-                        :current="request()->routeIs('user.create')" wire:navigate>
-                        {{ __('Create User') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('user.index')"
-                        :current="request()->routeIs('user.index')" wire:navigate>
-                        {{ __('Users List') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
+                @can('user.create')
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Users')" icon="users"
+                        class="grid">
+                        <flux:sidebar.item icon="plus" :href="route('user.create')"
+                            :current="request()->routeIs('user.create')" wire:navigate>
+                            {{ __('Create User') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('user.index')"
+                            :current="request()->routeIs('user.index')" wire:navigate>
+                            {{ __('Users List') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endcan
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
@@ -146,7 +170,7 @@
                 target="_blank">
                 {{ __('Repository') }}
             </flux:sidebar.item>
-
+        
             <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
                 target="_blank">
                 {{ __('Documentation') }}

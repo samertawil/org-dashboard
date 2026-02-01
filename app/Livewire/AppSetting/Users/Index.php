@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Index extends Component
@@ -74,7 +75,7 @@ class Index extends Component
     public function resetPass(int $userId): void
     {
         $user = User::findOrFail($userId);
-        dd($user);
+         
         $user->password = 'password'; // Set default password
         $user->save();
 
@@ -83,6 +84,9 @@ class Index extends Component
 
     public function render()
     {
+        if (Gate::denies('user.index')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.app-setting.users.index');
     }
 }
