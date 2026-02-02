@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Livewire\OrgApp\Student;
+
+use DateTime;
+use App\Models\Student;
+use Livewire\Component;
+use Livewire\Attributes\Validate;
+use App\Concerns\Student\StudentTrait;
+
+class Create extends Component
+{
+    use StudentTrait;
+
+    #[Validate('required|integer|min_digits:9|min_digits:9|unique:students,identity_number')]
+    public $identity_number = '';
+
+    public function rules() {
+        return [
+            'birth_date' => 'required|date|before_or_equal:' . Student::maxBirthDate() . '|after_or_equal:' . Student::minBirthDate(),           
+        ];
+    }
+    public function save()
+    {
+        $this->validate();
+
+        Student::create([
+            'identity_number' => $this->identity_number,
+            'full_name' => $this->full_name,
+            'birth_date' => $this->birth_date,
+            'student_groups_id' => $this->student_groups_id ?: null,
+            'gender' => $this->gender,
+            'activation' => $this->activation,
+            'status_id' => $this->status_id ?: null,
+            'parent_phone' => $this->parent_phone,
+            'living_parent_id' => $this->living_parent_id ?: null,
+            'notes' => $this->notes,
+            'added_type' => 1, // Manual
+            'created_by' => auth()->id(),
+        ]);
+
+        session()->flash('message', __('Student successfully created.'));
+
+        return $this->redirect(route('student.index'), navigate: true);
+    }
+
+    public function render()
+    {     
+        
+        return view('livewire.org-app.student.create', [
+            'heading' => __('Create Student'),
+            'type' => 'save',
+        ]);
+    }
+}

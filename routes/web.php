@@ -31,7 +31,10 @@ use App\Livewire\OrgApp\ActivitySector\Index;
 use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
 use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
 use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
-
+use App\Livewire\OrgApp\Student\Create as StudentCreat;
+use App\Livewire\OrgApp\Student\Edit as StudentEdit;
+use App\Livewire\OrgApp\Student\Index as StudentIndex;
+use App\Livewire\OrgApp\Student\ImportedFiles;
 use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
 use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
 use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
@@ -49,6 +52,7 @@ Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
 require __DIR__.'/settings.php';
+
 
 // Users
 Route::middleware(['auth'])->group(function () {
@@ -101,5 +105,11 @@ Route::get('/dashboard/partner', PartnerIndex::class)->name('partner.index');
 Route::get('/dashboard/student-group', StudentGroupIndex::class)->name('student.group.index');
 Route::get('/dashboard/student-group/create', StudentGroupCreate::class)->name('student.group.create');
 Route::get('/dashboard/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
+
+Route::get('dashboard/student',StudentIndex::class)->name('student.index');
+Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('student.imported-files');
+Route::get('dashboard/student/create',StudentCreat::class)->name('student.create');
+Route::get('dashboard/student/{student}/edit',StudentEdit::class)->name('student.edit');
+ 
 
 });

@@ -8,7 +8,6 @@ use App\Models\Employee;
 use App\Models\Department;
 use Carbon\CarbonImmutable;
 use App\Observers\StatusObserver;
-use App\Repositories\AbilityRepo;
 use Illuminate\Support\Facades\DB;
 use App\Observers\EmployeeObserver;
 use Illuminate\Support\Facades\Date;

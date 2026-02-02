@@ -56,6 +56,55 @@
                 </flux:sidebar.group>    
                 @endcan
                 
+                
+                <!-- Partners Group -->
+                {{-- @can('partner.create') --}}
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="server-stack"
+                    class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('partner.create')"
+                        :current="request()->routeIs('partner.create')" wire:navigate>
+                        {{ __('Create Partners') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('partner.index')"
+                        :current="request()->routeIs('partner.index')" wire:navigate>
+                        {{ __('Partners List') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>    
+                {{-- @endcan --}}
+
+                  
+                <!-- Students Groups -->
+                {{-- @can('student.group.create') --}}
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Students Groups')" icon="server-stack"
+                    class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('student.group.create')"
+                        :current="request()->routeIs('student.group.create')" wire:navigate>
+                        {{ __('Create Students Groups') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('student.group.index')"
+                        :current="request()->routeIs('student.group.index')" wire:navigate>
+                        {{ __('Students Groups List') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>    
+                {{-- @endcan --}}
+
+
+                   
+                <!-- Students Groups -->
+                {{-- @can('student.create') --}}
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Students')" icon="server-stack"
+                    class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('student.create')"
+                        :current="request()->routeIs('student.create')" wire:navigate>
+                        {{ __('Create Students') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('student.index')"
+                        :current="request()->routeIs('student.index')" wire:navigate>
+                        {{ __('Students List') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>    
+                {{-- @endcan --}}
+
 
                 <!-- Activities Group -->
                
