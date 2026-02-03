@@ -64,10 +64,16 @@ class Activity extends Model
         return $this->hasMany(ActivityAttchment::class, 'activity_id');
     }
 
+    public function teachingGroups()
+    {
+        return $this->hasMany(TeachingGroup::class, 'activity_id');
+    }
+
     public function feedbacks()
     {
         return $this->hasMany(FeedBack::class, 'activity_id');
     }
+
 
     public function getAverageRatingAttribute()
     {
@@ -87,7 +93,7 @@ class Activity extends Model
         }
  
        
-          $color = $avg  < 2.5 ? 'text-yellow-400' : 'text-yellow-600'; // Gold vs Yellow (adjust classes as needed)
+          $color = $avg  < 2.5 ? 'text-zinc-400' : 'text-yellow-600'; // Gold vs Yellow (adjust classes as needed)
 
         $text = match (true) {
             $avg >= 4.5 => __('Excellent'),

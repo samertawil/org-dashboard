@@ -35,4 +35,9 @@ class StudentGroup extends Model
     {
         return $this->belongsTo(Status::class);
     }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class, 'student_groups_id');
+    }
 }

@@ -178,9 +178,14 @@
                                     </flux:modal>
 
                                     <flux:modal.trigger name="activity-attachments">
-                                        <flux:button wire:click="selectActivity({{ $activity->id }})" icon="paper-clip"
-                                            variant="ghost" size="sm" tooltip="Attachments">
-                                        </flux:button>
+                                        <div class="relative">
+                                            <flux:button wire:click="selectActivity({{ $activity->id }})" icon="paper-clip"
+                                                variant="ghost" size="sm" tooltip="Attachments" style="{{ $activity->attachments_count > 0 ? 'color: #3b82f6 !important;' : '' }}">
+                                            </flux:button>
+                                            @if($activity->attachments_count > 0)
+                                                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                            @endif
+                                        </div>
                                     </flux:modal.trigger>
                                 </div>
                             </td>
@@ -213,9 +218,12 @@
                                         <flux:icon icon="document" size="sm" class="text-zinc-400" />
                                         <div class="flex flex-col">
                                             <span
-                                                class="text-sm font-medium">{{ basename($attachment['attchment_path'] ?? '') }}</span>
+                                                class="text-sm font-medium">{{ \Illuminate\Support\Str::limit(basename($attachment['attchment_path'] ?? ''), 25) }}</span>
                                             <span
                                                 class="text-xs text-zinc-500">{{ $attachment['notes'] ?? '' }}</span>
+                                            <span class="text-xs text-blue-500 dark:text-blue-400 mt-0.5">
+                                                {{ $attachment['attachment_type']['status_name'] ?? '' }}
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">

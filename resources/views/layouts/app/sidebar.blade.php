@@ -43,7 +43,7 @@
 
                 <!-- Employees Group -->
                 @can('employee.create')
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="server-stack"
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="user-group"
                     class="grid">
                     <flux:sidebar.item icon="plus" :href="route('employee.create')"
                         :current="request()->routeIs('employee.create')" wire:navigate>
@@ -55,11 +55,25 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>    
                 @endcan
-                
+
+                {{-- @can('employee.create') --}}
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar"
+                    class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('currency.create')"
+                        :current="request()->routeIs('currency.create')" wire:navigate>
+                        {{ __('Create Currency') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('currency.index')"
+                        :current="request()->routeIs('currency.index')" wire:navigate>
+                        {{ __('Currency List') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>    
+                {{-- @endcan --}}
+            
                 
                 <!-- Partners Group -->
                 {{-- @can('partner.create') --}}
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="server-stack"
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="briefcase"
                     class="grid">
                     <flux:sidebar.item icon="plus" :href="route('partner.create')"
                         :current="request()->routeIs('partner.create')" wire:navigate>
@@ -71,11 +85,24 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>    
                 {{-- @endcan --}}
-
+  
+                {{-- @can('employee.create') --}}
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Curricula')" icon="book-open-text"
+                    class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('subject.create')"
+                        :current="request()->routeIs('subject.create')" wire:navigate>
+                        {{ __('Create Curricula') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('subject.index')"
+                        :current="request()->routeIs('subject.index')" wire:navigate>
+                        {{ __('Curricula List') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>    
+                {{-- @endcan --}}
                   
                 <!-- Students Groups -->
                 {{-- @can('student.group.create') --}}
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Students Groups')" icon="server-stack"
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Students Groups')" icon="rectangle-group"
                     class="grid">
                     <flux:sidebar.item icon="plus" :href="route('student.group.create')"
                         :current="request()->routeIs('student.group.create')" wire:navigate>
@@ -92,7 +119,7 @@
                    
                 <!-- Students Groups -->
                 {{-- @can('student.create') --}}
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Students')" icon="server-stack"
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Students')" icon="academic-cap"
                     class="grid">
                     <flux:sidebar.item icon="plus" :href="route('student.create')"
                         :current="request()->routeIs('student.create')" wire:navigate>
@@ -110,7 +137,7 @@
                
                     
                 @can('activity.index')
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')" icon="server-stack"
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')" icon="clipboard-document-list"
                     class="grid">
                     <flux:sidebar.item icon="list-bullet" :href="route('sector.show')"
                         :current="request()->routeIs('sector.show')" wire:navigate>
@@ -167,7 +194,7 @@
                 @endcan
                 <!-- System Names Group -->
                 @can('ability.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Permissions')" icon="server-stack"
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Permissions')" icon="key"
                         class="grid">
 
                         <flux:sidebar.item icon="plus" :href="route('ability.create')"

@@ -16,6 +16,8 @@ use App\Enums\GlobalSystemConstant;
 use App\Concerns\Activity\FormTrait;
 use Illuminate\Support\Facades\Gate;
 use App\Reposotries\NeighbourhoodRepo;
+use App\Models\PartnerInstitution;
+use App\Models\StudentGroup;
 
 
 class Create extends Component
@@ -25,13 +27,14 @@ class Create extends Component
     #[Validate('required|string|max:255|unique:activities,name')]
     public string $name = 'ACTIVITY #';
 
-
+    
     public function mount()
     {
         $this->start_date = Carbon::now()->toDateString();
         $this->addParcel();
         $this->addBeneficiary();
         $this->addWorkTeam();
+        $this->addTeachingGroup();
         $this->addFeedback();
     }
 
@@ -56,7 +59,8 @@ class Create extends Component
                 'description' => ucfirst($this->description),
                 'start_date' => $this->start_date,
                 'end_date' => filled($this->end_date) ? $this->end_date : $this->start_date,
-                'cost' => $this->cost ?? 0,
+                'cost' => $this->cost ?? null,
+                'cost_nis' => $this->cost_nis ??null ,
                 'status' => $this->status,
                 'status_name' => $statusModel ? $statusModel->status_name : null,
                 'region' => $this->region ?: null,
@@ -69,21 +73,39 @@ class Create extends Component
 
             ]);
 
-            foreach ($this->parcels as $parcel) {
-                if ($parcel['parcel_type'] || $parcel['distributed_parcels_count']) {
-                    $project->parcels()->create($parcel);
+           
+            if ($this->sector_id != 55) {
+                foreach ($this->parcels as $parcel) {
+                    if ($parcel['parcel_type'] || $parcel['distributed_parcels_count']) {
+                        $project->parcels()->create($parcel);
+                    }
                 }
-            }
 
-            foreach ($this->beneficiaries as $beneficiary) {
-                if ($beneficiary['beneficiary_type'] || $beneficiary['beneficiaries_count']) {
-                    $project->beneficiaries()->create($beneficiary);
+                foreach ($this->beneficiaries as $beneficiary) {
+                    if ($beneficiary['beneficiary_type'] || $beneficiary['beneficiaries_count']) {
+                        $project->beneficiaries()->create($beneficiary);
+                    }
                 }
             }
 
             foreach ($this->work_teams as $team) {
                 if ($team['employee_id'] || $team['employee_mission_title']) {
                     $project->workTeams()->create($team);
+                }
+            }
+
+            if ($this->sector_id == 55) {
+                foreach ($this->teaching_groups as $group) {
+                    if ($group['name']) {
+                        // Ensure dates are null if empty
+                        $group['start_date'] = $group['start_date'] ?: null;
+                        $group['end_date'] = $group['end_date'] ?: null;
+
+                        $project->teachingGroups()->create(array_merge($group, [
+                            'created_by' => auth()->id(),
+                            'updated_by' => auth()->id(),
+                        ]));
+                    }
                 }
             }
 
@@ -121,6 +143,8 @@ class Create extends Component
             'neighbourhoods' => $this->city ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city):collect(),
             'locations' => $this->neighbourhood ? LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood):collect(), 
             'employees' => employeeRepo::employees()->where('activation',GlobalSystemConstant::ACTIVE->value),
+            'partners' => PartnerInstitution::all(),
+            'studentGroups' => StudentGroup::all(),
         ]);
     }
 }

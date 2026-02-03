@@ -2,7 +2,6 @@
 
 namespace App\Concerns\Student;
 
-use App\Models\Student;
 use App\Models\StudentGroup;
 use App\Reposotries\StatusRepo;
 use Livewire\Attributes\Validate;

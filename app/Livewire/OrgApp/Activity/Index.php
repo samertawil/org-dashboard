@@ -68,7 +68,7 @@ class Index extends Component
 
     public function selectActivity($activityId)
     {
-        $this->selectedactivity = Activity::with('attachments')->find($activityId);
+        $this->selectedactivity = Activity::with('attachments.attachmentType')->find($activityId);
         $this->attachments = $this->selectedactivity->attachments->toArray();
         $this->newAttachments = [];
     }
@@ -136,6 +136,7 @@ class Index extends Component
     public function activities()
     {
         return Activity::with(['regions', 'cities', 'activityStatus', 'statusSpecificSector', 'attachments'])
+            ->withCount('attachments')
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
             ->when($this->start_date, fn($q) => $q->where('start_date', $this->start_date))
             ->when($this->status_id, function ($q) {

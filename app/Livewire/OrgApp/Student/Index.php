@@ -2,13 +2,16 @@
 
 namespace App\Livewire\OrgApp\Student;
 
+use App\Models\Status;
+use App\Models\Student;
 use Livewire\Component;
+use App\Models\FeedBack;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\Computed;
-use App\Models\Student;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
+use App\Reposotries\StatusRepo;
+use Livewire\Attributes\Computed;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Index extends Component
 {
@@ -21,6 +24,12 @@ class Index extends Component
     public $perPage = 10;
     
     public $excelFile; // For file upload
+
+    public $feedbackComment = '';
+    public $feedbackRating = 5;
+    public $feedbackType = null;
+    public $studentFeedBackTime = null;
+    public $selectedStudentId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -46,6 +55,7 @@ class Index extends Component
     {
         return Student::query()
             ->with(['studentGroup', 'status', 'city', 'region'])
+            ->withCount('feedbacks')
             ->where('full_name', 'like', '%' . $this->search . '%')
             ->orWhere('identity_number', 'like', '%' . $this->search . '%')
             ->orderBy($this->sortField, $this->sortDirection)
@@ -98,6 +108,71 @@ class Index extends Component
              
              session()->flash('error', implode('<br>', $messages));
         }
+    }
+
+    
+    public function manageFeedback($studentId)
+    {
+        $this->selectedStudentId = $studentId;
+        $this->feedbackComment = '';
+        $this->feedbackRating = 5; // Default rating
+        $this->feedbackType = null;
+        $this->studentFeedBackTime= null;
+        $this->resetErrorBag();
+        $this->dispatch('open-modal', 'feedback-modal');
+    }
+
+    public function saveFeedback()
+    {
+        $this->validate([
+            'feedbackComment' => 'nullable|string',
+            'feedbackRating' => 'required|integer|min:1|max:5',
+            'feedbackType' => 'required|exists:statuses,id',
+            'selectedStudentId' => 'required|exists:students,id',
+        ]);
+
+        FeedBack::create([
+            'student_id' => $this->selectedStudentId,
+            'comment' => $this->feedbackComment,
+            'rating' => $this->feedbackRating,
+            'feed_back_type' => $this->feedbackType,
+            'student_feed_back_time' => $this->studentFeedBackTime,
+        ]);
+
+        $this->feedbackComment = '';
+        $this->feedbackRating = 5;
+        $this->feedbackType = null;
+        $this->studentFeedBackTime= null;
+        session()->flash('feedback_success', __('Feedback added successfully.'));
+    }
+
+    #[Computed()]
+    public function feedbackTypes()
+    {
+        return StatusRepo::statuses()->whereIn('p_id_sub',[ 56,60]);
+    }
+
+    public function deleteFeedback($feedbackId)
+    {
+        $feedback = FeedBack::findOrFail($feedbackId);
+        $feedback->delete();
+        session()->flash('feedback_success', __('Feedback deleted successfully.'));
+    }
+
+    #[Computed()]
+    public function selectedStudent()
+    {
+        return $this->selectedStudentId ? Student::find($this->selectedStudentId) : null;
+    }
+
+    #[Computed()]
+    public function studentFeedbacks()
+    {
+        if (!$this->selectedStudentId) return [];
+        return FeedBack::where('student_id', $this->selectedStudentId)
+            ->with('feedbackTypeStatus')
+            ->latest()
+            ->get();
     }
 
     public function render()

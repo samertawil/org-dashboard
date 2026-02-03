@@ -77,4 +77,9 @@ class Student extends Model
     {
         return $this->belongsTo(Status::class, 'living_parent_id');
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(FeedBack::class);
+    }
 }

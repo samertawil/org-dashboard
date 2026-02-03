@@ -2,6 +2,7 @@
 
 namespace App\Concerns\Activity;
 
+use App\Models\TeachingGroup;
 use App\Reposotries\StatusRepo;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
@@ -18,7 +19,10 @@ trait FormTrait
     public $end_date = '';
 
     #[Validate('nullable|numeric|min:0')]
-    public $cost = 0;
+    public $cost = null;
+
+    #[Validate('nullable|numeric|min:0')]
+    public $cost_nis = null;
 
     #[Validate('nullable|exists:statuses,id')]
     public $status = null;
@@ -62,6 +66,8 @@ trait FormTrait
             'notes' => '',
         ];
     }
+
+     
 
     public function removeParcel($index)
     {
@@ -107,7 +113,7 @@ trait FormTrait
     public function addFeedback()
     {
         $this->feedbacks[] = [
-            'rating' => 5,
+            'rating' => null,
             'comment' => '',
             'client_name' => '',
         ];
@@ -135,6 +141,60 @@ trait FormTrait
     public function updatedNeighbourhood()
     {
         $this->location = '';
+    }
+
+    public $teaching_groups = [];
+
+    public function addTeachingGroup()
+    {
+        $count = count(TeachingGroup::get()) + 1;
+        
+        $this->teaching_groups[] = [
+            'name' => "TeachingGroup #{$count}",
+            'region_id' => null,
+            'city_id' => null,
+            'neighbourhood_id' => null,
+            'location_id' => null,
+            'address_details' => '',
+            'start_date' => $this->start_date ?? date('Y-m-d'),
+            'end_date' => $this->end_date ?? null,
+            'Moderator' => '',
+            'Moderator_phone' => '',
+            'Moderator_email' => '',
+            'status' => null,
+            'activation' => 1,
+            'cost_usd' => 0.00,
+            'cost_nis' => 0.00,
+            'partner_id' => null,
+            'notes' => '',
+            'student_groups_id' => null,
+        ];
+    }
+
+    public function removeTeachingGroup($index)
+    {
+        unset($this->teaching_groups[$index]);
+        $this->teaching_groups = array_values($this->teaching_groups);
+    }
+
+    public function updatedTeachingGroups($value, $key)
+    {
+        $parts = explode('.', $key);
+        if (count($parts) < 2) return;
+        
+        $index = $parts[0];
+        $field = $parts[1];
+
+        if ($field === 'region_id') {
+            $this->teaching_groups[$index]['city_id'] = null;
+            $this->teaching_groups[$index]['neighbourhood_id'] = null;
+            $this->teaching_groups[$index]['location_id'] = null;
+        } elseif ($field === 'city_id') {
+            $this->teaching_groups[$index]['neighbourhood_id'] = null;
+            $this->teaching_groups[$index]['location_id'] = null;
+        } elseif ($field === 'neighbourhood_id') {
+            $this->teaching_groups[$index]['location_id'] = null;
+        }
     }
 
     #[Computed()]

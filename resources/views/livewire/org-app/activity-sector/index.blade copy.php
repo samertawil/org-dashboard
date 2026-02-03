@@ -69,7 +69,7 @@
                             <div class="flex flex-col gap-4">
                                 <div class="flex items-start justify-between gap-4">
                                     <div>
-                                        <div class="d-flex justify-between">
+                                        <div class="flex justify-end">
 
 
                                             <div class="flex items-center gap-2 mb-1">
@@ -99,23 +99,9 @@
 
 
                                             </div>
-                                            <div>
-                                                @if ($activity->rating_info['rating'] > 0)
-                                                    <div class="flex">
-    
-                                                    </div>
-                                                    <div class="flex items-center gap-1 ml-2">
-                                                        <flux:icon icon="star" variant="solid"
-                                                            class="{{ $activity->rating_info['color'] }} w-4 h-4" />
-                                                        <span
-                                                            class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{{ $activity->rating_info['rating'] }}</span>
-                                                        <span
-                                                            class="text-[10px] text-zinc-500">({{ $activity->rating_info['text'] }})</span>
-                                                    </div>
-                                                @endif
-                                            </div>
                                         </div>
-                                        
+
+
                                         <div class="flex flex-wrap gap-y-1 gap-x-2 text-md ">
 
                                             <span> </span>
@@ -163,28 +149,41 @@
                                 @endif
                             </div>
 
+                            <div class="flex justify-between items-center mt-4">
 
-                            <div class="flex justify-end">
+                                <div>
 
+                                    @if ($activity->rating_info['rating'] > 0)
+                                        <div class="flex items-center gap-1 ml-2">
+                                            <flux:icon icon="star" variant="solid"
+                                                class="{{ $activity->rating_info['color'] }} w-4 h-4" />
+                                            <span
+                                                class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{{ $activity->rating_info['rating'] }}</span>
+                                            <span
+                                                class="text-[10px] text-zinc-500">({{ $activity->rating_info['text'] }})</span>
+                                        </div>
+                                    @endif
+                                </div>
 
+                                <div class="flex justify-end items-center">
+                                    @php $modalName = 'activity-show-' . $activity->id; @endphp
 
-                                @php $modalName = 'activity-show-' . $activity->id; @endphp
+                                    <flux:modal.trigger :name="$modalName">
+                                        <flux:button variant="subtle" size="xs" icon="eye"
+                                            tooltip="Show All Data" wire:click="openShowModal({{ $activity->id }})">
+                                            Details </flux:button>
+                                    </flux:modal.trigger>
 
-                                <flux:modal.trigger :name="$modalName">
-                                    <flux:button variant="subtle" size="xs" icon="eye" tooltip="Show All Data"
-                                        wire:click="openShowModal({{ $activity->id }})">Details </flux:button>
-                                </flux:modal.trigger>
-
-                                <flux:modal :name="$modalName" class="md:w-96"
-                                    x-on:close-modal="$wire.closeShowModal()">
-                                    <div class="mt-4">
-                                        @if ($selectedactivityIdForShowModal === $activity->id)
-                                            <livewire:OrgApp.activity.show :activity="$activity"
-                                                wire:key="show-activity-{{ $activity->id }}" />
-                                        @endif
-                                    </div>
-                                </flux:modal>
-
+                                    <flux:modal :name="$modalName" class="md:w-96"
+                                        x-on:close-modal="$wire.closeShowModal()">
+                                        <div class="mt-4">
+                                            @if ($selectedactivityIdForShowModal === $activity->id)
+                                                <livewire:OrgApp.activity.show :activity="$activity"
+                                                    wire:key="show-activity-{{ $activity->id }}" />
+                                            @endif
+                                        </div>
+                                    </flux:modal>
+                                </div>
                             </div>
                         </flux:card>
                     @empty

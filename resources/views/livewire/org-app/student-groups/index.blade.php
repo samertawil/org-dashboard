@@ -97,7 +97,7 @@
                                 {{ $group->Moderator ?? '-' }}
                             </td>
                              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->current_student_count }} / {{ $group->max_students }}
+                                {{ $group->students_count }} / {{ $group->max_students }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->region->region_name ?? '-' }}

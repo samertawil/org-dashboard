@@ -14,6 +14,9 @@ use App\Enums\GlobalSystemConstant;
 use App\Concerns\Activity\FormTrait;
 use Illuminate\Support\Facades\Gate;
 
+use App\Models\PartnerInstitution;
+use App\Models\StudentGroup;
+
 class Edit extends Component
 {
     public Activity $activity;
@@ -40,6 +43,7 @@ class Edit extends Component
         $this->location = $activity->location;
         $this->address_details = $activity->address_details;
         $this->sector_id = $activity->sector_id;
+        $this->cost_nis = $activity->cost_nis;
         
         $this->parcels = $activity->parcels->toArray();
         if (empty($this->parcels)) $this->addParcel();
@@ -49,6 +53,9 @@ class Edit extends Component
 
         $this->work_teams = $activity->workTeams->toArray();
         if (empty($this->work_teams)) $this->addWorkTeam();
+
+        $this->teaching_groups = $activity->teachingGroups->toArray();
+        if (empty($this->teaching_groups)) $this->addTeachingGroup();
 
         $this->feedbacks = $activity->feedbacks->toArray();
         if (empty($this->feedbacks)) $this->addFeedback();
@@ -74,6 +81,7 @@ class Edit extends Component
             'start_date' => $this->start_date,
             'end_date' => $this->end_date ?: null,
             'cost' => $this->cost,
+            'cost_nis' => $this->cost_nis,
             'status' => $this->status,
             'status_name' => $statusModel ? $statusModel->status_name : null,
             'region' => $this->region ?: null,
@@ -105,6 +113,23 @@ class Edit extends Component
             }
         }
 
+        $this->activity->teachingGroups()->delete();
+        if ($this->sector_id == 55) {
+            foreach ($this->teaching_groups as $group) {
+                if ($group['name']) {
+                    // Ensure dates are null if empty
+                    $group['start_date'] = $group['start_date'] ?: null;
+                    $group['end_date'] = $group['end_date'] ?: null;
+
+                    $this->activity->teachingGroups()->create(array_merge($group, [
+                        'updated_by' => auth()->id(),
+                         // Preserve created_by if it existed in the original relation, otherwise auth()->id()
+                        'created_by' => $group['created_by'] ?? auth()->id(),
+                    ]));
+                }
+            }
+        }
+
         $this->activity->feedbacks()->delete();
         foreach ($this->feedbacks as $feedback) {
             if ($feedback['rating'] || $feedback['comment']) {
@@ -133,11 +158,13 @@ class Edit extends Component
             'parcelTypes' => Status::where('p_id_sub', $this->sector_id)->get(),
             'beneficiaryTypes' => Status::where('p_id_sub', 36)->get(),
             'missionTitles' => Status::where('p_id_sub', 37)->get(),
-            'regions' => Region::get(),
-            'cities' => $this->region ? City::where('region_id', $this->region)->get() : collect(),
-            'neighbourhoods' => $this->city ? Neighbourhood::where('city_id', $this->city)->get() : collect(),
-            'locations' => $this->neighbourhood ? Location::where('neighbourhood_id', $this->neighbourhood)->get() : collect(),
-            'employees' => Employee::get(),
+            'regions' => \App\Reposotries\RegionRepo::regions(),
+            'cities' => $this->region ? \App\Reposotries\CityRepo::cities()->where('region_id', $this->region) : collect(),
+            'neighbourhoods' => $this->city ? \App\Reposotries\NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city) : collect(),
+            'locations' => $this->neighbourhood ? \App\Reposotries\LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood) : collect(),
+            'employees' => \App\Reposotries\employeeRepo::employees()->where('activation',GlobalSystemConstant::ACTIVE->value),
+            'partners' => PartnerInstitution::all(),
+            'studentGroups' => StudentGroup::all(),
         ]);
     }
 }

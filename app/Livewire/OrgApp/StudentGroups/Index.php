@@ -2,10 +2,12 @@
 
 namespace App\Livewire\OrgApp\StudentGroups;
 
+use App\Models\Student;
 use Livewire\Component;
+use App\Models\StudentGroup;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
-use App\Models\StudentGroup;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
@@ -43,9 +45,13 @@ class Index extends Component
     public function groups()
     {
      return  StudentGroup::query()
-            ->with(['region', 'city', 'status'])
-            ->where('name', 'like', '%' . $this->search . '%')
-            ->orWhere('Moderator', 'like', '%' . $this->search . '%')
+            ->with(['region', 'city', 'status'])  ->withCount(['students' => function ($query) {
+    $query->where('activation', 1);
+}])
+            ->where(function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('Moderator', 'like', '%' . $this->search . '%');
+            })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);      
     }
@@ -59,6 +65,10 @@ class Index extends Component
 
     public function render()
     {
+
+        //          $data = Student::groupBy('student_groups_id')->select('student_groups_id', DB::raw('count(*) as total'))->get();
+
+        // dd($data);
         return view('livewire.org-app.student-groups.index');
     }
 }

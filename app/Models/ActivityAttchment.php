@@ -22,4 +22,14 @@ class ActivityAttchment extends Model
     {
         return $this->belongsTo(Status::class, 'status_id');
     }
+
+    public function teachingGroup()
+    {
+        return $this->belongsTo(TeachingGroup::class, 'teaching_groups_id');
+    }
+
+    public function subjectLearning()
+    {
+        return $this->belongsTo(StudentSubjectForLearn::class, 'subject_learning_id');
+    }
 }

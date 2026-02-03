@@ -6,7 +6,7 @@
             <flux:subheading size="lg">{{ __('monitor and manage your sectors') }}</flux:subheading>
 
         </div>
-        <div class="self-end">
+        <div class="self-center">
             <flux:button href="{{ route('activity.create') }}" wire:navigate variant="ghost" icon="plus">
                 {{ __('New Activity') }}
             </flux:button>

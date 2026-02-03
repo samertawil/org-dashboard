@@ -50,6 +50,7 @@
 
             {{-- Gender --}}
             <flux:select wire:model="gender" :label="__('Gender')">
+                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Gender') }}</option>
                 <option value="male">{{ __('Male') }}</option>
                 <option value="female">{{ __('Female') }}</option>
             </flux:select>

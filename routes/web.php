@@ -39,9 +39,16 @@ use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
 use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
 use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
 
+use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
+use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
+use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
 
-
-
+use App\Livewire\OrgApp\Currency\Index as CurrencyIndex;
+use App\Livewire\OrgApp\Currency\Create as CurrencyCreate;
+use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
+use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
+use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
+use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
 
 Route::get('/', function () {
     return view('welcome');
@@ -111,5 +118,16 @@ Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('stude
 Route::get('dashboard/student/create',StudentCreat::class)->name('student.create');
 Route::get('dashboard/student/{student}/edit',StudentEdit::class)->name('student.edit');
  
+Route::get('dashboard/teaching-group',TeachingGroupIndex::class)->name('teaching.group.index');
+Route::get('dashboard/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
+Route::get('dashboard/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
 
+Route::get('dashboard/currency', CurrencyIndex::class)->name('currency.index');
+Route::get('dashboard/currency/create', CurrencyCreate::class)->name('currency.create');
+Route::get('dashboard/currency/{currency}/edit', CurrencyEdit::class)->name('currency.edit');
+
+Route::get('dashboard/learnin-subject/create',SubjectCreate::class)->name('subject.create');
+Route::get('dashboard/learnin-subject/{subject}/edit',SubjectEdit::class)->name('subject.edit');
+Route::get('dashboard/learnin-subject',SubjectIndex::class)->name('subject.index');
+ 
 });
