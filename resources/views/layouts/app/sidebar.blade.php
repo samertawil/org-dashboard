@@ -25,52 +25,51 @@
             <flux:sidebar.group :heading="__('App')" class="grid">
                 <!-- Department Group -->
                 @can('department.create')
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Department')" icon="flag"
-                class="grid">
-                <flux:sidebar.item icon="plus" :href="route('department.create')"
-                    :current="request()->routeIs('department.create')" wire:navigate>
-                    {{ __('Create Department') }}
-                </flux:sidebar.item>
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Department')" icon="flag"
+                        class="grid">
+                        <flux:sidebar.item icon="plus" :href="route('department.create')"
+                            :current="request()->routeIs('department.create')" wire:navigate>
+                            {{ __('Create Department') }}
+                        </flux:sidebar.item>
 
-                <flux:sidebar.item icon="list-bullet" :href="route('department.index')"
-                    :current="request()->routeIs('department.index')" wire:navigate>
-                    {{ __('Department List') }}
-                </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('department.index')"
+                            :current="request()->routeIs('department.index')" wire:navigate>
+                            {{ __('Department List') }}
+                        </flux:sidebar.item>
 
-            </flux:sidebar.group>     
+                    </flux:sidebar.group>
                 @endcan
-                
+
 
                 <!-- Employees Group -->
                 @can('employee.create')
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="user-group"
-                    class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('employee.create')"
-                        :current="request()->routeIs('employee.create')" wire:navigate>
-                        {{ __('Create Employees') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('employee.index')"
-                        :current="request()->routeIs('employee.index')" wire:navigate>
-                        {{ __('Employees List') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>    
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="user-group"
+                        class="grid">
+                        <flux:sidebar.item icon="plus" :href="route('employee.create')"
+                            :current="request()->routeIs('employee.create')" wire:navigate>
+                            {{ __('Create Employees') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('employee.index')"
+                            :current="request()->routeIs('employee.index')" wire:navigate>
+                            {{ __('Employees List') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
                 @endcan
 
-                {{-- @can('employee.create') --}}
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar"
-                    class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('currency.create')"
-                        :current="request()->routeIs('currency.create')" wire:navigate>
+                @canany(['currency.index', 'currency.create'])
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar" class="grid">
+                    <flux:sidebar.item icon="plus" :href="route('currency.create')" :current="request()->routeIs('currency.create')" wire:navigate>
                         {{ __('Create Currency') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('currency.index')"
-                        :current="request()->routeIs('currency.index')" wire:navigate>
+                    <flux:sidebar.item icon="list-bullet" :href="route('currency.index')" :current="request()->routeIs('currency.index')" wire:navigate>
                         {{ __('Currency List') }}
                     </flux:sidebar.item>
-                </flux:sidebar.group>    
-                {{-- @endcan --}}
+                </flux:sidebar.group>
+            @endcanany
             
-                
+
+
+
                 <!-- Partners Group -->
                 {{-- @can('partner.create') --}}
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="briefcase"
@@ -83,9 +82,9 @@
                         :current="request()->routeIs('partner.index')" wire:navigate>
                         {{ __('Partners List') }}
                     </flux:sidebar.item>
-                </flux:sidebar.group>    
+                </flux:sidebar.group>
                 {{-- @endcan --}}
-  
+
                 {{-- @can('employee.create') --}}
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Curricula')" icon="book-open-text"
                     class="grid">
@@ -97,13 +96,13 @@
                         :current="request()->routeIs('subject.index')" wire:navigate>
                         {{ __('Curricula List') }}
                     </flux:sidebar.item>
-                </flux:sidebar.group>    
+                </flux:sidebar.group>
                 {{-- @endcan --}}
-                  
+
                 <!-- Students Groups -->
                 {{-- @can('student.group.create') --}}
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Students Groups')" icon="rectangle-group"
-                    class="grid">
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Students Groups')"
+                    icon="rectangle-group" class="grid">
                     <flux:sidebar.item icon="plus" :href="route('student.group.create')"
                         :current="request()->routeIs('student.group.create')" wire:navigate>
                         {{ __('Create Students Groups') }}
@@ -112,11 +111,11 @@
                         :current="request()->routeIs('student.group.index')" wire:navigate>
                         {{ __('Students Groups List') }}
                     </flux:sidebar.item>
-                </flux:sidebar.group>    
+                </flux:sidebar.group>
                 {{-- @endcan --}}
 
 
-                   
+
                 <!-- Students Groups -->
                 {{-- @can('student.create') --}}
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Students')" icon="academic-cap"
@@ -129,33 +128,33 @@
                         :current="request()->routeIs('student.index')" wire:navigate>
                         {{ __('Students List') }}
                     </flux:sidebar.item>
-                </flux:sidebar.group>    
+                </flux:sidebar.group>
                 {{-- @endcan --}}
 
 
                 <!-- Activities Group -->
-               
-                    
+
+
                 @can('activity.index')
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')" icon="clipboard-document-list"
-                    class="grid">
-                    <flux:sidebar.item icon="list-bullet" :href="route('sector.show')"
-                        :current="request()->routeIs('sector.show')" wire:navigate>
-                        {{ __('Sectors & Activities') }}
-                    </flux:sidebar.item>
-                  
-                    <flux:sidebar.item icon="list-bullet" :href="route('activity.index')"
-                        :current="request()->routeIs('activity.index')" wire:navigate>
-                        {{ __('Activities List') }}
-                    </flux:sidebar.item>
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')"
+                        icon="clipboard-document-list" class="grid">
+                        <flux:sidebar.item icon="list-bullet" :href="route('sector.show')"
+                            :current="request()->routeIs('sector.show')" wire:navigate>
+                            {{ __('Sectors & Activities') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="list-bullet" :href="route('activity.index')"
+                            :current="request()->routeIs('activity.index')" wire:navigate>
+                            {{ __('Activities List') }}
+                        </flux:sidebar.item>
                     @endcan
                     @can('activity.create')
-                    <flux:sidebar.item icon="plus" :href="route('activity.create')"
-                        :current="request()->routeIs('activity.create')" wire:navigate>
-                        {{ __('Create Activities') }}
-                    </flux:sidebar.item>
+                        <flux:sidebar.item icon="plus" :href="route('activity.create')"
+                            :current="request()->routeIs('activity.create')" wire:navigate>
+                            {{ __('Create Activities') }}
+                        </flux:sidebar.item>
                     @endcan
-                   
+
 
                 </flux:sidebar.group>
 
@@ -246,7 +245,7 @@
                 target="_blank">
                 {{ __('Repository') }}
             </flux:sidebar.item>
-        
+
             <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
                 target="_blank">
                 {{ __('Documentation') }}

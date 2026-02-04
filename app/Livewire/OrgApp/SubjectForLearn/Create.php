@@ -3,9 +3,9 @@
 namespace App\Livewire\OrgApp\SubjectForLearn;
 
 use Livewire\Component;
+use Livewire\Attributes\Validate;
 use App\Models\StudentSubjectForLearn;
 use App\Concerns\SubjectForLearn\SubjectForLearnTrait;
-use Livewire\Attributes\Validate;
 
 class Create extends Component
 {
@@ -13,6 +13,16 @@ class Create extends Component
 
     #[Validate('required|string|unique:student_subject_for_learns,name')]
     public $name = '';
+
+   
+    
+    
+
+    // public function rules() {
+    //     return [
+    //         'birth_date' => 'required|date|before_or_equal:' . Student::maxBirthDate() . '|after_or_equal:' . Student::minBirthDate(),           
+    //     ];
+    // }
 
     public function save()
     {
@@ -23,6 +33,8 @@ class Create extends Component
             'type_id' => $this->type_id ?: null,
             'description' => $this->description,
             'activation' => $this->activation,
+            'from_age' => $this->from_age,
+            'to_age' => $this->to_age,
         ]);
 
         session()->flash('message', __('Subject successfully created.'));

@@ -2,10 +2,11 @@
 
 namespace App\Livewire\OrgApp\Currency;
 
-use App\Concerns\Currency\CurrencyTrait;
 use Livewire\Component;
 use App\Models\CurrancyValue;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
+use App\Concerns\Currency\CurrencyTrait;
 
 class Edit extends Component
 {
@@ -51,6 +52,11 @@ class Edit extends Component
 
     public function render()
     {
+        
+        if(Gate::denies('currency.create')){
+            abort(403,'You do not have the necessary permissions.');
+        }
+        
         return view('livewire.org-app.currency.edit', [
             'heading' => __('Edit Currency Value'),
             'type' => 'save',

@@ -5,20 +5,25 @@ namespace App\Concerns\StudentsGroups;
 use App\Reposotries\CityRepo;
 use App\Reposotries\RegionRepo;
 use App\Reposotries\StatusRepo;
+use App\Reposotries\LocationRepo;
 use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
+use App\Models\Location;
+use App\Models\StudentSubjectForLearn;
+use App\Reposotries\NeighbourhoodRepo;
 
 trait StudentsGroupsTrait
 {
-    
+
     #[Validate('required|integer|min:0|gt:min_students', message: ['gt:min_students' => 'Max students must exceed min students.'])]
     public $max_students = 0;
-    
 
-    #[Validate('required|integer|min:0|lt:max_students', 
-    message: ['lt:max_students' => 'Min students must be less than max students.']
-)]
-public $min_students = 0;
+
+    #[Validate(
+        'required|integer|min:0|lt:max_students',
+        message: ['lt:max_students' => 'Min students must be less than max students.']
+    )]
+    public $min_students = 0;
 
     #[Validate('nullable|exists:regions,id')]
     public $region_id = '';
@@ -27,16 +32,16 @@ public $min_students = 0;
     public $city_id = '';
 
     #[Validate('nullable|string')]
-    public $Moderator = '';
+    public $Moderator = null;
 
     #[Validate('nullable|string')]
-    public $Moderator_phone = '';
+    public $Moderator_phone = null;
 
     #[Validate('nullable|email')]
-    public $Moderator_email = '';
+    public $Moderator_email = null;
 
     #[Validate('nullable|string')]
-    public $description = '';
+    public $description = null;
 
     #[Validate('required|integer')]
     public $activation = GlobalSystemConstant::ACTIVE->value;
@@ -44,10 +49,39 @@ public $min_students = 0;
     #[Validate('nullable|exists:statuses,id')]
     public $status_id = '';
 
+    #[Validate('nullable|array')]
+    public $subject_to_learn_id = [];
+
+
+    #[Validate('nullable|exists:neighbourhoods,id')]
+    public $neighbourhood_id = '';
+
+    #[Validate('nullable|exists:locations,id')]
+    public $location_id = '';
+
+    public $address_details = '';
+
+    #[Validate('nullable|date')]
+    public $start_date = '';
+
+    #[Validate('nullable|date|after_or_equal:start_date')]
+    public $end_date = '';
+
+    #[Validate('nullable|date_format:H:i')]
+    public $start_time = '';
+
+    #[Validate('nullable|date_format:H:i')]
+    public $end_time = '';
+
+
+
     public $activations = [];
     public $regions = [];
     public $cities = [];
+    public $neighbourhoods = [];
+    public $locations = [];
     public $statuses = [];
+    public $subjects = [];
 
     public function updated($property, $value)
     {
@@ -60,14 +94,35 @@ public $min_students = 0;
     {
         $this->city_id = '';
         $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : collect();
+        $this->neighbourhood_id = '';
+        $this->neighbourhoods = collect();
+        $this->location_id = '';
+        $this->locations = collect();
     }
-    public function bootStudentsGroupsTrait() {
-       
-        $this->regions = RegionRepo::regions();
-        $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id):collect();
-        $this->activations = GlobalSystemConstant::options()->where('type', 'status');   
-        $this->statuses = StatusRepo::statuses();
-    }
-   
 
+    public function updatedCityId()
+    {
+        $this->neighbourhood_id = '';
+        $this->neighbourhoods = $this->city_id ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city_id) : collect();
+        $this->location_id = '';
+        $this->locations = collect();
+    }
+
+    public function updatedNeighbourhoodId()
+    {
+        $this->location_id = '';
+        $this->locations = $this->neighbourhood_id ? LocationRepo::Locations()->where('neighbourhood_id', $this->neighbourhood_id) : collect();
+    }
+
+    public function bootStudentsGroupsTrait()
+    {
+
+        $this->regions = RegionRepo::regions();
+        $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : collect();
+        $this->neighbourhoods = $this->city_id ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city_id) : collect();
+        $this->locations = $this->neighbourhood_id ? LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood_id) : collect();
+        $this->activations = GlobalSystemConstant::options()->where('type', 'status');
+        $this->statuses = StatusRepo::statuses();
+        $this->subjects = StudentSubjectForLearn::select('id', 'name')->get();
+    }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StudentSubjectForLearn extends Model
 {
-    protected $fillable = ['name', 'type_id', 'description', 'activation'];
+    protected $fillable = ['name', 'type_id', 'description', 'activation', 'from_age', 'to_age'];
 
     public function type()
     {

@@ -1,54 +1,56 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Livewire\OrgApp\ActivitySector\Index;
+use App\Livewire\OrgApp\Student\ImportedFiles;
+use App\Livewire\AppSetting\Role\GrantUserRole;
 use App\Livewire\AppSetting\Role\Edit as RoleEdit;
 use App\Livewire\AppSetting\Role\Index as RoleIndex;
+use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
+use App\Livewire\OrgApp\Student\Edit as StudentEdit;
+use App\Livewire\OrgApp\StudentGroups\DailyStudents;
 use App\Livewire\AppSetting\Role\Create as RoleCreate;
-use App\Livewire\AppSetting\Role\GrantUserRole;
 use App\Livewire\AppSetting\Status\Edit as StatusEdit;
+use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
+
+use App\Livewire\OrgApp\Activity\Show as ActivityShow;
+use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
+use App\Livewire\OrgApp\Employee\Edit as EmployeeEdit;
+use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
+use App\Livewire\OrgApp\Student\Index as StudentIndex;
+use App\Livewire\AppSetting\Users\Index as  UsersIndex;
+use App\Livewire\OrgApp\Student\Create as StudentCreat;
 use App\Livewire\AppSetting\Ability\Edit as AbilityEdit;
 use App\Livewire\AppSetting\Status\Index as StatusIndex;
+use App\Livewire\OrgApp\Activity\Index as ActivityIndex;
+use App\Livewire\OrgApp\Currency\Index as CurrencyIndex;
+use App\Livewire\OrgApp\Employee\Index as EmployeeIndex;
+use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
 use App\Livewire\AppSetting\Users\Create as  UsersCreate;
-use App\Livewire\AppSetting\Users\Index as  UsersIndex;
 use App\Livewire\AppSetting\Ability\Index as AbilityIndex;
 use App\Livewire\AppSetting\Status\Create as StatusCreate;
-
-use App\Livewire\AppSetting\Ability\Create as AbilityCreate;
-use App\Livewire\AppSetting\SystemNames\Index as SystemNamesIndex;
-use App\Livewire\AppSetting\SystemNames\Create as SystemNamesCreate;
-use App\Livewire\Appsetting\RoleModuleName\Create as RoleModuleNameCreate;
-use App\Livewire\OrgApp\Department\Index as DepartmentIndex;
-use App\Livewire\OrgApp\Department\Create as DepartmentCreate;
-use App\Livewire\OrgApp\Department\Edit as DepartmentEdit;
-use App\Livewire\OrgApp\Employee\Index as EmployeeIndex;
-use App\Livewire\OrgApp\Employee\Create as EmployeeCreate;
-use App\Livewire\OrgApp\Employee\Edit as EmployeeEdit;
-use App\Livewire\OrgApp\Activity\Index as ActivityIndex;
 use App\Livewire\OrgApp\Activity\Create as ActivityCreate;
-use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
-use App\Livewire\OrgApp\Activity\Show as ActivityShow;
-use App\Livewire\OrgApp\ActivitySector\Index;
-use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
-use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
-use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
-use App\Livewire\OrgApp\Student\Create as StudentCreat;
-use App\Livewire\OrgApp\Student\Edit as StudentEdit;
-use App\Livewire\OrgApp\Student\Index as StudentIndex;
-use App\Livewire\OrgApp\Student\ImportedFiles;
-use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
+use App\Livewire\OrgApp\Currency\Create as CurrencyCreate;
+use App\Livewire\OrgApp\Department\Edit as DepartmentEdit;
+use App\Livewire\OrgApp\Employee\Create as EmployeeCreate;
+use App\Livewire\AppSetting\Ability\Create as AbilityCreate;
+use App\Livewire\OrgApp\Department\Index as DepartmentIndex;
+use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
+use App\Livewire\OrgApp\Department\Create as DepartmentCreate;
+use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
 use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
+
+use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
+use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
 
-use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
-use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
+use App\Livewire\AppSetting\SystemNames\Index as SystemNamesIndex;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
-
-use App\Livewire\OrgApp\Currency\Index as CurrencyIndex;
-use App\Livewire\OrgApp\Currency\Create as CurrencyCreate;
-use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
-use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
-use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
-use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
+use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
+use App\Livewire\AppSetting\SystemNames\Create as SystemNamesCreate;
+use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
+use App\Livewire\Appsetting\RoleModuleName\Create as RoleModuleNameCreate;
+use App\Livewire\OrgApp\StudentGroups\ShowSchedule as StudentGroupSchedule;
 
 Route::get('/', function () {
     return view('welcome');
@@ -112,6 +114,8 @@ Route::get('/dashboard/partner', PartnerIndex::class)->name('partner.index');
 Route::get('/dashboard/student-group', StudentGroupIndex::class)->name('student.group.index');
 Route::get('/dashboard/student-group/create', StudentGroupCreate::class)->name('student.group.create');
 Route::get('/dashboard/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
+Route::get('/dashboard/student-group/{group}/schedule', StudentGroupSchedule::class)->name('student.group.schedule');
+Route::get('/dashboard/student-group/{group}/schedule/{date}/students', DailyStudents::class)->name('student.group.date.students');
 
 Route::get('dashboard/student',StudentIndex::class)->name('student.index');
 Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('student.imported-files');

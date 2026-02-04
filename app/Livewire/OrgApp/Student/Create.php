@@ -14,6 +14,9 @@ class Create extends Component
 
     #[Validate('required|integer|min_digits:9|min_digits:9|unique:students,identity_number')]
     public $identity_number = '';
+    
+    #[Validate('required|in:full_week,sat_mon_wed,sun_tue_thu')]
+    public $enrollment_type = 'sat_mon_wed';
 
     public function rules() {
         return [
@@ -30,6 +33,7 @@ class Create extends Component
             'birth_date' => $this->birth_date,
             'student_groups_id' => $this->student_groups_id ?: null,
             'gender' => $this->gender,
+            'enrollment_type' => $this->enrollment_type,
             'activation' => $this->activation,
             'status_id' => $this->status_id ?: null,
             'parent_phone' => $this->parent_phone,

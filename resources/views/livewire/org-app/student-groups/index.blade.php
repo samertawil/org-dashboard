@@ -65,6 +65,10 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Moderator') }}
                         </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Subjects') }}
+                        </th>
                          <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Count/Max') }}
@@ -96,6 +100,20 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->Moderator ?? '-' }}
                             </td>
+                            <td class="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
+                                @if (!empty($group->subject_to_learn_id) && is_array($group->subject_to_learn_id))
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
+                                            {{ count($group->subject_to_learn_id) }} {{ __('Subjects') }}
+                                        </span>
+                                        <button wire:click="viewSubjects({{ $group->id }})" class="text-xs text-blue-600 hover:text-blue-500 hover:underline dark:text-blue-400">
+                                            {{ __('View All') }}
+                                        </button>
+                                    </div>
+                                @else
+                                    -
+                                @endif
+                            </td>
                              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->students_count }} / {{ $group->max_students }}
                             </td>
@@ -125,6 +143,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
+                                    <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate
+                                        variant="ghost" size="sm" icon="calendar" title="{{ __('Schedule') }}" />
                                     <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
                                     <flux:button wire:click="delete({{ $group->id }})"
@@ -149,4 +169,32 @@
             {{ $this->groups->links() }}
         </div>
     </div>
+
+    {{-- Subjects Modal --}}
+    <flux:modal wire:model="showSubjectsModal">
+        <div class="p-6">
+            <div class="flex flex-col gap-4">
+                <div>
+                    <flux:heading size="lg">{{ $viewingGroupName }} - {{ __('Subjects') }}</flux:heading>
+                    <flux:subheading>{{ __('List of subjects assigned to this group.') }}</flux:subheading>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mt-2">
+                     @forelse($viewingSubjects as $subjectName)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border border-blue-100 dark:border-blue-500/30">
+                            {{ $subjectName }}
+                        </span>
+                    @empty
+                        <span class="text-zinc-500 italic">{{ __('No subjects found.') }}</span>
+                    @endforelse
+                </div>
+
+                <div class="flex justify-end mt-4">
+                    <flux:button wire:click="closeSubjectsModal" variant="ghost">
+                        {{ __('Close') }}
+                    </flux:button>
+                </div>
+            </div>
+        </div>
+    </flux:modal>
 </div>

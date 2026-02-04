@@ -19,6 +19,7 @@ class Student extends Model
         'living_parent_id',
         'notes',
         'added_type',
+        'enrollment_type',
         'created_by',
         'updated_by',
     ];

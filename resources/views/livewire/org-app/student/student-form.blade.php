@@ -63,6 +63,13 @@
                 @endforeach
             </flux:select>
             
+            {{-- Enrollment Type --}}
+            <flux:select wire:model="enrollment_type" :label="__('Enrollment Type')">
+                <option value="sat_mon_wed">{{ __('Saturday / Monday / Wednesday') }}</option>
+                <option value="sun_tue_thu">{{ __('Sunday / Tuesday / Thursday') }}</option>
+                <option value="full_week">{{ __('Full Week') }}</option>
+            </flux:select>
+            
             {{-- Status --}}
              <flux:select wire:model="status_id" :label="__('Student Status')">
                 <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Status') }}</option>

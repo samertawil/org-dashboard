@@ -60,6 +60,7 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation
             'full_name'         => $row['full_name'],
             'birth_date'        => $birthDate,
             'gender'            => $row['gender'] ?? null,
+            'enrollment_type'   => $row['enrollment_type'] ?? 'sat_mon_wed', 
             'student_groups_id' => $studentGroup ? $studentGroup->id : null,
             'status_id'         => $status ? $status->id : null, 
             'parent_phone'      => $row['parent_phone'] ?? null,

@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\StudentGroups;
 use App\Models\Student;
 use Livewire\Component;
 use App\Models\StudentGroup;
+use App\Models\StudentSubjectForLearn;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,11 @@ class Index extends Component
     public string $search = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
+    
+    // Modal State
+    public $viewingSubjects = [];
+    public $viewingGroupName = '';
+    public $showSubjectsModal = false;
 
     // Pagination
     public int $perPage = 10;
@@ -63,12 +69,36 @@ class Index extends Component
         session()->flash('message', __('Student Group successfully deleted.'));
     }
 
+    public function viewSubjects($groupId)
+    {
+        $group = StudentGroup::find($groupId);
+        if ($group) {
+            $ids = $group->subject_to_learn_id ?? [];
+            if (is_array($ids) && count($ids) > 0) {
+                 $this->viewingSubjects = StudentSubjectForLearn::whereIn('id', $ids)->pluck('name')->toArray();
+            } else {
+                 $this->viewingSubjects = [];
+            }
+            $this->viewingGroupName = $group->name;
+            $this->showSubjectsModal = true;
+        }
+    }
+    
+    public function closeSubjectsModal()
+    {
+        $this->showSubjectsModal = false;
+        $this->viewingSubjects = [];
+        $this->viewingGroupName = '';
+    }
+
     public function render()
     {
 
         //          $data = Student::groupBy('student_groups_id')->select('student_groups_id', DB::raw('count(*) as total'))->get();
 
         // dd($data);
-        return view('livewire.org-app.student-groups.index');
+        return view('livewire.org-app.student-groups.index', [
+            'subjectsMap' => StudentSubjectForLearn::all()->keyBy('id')
+        ]);
     }
 }

@@ -27,6 +27,8 @@ class Edit extends Component
         $this->type_id = $subject->type_id;
         $this->description = $subject->description;
         $this->activation = $subject->activation;
+        $this->from_age = $subject->from_age;
+        $this->to_age = $subject->to_age;
         // Arrays are loaded by trait boot method
     }
 
@@ -39,6 +41,8 @@ class Edit extends Component
             'type_id' => $this->type_id ?: null,
             'description' => $this->description,
             'activation' => $this->activation,
+            'from_age' => $this->from_age,
+            'to_age' => $this->to_age,
         ]);
 
         session()->flash('message', __('Subject successfully updated.'));

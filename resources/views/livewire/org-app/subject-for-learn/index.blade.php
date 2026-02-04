@@ -30,6 +30,9 @@
                             </div>
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Type') }}</th>
+
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('From/To Age') }}</th>
+
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Description') }}</th>
                          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Items') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Status') }}</th>
@@ -41,6 +44,9 @@
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">{{ $subject->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $subject->type?->status_name ?? '-' }}</td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $subject->from_age ?? '-' }}/{{ $subject->to_age ?? '-' }}</td>
+
                              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 truncate max-w-xs">{{ \Illuminate\Support\Str::limit($subject->description, 30) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 <flux:badge size="sm" color="zinc">{{ $subject->subjects_attchments_count }}</flux:badge>

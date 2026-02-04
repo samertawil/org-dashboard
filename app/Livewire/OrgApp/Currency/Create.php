@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\Currency;
 use Livewire\Component;
 use App\Models\CurrancyValue;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 use App\Concerns\Currency\CurrencyTrait;
 
 class Create extends Component
@@ -43,6 +44,10 @@ class Create extends Component
 
     public function render()
     {
+
+        if(Gate::denies('currency.create')){
+            abort(403,'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.currency.create', [
             'heading' => __('Create Currency Value'),
             'type' => 'save',

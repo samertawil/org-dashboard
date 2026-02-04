@@ -2,10 +2,11 @@
 
 namespace App\Livewire\OrgApp\Currency;
 
-use App\Models\CurrancyValue;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\CurrancyValue;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
 {
@@ -56,6 +57,12 @@ class Index extends Component
 
     public function render()
     {
+       
+        if( Gate::denies('currency.index')){
+            abort(403,'You do not have the necessary permissions.');
+        }
+        
+        
         return view('livewire.org-app.currency.index');
     }
 }

@@ -99,6 +99,9 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Gender') }}
                         </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Enrollment') }}
+                        </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Status') }}
@@ -123,6 +126,17 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ ucfirst($student->gender) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                @if($student->enrollment_type === 'full_week')
+                                    {{ __('Full Week') }}
+                                @elseif($student->enrollment_type === 'sat_mon_wed')
+                                    {{ __('Sat/Mon/Wed') }}
+                                @elseif($student->enrollment_type === 'sun_tue_thu')
+                                    {{ __('Sun/Mon/Thu') }}
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php

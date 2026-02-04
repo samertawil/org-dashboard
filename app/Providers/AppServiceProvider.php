@@ -7,6 +7,7 @@ use App\Models\Ability;
 use App\Models\Employee;
 use App\Models\Department;
 use Carbon\CarbonImmutable;
+use App\Models\StudentGroup;
 use App\Observers\StatusObserver;
 use Illuminate\Support\Facades\DB;
 use App\Observers\EmployeeObserver;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Observers\DepartmentObserver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\StudentGroupSchedules;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         Status::observe(StatusObserver::class);
         Employee::observe(EmployeeObserver::class);
         Department::observe(DepartmentObserver::class);
+        // StudentGroup::observe((StudentGroupSchedules::class));
 
 
         date_default_timezone_set('Asia/Gaza');
