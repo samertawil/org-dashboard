@@ -84,62 +84,7 @@
                 <flux:error name="cost_nis" />
             </flux:field>
             
-             {{-- Dates --}}
-            <flux:field>
-                <flux:label>{{ __('Start Date') }}</flux:label>
-                <flux:input type="date" wire:model="start_date" />
-                <flux:error name="start_date" />
-            </flux:field>
-
-            <flux:field>
-                <flux:label>{{ __('End Date') }}</flux:label>
-                <flux:input type="date" wire:model="end_date" />
-                <flux:error name="end_date" />
-            </flux:field>
-
-             {{-- Location Details Header --}}
-            <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mt-4 mb-2">
-                <flux:heading size="lg">{{ __('Location Details') }}</flux:heading>
-            </div>
-            
-            {{-- Region --}}
-            <flux:select wire:model.live="region_id" :label="__('Region')" placeholder="{{ __('Select Region') }}">
-                 <option value="">{{ __('Select Region') }}</option>
-                @foreach($regions as $region)
-                    <option value="{{ $region->id }}">{{ $region->region_name }}</option>
-                @endforeach
-            </flux:select>
-
-             {{-- City --}}
-            <flux:select wire:model.live="city_id" :label="__('City')" placeholder="{{ __('Select City') }}">
-                 <option value="">{{ __('Select City') }}</option>
-                @foreach($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->city_name }}</option>
-                @endforeach
-            </flux:select>
-            
-             {{-- Neighbourhood --}}
-            <flux:select wire:model="neighbourhood_id" :label="__('Neighbourhood')" placeholder="{{ __('Select Neighbourhood') }}">
-                 <option value="">{{ __('Select Neighbourhood') }}</option>
-                @foreach($neighbourhoods as $neighbourhood)
-                    <option value="{{ $neighbourhood->id }}">{{ $neighbourhood->name ?? 'Neighbourhood '.$neighbourhood->id }}</option>
-                @endforeach
-            </flux:select>
-
-             {{-- Location --}}
-            <flux:select wire:model="location_id" :label="__('Location')" placeholder="{{ __('Select Location') }}">
-                 <option value="">{{ __('Select Location') }}</option>
-                @foreach($locations as $location)
-                    <option value="{{ $location->id }}">{{ $location->name ?? 'Location '.$location->id }}</option>
-                @endforeach
-            </flux:select>
-
-            {{-- Address Details --}}
-             <flux:field class="md:col-span-2 lg:col-span-3">
-                <flux:label>{{ __('Address Details') }}</flux:label>
-                <flux:input type="text" wire:model="address_details" :placeholder="__('Enter address details')" />
-                <flux:error name="address_details" />
-            </flux:field>
+          
 
 
             {{-- Moderator Information Header --}}

@@ -103,7 +103,7 @@
              {{-- Notes --}}
              <flux:field class="md:col-span-2 lg:col-span-3">
                 <flux:label>{{ __('Notes') }}</flux:label>
-                <flux:textarea wire:model="notes" :placeholder="__('Enter notes')" />
+                <flux:textarea wire:model="notes" :placeholder="__('Enter notes')" spellcheck="true"  />
                 <flux:error name="notes" />
             </flux:field>
 

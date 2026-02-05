@@ -24,26 +24,6 @@ trait TeachingGroupTrait
     #[Validate('nullable|exists:student_groups,id')]
     public $student_groups_id = '';
 
-    #[Validate('nullable|exists:regions,id')]
-    public $region_id = '';
-
-    #[Validate('nullable|exists:cities,id')]
-    public $city_id = '';
-
-    #[Validate('nullable|exists:neighbourhoods,id')]
-    public $neighbourhood_id = '';
-
-    #[Validate('nullable|exists:locations,id')]
-    public $location_id = '';
-
-    #[Validate('nullable|string')]
-    public $address_details = '';
-
-    #[Validate('nullable|date')]
-    public $start_date = '';
-
-    #[Validate('nullable|date|after_or_equal:start_date')]
-    public $end_date = '';
 
     #[Validate('nullable|string')]
     public $Moderator = '';
@@ -74,10 +54,7 @@ trait TeachingGroupTrait
 
     public $activities = [];
     public $student_groups = [];
-    public $regions = [];
-    public $cities = [];
-    public $neighbourhoods = [];
-    public $locations = [];
+   
     public $statuses = [];
     public $activations = [];
     public $partners = [];
@@ -88,27 +65,10 @@ trait TeachingGroupTrait
             $this->$property = ucfirst($value);
         }
     }
-
-    public function updatedRegionId()
-    {
-        $this->city_id = '';
-        $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : collect();
-        $this->neighbourhood_id = '';
-        $this->neighbourhoods = collect();
-    }
-    
-     public function updatedCityId()
-    {
-        $this->neighbourhood_id = '';
-         $this->neighbourhoods = $this->city_id ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city_id) : collect();
-    }
+ 
 
     public function bootTeachingGroupTrait() {
-        $this->regions = RegionRepo::regions();
-        $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : collect();
-        $this->neighbourhoods = $this->city_id ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city_id) : collect();
-        
-        $this->locations = LocationRepo::locations();
+       
         $this->statuses = StatusRepo::statuses();
         $this->activations = GlobalSystemConstant::options()->where('type', 'status');
         

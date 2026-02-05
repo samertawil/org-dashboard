@@ -43,7 +43,7 @@ class ActivityReport extends Model
                 DB::raw("CASE WHEN EXISTS(SELECT 1 FROM activity_parcels WHERE activity_id = activities.id) THEN 'ADDED PARCELS' ELSE 'EMPTY PARCELS' END as parcels_status"),
                 DB::raw("CASE WHEN EXISTS(SELECT 1 FROM activity_beneficiaries WHERE activity_id = activities.id) THEN 'ADDED BENEFICIARIES' ELSE 'EMPTY BENEFICIARIES' END as beneficiaries_status"),
                 DB::raw("CASE WHEN EXISTS(SELECT 1 FROM activity_work_teams WHERE activity_id = activities.id) THEN 'ADDED WORK TEAMS' ELSE 'EMPTY WORK TEAMS' END as work_teams_status")
-            ])
+            ])->where('sector_id', '!=', 55)
             ->distinct();
     }
 

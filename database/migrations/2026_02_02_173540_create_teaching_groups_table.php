@@ -15,13 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->foreignId('activity_id')->constrained('activities')->onDelete('cascade');
-            $table->foreignId('region_id')->nullable()->constrained('regions')->nullOnDelete();
-            $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
-            $table->foreignId('neighbourhood_id')->nullable()->constrained('neighbourhoods')->nullOnDelete();
-            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $table->string('address_details')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
             $table->string('Moderator')->nullable();
             $table->string('Moderator_phone')->nullable();
             $table->string('Moderator_email')->nullable();

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\OrgApp\Student;
 
-use App\Models\Status;
+
 use App\Models\Student;
 use Livewire\Component;
 use App\Models\FeedBack;

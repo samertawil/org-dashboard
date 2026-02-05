@@ -6,8 +6,6 @@ use Livewire\Component;
 use App\Models\Activity;
 use Livewire\WithPagination;
 use App\Models\TeachingGroup;
-use App\Reposotries\CityRepo;
-use App\Reposotries\RegionRepo;
 use App\Reposotries\StatusRepo;
 use Livewire\Attributes\Computed;
 
@@ -16,9 +14,7 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
-    public $region_id = '';
-    public $city_id = '';
-    public $start_date = '';
+ 
     public $activity_id = '';
     public $status_id = '';
 
@@ -28,9 +24,7 @@ class Index extends Component
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'region_id' => ['except' => ''],
-        'city_id' => ['except' => ''],
-        'start_date' => ['except' => ''],
+    
         'activity_id' => ['except' => ''],
         'status_id' => ['except' => ''],
     ];
@@ -47,7 +41,7 @@ class Index extends Component
 
     public function updated($property)
     {
-        if (in_array($property, ['search', 'region_id', 'city_id', 'start_date', 'activity_id', 'status_id'])) {
+        if (in_array($property, ['search',  'activity_id', 'status_id'])) {
             $this->resetPage();
         }
     }
@@ -56,19 +50,11 @@ class Index extends Component
     public function groups()
     {
         return TeachingGroup::query()
-            ->with(['region', 'city', 'status', 'activity'])
+            ->with([ 'status', 'activity'])
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
             })
-            ->when($this->region_id, function ($q) {
-                $q->where('region_id', $this->region_id);
-            })
-            ->when($this->city_id, function ($q) {
-                $q->where('city_id', $this->city_id);
-            })
-            ->when($this->start_date, function ($q) {
-                $q->whereDate('start_date', $this->start_date);
-            })
+           
             ->when($this->activity_id, function ($q) {
                 $q->where('activity_id', $this->activity_id);
             })
@@ -89,8 +75,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.org-app.teaching-group.index', [
-            'regions' => RegionRepo::regions(),
-            'cities' => $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : CityRepo::cities(),
+         
             'activities' => Activity::all(),
             'statuses' => StatusRepo::statuses(),
         ]);

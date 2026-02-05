@@ -22,8 +22,23 @@ class StudentGroupSchedule extends Model
     'updated_by',
     'activation',
     'status_id',
+    'subject_to_learn_id',
     
    ];
+
+    protected $casts = [
+       'subject_to_learn_id' => 'array',
+    ];
+
+   public function studentGroup()
+   {
+       return $this->belongsTo(StudentGroup::class);
+   }
+
+   public function updatedBy()
+   {
+       return $this->belongsTo(User::class, 'updated_by');
+   }
    
    public function status()
    {

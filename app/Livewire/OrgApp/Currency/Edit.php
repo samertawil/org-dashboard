@@ -25,13 +25,14 @@ class Edit extends Component
     public function rules() 
     {
         return [
-            'exchange_date' => [
-                'required',
-                'date',
-                Rule::unique('currancy_values')->where(function ($query) {
-                    return $query->where('currency_value', $this->currency_value);
-                })->ignore($this->currency->id),
-            ],
+            // 'exchange_date' => [
+            //     'required',
+            //     'date',
+            //     Rule::unique('currancy_values')->where(function ($query) {
+            //         return $query->where('currency_value', $this->currency_value);
+            //     })->ignore($this->currency->id),
+            // ],
+            'exchange_date' => 'required|date|unique:currancy_values,exchange_date,'.$this->currency->id,
             'currency_value' => ['required', 'numeric'],
         ];
     }

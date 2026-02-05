@@ -17,13 +17,14 @@ class Create extends Component
     public function rules() 
     {
         return [
-            'exchange_date' => [
-                'required',
-                'date',
-                Rule::unique('currancy_values')->where(function ($query) {
-                    return $query->where('currency_value', $this->currency_value);
-                }),
-            ],
+            // 'exchange_date' => [
+            //     'required',
+            //     'date',
+            //     Rule::unique('currancy_values')->where(function ($query) {
+            //         return $query->where('currency_value', $this->currency_value);
+            //     }),
+            // ],
+            'exchange_date' => 'required|date|unique:currancy_values,exchange_date',
             'currency_value' => ['required', 'numeric'],
         ];
     }

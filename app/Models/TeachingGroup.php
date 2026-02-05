@@ -6,28 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class TeachingGroup extends Model
 {
-    protected $fillable = ['name', 'activity_id', 'region_id', 'city_id', 'neighbourhood_id', 'location_id', 'address_details', 'start_date', 'end_date', 'Moderator', 'Moderator_phone', 'Moderator_email', 'status', 'activation', 'cost_usd', 'cost_nis', 'partner_id', 'notes', 'created_by', 'updated_by','student_groups_id'];
+    protected $fillable = ['name', 'activity_id', 'Moderator', 'Moderator_phone', 'Moderator_email', 'status', 'activation', 'cost_usd', 'cost_nis', 'partner_id', 'notes', 'created_by', 'updated_by','student_groups_id'];
 
     public function activity()
     {
         return $this->belongsTo(Activity::class);
     }
-    public function region()
-    {
-        return $this->belongsTo(Region::class);
-    }
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
-    public function neighbourhood()
-    {
-        return $this->belongsTo(Neighbourhood::class);
-    }
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
+   
     public function status()
     {
         return $this->belongsTo(Status::class, 'status');

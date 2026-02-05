@@ -7,8 +7,8 @@ use Livewire\Component;
 use App\Models\Activity;
 use Livewire\Attributes\Lazy;
 use Illuminate\Support\Facades\Gate;
+use Barryvdh\DomPDF\Facade\Pdf;
 
-#[Lazy]
 class Show extends Component
 {
     public Activity $activity;
@@ -16,6 +16,19 @@ class Show extends Component
     public function mount(Activity $activity)
     {
         $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels', 'beneficiaries', 'workTeams']);
+    }
+
+    public function downloadPdf()
+    {
+        if(Gate::denies('activity.index')){
+            return abort(403,'You do not have the necessary permissions');
+        }
+
+        $pdf = Pdf::loadView('livewire.org-app.activity.pdf', ['activity' => $this->activity]);
+        
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'activity-report-' . $this->activity->id . '.pdf');
     }
 
     public function render()

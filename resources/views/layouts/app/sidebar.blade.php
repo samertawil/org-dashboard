@@ -5,13 +5,22 @@
     @include('partials.head')
 </head>
 
+@php
+    $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
+
+    $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
+@endphp
+
 <body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:sidebar sticky collapsible="mobile"
+    <flux:sidebar sticky stashable="false" :collapsible="true"
         class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header>
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-            <flux:sidebar.collapse class="lg:hidden" />
+            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
         </flux:sidebar.header>
+
+
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Platform')" class="grid">
@@ -57,16 +66,25 @@
                 @endcan
 
                 @canany(['currency.index', 'currency.create'])
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar" class="grid">
-                    <flux:sidebar.item icon="plus" :href="route('currency.create')" :current="request()->routeIs('currency.create')" wire:navigate>
-                        {{ __('Create Currency') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="list-bullet" :href="route('currency.index')" :current="request()->routeIs('currency.index')" wire:navigate>
-                        {{ __('Currency List') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            @endcanany
-            
+                    <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar"
+                        class="grid">
+                        @can('currency.create')
+                            
+                        <flux:sidebar.item icon="plus" :href="route('currency.create')"
+                            :current="request()->routeIs('currency.create')" wire:navigate>
+                            {{ __('Create Currency') }}
+                        </flux:sidebar.item>
+                        @endcan
+
+                        @can('currency.index')
+                        <flux:sidebar.item icon="list-bullet" :href="route('currency.index')"
+                            :current="request()->routeIs('currency.index')" wire:navigate>
+                            {{ __('Currency List') }}
+                        </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+                @endcanany
+
 
 
 
@@ -110,6 +128,10 @@
                     <flux:sidebar.item icon="list-bullet" :href="route('student.group.index')"
                         :current="request()->routeIs('student.group.index')" wire:navigate>
                         {{ __('Students Groups List') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" :href="route('reports.groups.attendance')"
+                        :current="request()->routeIs('reports.groups.attendance')" wire:navigate>
+                        {{ __('Groups Attendance') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
                 {{-- @endcan --}}
@@ -300,6 +322,39 @@
     </flux:header>
 
     {{ $slot }}
+
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            if (window.innerWidth < 1024) return;
+
+            const currentRoute = document.querySelector('meta[name="current-route"]')?.content;
+            const patterns = @json($routesToHibernate);
+
+            const matchPattern = (route, pattern) => {
+                if (!route) return false;
+                const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+                return regex.test(route);
+            };
+
+            const shouldHibernate = patterns.some(pattern => matchPattern(currentRoute, pattern));
+
+            if (shouldHibernate) {
+                setTimeout(() => {
+                    const toggleWrapper = document.getElementById('flux-sidebar-toggle-desktop');
+                    const sidebar = toggleWrapper?.closest('[data-flux-sidebar]');
+
+                    if (sidebar && !sidebar.hasAttribute('data-flux-sidebar-collapsed-desktop')) {
+                        const innerBtn = toggleWrapper?.querySelector('button');
+                        if (innerBtn) {
+                            innerBtn.click();
+                        } else {
+                            window.dispatchEvent(new CustomEvent('flux-sidebar-toggle'));
+                        }
+                    }
+                }, 100);
+            }
+        });
+    </script>
 
     @fluxScripts
 </body>

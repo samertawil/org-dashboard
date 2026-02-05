@@ -4,9 +4,14 @@
             <flux:heading level="1" size="xl">{{ __('Group Schedule') }}: {{ $group->name }}</flux:heading>
             <flux:subheading>{{ __('View schedule for this group.') }}</flux:subheading>
         </div>
-        <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="arrow-left">
-            {{ __('Back to Groups') }}
-        </flux:button>
+        <div class="flex gap-2">
+            <flux:button href="{{ route('student.group.report', $group) }}" wire:navigate variant="ghost" icon="document-text">
+                {{ __('View Report') }}
+            </flux:button>
+            <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="arrow-left">
+                {{ __('Back to Groups') }}
+            </flux:button>
+        </div>
     </div>
  
     <!-- Calendar Navigation -->
@@ -78,7 +83,7 @@
                                          @endif
                                          
                                          @if($schedule->name)
-                                             <div class="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate px-1">{{ $schedule->name }}</div>
+                                             <div class="text-[11px] font-medium text-red-700 dark:text-zinc-300 truncate px-1">{{ $schedule->name }}</div>
                                          @endif
                                     </div>
                                  @endif
@@ -139,7 +144,20 @@
                         <flux:input type="time" wire:model="edit_end_time" label="{{ __('End Time') }}" />
                      </div>
 
-                     <flux:textarea wire:model="edit_notes" label="{{ __('Notes') }}" />
+                  <div class="border"></div>
+
+                       
+                     <div class="space-y-3" x-show="!$wire.edit_is_off_day">
+                        <flux:label>{{ __('Subjects') }}</flux:label>
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach($group->subjects as $subject)
+                                <flux:checkbox wire:model="edit_subjects" value="{{ $subject->id }}" label="{{ $subject->name }}" />
+                            @endforeach
+                        </div>
+                     </div>
+
+                     <div class="border"></div>
+                     <flux:textarea rows="2" wire:model="edit_notes" label="{{ __('Notes') }}" />
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">

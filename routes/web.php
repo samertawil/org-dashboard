@@ -116,6 +116,8 @@ Route::get('/dashboard/student-group/create', StudentGroupCreate::class)->name('
 Route::get('/dashboard/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
 Route::get('/dashboard/student-group/{group}/schedule', StudentGroupSchedule::class)->name('student.group.schedule');
 Route::get('/dashboard/student-group/{group}/schedule/{date}/students', DailyStudents::class)->name('student.group.date.students');
+Route::get('/dashboard/student-group/{group}/report', \App\Livewire\OrgApp\StudentGroups\Report::class)->name('student.group.report');
+Route::get('/dashboard/reports/groups-attendance', \App\Livewire\OrgApp\Reports\GroupsAttendance::class)->name('reports.groups.attendance');
 
 Route::get('dashboard/student',StudentIndex::class)->name('student.index');
 Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('student.imported-files');
@@ -133,5 +135,7 @@ Route::get('dashboard/currency/{currency}/edit', CurrencyEdit::class)->name('cur
 Route::get('dashboard/learnin-subject/create',SubjectCreate::class)->name('subject.create');
 Route::get('dashboard/learnin-subject/{subject}/edit',SubjectEdit::class)->name('subject.edit');
 Route::get('dashboard/learnin-subject',SubjectIndex::class)->name('subject.index');
+ 
+Route::get('dashboard/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
  
 });

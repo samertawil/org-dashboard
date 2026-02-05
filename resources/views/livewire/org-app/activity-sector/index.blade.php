@@ -105,7 +105,7 @@
                                         <div class="flex flex-wrap gap-y-1 gap-x-2 text-md ">
 
                                             <span> </span>
-                                            <span>{{ $activity->regions->region_name ?? 'N/A' }}</span>
+                                            <span>{{ $activity->regions->region_name ?? 'N/A Location' }}</span>
                                             @if ($activity->cities->city_name ?? false)
                                                 <span> &nbsp; &bull; &nbsp; </span>
                                                 <span>{{ $activity->cities->city_name }}</span>
@@ -119,19 +119,19 @@
                                 @endphp
                                 <div class="flex gap-2">
                                     <flux:badge size="sm" inset="top bottom" color="zinc"
-                                        class="{{ ($report?->parcels_status ?? '') === 'ADDED PARCELS' ? '!text-green-600' : '!text-red-600' }}">
+                                        class="{{ ($report?->parcels_status ?? '') === 'ADDED PARCELS' ? '!text-green-600' : '' }}">
                                         {{ $report?->parcels_status ?? '' }}
                                     </flux:badge>
                                     <flux:badge size="sm" inset="top bottom" color="zinc"
-                                        class="{{ ($report?->beneficiaries_status ?? '') === 'ADDED BENEFICIARIES' ? '!text-green-600' : '!text-red-600' }}">
+                                        class="{{ ($report?->beneficiaries_status ?? '') === 'ADDED BENEFICIARIES' ? '!text-green-600' : '' }}">
                                         {{ $report?->beneficiaries_status ?? '' }}
                                     </flux:badge>
                                     <flux:badge size="sm" inset="top bottom" color="zinc"
-                                        class="{{ ($report?->work_teams_status ?? '') === 'ADDED WORK TEAMS' ? '!text-green-600' : '!text-red-600' }}">
+                                        class="{{ ($report?->work_teams_status ?? '') === 'ADDED WORK TEAMS' ? '!text-green-600' : '' }}">
                                         {{ $report?->work_teams_status ?? '' }}
                                     </flux:badge>
                                     <flux:badge size="sm" inset="top bottom" color="zinc"
-                                        class="{{ ($report?->attchemnts_status ?? '') === 'ADDED ATTCHMENTS' ? '!text-green-600' : '!text-red-600' }}">
+                                        class="{{ ($report?->attchemnts_status ?? '') === 'ADDED ATTCHMENTS' ? '!text-green-600' : '' }}">
                                         {{ $report?->attchemnts_status ?? '' }}
                                     </flux:badge>
                                 </div>

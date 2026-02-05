@@ -19,20 +19,7 @@
         <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <flux:input wire:model.live="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
 
-            <flux:select wire:model.live="region_id" placeholder="{{ __('Filter by Region') }}">
-                <option value="">{{ __('All Regions') }}</option>
-                @foreach($regions as $region)
-                    <option value="{{ $region->id }}">{{ $region->region_name }}</option>
-                @endforeach
-            </flux:select>
-
-            <flux:select wire:model.live="city_id" placeholder="{{ __('Filter by City') }}">
-                <option value="">{{ __('All Cities') }}</option>
-                @foreach($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->city_name }}</option>
-                @endforeach
-            </flux:select>
-
+          
             <flux:select wire:model.live="activity_id" placeholder="{{ __('Filter by Activity') }}">
                 <option value="">{{ __('All Activities') }}</option>
                 @foreach($activities as $activity)
@@ -49,9 +36,9 @@
 
             <flux:input type="date" wire:model.live="start_date" />
              
-             @if ($search || $region_id || $city_id || $activity_id || $status_id || $start_date)
+             @if ($search  || $activity_id || $status_id )
             <div class="flex items-center justify-end md:col-span-3 lg:col-span-4">
-                <flux:button wire:click="$set('search', ''); $set('region_id', ''); $set('city_id', ''); $set('activity_id', ''); $set('status_id', ''); $set('start_date', '');" variant="ghost" size="sm" icon="x-mark">
+                <flux:button wire:click="$set('search', ''); $set('activity_id', ''); $set('status_id', '');" variant="ghost" size="sm" icon="x-mark">
                     {{ __('Clear Filters') }}
                 </flux:button>
             </div>
@@ -96,18 +83,7 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Activity') }}
                         </th>
-                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Start Date') }}
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Region') }}
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('City') }}
-                        </th>
+                        
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Status') }}
@@ -127,15 +103,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->activity->name ?? '-' }}
                             </td>
-                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->start_date ? \Carbon\Carbon::parse($group->start_date)->format('Y-m-d') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->region->region_name ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->city->city_name ?? '-' }}
-                            </td>
+                        
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 {{ $group->getRelation('status')->name ?? ($group->getRelation('status')->status_name ?? '-') }}
                             </td>

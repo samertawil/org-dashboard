@@ -5,8 +5,8 @@
 @if($sidebar)
     <flux:sidebar.brand name="American Friends Service Committee" {{ $attributes }}>
 
-        <x-slot name="logo" class="flex aspect-square size-10 items-center justify-center rounded-md">
-            <img src="{{ asset('logo.png') }}" alt="logo" />
+        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md">
+            <img src="{{ asset('logo2.png') }}" alt="logo" />
         </x-slot>
     </flux:sidebar.brand>
    

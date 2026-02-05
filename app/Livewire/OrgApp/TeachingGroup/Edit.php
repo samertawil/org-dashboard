@@ -27,15 +27,7 @@ class Edit extends Component
         $this->name = $group->name;
         $this->activity_id = $group->activity_id;
         $this->student_groups_id = $group->student_groups_id;
-        $this->region_id = $group->region_id;
-        $this->updatedRegionId(); 
-        $this->city_id = $group->city_id;
-        $this->updatedCityId(); 
-        $this->neighbourhood_id = $group->neighbourhood_id;
-        $this->location_id = $group->location_id;
-        $this->address_details = $group->address_details;
-        $this->start_date = $group->start_date;
-        $this->end_date = $group->end_date;
+       
         $this->Moderator = $group->Moderator;
         $this->Moderator_phone = $group->Moderator_phone;
         $this->Moderator_email = $group->Moderator_email;
@@ -55,16 +47,10 @@ class Edit extends Component
             'name' => ucfirst($this->name),
             'activity_id' => $this->activity_id,
             'student_groups_id' => $this->student_groups_id ?: null,
-            'region_id' => $this->region_id ?: null,
-            'city_id' => $this->city_id ?: null,
-            'neighbourhood_id' => $this->neighbourhood_id ?: null,
-            'location_id' => $this->location_id ?: null,
-            'address_details' => $this->address_details,
-            'start_date' => $this->start_date ?: null,
-            'end_date' => $this->end_date ?: null,
-            'Moderator' => ucfirst($this->Moderator),
-            'Moderator_phone' => $this->Moderator_phone,
-            'Moderator_email' => $this->Moderator_email,
+          
+            'Moderator' => ucfirst($this->Moderator)?: null,
+            'Moderator_phone' => $this->Moderator_phone?: null,
+            'Moderator_email' => $this->Moderator_email?: null,
             'status' => $this->status ?: null,
             'activation' => $this->activation,
             'cost_usd' => $this->cost_usd,
@@ -84,10 +70,7 @@ class Edit extends Component
         return view('livewire.org-app.teaching-group.edit', [
             'heading' => __('Edit Teaching Group'),
             'type' => 'save',
-            'regions' => $this->regions,
-            'cities' => $this->cities,
-            'neighbourhoods' => $this->neighbourhoods,
-            'locations' => $this->locations,
+
             'activities' => $this->activities,
             'student_groups' => $this->student_groups,
             'partners' => $this->partners,

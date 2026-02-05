@@ -80,4 +80,9 @@ class StudentGroup extends Model
         }
         return StudentSubjectForLearn::whereIn('id', $ids)->get();
     }
+
+    public function dailyAttendances()
+    {
+        return $this->hasMany(StudentDailyAttendance::class);
+    }
 }

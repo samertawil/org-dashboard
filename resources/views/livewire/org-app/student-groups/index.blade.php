@@ -145,6 +145,8 @@
                                 <div class="flex items-center justify-end gap-2">
                                     <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate
                                         variant="ghost" size="sm" icon="calendar" title="{{ __('Schedule') }}" />
+                                    <flux:button href="https://www.google.com/maps/search/?api=1&query={{ $group->region->region_name ?? '' }} {{ $group->city->city_name ?? '' }} {{ $group->neighbourhood->name ?? '' }} Gaza Strip" 
+                                        target="_blank" variant="ghost" size="sm" icon="map-pin" title="{{ __('View Map') }}" />
                                     <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
                                     <flux:button wire:click="delete({{ $group->id }})"

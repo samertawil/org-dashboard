@@ -19,10 +19,10 @@ trait FormTrait
     public $end_date = '';
 
     #[Validate('nullable|numeric|min:0')]
-    public $cost = null;
+    public $cost = 0;
 
     #[Validate('nullable|numeric|min:0')]
-    public $cost_nis = null;
+    public $cost_nis = 0;
 
     #[Validate('nullable|exists:statuses,id')]
     public $status = null;
@@ -150,17 +150,11 @@ trait FormTrait
         $count = count(TeachingGroup::get()) + 1;
         
         $this->teaching_groups[] = [
-            'name' => "TeachingGroup #{$count}",
-            'region_id' => null,
-            'city_id' => null,
-            'neighbourhood_id' => null,
-            'location_id' => null,
-            'address_details' => '',
-            'start_date' => $this->start_date ?? date('Y-m-d'),
-            'end_date' => $this->end_date ?? null,
-            'Moderator' => '',
-            'Moderator_phone' => '',
-            'Moderator_email' => '',
+            'name' => "Teaching Point #{$count}",
+          
+            'Moderator' => null,
+            'Moderator_phone' => null,
+            'Moderator_email' => null,
             'status' => null,
             'activation' => 1,
             'cost_usd' => 0.00,
@@ -185,16 +179,7 @@ trait FormTrait
         $index = $parts[0];
         $field = $parts[1];
 
-        if ($field === 'region_id') {
-            $this->teaching_groups[$index]['city_id'] = null;
-            $this->teaching_groups[$index]['neighbourhood_id'] = null;
-            $this->teaching_groups[$index]['location_id'] = null;
-        } elseif ($field === 'city_id') {
-            $this->teaching_groups[$index]['neighbourhood_id'] = null;
-            $this->teaching_groups[$index]['location_id'] = null;
-        } elseif ($field === 'neighbourhood_id') {
-            $this->teaching_groups[$index]['location_id'] = null;
-        }
+        
     }
 
     #[Computed()]

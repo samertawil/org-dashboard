@@ -42,6 +42,7 @@ class ShowSchedule extends Component
     public $edit_is_off_day;
     public $edit_notes;
     public $edit_date;
+    public $edit_subjects = []; // Array of subject IDs
 
     public function editSchedule($scheduleId)
     {
@@ -55,6 +56,11 @@ class ShowSchedule extends Component
         $this->edit_notes = $schedule->notes;
         $this->edit_date = Carbon::parse($schedule->schedule_date)->format('Y-m-d');
         
+        // Load subjects or default to group subjects if empty? 
+        // User requested: "The field ... is the subjects supposed to be learned ... The group is created with default subjects ... required to add these subjects to student_group_schedules"
+        // So we should probably default to existing schedule subjects, or empty if none.
+        $this->edit_subjects = $schedule->subject_to_learn_id ?? [];
+        
         $this->showEditModal = true;
     }
 
@@ -62,6 +68,7 @@ class ShowSchedule extends Component
     {
         $rules = [
             'edit_notes' => 'nullable|string|max:255',
+            'edit_subjects' => 'nullable|array',
         ];
 
         // Only validate times if it is NOT an off day
@@ -88,6 +95,7 @@ class ShowSchedule extends Component
             'is_off_day' => (int) $this->edit_is_off_day,
             'notes' => $this->edit_notes,
             'hours' => $hours,
+            'subject_to_learn_id' => $this->edit_subjects,
         ]);
 
         $this->showEditModal = false;
@@ -189,7 +197,7 @@ class ShowSchedule extends Component
              ];
              $currentDate->addDay();
         }
-
+ 
         return view('livewire.org-app.student-groups.student-group-schedule', [
             'calendar' => $calendar,
             'currentMonthName' => $startOfMonth->format('F Y'),

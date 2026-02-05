@@ -62,7 +62,7 @@ class Student extends Model
 
     public function studentGroup()
     {
-        return $this->belongsTo(StudentGroup::class);
+        return $this->belongsTo(StudentGroup::class,'student_groups_id');
     }
 
     public function creator()
@@ -82,5 +82,10 @@ class Student extends Model
     public function feedbacks()
     {
         return $this->hasMany(FeedBack::class);
+    }
+
+    public function dailyAttendances()
+    {
+        return $this->hasMany(StudentDailyAttendance::class);
     }
 }

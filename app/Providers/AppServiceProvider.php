@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use App\Models\StudentGroup;
 use App\Observers\StatusObserver;
 use Illuminate\Support\Facades\DB;
+use App\Observers\AbilitieObserver;
 use App\Observers\EmployeeObserver;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Status::observe(StatusObserver::class);
         Employee::observe(EmployeeObserver::class);
         Department::observe(DepartmentObserver::class);
+        Ability::observe(AbilitieObserver::class);
         // StudentGroup::observe((StudentGroupSchedules::class));
 
 

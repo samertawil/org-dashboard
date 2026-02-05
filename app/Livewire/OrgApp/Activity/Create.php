@@ -6,18 +6,19 @@ use Carbon\Carbon;
 use App\Models\Status;
 use Livewire\Component;
 use App\Models\Activity;
+use App\Models\StudentGroup;
+use App\Models\CurrancyValue;
 use App\Reposotries\CityRepo;
 use App\Reposotries\RegionRepo;
 use App\Reposotries\employeeRepo;
 use App\Reposotries\LocationRepo;
 use Livewire\Attributes\Validate;
+use App\Models\PartnerInstitution;
 use Illuminate\Support\Facades\DB;
 use App\Enums\GlobalSystemConstant;
 use App\Concerns\Activity\FormTrait;
 use Illuminate\Support\Facades\Gate;
 use App\Reposotries\NeighbourhoodRepo;
-use App\Models\PartnerInstitution;
-use App\Models\StudentGroup;
 
 
 class Create extends Component
@@ -38,6 +39,17 @@ class Create extends Component
         $this->addFeedback();
     }
 
+    public function updatedCost() {
+        $currencyValue = CurrancyValue::latest('exchange_date')->first();
+        $this->cost_nis = $this->cost * $currencyValue->currency_value;
+    }
+
+    public function updatedCostNis() {
+        $currencyValue = CurrancyValue::latest('exchange_date')->first();
+        $this->cost = $this->cost_nis / $currencyValue->currency_value;
+        $this->cost = round($this->cost, 2);
+
+    }
   
     public function save()
     {
@@ -98,8 +110,7 @@ class Create extends Component
                 foreach ($this->teaching_groups as $group) {
                     if ($group['name']) {
                         // Ensure dates are null if empty
-                        $group['start_date'] = $group['start_date'] ?: null;
-                        $group['end_date'] = $group['end_date'] ?: null;
+                    
 
                         $project->teachingGroups()->create(array_merge($group, [
                             'created_by' => auth()->id(),

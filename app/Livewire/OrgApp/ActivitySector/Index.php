@@ -106,8 +106,7 @@ class Index extends Component
 
     public function render()
     {
-        //    $activityReport = ActivityReport::getReport() ;
-        // dd( $activityReport);
+        
         if(Gate::denies('activity.index')){
             return abort(403,'You do not have the necessary permissions');
         }

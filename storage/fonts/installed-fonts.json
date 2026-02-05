@@ -1,0 +1,11 @@
+{
+    "cairo": {
+        "normal": "C:\\xampp\\htdocs\\feras\\org-dashboard\\storage\\fonts\/cairo_normal_4ca571ee8ad37cad60a1aa38c537bc53",
+        "600": "C:\\xampp\\htdocs\\feras\\org-dashboard\\storage\\fonts\/cairo_600_dc01825879fa79a7c51dfcd1e797822b",
+        "bold": "cairo_bold_6bf80f6a4bc8bc1ed75948faa854dedb"
+    },
+    "amiri": {
+        "normal": "C:\\xampp\\htdocs\\feras\\org-dashboard\\storage\\fonts\/amiri_normal_ad0b66a287d29ae69a748be4fdb88786",
+        "bold": "amiri_bold_29a580797db49c04bb13142539f7c32e"
+    }
+}
