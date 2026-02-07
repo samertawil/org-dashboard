@@ -20,13 +20,24 @@
 
     {{-- Search and Table Section --}}
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-zinc-200 dark:border-zinc-700">
+        <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 relative">
             <flux:input 
                 wire:model.live="search" 
-                :placeholder="__('Search by name or employee number...')" 
+                :placeholder="__('Search by name, employee number or department...')" 
                 icon="magnifying-glass"
             />
+            <div wire:loading wire:target="search" class="absolute right-6 top-1/2 -translate-y-1/2">
+                <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+            </div>
         </div>
+
+        @if ($search)
+            <div class="p-4 flex items-center justify-end border-b border-zinc-200 dark:border-zinc-700">
+                <flux:button wire:click="$set('search', '');" variant="ghost" size="sm" icon="x-mark">
+                    {{ __('Clear Filters') }}
+                </flux:button>
+            </div>
+        @endif
 
         <div class="overflow-x-auto">
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">

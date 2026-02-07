@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('partner_institutions', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->uniqid;
+            $table->string('name')->unique();
             $table->string('manager_name')->nullable();
           
             $table->string('location')->nullable();

@@ -11,7 +11,7 @@ class NeighbourhoodRepo
     public static function neighbourhoods()
     {
        return Cache::rememberForever('Neighbourhood-all', function () {
-            return Neighbourhood::get();
+            return Neighbourhood::select('id', 'neighbourhood_name', 'city_id')->get();
         });
     }
 }

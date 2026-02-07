@@ -17,7 +17,7 @@ class Create extends Component
     public $location = '';
 
     #[Validate('nullable|string')]
-    public $description = '';
+    public $description = null;
 
     public function save()
     {
@@ -26,7 +26,7 @@ class Create extends Component
         Department::create([
             'name' => $this->name,
             'location' => $this->location,
-            'description' => $this->description,
+            'description' => $this->description?:null,
         ]);
 
         session()->flash('message', __('Department successfully created.'));

@@ -68,6 +68,15 @@
                     x-bind:class="activeTab === 'teams' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
                 {{ __('Teams') }}
             </button>
+
+            <button @click="activeTab = 'feedback'"
+                :class="activeTab === 'feedback' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
+                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
+                <flux:icon icon="chat-bubble-left-right" class="mr-2 h-5 w-5"
+                    x-bind:class="activeTab === 'feedback' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                {{ __('Feed Back') }}
+            </button>
         </nav>
     </div>
 
@@ -81,15 +90,25 @@
                 
                 <flux:card class="space-y-4 h-fit">
                     <flux:heading size="md" class="text-left border-b border-zinc-100 dark:border-zinc-700 pb-3">
-                        {{ __('Activity Over view') }}</flux:heading>
+                        {{ __('Activity Overview') }}</flux:heading>
 
                     <div class="flex flex-col gap-4">
+
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-zinc-500">{{ __('Activity Name') }}</span>
                             <div class="flex items-center gap-2">
 
                                 <span
                                     class="text-xs font-medium text-zinc-900 dark:text-zinc-100">{{ $activity->name ?? __('Unknown') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-zinc-500">{{ __('Sector Name') }}</span>
+                            <div class="flex items-center gap-2">
+
+                                <span
+                                    class="text-xs font-medium text-zinc-900 dark:text-zinc-100">{{ $activity->statusSpecificSector->status_name ?? __('Unknown') }}</span>
                             </div>
                         </div>
 
@@ -378,6 +397,61 @@
                         </h3>
                         <p class="text-xs text-zinc-500 mt-1">
                             {{ __('There are no work teams currently assigned to this activity.') }}</p>
+                    </div>
+                @endif
+            </flux:card>
+        </div>
+
+        {{-- Feedback Tab --}}
+        <div x-show="activeTab === 'feedback'" class="print:block print:mt-4" style="display: none;">
+            <flux:card>
+                <flux:heading size="lg" class="mb-6">{{ __('Activity Feedback') }}</flux:heading>
+
+                @if ($activity->feedbacks->count() > 0)
+                    <div class="space-y-4">
+                        @foreach ($activity->feedbacks as $feedback)
+                            <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <flux:avatar src="" name="{{ $feedback->student->full_name ?? ($feedback->client_name ?? '?') }}" />
+                                        <div>
+                                            <div class="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                                                {{ $feedback->student->full_name ?? ($feedback->client_name ?? __('Anonymous')) }}
+                                            </div>
+                                            <div class="text-xs text-zinc-500">
+                                                {{ $feedback->created_at->format('M d, Y H:i') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
+                                        <flux:icon icon="star" variant="solid" class="w-4 h-4 text-amber-500" />
+                                        <span class="text-sm font-bold text-amber-700 dark:text-amber-400">{{ number_format($feedback->rating, 1) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 pl-[3.25rem]">
+                                    @if($feedback->feedbackTypeStatus)
+                                        <div class="mb-2">
+                                            <span class="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/10">
+                                                {{ $feedback->feedbackTypeStatus->status_name }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                    
+                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                                        {{ $feedback->comment }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-12">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-3">
+                            <flux:icon icon="chat-bubble-left-right" class="w-6 h-6 text-zinc-400" />
+                        </div>
+                        <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ __('No feedback yet') }}</h3>
+                        <p class="text-xs text-zinc-500 mt-1">{{ __('There are no feedbacks recorded for this activity.') }}</p>
                     </div>
                 @endif
             </flux:card>

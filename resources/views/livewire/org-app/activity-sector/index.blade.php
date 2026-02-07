@@ -20,9 +20,20 @@
         {{-- Left Sidebar: Sectors --}}
 
         <div class="me-10 w-full pb-4 md:w-[220px] shrink-0">
-            <div class="mb-4">
-                <flux:input wire:model.live="search" icon="magnifying-glass" placeholder="Search..." />
+            <div class="mb-4 relative">
+                <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search..." />
+                <div wire:loading wire:target="search" class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
             </div>
+
+            @if ($search)
+                <div class="mb-4">
+                    <flux:button wire:click="$set('search', '');" variant="ghost" size="sm" icon="x-mark" class="w-full justify-center">
+                        {{ __('Clear Filters') }}
+                    </flux:button>
+                </div>
+            @endif
 
             <flux:navlist>
                 @forelse ($this->sectors as $sector)

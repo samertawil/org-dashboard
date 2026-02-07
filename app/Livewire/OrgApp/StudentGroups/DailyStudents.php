@@ -68,6 +68,7 @@ class DailyStudents extends Component
         if ($dayOfWeek === 4) { $enrollmentTypes[] = 'sun_tue_thu'; } // Thursday
 
         return $this->group->students()
+            ->select('students.id', 'full_name', 'identity_number', 'enrollment_type', 'students.activation')
             ->whereIn('enrollment_type', $enrollmentTypes)
             ->get();
     }

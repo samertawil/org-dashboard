@@ -21,11 +21,13 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {{-- Search by Name --}}
-            <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by ability Name')" type="text"
-                :placeholder="__('Search ability name...')" icon="magnifying-glass" />
-
-
-
+            <div class="relative">
+                <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by ability Name')" type="text"
+                    :placeholder="__('Search ability name...')" icon="magnifying-glass" />
+                <div wire:loading wire:target="search" class="absolute right-3 top-[2.4rem]">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
         </div>
 
         {{-- Clear Filters --}}

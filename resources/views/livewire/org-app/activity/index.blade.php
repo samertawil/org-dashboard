@@ -18,9 +18,12 @@
         class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             {{-- Name Search --}}
-            <flux:field>
+            <flux:field class="relative">
                 <flux:label>{{ __('Activity Name') }}</flux:label>
-                <flux:input wire:model.live="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
+                <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
+                <div wire:loading wire:target="search" class="absolute right-3 bottom-2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
             </flux:field>
 
             {{-- Start Date --}}
@@ -94,11 +97,11 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Region/City') }}
                         </th>
-
+{{-- 
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Rating') }}
-                        </th>
+                        </th> --}}
 
                         <th scope="col"
                             class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -143,13 +146,13 @@
                                 {{ $activity->regions->region_name ?? '-' }} /
                                 {{ $activity->cities->city_name ?? '-' }}
                             </td>
-
+{{-- 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 <div class="flex items-center gap-1">
                                     <flux:icon icon="star" variant="solid" class="{{ $activity->rating_info['color'] }} w-4 h-4" />
                                     <span>{{ $activity->rating_info['rating'] }}</span>
                                 </div>
-                            </td>
+                            </td> --}}
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
@@ -158,7 +161,7 @@
                                     <flux:button wire:click="delete({{ $activity->id }})"
                                         wire:confirm="{{ __('Are you sure you want to delete this activity?') }}"
                                         variant="ghost" size="sm" icon="trash"
-                                        class="text-red-500 hover:text-red-600" />
+                                        class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                                     @php $modalName = 'activity-show-' . $activity->id; @endphp
 
                                     <flux:modal.trigger :name="$modalName">
@@ -201,12 +204,15 @@
             </table>
         </div>
 
-        <flux:modal name="activity-attachments" class="md:w-[600px]">
+        <flux:modal name="activity-attachments" class="w-full md:w-[600px]">
             <div class="space-y-6">
                 <flux:heading level="2" size="lg">{{ __('Attachments For') }}:
                     {{ $selectedactivity?->name }}</flux:heading>
 
                 @if ($selectedactivity)
+                    <div class="mb-4">
+                        <x-auth-session-status class="text-center" :status="session('message')" />
+                    </div>
                     {{-- Existing Attachments --}}
                     <div class="space-y-2">
                         <flux:heading size="md">{{ __('Existing Files') }}</flux:heading>
@@ -232,7 +238,8 @@
                                             target="_blank" variant="ghost" size="sm" icon="eye" />
                                         <flux:button wire:click="deleteAttachment({{ $attachment['id'] }})"
                                             wire:confirm="Are you sure?" variant="ghost" size="sm"
-                                            icon="trash" class="text-red-500" />
+                                            wire:loading.attr="disabled"
+                                            icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                                     </div>
                                 </div>
                             @endforeach
@@ -243,7 +250,7 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <flux:heading size="md">{{ __('Upload New') }}</flux:heading>
-                            <flux:button wire:click="addAttachment" variant="ghost" size="sm" icon="plus" />
+                            <flux:button wire:click="addAttachment" variant="ghost" size="sm" icon="plus" wire:loading.attr="disabled" />
                         </div>
 
                         @foreach ($newAttachments as $index => $item)
@@ -262,15 +269,16 @@
                                     <flux:input wire:model="newAttachments.{{ $index }}.notes"
                                         :label="__('Notes')" class="flex-1" />
                                     <flux:button wire:click="removeNewAttachment({{ $index }})"
-                                        variant="ghost" icon="trash" class="text-red-500" />
+                                        variant="ghost" icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                                 </div>
                             </div>
                         @endforeach
 
                         @if (!empty($newAttachments))
                             <div class="flex justify-end">
-                                <flux:button wire:click="saveAttachments" variant="primary" icon="cloud-arrow-up">
-                                    {{ __('Save All New Files') }}
+                                <flux:button wire:click="saveAttachments" variant="primary" icon="cloud-arrow-up" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="saveAttachments">{{ __('Save All New Files') }}</span>
+                                    <span wire:loading wire:target="saveAttachments">{{ __('Saving...') }}</span>
                                 </flux:button>
                             </div>
                         @endif

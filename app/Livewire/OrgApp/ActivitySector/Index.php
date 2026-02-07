@@ -4,11 +4,9 @@ namespace App\Livewire\OrgApp\ActivitySector;
 
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\ActivityParcel;
 use App\Models\ActivityReport;
 use App\Models\ActivitiesSector;
 use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
@@ -79,7 +77,7 @@ class Index extends Component
         return Activity::where('sector_id', $this->selectedSectorId)
             ->whereMonth('start_date', $month)
             ->whereYear('start_date', $year)
-            ->with(['parcels', 'regions', 'activityStatus', 'cities', 'activityNeighbourhood', 'activityLocation'])
+            ->with(['parcels.parcelType', 'regions', 'activityStatus', 'cities', 'activityNeighbourhood', 'activityLocation'])
             ->latest('start_date')
             ->get();
     }
@@ -110,8 +108,27 @@ class Index extends Component
         if(Gate::denies('activity.index')){
             return abort(403,'You do not have the necessary permissions');
         }
+
+        $activityReport = collect();
+
+        if ($this->selectedSectorId && $this->selectedSectorDate) {
+            try {
+                $date = \Carbon\Carbon::createFromFormat('!m/Y', $this->selectedSectorDate);
+                $month = $date->month;
+                $year = $date->year;
+
+                $activityReport = ActivityReport::report()
+                    ->where('sector_id', $this->selectedSectorId)
+                    ->whereMonth('start_date', $month)
+                    ->whereYear('start_date', $year)
+                    ->get();
+            } catch (\Exception $e) {
+                // handle error or leave empty
+            }
+        }
+
         return view('livewire.org-app.activity-sector.index',[
-            'activityReport'=>ActivityReport::getReport(),
+            'activityReport' => $activityReport,
         ]);
     }
 }

@@ -31,8 +31,13 @@ class Index extends Component
             abort(403, 'You do not have the necessary permissions');
         }
         $employees = Employee::with(['department', 'positionStatus'])
-            ->where('full_name', 'like', '%' . $this->search . '%')
-            ->orWhere('employee_number', 'like', '%' . $this->search . '%')
+            ->where(function($query) {
+                $query->where('full_name', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('department', function($q) {
+                        $q->where('name', 'like', '%' . $this->search . '%');
+                    })
+                    ->orWhere('employee_number', 'like', '%' . $this->search . '%');
+            })
             ->latest()
             ->paginate(10);
 

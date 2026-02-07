@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Appsetting\RoleModuleName;
+namespace App\Livewire\AppSetting\RoleModuleName;
 
 use Livewire\Component;
 use App\Models\ModuleName;

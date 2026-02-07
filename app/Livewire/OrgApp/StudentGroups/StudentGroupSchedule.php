@@ -144,10 +144,6 @@ class StudentGroupSchedule extends Component
         $groupStartDate = $this->group->start_date ? Carbon::parse($this->group->start_date)->format('Y-m-d') : null;
         $groupEndDate = $this->group->end_date ? Carbon::parse($this->group->end_date)->format('Y-m-d') : null;
         
-        dd($studentCounts, $groupStartDate, $groupEndDate, $this->year, $this->month);
-        
-        // dd($studentCounts, $groupStartDate, $groupEndDate);
-
         // Generate calendar grid
         $startDayOfWeek = $startOfMonth->dayOfWeek;
         

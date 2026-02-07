@@ -11,7 +11,7 @@ class DepartmentRepo
     public static function departments()
     {
        return Cache::rememberForever('Department-all', function () {
-            return Department::get();
+            return Department::select('id', 'name')->get();
         });
     }
 }

@@ -10,7 +10,7 @@ class AbilityRepo
     public static function Abilities()
     {
         return Cache::rememberForever('Abilities-all', function () {
-            return Ability::get();
+            return Ability::select('id', 'name', 'title')->get();
         });
     }
 }

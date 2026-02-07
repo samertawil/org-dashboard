@@ -261,8 +261,9 @@
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">
-                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}">
-                    {{ $heading }}
+                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
+                    <span wire:loading.remove>{{ $heading }}</span>
+                    <span wire:loading>{{ __('Saving...') }}</span>
                 </flux:button>
             </div>
             @include('layouts._show_all_input_error')

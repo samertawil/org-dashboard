@@ -20,7 +20,7 @@
 
             {{-- Basic Information Header --}}
             <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-2">
-                <flux:heading size="lg" class="text-blue-600">{{ __('Basic Information') }}</flux:heading>
+                <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Basic Information') }}</flux:heading>
             </div>
 
             {{-- activity Name --}}
@@ -45,13 +45,13 @@
 
             {{-- Cost --}}
             <flux:field>
-                <flux:label  >{{ __('Tottal Cost USD') }}</flux:label>
+                <flux:label>{{ __('Tottal Cost USD') }}</flux:label>
                 <flux:input type="number" step="0.01" wire:model.live.lazy="cost" :placeholder="0.0" />
                 <flux:error name="cost" />
             </flux:field>
 
             <flux:field>
-                <flux:label >{{ __('Tottal Cost NIS') }}</flux:label>
+                <flux:label>{{ __('Tottal Cost NIS') }}</flux:label>
                 <flux:input type="number" step="0.01" wire:model.live.lazy="cost_nis" :placeholder="0.0" />
                 <flux:error name="cost_nis" />
             </flux:field>
@@ -94,224 +94,228 @@
 
             </flux:field>
 
-       
+
             {{-- Location Information Header --}}
             @if ($sector_id != 55)
-            <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mt-4 mb-2">
-                <flux:heading size="lg" class="text-blue-600">{{ __('Location Details') }}</flux:heading>
-            </div>
+                <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mt-4 mb-2">
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Location Details') }}</flux:heading>
+                </div>
 
-            {{-- Region --}}
-            <flux:select wire:model.live="region" :label="__('Region')">
-                <option value="">{{ __('Select Region') }}</option>
-                @foreach ($regions as $r)
-                    <option value="{{ $r->id }}">{{ $r->region_name }}</option>
-                @endforeach
-            </flux:select>
-            <flux:error name="region" />
+                {{-- Region --}}
+                <flux:select wire:model.live="region" :label="__('Region')">
+                    <option value="">{{ __('Select Region') }}</option>
+                    @foreach ($regions as $r)
+                        <option value="{{ $r->id }}">{{ $r->region_name }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:error name="region" />
 
-            {{-- City --}}
-            <flux:select wire:model.live="city" :label="__('City')" :disabled="!$region">
-                <option value="">{{ __('Select City') }}</option>
-                @foreach ($cities as $c)
-                    <option value="{{ $c->id }}">{{ $c->city_name }}</option>
-                @endforeach
-            </flux:select>
-            <flux:error name="city" />
+                {{-- City --}}
+                <flux:select wire:model.live="city" :label="__('City')" :disabled="!$region">
+                    <option value="">{{ __('Select City') }}</option>
+                    @foreach ($cities as $c)
+                        <option value="{{ $c->id }}">{{ $c->city_name }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:error name="city" />
 
-            {{-- Neighbourhood --}}
-            <flux:select wire:model.live="neighbourhood" :label="__('Neighbourhood')" :disabled="!$city">
-                <option value="">{{ __('Select Neighbourhood') }}</option>
-                @foreach ($neighbourhoods as $n)
-                    <option value="{{ $n->id }}">{{ $n->neighbourhood_name }}</option>
-                @endforeach
-            </flux:select>
-            <flux:error name="neighbourhood" />
+                {{-- Neighbourhood --}}
+                <flux:select wire:model.live="neighbourhood" :label="__('Neighbourhood')" :disabled="!$city">
+                    <option value="">{{ __('Select Neighbourhood') }}</option>
+                    @foreach ($neighbourhoods as $n)
+                        <option value="{{ $n->id }}">{{ $n->neighbourhood_name }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:error name="neighbourhood" />
 
-            {{-- Location --}}
-            <flux:select wire:model.live="location" :label="__('Location')" :disabled="!$neighbourhood">
-                <option value="">{{ __('Select Location') }}</option>
-                @foreach ($locations as $l)
-                    <option value="{{ $l->id }}">{{ $l->location_name }}</option>
-                @endforeach
-            </flux:select>
-            <flux:error name="location" />
+                {{-- Location --}}
+                <flux:select wire:model.live="location" :label="__('Location')" :disabled="!$neighbourhood">
+                    <option value="">{{ __('Select Location') }}</option>
+                    @foreach ($locations as $l)
+                        <option value="{{ $l->id }}">{{ $l->location_name }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:error name="location" />
 
-            {{-- Address Details --}}
-            <div class="md:col-span-2 lg:col-span-2">
-                <flux:field>
-                    <flux:label>{{ __('Address Details') }}</flux:label>
-                    <flux:input type="text" wire:model="address_details"
-                        :placeholder="__('E.g. Building number, street name...')" />
-                    <flux:error name="address_details" />
-                </flux:field>
-            </div>
+                {{-- Address Details --}}
+                <div class="md:col-span-2 lg:col-span-2">
+                    <flux:field>
+                        <flux:label>{{ __('Address Details') }}</flux:label>
+                        <flux:input type="text" wire:model="address_details"
+                            :placeholder="__('E.g. Building number, street name...')" />
+                        <flux:error name="address_details" />
+                    </flux:field>
+                </div>
             @endif
 
             {{-- Parcels Section --}}
             @if ($sector_id != 55)
-            <div class="md:col-span-2 lg:col-span-3">
-                <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600">{{ __('Parcels') }}</flux:heading>
-                    <flux:button wire:click="addParcel" variant="ghost" icon="plus" size="sm">
-                        {{ __('Add Parcel') }}</flux:button>
-                </div>
+                <div class="md:col-span-2 lg:col-span-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Parcels') }}</flux:heading>
+                        <flux:button wire:click="addParcel" variant="ghost" icon="plus" size="sm">
+                            {{ __('Add Parcel') }}</flux:button>
+                    </div>
 
-                <div class="space-y-4">
-                    @foreach ($parcels as $index => $parcel)
-                        <div wire:key="parcel-{{ $index }}"
-                            class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 relative">
-                            <flux:select wire:model="parcels.{{ $index }}.parcel_type"
-                                :label="__('Parcel Type')">
-                                <option value="">{{ __('Select') }}</option>
-                                @if ($this->sector_id)
-                                    @foreach ($this->allStatuses->where('p_id_sub', $this->sector_id) as $s)
-                                        <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                                    @endforeach
-                                @endif
+                    <div class="space-y-4">
+                        @foreach ($parcels as $index => $parcel)
+                            <div wire:key="parcel-{{ $index }}"
+                                class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 relative">
+                                <flux:select wire:model="parcels.{{ $index }}.parcel_type"
+                                    :label="__('Parcel Type')">
+                                    <option value="">{{ __('Select') }}</option>
+                                    @if ($this->sector_id)
+                                        @foreach ($this->allStatuses->where('p_id_sub', $this->sector_id) as $s)
+                                            <option value="{{ $s->id }}">{{ $s->status_name }}</option>
+                                        @endforeach
+                                    @endif
 
-                            </flux:select>
-                            <flux:input type="number"
-                                wire:model="parcels.{{ $index }}.distributed_parcels_count"
-                                :label="__('Count')" />
-                            <flux:input type="number" step="0.01"
-                                wire:model="parcels.{{ $index }}.cost_for_each_parcel"
-                                :label="__('Cost Per Parcel')" />                        
+                                </flux:select>
+                                <flux:input type="number"
+                                    wire:model="parcels.{{ $index }}.distributed_parcels_count"
+                                    :label="__('Count')" />
+                                <flux:input type="number" step="0.01"
+                                    wire:model="parcels.{{ $index }}.cost_for_each_parcel"
+                                    :label="__('Cost Per Parcel')" />
                                 <flux:input type="text" wire:model="parcels.{{ $index }}.notes"
                                     :label="__('Notes')" placeholder="Optional" />
+                                    <div class="flex items-center mt-5   ">
                                 <flux:button wire:click="removeParcel({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500" />
-                           
-                        </div>
-                    @endforeach
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
             @endif
 
             {{-- Beneficiaries Section --}}
             @if ($sector_id != 55)
-            <div class="md:col-span-2 lg:col-span-3 mt-4">
-                <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600">{{ __('Beneficiaries') }}</flux:heading>
-                    <flux:button wire:click="addBeneficiary" variant="ghost" icon="plus" size="sm">
-                        {{ __('Add Beneficiary') }}</flux:button>
-                </div>
-                <div class="space-y-4">
-                    @foreach ($beneficiaries as $index => $beneficiary)
-                        <div wire:key="beneficiary-{{ $index }}"
-                            class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700">
-                            <flux:select wire:model="beneficiaries.{{ $index }}.beneficiary_type"
-                                :label="__('Type')">
-                                <option value="">{{ __('Select') }}</option>
-                                @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.beneficiaries_types')) as $s)
-                                    <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                                @endforeach
-                            </flux:select>
-                            <flux:input type="number"
-                                wire:model="beneficiaries.{{ $index }}.beneficiaries_count"
-                                :label="__('Count')" />
-                            <flux:input type="number" step="0.01"
-                                wire:model="beneficiaries.{{ $index }}.cost_for_each_beneficiary"
-                                :label="__('Cost Per Beneficiary')" />
-                            {{-- <flux:select wire:model="beneficiaries.{{ $index }}.status_id" :label="__('Status')">
-                                <option value="">{{ __('Select') }}</option>
-                                @foreach ($activityStatuses as $s)
-                                    <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                                @endforeach
-                            </flux:select> --}}
+                <div class="md:col-span-2 lg:col-span-3 mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Beneficiaries') }}</flux:heading>
+                        <flux:button wire:click="addBeneficiary" variant="ghost" icon="plus" size="sm">
+                            {{ __('Add Beneficiary') }}</flux:button>
+                    </div>
+                    <div class="space-y-4">
+                        @foreach ($beneficiaries as $index => $beneficiary)
+                            <div wire:key="beneficiary-{{ $index }}"
+                                class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700">
+                                <flux:select wire:model="beneficiaries.{{ $index }}.beneficiary_type"
+                                    :label="__('Type')">
+                                    <option value="">{{ __('Select') }}</option>
+                                    @foreach ($beneficiaryTypes as $s)
+                                        <option value="{{ $s->id }}">{{ $s->status_name }}</option>
+                                    @endforeach
+                                </flux:select>
+                                <flux:input type="number"
+                                    wire:model="beneficiaries.{{ $index }}.beneficiaries_count"
+                                    :label="__('Count')" />
+                                <flux:input type="number" step="0.01"
+                                    wire:model="beneficiaries.{{ $index }}.cost_for_each_beneficiary"
+                                    :label="__('Cost Per Beneficiary')" />
+                              
                                 <flux:input type="text" wire:model="beneficiaries.{{ $index }}.notes"
-                                    :label="__('Notes')"  placeholder="Optional"/>
-                                    <flux:button wire:click="removeBeneficiary({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500" />
-                        </div>
-                    @endforeach
+                                    :label="__('Notes')" placeholder="Optional" />
+                                    <div class="flex items-center mt-5   ">
+                                <flux:button wire:click="removeBeneficiary({{ $index }})" variant="ghost"
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
             @endif
 
             {{-- Educational Point Section --}}
-               @if ($sector_id  == 55)
-            <div class="md:col-span-2 lg:col-span-3 mt-4">
-                <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600">{{ __('Educational Point') }}</flux:heading>
-                    <flux:button wire:click="addTeachingGroup" variant="ghost" icon="plus" size="sm">
-                        {{ __('Add Educational Point') }}</flux:button>
+            @if ($sector_id == 55)
+                <div class="md:col-span-2 lg:col-span-3 mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Educational Point') }}
+                        </flux:heading>
+                        <flux:button wire:click="addTeachingGroup" variant="ghost" icon="plus" size="sm">
+                            {{ __('Add Educational Point') }}</flux:button>
+                    </div>
+                    <div class="space-y-4">
+                        @foreach ($teaching_groups as $index => $group)
+                            <div wire:key="teaching-group-{{ $index }}"
+                                class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4 relative">
+
+
+
+                                {{-- Row 1: Basic Info --}}
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <flux:input type="text" wire:model="teaching_groups.{{ $index }}.name"
+                                        :label="__('Point Name')" />
+
+
+
+                                    <flux:select wire:model="teaching_groups.{{ $index }}.status"
+                                        :label="__('Status')">
+                                        <option value="">{{ __('Select Status') }}</option>
+                                        @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.activity_status')) as $status)
+                                            <option value="{{ $status->id }}">{{ $status->status_name }}</option>
+                                        @endforeach
+                                    </flux:select>
+                                    <flux:input type="number" step="0.01"
+                                        wire:model="teaching_groups.{{ $index }}.cost_usd"
+                                        :label="__('Cost USD')" />
+
+                                    <flux:input type="number" step="0.01"
+                                        wire:model="teaching_groups.{{ $index }}.cost_nis"
+                                        :label="__('Cost NIS')" />
+
+                                </div>
+
+                                {{-- Row 2: Financial & Relations --}}
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                                    <flux:select wire:model="teaching_groups.{{ $index }}.student_groups_id"
+                                        :label="__('Student Group')">
+                                        <option value="">{{ __('Select Group') }}</option>
+                                        @foreach ($studentGroups as $sg)
+                                            <option value="{{ $sg->id }}">{{ $sg->name ?? $sg->id }}</option>
+                                        @endforeach
+                                    </flux:select>
+
+                                    <flux:select wire:model="teaching_groups.{{ $index }}.partner_id"
+                                        :label="__('Partner')">
+                                        <option value="">{{ __('Select Partner') }}</option>
+                                        @foreach ($partners as $partner)
+                                            <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                        @endforeach
+                                    </flux:select>
+                                </div>
+
+                                {{-- Row 5: Moderator --}}
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <flux:input type="text"
+                                        wire:model="teaching_groups.{{ $index }}.Moderator"
+                                        :label="__('Moderator Name')" placeholder="Enter Moderator Name" />
+                                    <flux:input type="text"
+                                        wire:model="teaching_groups.{{ $index }}.Moderator_phone"
+                                        :label="__('Moderator Phone')" placeholder="Enter Moderator Phone" />
+                                    <flux:input type="text"
+                                        wire:model="teaching_groups.{{ $index }}.Moderator_email"
+                                        :label="__('Moderator Email')" placeholder="Enter Moderator Email" />
+                                </div>
+
+                                {{-- Row 6: Notes --}}
+                                <flux:input type="text" wire:model="teaching_groups.{{ $index }}.notes"
+                                    :label="__('Notes')" placeholder="Optional" />
+                                    <div class="flex items-center mt-5">
+                                <flux:button wire:click="removeTeachingGroup({{ $index }})" variant="ghost"
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <div class="space-y-4">
-                    @foreach ($teaching_groups as $index => $group)
-                       
-
-                        <div wire:key="teaching-group-{{ $index }}"
-                            class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4 relative">
-                            
-                         
-
-                            {{-- Row 1: Basic Info --}}
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <flux:input type="text" wire:model="teaching_groups.{{ $index }}.name"
-                                    :label="__('Point Name')" />
-                                
-                            
-
-                                <flux:select wire:model="teaching_groups.{{ $index }}.status" :label="__('Status')">
-                                    <option value="">{{ __('Select Status') }}</option>
-                                    @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.activity_status')) as $status)
-                                        <option value="{{ $status->id }}">{{ $status->status_name }}</option>
-                                    @endforeach
-                                </flux:select>
-                                <flux:input type="number" step="0.01" wire:model="teaching_groups.{{ $index }}.cost_usd"
-                                :label="__('Cost USD')" />
-                            
-                            <flux:input type="number" step="0.01" wire:model="teaching_groups.{{ $index }}.cost_nis"
-                                :label="__('Cost NIS')" />
-
-                            </div>
-
-                            {{-- Row 2: Financial & Relations --}}
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                              
-                                <flux:select wire:model="teaching_groups.{{ $index }}.student_groups_id" :label="__('Student Group')">
-                                    <option value="">{{ __('Select Group') }}</option>
-                                    @foreach ($studentGroups as $sg)
-                                        <option value="{{ $sg->id }}">{{ $sg->name ?? $sg->id }}</option>
-                                    @endforeach
-                                </flux:select>
-
-                                <flux:select wire:model="teaching_groups.{{ $index }}.partner_id" :label="__('Partner')">
-                                    <option value="">{{ __('Select Partner') }}</option>
-                                    @foreach ($partners as $partner)
-                                        <option value="{{ $partner->id }}">{{ $partner->name }}</option>
-                                    @endforeach
-                                </flux:select>
-                            </div>
-
-                           
-
-
-                            {{-- Row 5: Moderator --}}
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <flux:input type="text" wire:model="teaching_groups.{{ $index }}.Moderator" :label="__('Moderator Name')" placeholder="Enter Moderator Name" />
-                                <flux:input type="text" wire:model="teaching_groups.{{ $index }}.Moderator_phone" :label="__('Moderator Phone')" placeholder="Enter Moderator Phone"/>
-                                <flux:input type="text" wire:model="teaching_groups.{{ $index }}.Moderator_email" :label="__('Moderator Email')" placeholder="Enter Moderator Email"/>
-                            </div>
-                           
-                            {{-- Row 6: Notes --}}
-                            <flux:input type="text" wire:model="teaching_groups.{{ $index }}.notes"
-                                :label="__('Notes')" placeholder="Optional" />
-                                
-                                    <flux:button wire:click="removeTeachingGroup({{ $index }})" variant="ghost"
-                                        icon="trash" class="text-red-500" />
-                              
-                        </div>
-                       
-                    @endforeach
-                </div>
-            </div>
-@endif
+            @endif
             {{-- Work Team Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600">{{ __('Work Team') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Work Team') }}</flux:heading>
                     <flux:button wire:click="addWorkTeam" variant="ghost" icon="plus" size="sm">
                         {{ __('Add Member') }}</flux:button>
                 </div>
@@ -331,16 +335,20 @@
                                 :label="__('Mission')">
                                 <option value="" class="text-gray-500 placeholder-gray-500">
                                     {{ __('Select Mission') }}</option>
-                                @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.aids_primary_missions')) as $s)
+                                @foreach ($missionTitles as $s)
                                     <option value="{{ $s->id }}">{{ $s->status_name }}</option>
                                 @endforeach
                             </flux:select>
-                                 
+                           
                                 <flux:input type="text" wire:model="work_teams.{{ $index }}.notes"
-                                    :label="__('Notes')" placeholder="Optional" />
-
-                            <flux:button wire:click="removeWorkTeam({{ $index }})" variant="ghost"
-                            icon="trash" class="text-red-500" />
+                                :label="__('Notes')" placeholder="Optional" />
+                            <div class="flex items-center mt-5">
+                                <flux:button wire:click="removeWorkTeam({{ $index }})" variant="ghost"
+                                icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                            </div>
+                          
+                           
+                          
                         </div>
                     @endforeach
                 </div>
@@ -349,7 +357,7 @@
             {{-- Feedback Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600">{{ __('Feedbacks') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Feedbacks') }}</flux:heading>
                     <flux:button wire:click="addFeedback" variant="ghost" icon="plus" size="sm">
                         {{ __('Add Feedback') }}</flux:button>
                 </div>
@@ -360,7 +368,8 @@
                             <flux:field>
                                 <flux:label class="text-blue-600">{{ __('Rating') }}</flux:label>
                                 <flux:select wire:model="feedbacks.{{ $index }}.rating">
-                                    <option value="" class="text-gray-500 placeholder-gray-500">Give Rating</option>
+                                    <option value="" class="text-gray-500 placeholder-gray-500">Give Rating
+                                    </option>
                                     <option value="5">5 - {{ __('Excellent') }}</option>
                                     <option value="4">4 - {{ __('Very Good') }}</option>
                                     <option value="3">3 - {{ __('Good') }}</option>
@@ -374,9 +383,9 @@
 
                             <flux:input type="text" wire:model="feedbacks.{{ $index }}.comment"
                                 :label="__('Comment')" placeholder="Enter feedback..." class="flex-1" />
-                            <div>
+                                <div class="flex items-center mt-5   ">
                                 <flux:button wire:click="removeFeedback({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500" />
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                             </div>
                         </div>
                     @endforeach
@@ -386,8 +395,9 @@
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">
-                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}">
-                    {{ $heading }}
+                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
+                    <span wire:loading.remove>{{ $heading }}</span>
+                    <span wire:loading>{{ $type === 'save' ? __('Saving...') : __('Updating...') }}</span>
                 </flux:button>
             </div>
             @include('layouts._show_all_input_error')

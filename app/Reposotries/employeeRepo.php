@@ -11,7 +11,7 @@ class employeeRepo
     public static function employees()
     {
        return Cache::rememberForever('Employee-all', function () {
-            return Employee::get();
+            return Employee::select('id', 'full_name', 'user_id', 'activation')->get();
         });
     }
 }

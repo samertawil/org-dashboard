@@ -18,7 +18,7 @@ class Edit extends Component
     public $location = '';
 
     #[Validate('nullable|string')]
-    public $description = '';
+    public $description = null;
 
     public function mount(Department $department)
     {

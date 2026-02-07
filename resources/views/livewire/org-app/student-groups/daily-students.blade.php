@@ -13,8 +13,9 @@
         <h2 class="text-lg font-medium text-zinc-900 dark:text-white">{{ __('Students List') }}</h2>
         <div class="flex gap-2">
            
-            <flux:button wire:click="saveAttendance" variant="primary">
-                {{ __('Save Attendance') }}
+            <flux:button wire:click="saveAttendance" variant="primary" wire:loading.attr="disabled">
+                <span wire:loading.remove>{{ __('Save Attendance') }}</span>
+                <span wire:loading>{{ __('Saving...') }}</span>
             </flux:button>
         </div>
     </div>

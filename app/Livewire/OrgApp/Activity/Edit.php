@@ -9,13 +9,18 @@ use Livewire\Component;
 use App\Models\Activity;
 use App\Models\Employee;
 use App\Models\Location;
+use App\Models\StudentGroup;
 use App\Models\Neighbourhood;
+use App\Reposotries\CityRepo;
+use App\Reposotries\RegionRepo;
+
+use App\Reposotries\employeeRepo;
+use App\Reposotries\LocationRepo;
+use App\Models\PartnerInstitution;
 use App\Enums\GlobalSystemConstant;
 use App\Concerns\Activity\FormTrait;
 use Illuminate\Support\Facades\Gate;
-
-use App\Models\PartnerInstitution;
-use App\Models\StudentGroup;
+use App\Reposotries\NeighbourhoodRepo;
 
 class Edit extends Component
 {
@@ -28,9 +33,9 @@ class Edit extends Component
 
     public function mount(Activity $activity)
     {
-       
+
         $this->activity = $activity;
-        
+
         $this->name = $activity->name;
         $this->description = $activity->description;
         $this->start_date = $activity->start_date;
@@ -44,7 +49,7 @@ class Edit extends Component
         $this->address_details = $activity->address_details;
         $this->sector_id = $activity->sector_id;
         $this->cost_nis = $activity->cost_nis;
-        
+
         $this->parcels = $activity->parcels->toArray();
         if (empty($this->parcels)) $this->addParcel();
 
@@ -61,9 +66,10 @@ class Edit extends Component
         if (empty($this->feedbacks)) $this->addFeedback();
     }
 
-    public function rules() {
+    public function rules()
+    {
         return [
-            'name'=>'required|string|max:255',
+            'name' => 'required|string|max:255',
             // unique:activities,name,'.$this->activity->id
         ];
     }
@@ -71,8 +77,6 @@ class Edit extends Component
     public function update()
     {
         $this->validate();
-
-        $statusModel = Status::find($this->status);
 
 
         $this->activity->update([
@@ -83,7 +87,7 @@ class Edit extends Component
             'cost' => $this->cost,
             'cost_nis' => $this->cost_nis,
             'status' => $this->status,
-            'status_name' => $statusModel ? $statusModel->status_name : null,
+            // 'status_name' => $statusModel ? $statusModel->status_name : null,
             'region' => $this->region ?: null,
             'city' => $this->city ?: null,
             'neighbourhood' => $this->neighbourhood ?: null,
@@ -108,7 +112,7 @@ class Edit extends Component
 
         $this->activity->workTeams()->delete();
         foreach ($this->work_teams as $team) {
-            if ($team['employee_id'] || $team['employee_mission_title']) {
+            if ($team['employee_id']) {
                 $this->activity->workTeams()->create($team);
             }
         }
@@ -123,7 +127,7 @@ class Edit extends Component
 
                     $this->activity->teachingGroups()->create(array_merge($group, [
                         'updated_by' => auth()->id(),
-                         // Preserve created_by if it existed in the original relation, otherwise auth()->id()
+                        // Preserve created_by if it existed in the original relation, otherwise auth()->id()
                         'created_by' => $group['created_by'] ?? auth()->id(),
                     ]));
                 }
@@ -146,25 +150,17 @@ class Edit extends Component
 
     public function render()
     {
-        if(Gate::denies('activity.create')){
-            return abort(403,'You do not have the necessary permissions');
+        if (Gate::denies('activity.create')) {
+            return abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.org-app.activity.edit', [
             'heading' => __('Edit Activity'),
             'type' => 'update',
-            'activations' => GlobalSystemConstant::options()->where('type', 'status'),
-            'statuses' => Status::whereNull('p_id_sub')->get(),
-            'activityStatuses' => Status::where('p_id_sub', config('appConstant.activity_status'))->get(),
-            'parcelTypes' => Status::where('p_id_sub', $this->sector_id)->get(),
-            'beneficiaryTypes' => Status::where('p_id_sub', 36)->get(),
-            'missionTitles' => Status::where('p_id_sub', 37)->get(),
-            'regions' => \App\Reposotries\RegionRepo::regions(),
-            'cities' => $this->region ? \App\Reposotries\CityRepo::cities()->where('region_id', $this->region) : collect(),
-            'neighbourhoods' => $this->city ? \App\Reposotries\NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city) : collect(),
-            'locations' => $this->neighbourhood ? \App\Reposotries\LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood) : collect(),
-            'employees' => \App\Reposotries\employeeRepo::employees()->where('activation',GlobalSystemConstant::ACTIVE->value),
-            'partners' => PartnerInstitution::all(),
-            'studentGroups' => StudentGroup::all(),
+            'regions' => RegionRepo::regions(),
+            'cities' => $this->region ? CityRepo::cities()->where('region_id', $this->region) : collect(),
+            'neighbourhoods' => $this->city ? NeighbourhoodRepo::neighbourhoods()->where('city_id', $this->city) : collect(),
+            'locations' => $this->neighbourhood ? LocationRepo::locations()->where('neighbourhood_id', $this->neighbourhood) : collect(),
+            'employees' => employeeRepo::employees(),
         ]);
     }
 }

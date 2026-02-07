@@ -14,6 +14,29 @@
             {{ __('Create System Name') }}
         </flux:button>
     </div>
+    {{-- Search and Filter Section --}}
+    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white mb-4">{{ __('Search & Filter') }}</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="relative">
+                <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by System Name')" type="text"
+                    :placeholder="__('Search name...')" icon="magnifying-glass" />
+                <div wire:loading wire:target="search" class="absolute right-3 top-[2.4rem]">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
+        </div>
+
+        {{-- Clear Filters --}}
+        @if ($search)
+            <div class="mt-4 flex items-center justify-end">
+                <flux:button wire:click="$set('search', '')" variant="ghost" size="sm" icon="x-mark">
+                    {{ __('Clear Filters') }}
+                </flux:button>
+            </div>
+        @endif
+    </div>
 
 
     <!-- Success Message -->

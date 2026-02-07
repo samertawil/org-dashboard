@@ -31,6 +31,8 @@ class Index extends Component
             abort(403, 'You do not have the necessary permissions');
         }
         $departments = Department::where('name', 'like', '%' . $this->search . '%')
+         
+            ->orwhere('location', 'like', '%' . $this->search . '%')
             ->latest()
             ->paginate(10);
 

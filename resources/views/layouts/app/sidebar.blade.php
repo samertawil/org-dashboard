@@ -20,6 +20,8 @@
             <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
         </flux:sidebar.header>
 
+        
+
 
 
         <flux:sidebar.nav>
@@ -28,8 +30,16 @@
                     wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="calendar" :href="route('calendar.index')" :current="request()->routeIs('calendar.index')"
+                    wire:navigate>
+                    {{ __('Calendar') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
+
+         
+        
+
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('App')" class="grid">
                 <!-- Department Group -->
@@ -178,6 +188,34 @@
                     @endcan
 
 
+                </flux:sidebar.group>
+
+                <!-- Reports Group -->
+                 <flux:sidebar.group expandable :expanded="false" :heading="__('Reports')" icon="chart-bar" class="grid">
+                     <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.activity.overview')"
+                        :current="request()->routeIs('reports.activity.overview')" wire:navigate>
+                        {{ __('Activity Reports') }}
+                    </flux:sidebar.item>
+
+                     <flux:sidebar.item icon="currency-dollar" :href="route('reports.financial.summary')"
+                        :current="request()->routeIs('reports.financial.summary')" wire:navigate>
+                        {{ __('Financial Reports') }}
+                    </flux:sidebar.item>
+
+                     <flux:sidebar.item icon="user-group" :href="route('reports.beneficiary.impact')"
+                        :current="request()->routeIs('reports.beneficiary.impact')" wire:navigate>
+                        {{ __('Beneficiaries Reports') }}
+                    </flux:sidebar.item>
+
+                     <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
+                        :current="request()->routeIs('reports.educational.progress')" wire:navigate>
+                        {{ __('Educational Reports') }}
+                    </flux:sidebar.item>
+
+                     <flux:sidebar.item icon="star" :href="route('reports.feedback.analysis')"
+                        :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
+                        {{ __('Feedback Reports') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
 
 

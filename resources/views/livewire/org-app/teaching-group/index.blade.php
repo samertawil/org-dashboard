@@ -17,28 +17,48 @@
     <div
         class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
         <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <flux:input wire:model.live="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
+            <div class="relative">
+                <flux:input wire:model.live="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
+                <div wire:loading wire:target="search" class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
 
           
-            <flux:select wire:model.live="activity_id" placeholder="{{ __('Filter by Activity') }}">
-                <option value="">{{ __('All Activities') }}</option>
-                @foreach($activities as $activity)
-                    <option value="{{ $activity->id }}">{{ $activity->name ?? 'Activity '.$activity->id }}</option>
-                @endforeach
-            </flux:select>
+            <div class="relative">
+                <flux:select wire:model.live="activity_id" placeholder="{{ __('Filter by Activity') }}">
+                    <option value="">{{ __('All Activities') }}</option>
+                    @foreach($activities as $activity)
+                        <option value="{{ $activity->id }}">{{ $activity->name ?? 'Activity '.$activity->id }}</option>
+                    @endforeach
+                </flux:select>
+                <div wire:loading wire:target="activity_id" class="absolute right-8 top-1/2 -translate-y-1/2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
 
-            <flux:select wire:model.live="status_id" placeholder="{{ __('Filter by Status') }}">
-                <option value="">{{ __('All Statuses') }}</option>
-                @foreach($statuses as $status)
-                    <option value="{{ $status->id }}">{{ $status->name ?? $status->status_name }}</option>
-                @endforeach
-            </flux:select>
+            <div class="relative">
+                <flux:select wire:model.live="status_id" placeholder="{{ __('Filter by Status') }}">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status->id }}">{{ $status->name ?? $status->status_name }}</option>
+                    @endforeach
+                </flux:select>
+                <div wire:loading wire:target="status_id" class="absolute right-8 top-1/2 -translate-y-1/2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
 
-            <flux:input type="date" wire:model.live="start_date" />
+            <div class="relative">
+                <flux:input type="date" wire:model.live="start_date" />
+                <div wire:loading wire:target="start_date" class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
              
-             @if ($search  || $activity_id || $status_id )
+             @if ($search  || $activity_id || $status_id || $start_date)
             <div class="flex items-center justify-end md:col-span-3 lg:col-span-4">
-                <flux:button wire:click="$set('search', ''); $set('activity_id', ''); $set('status_id', '');" variant="ghost" size="sm" icon="x-mark">
+                <flux:button wire:click="$set('search', ''); $set('activity_id', ''); $set('status_id', ''); $set('start_date', '');" variant="ghost" size="sm" icon="x-mark">
                     {{ __('Clear Filters') }}
                 </flux:button>
             </div>

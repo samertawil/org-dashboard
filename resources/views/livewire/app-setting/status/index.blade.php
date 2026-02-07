@@ -21,26 +21,41 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {{-- Search by Name --}}
-            <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by Name')" type="text"
-                :placeholder="__('Search status name...')" icon="magnifying-glass" />
+            <div class="relative">
+                <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by Name')" type="text"
+                    :placeholder="__('Search status name...')" icon="magnifying-glass" />
+                <div wire:loading wire:target="search" class="absolute right-3 top-[2.4rem]">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
 
             {{-- Filter by Parent Status --}}
-            <flux:select wire:model.live="searchParentStatus" :label="__('Filter by Parent Status')"
-                :placeholder="__('All parent statuses')">
-                <option value="">{{ __('All Parent Statuses') }}</option>
-                @foreach ($parentStatuses as $parent)
-                    <option value="{{ $parent->id }}">{{ $parent->status_name }}</option>
-                @endforeach
-            </flux:select>
+            <div class="relative">
+                <flux:select wire:model.live="searchPid" :label="__('Filter by Parent Status')"
+                    :placeholder="__('All parent statuses')">
+                    <option value="">{{ __('All Parent Statuses') }}</option>
+                    @foreach ($this->parentStatuses as $status)
+                        <option value="{{ $status->id }}">{{ $status->status_name }}</option>
+                    @endforeach
+                </flux:select>
+                <div wire:loading wire:target="searchPid" class="absolute right-8 top-[2.4rem]">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
 
             {{-- Filter by System Name --}}
-            <flux:select wire:model.live="searchSystemName" :label="__('Filter by System')"
-                :placeholder="__('All systems')">
-                <option value="">{{ __('All Systems') }}</option>
-                @foreach ($systemNames as $system)
-                    <option value="{{ $system->id }}">{{ $system->system_name }}</option>
-                @endforeach
-            </flux:select>
+            <div class="relative">
+                <flux:select wire:model.live="searchSystemName" :label="__('Filter by System')"
+                    :placeholder="__('All systems')">
+                    <option value="">{{ __('All Systems') }}</option>
+                    @foreach ($this->systemNames as $system)
+                        <option value="{{ $system->id }}">{{ $system->system_name }}</option>
+                    @endforeach
+                </flux:select>
+                <div wire:loading wire:target="searchSystemName" class="absolute right-8 top-[2.4rem]">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
         </div>
 
         {{-- Clear Filters --}}

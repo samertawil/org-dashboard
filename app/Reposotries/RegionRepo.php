@@ -9,8 +9,8 @@ class RegionRepo
 {
     public static function regions()
     {
-       return Cache::rememberForever('Region-all', function () {
-            return Region::get();
+        return Cache::rememberForever('Region-all', function () {
+            return Region::select('id', 'region_name')->get();
         });
     }
 }

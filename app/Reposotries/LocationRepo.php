@@ -11,7 +11,7 @@ class LocationRepo
     public static function locations()
     {
        return Cache::rememberForever('Location-all', function () {
-            return Location::get();
+            return Location::select('id', 'location_name', 'neighbourhood_id')->get();
         });
     }
 }

@@ -9,8 +9,8 @@ class CityRepo
 {
     public static function cities()
     {
-       return Cache::rememberForever('city-all', function () {
-            return City::get();
+        return Cache::rememberForever('city-all', function () {
+            return City::select('id', 'city_name', 'region_id')->get();
         });
     }
 }

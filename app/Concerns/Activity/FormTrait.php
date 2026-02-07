@@ -4,13 +4,17 @@ namespace App\Concerns\Activity;
 
 use App\Models\TeachingGroup;
 use App\Reposotries\StatusRepo;
+use App\Reposotries\PartnersRepo;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
+use App\Reposotries\StudentGroupRepo;
+ 
+ 
 
 trait FormTrait
 {
     #[Validate('nullable|string')]
-    public $description = '';
+    public $description = null;
 
     #[Validate('required|date')]
     public $start_date = '';
@@ -46,15 +50,34 @@ trait FormTrait
     public $sector_id = '';
 
     #[Validate('nullable|string|max:255')]
-    public string $address_details = '';
+    public  $address_details = null;
 
-    
+    public $beneficiaryTypes=[];
+    public $missionTitles=[];
+    public $partners=[];
+    public $studentGroups=[];
+ 
 
 
     public $parcels = [];
     public $beneficiaries = [];
     public $work_teams = [];
 
+    #[Computed()]
+    public function allStatuses()
+    {
+        return StatusRepo::statuses();
+    }
+    
+    public function bootFormTrait()
+    {
+      
+        $this->beneficiaryTypes = $this->allStatuses()->where('p_id_sub', config('appConstant.beneficiaries_types')) ;
+        $this->missionTitles =  $this->allStatuses()->where('p_id_sub', config('appConstant.aids_primary_missions')) ;
+        $this->partners = PartnersRepo::partners();
+        $this->studentGroups = StudentGroupRepo::studentGroups();
+        
+    }
 
     public function addParcel()
     {
@@ -82,7 +105,7 @@ trait FormTrait
             'beneficiaries_count' => 0,
             'cost_for_each_beneficiary' => 0.00,
             'status_id' => '',
-            'notes' => '',
+            'notes' => null,
         ];
     }
 
@@ -95,10 +118,10 @@ trait FormTrait
     public function addWorkTeam()
     {
         $this->work_teams[] = [
-            'employee_mission_title' => '',
+            'employee_mission_title' => null,
             'employee_id' => '',
             'status_id' => '',
-            'notes' => '',
+            'notes' => null,
         ];
     }
 
@@ -182,9 +205,5 @@ trait FormTrait
         
     }
 
-    #[Computed()]
-    public function allStatuses()
-    {
-        return StatusRepo::statuses();
-    }
+    
 }

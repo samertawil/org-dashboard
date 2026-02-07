@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Livewire\OrgApp\Dashboard\MyTasks;
 use App\Livewire\OrgApp\ActivitySector\Index;
 use App\Livewire\OrgApp\Student\ImportedFiles;
 use App\Livewire\AppSetting\Role\GrantUserRole;
@@ -11,8 +12,8 @@ use App\Livewire\OrgApp\Student\Edit as StudentEdit;
 use App\Livewire\OrgApp\StudentGroups\DailyStudents;
 use App\Livewire\AppSetting\Role\Create as RoleCreate;
 use App\Livewire\AppSetting\Status\Edit as StatusEdit;
-use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
 
+use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
 use App\Livewire\OrgApp\Activity\Show as ActivityShow;
 use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
 use App\Livewire\OrgApp\Employee\Edit as EmployeeEdit;
@@ -38,23 +39,25 @@ use App\Livewire\OrgApp\Department\Index as DepartmentIndex;
 use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
 use App\Livewire\OrgApp\Department\Create as DepartmentCreate;
 use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
-use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
 
+use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
 use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
-use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
 
+use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
 use App\Livewire\AppSetting\SystemNames\Index as SystemNamesIndex;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
 use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
 use App\Livewire\AppSetting\SystemNames\Create as SystemNamesCreate;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
-use App\Livewire\Appsetting\RoleModuleName\Create as RoleModuleNameCreate;
+use App\Livewire\AppSetting\RoleModuleName\Create as RoleModuleNameCreate;
 use App\Livewire\OrgApp\StudentGroups\ShowSchedule as StudentGroupSchedule;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::view('/features', 'features')->name('features');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -118,6 +121,17 @@ Route::get('/dashboard/student-group/{group}/schedule', StudentGroupSchedule::cl
 Route::get('/dashboard/student-group/{group}/schedule/{date}/students', DailyStudents::class)->name('student.group.date.students');
 Route::get('/dashboard/student-group/{group}/report', \App\Livewire\OrgApp\StudentGroups\Report::class)->name('student.group.report');
 Route::get('/dashboard/reports/groups-attendance', \App\Livewire\OrgApp\Reports\GroupsAttendance::class)->name('reports.groups.attendance');
+Route::get('/dashboard/reports/activity-overview', \App\Livewire\OrgApp\Reports\ActivityOverview::class)->name('reports.activity.overview');
+Route::get('/dashboard/reports/financial-summary', \App\Livewire\OrgApp\Reports\FinancialSummary::class)->name('reports.financial.summary');
+Route::get('/dashboard/reports/beneficiary-impact', \App\Livewire\OrgApp\Reports\BeneficiaryImpact::class)->name('reports.beneficiary.impact');
+Route::get('/dashboard/reports/educational-progress', \App\Livewire\OrgApp\Reports\EducationalProgress::class)->name('reports.educational.progress');
+Route::get('/dashboard/reports/feedback-analysis', \App\Livewire\OrgApp\Reports\FeedbackAnalysis::class)->name('reports.feedback.analysis');
+Route::get('/dashboard/calendar', \App\Livewire\OrgApp\Calendar\Index::class)->name('calendar.index');
+
+
+
+
+
 
 Route::get('dashboard/student',StudentIndex::class)->name('student.index');
 Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('student.imported-files');
@@ -138,4 +152,6 @@ Route::get('dashboard/learnin-subject',SubjectIndex::class)->name('subject.index
  
 Route::get('dashboard/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
  
+
+Route::get('dashboard/my-tasks', MyTasks::class)->name('my.tasks');
 });
