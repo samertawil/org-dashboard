@@ -22,7 +22,10 @@
         </style>
     </head>
     <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
-        <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
+        <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden flex items-center justify-between lg:block">
+            <div class="lg:hidden">
+                <img src="{{ asset('logo2.png') }}" class="h-10 w-auto" alt="Logo">
+            </div>
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
                     @auth
@@ -35,7 +38,7 @@
                     @else
                         <a
                             href="{{ route('login') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal"
+                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-[#19140035] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
                         >
                             Log in
                         </a>
@@ -52,10 +55,10 @@
             @endif
         </header>
         <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
-            <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
-                <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-20 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-es-lg rounded-ee-lg lg:rounded-ss-lg lg:rounded-ee-none">
-                    <h1 class="mb-1 font-medium">Let's get started</h1>
-                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">AFSC GAZA  has an incredibly rich activitysystem. <br>We suggest starting with the following.</p>
+            <main class="flex max-w-[335px] w-full flex-col lg:max-w-4xl lg:flex-row">
+                <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-15 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-es-lg rounded-ee-lg lg:rounded-ss-lg lg:rounded-ee-none">
+                    <h1 class="mb-1 font-medium">AFSC Gaza Office - Managment System </h1>
+                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">The American Friends Service Committee (AFSC) is providing emergency relief to over 1 million displaced Palestinians in Gaza, who are facing starvation and disease due to the ongoing crisis. Despite challenges. <br><br>We suggest starting with the following.</p>
                     <ul class="flex flex-col mb-4 lg:mb-6">
                         <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:top-1/2 before:bottom-0 before:left-[0.4rem] before:absolute">
                             <span class="relative py-1 bg-white dark:bg-[#161615]">
@@ -64,9 +67,9 @@
                                 </span>
                             </span>
                             <span>
-                                Read the
-                                <a href="{{route('features')}} " target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
-                                    <span>Features</span>
+                                 
+                                <a href="https://secure.afsc.org/a/26jr_nd?ms=WEB26NV0001JR" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
+                                    <span>DONATE NOW</span>
                                     <svg
                                         width="10"
                                         height="11"
@@ -83,6 +86,7 @@
                                     </svg>
                                 </a>
                             </span>
+                         
                         </li>
                         <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:bottom-1/2 before:top-0 before:start-[0.4rem] before:absolute">
                             <span class="relative py-1 bg-white dark:bg-[#161615]">
@@ -91,9 +95,9 @@
                                 </span>
                             </span>
                             <span>
-                                Watch video
-                                <a href="#" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
-                                    <span>AFSC ORG</span>
+                             
+                                <a href="https://afsc.org/" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
+                                    <span>WEBSITE</span>
                                     <svg
                                         width="10"
                                         height="11"
@@ -112,26 +116,32 @@
                             </span>
                         </li>
                     </ul>
-                    <ul class="flex gap-3 text-sm leading-normal">
-                        <li>
-                            <a href="https://afsc.org/about/" target="_blank" class="inline-block dark:bg-[#eeeeec] dark:border-[#eeeeec] dark:text-[#1C1C1A] dark:hover:bg-white dark:hover:border-white hover:bg-black hover:border-black px-5 py-1.5 bg-[#1b1b18] rounded-sm border border-black text-white text-sm leading-normal">
-                               About us
-                            </a>
-                        </li>
-                    </ul>
+                    
                 </div>
-                <div class="bg-[#fff2f2] dark:bg-[#1D0002] relative lg:-ms-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-e-lg! aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden  flex justify-center items-center">
+               
+                <div class="hidden lg:flex bg-[#fff2f2] dark:bg-[#1D0002] relative lg:-ms-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-e-lg! aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hiddenjustify-center items-center">
                     {{-- Laravel Logo --}}
-                    <image src="{{asset('logo.png')}}"></image>
+                    <div class="flex flex-col justify-between items-center w-full">
+                        <image src="{{asset('logo2.png')}}" style="width: 50%;  " alt="Logo"></image>
+                    </div>
+                  
 
                   
  
                 </div>
             </main>
+        
         </div>
-
+        <div class="mt-3 flex justify-center">
+            <a href="{{ route('features') }}" class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal transition-colors">
+                Dashboard Features
+            </a>
+        </div>
+        
         @if (Route::has('login'))
             <div class="h-14.5 hidden lg:block"></div>
         @endif
+      
     </body>
+    
 </html>

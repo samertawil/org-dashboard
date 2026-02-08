@@ -19,22 +19,25 @@ class MyTasks extends Component
 
     public function loadTasks()
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
+        $employee = Employee::where('user_id', $user->id)->first();
 
         if ($employee) {
-            $this->tasks = EventAssignee::with(['event:id,name,start,end', 'assigner:id,name'])
-                ->select('id', 'event_id', 'employee_id', 'created_by', 'status', 'response', 'created_at')
+            $this->tasks = EventAssignee::with(['event', 'assigner'])
                 ->where('employee_id', $employee->id)
                 ->whereIn('status', ['pending', 'postponed', 'clarification_needed'])
                 ->orderBy('created_at', 'desc')
+                // ->take(5) // Show top 5 pending
                 ->get();
             
-            $this->responses = $this->tasks->pluck('response', 'id')->toArray();
+            // Initialize responses
+            foreach($this->tasks as $task) {
+                $this->responses[$task->id] = $task->response;
+            }
         } else {
             $this->tasks = collect([]);
         }
     }
-
     public function updateStatus($assigneeId, $newStatus)
     {
         $employee = Auth::user()->employee;

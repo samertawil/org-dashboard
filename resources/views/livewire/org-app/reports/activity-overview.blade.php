@@ -70,20 +70,27 @@
             <flux:heading size="md" class="mb-4">{{ __('Status Distribution') }}</flux:heading>
             <div wire:ignore x-data="{
                 init() {
-                        let chart = new ApexCharts(this.$el, {
-                            series: @js($statusChartData['series']),
-                            labels: @js($statusChartData['labels']),
-                            chart: { type: 'donut', height: 300 },
-                            colors: ['#22c55e', '#eab308', '#3b82f6', '#f97316', '#64748b'],
-                            legend: { position: 'bottom' }
-                        });
-                        chart.render();
-            
-                        $watch('series', (value) => {
-                            chart.updateSeries(value);
-                        });
-                    },
-                    series: @entangle('statusChartData.series')
+                    const isDark = document.documentElement.classList.contains('dark');
+                    let chart = new ApexCharts(this.$el, {
+                        series: @js($statusChartData['series']),
+                        labels: @js($statusChartData['labels']),
+                        chart: { 
+                            type: 'donut', 
+                            height: 300,
+                            foreColor: isDark ? '#e4e4e7' : '#374151',
+                            fontFamily: 'inherit'
+                        },
+                        colors: ['#22c55e', '#eab308', '#3b82f6', '#f97316', '#64748b'],
+                        legend: { position: 'bottom' },
+                        tooltip: { theme: isDark ? 'dark' : 'light' }
+                    });
+                    chart.render();
+        
+                    $watch('series', (value) => {
+                        chart.updateSeries(value);
+                    });
+                },
+                series: @entangle('statusChartData.series')
             }" class="min-h-[300px]">
             </div>
         </flux:card>
@@ -93,11 +100,18 @@
             <flux:heading size="md" class="mb-4">{{ __('Geographic Spread') }}</flux:heading>
             <div wire:ignore x-data="{
                 init() {
+                    const isDark = document.documentElement.classList.contains('dark');
                     let chart = new ApexCharts(this.$el, {
                         series: [{ name: 'Activities', data: @js($geoChartData['series']) }],
                         xaxis: { categories: @js($geoChartData['labels']) },
-                        chart: { type: 'bar', height: 300 },
-                        colors: ['#3b82f6']
+                        chart: { 
+                            type: 'bar', 
+                            height: 300,
+                            foreColor: isDark ? '#e4e4e7' : '#374151',
+                            fontFamily: 'inherit'
+                        },
+                        colors: ['#3b82f6'],
+                        tooltip: { theme: isDark ? 'dark' : 'light' }
                     });
                     chart.render();
                 }
@@ -110,11 +124,18 @@
             <flux:heading size="md" class="mb-4">{{ __('Monthly Progress') }}</flux:heading>
             <div wire:ignore x-data="{
                 init() {
+                    const isDark = document.documentElement.classList.contains('dark');
                     let chart = new ApexCharts(this.$el, {
                         series: [{ name: 'Started', data: @js($monthlyChartData['series']) }],
                         xaxis: { categories: @js($monthlyChartData['labels']) },
-                        chart: { type: 'area', height: 300 },
-                        stroke: { curve: 'smooth' }
+                        chart: { 
+                            type: 'area', 
+                            height: 300,
+                            foreColor: isDark ? '#e4e4e7' : '#374151',
+                            fontFamily: 'inherit'
+                        },
+                        stroke: { curve: 'smooth' },
+                        tooltip: { theme: isDark ? 'dark' : 'light' }
                     });
                     chart.render();
                 }

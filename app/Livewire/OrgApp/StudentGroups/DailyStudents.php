@@ -63,7 +63,8 @@ class DailyStudents extends Component
         
         if ($dayOfWeek === 6) { $enrollmentTypes[] = 'sat_mon_wed'; } // Saturday
         if ($dayOfWeek === 0) { $enrollmentTypes[] = 'sun_tue_thu'; } // Sunday
-        if ($dayOfWeek === 1) { $enrollmentTypes[] = 'sat_mon_wed'; $enrollmentTypes[] = 'sun_tue_thu'; } // Monday
+        if ($dayOfWeek === 1) { $enrollmentTypes[] = 'sat_mon_wed'; } // Monday
+        if ($dayOfWeek === 2) { $enrollmentTypes[] = 'sun_tue_thu'; } // tuesday
         if ($dayOfWeek === 3) { $enrollmentTypes[] = 'sat_mon_wed'; } // Wednesday
         if ($dayOfWeek === 4) { $enrollmentTypes[] = 'sun_tue_thu'; } // Thursday
 
@@ -115,6 +116,7 @@ class DailyStudents extends Component
 
     public function render()
     {
+      
         return view('livewire.org-app.student-groups.daily-students', [
             'students' => $this->getStudents()
         ]);

@@ -5,6 +5,7 @@ namespace App\Livewire\AppSetting\Status;
 use App\Models\Status;
 use Livewire\Component;
 use App\Models\SystemNames;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Gate;
 
 class Create extends Component
@@ -15,7 +16,7 @@ class Create extends Component
     public int|null  $c_id_sub = null;
     public int|null $used_in_system_id = null;
     public string|null $description = null;
-
+    public $parentStatuses = [];
 
     public function store(): void
     {
@@ -38,20 +39,21 @@ class Create extends Component
         $this->reset(['status_name', 'p_id_sub', 'used_in_system_id', 'description', 'c_id_sub']);
     }
 
+    #[Computed()]
     public function getParentStatuses()
     {
         return Status::whereNull('p_id_sub')
-            ->orWhere('p_id_sub', 0)
+            ->orWhere('p_id_sub', 29)
             ->orderBy('status_name')
             ->get();
     }
 
-    public function getChildStatuses()
-    {
-        return Status::whereNotNull('p_id_sub')->whereNull('c_id_sub')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-    }
+    // public function getChildStatuses()
+    // {
+    //     return Status::whereNotNull('p_id_sub')->whereNull('c_id_sub')
+    //         ->orderBy('created_at', 'DESC')
+    //         ->get();
+    // }
 
     public function getSystemNames()
     {
@@ -60,14 +62,15 @@ class Create extends Component
 
     public function render()
     {
+        
 
         if (Gate::denies('status.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.app-setting.status.create', [
 
-            'parentStatuses' => $this->getParentStatuses(),
-            'childStatuses' => $this->getChildStatuses(),
+            // 'parentStatuses' => $this->getParentStatuses(),
+            // 'childStatuses' => $this->getChildStatuses(),
             'systemNames' => $this->getSystemNames(),
         ]);
     }

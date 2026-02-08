@@ -123,6 +123,7 @@ class StudentGroupSchedule extends Component
 
     public function render()
     {
+        dd(2);
         $startOfMonth = Carbon::createFromDate($this->year, $this->month, 1);
         $daysInMonth = $startOfMonth->daysInMonth;
         

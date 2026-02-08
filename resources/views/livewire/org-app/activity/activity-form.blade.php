@@ -312,6 +312,42 @@
                     </div>
                 </div>
             @endif
+
+            
+            {{-- Activity Partners Section --}}
+            <div class="md:col-span-2 lg:col-span-3 mt-4">
+                <div class="flex items-center justify-between mb-2">
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Partners') }}</flux:heading>
+                    <flux:button wire:click="addActivityPartner" variant="ghost" icon="plus" size="sm">
+                        {{ __('Add Partner') }}</flux:button>
+                </div>
+                <div class="space-y-4">
+                    @foreach ($activity_partners as $index => $partner)
+                        <div wire:key="activity-partner-{{ $index }}"
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700">
+                            <flux:select wire:model="activity_partners.{{ $index }}.partner_id"
+                                :label="__('Partner')">
+                                <option value="" class="text-gray-500 placeholder-gray-500">
+                                    {{ __('Select Partner') }}</option>
+                                @foreach ($partners as $p)
+                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                @endforeach
+                            </flux:select>
+                           
+                                <flux:input type="text" wire:model="activity_partners.{{ $index }}.notes"
+                                :label="__('Notes')" placeholder="Optional" />
+                            <div class="flex items-center mt-5">
+                                <flux:button wire:click="removeActivityPartner({{ $index }})" variant="ghost"
+                                icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                            </div>
+                          
+                           
+                          
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            
             {{-- Work Team Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
@@ -353,6 +389,7 @@
                     @endforeach
                 </div>
             </div>
+
 
             {{-- Feedback Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">

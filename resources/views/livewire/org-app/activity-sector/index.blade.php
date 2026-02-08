@@ -16,7 +16,7 @@
 
     <flux:separator variant="subtle" />
 
-    <div class="flex items-start max-md:flex-col py-10 mt-6">
+    <div class="flex items-start max-md:flex-col py-5 mt-6">
         {{-- Left Sidebar: Sectors --}}
 
         <div class="me-10 w-full pb-4 md:w-[220px] shrink-0">
@@ -37,7 +37,7 @@
 
             <flux:navlist>
                 @forelse ($this->sectors as $sector)
-                    <div class="mb-6">
+                    <div class="mb-3">
                         <flux:navlist.item
                             wire:click="selectSector({{ $sector->sector_id }}, '{{ $sector->activites_date }}')"
                             :current="$selectedSectorId === $sector->sector_id && $selectedSectorDate === $sector->activites_date"
@@ -128,7 +128,7 @@
                                 @php
                                     $report = $activityReport->firstWhere('id', $activity->id);
                                 @endphp
-                                <div class="flex gap-2">
+                                <div class="flex flex-col gap-3 sm:flex-row   sm:flex-wrap">
                                     <flux:badge size="sm" inset="top bottom" color="zinc"
                                         class="{{ ($report?->parcels_status ?? '') === 'ADDED PARCELS' ? '!text-green-600' : '' }}">
                                         {{ $report?->parcels_status ?? '' }}

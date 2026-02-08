@@ -59,6 +59,9 @@ class Edit extends Component
         $this->work_teams = $activity->workTeams->toArray();
         if (empty($this->work_teams)) $this->addWorkTeam();
 
+        $this->activity_partners = $activity->activityPartners->toArray();
+        if (empty($this->activity_partners)) $this->addActivityPartner();
+
         $this->teaching_groups = $activity->teachingGroups->toArray();
         if (empty($this->teaching_groups)) $this->addTeachingGroup();
 
@@ -87,7 +90,6 @@ class Edit extends Component
             'cost' => $this->cost,
             'cost_nis' => $this->cost_nis,
             'status' => $this->status,
-            // 'status_name' => $statusModel ? $statusModel->status_name : null,
             'region' => $this->region ?: null,
             'city' => $this->city ?: null,
             'neighbourhood' => $this->neighbourhood ?: null,
@@ -114,6 +116,13 @@ class Edit extends Component
         foreach ($this->work_teams as $team) {
             if ($team['employee_id']) {
                 $this->activity->workTeams()->create($team);
+            }
+        }
+
+        $this->activity->activityPartners()->delete();
+        foreach ($this->activity_partners as $partner) {
+            if ($partner['partner_id']) {
+                $this->activity->activityPartners()->create($partner);
             }
         }
 

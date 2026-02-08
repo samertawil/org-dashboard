@@ -131,6 +131,7 @@ class ShowSchedule extends Component
 
     public function render()
     {
+        // dd(1);
         $startOfMonth = Carbon::createFromDate($this->year, $this->month, 1);
         $daysInMonth = $startOfMonth->daysInMonth;
         

@@ -59,6 +59,11 @@ class Activity extends Model
         return $this->hasMany(ActivityWorkTeam::class, 'activity_id');
     }
 
+    public function activityPartners()
+    {
+        return $this->hasMany(ActivityPartner::class, 'activity_id');
+    }
+
     public function attachments()
     {
         return $this->hasMany(ActivityAttchment::class, 'activity_id');

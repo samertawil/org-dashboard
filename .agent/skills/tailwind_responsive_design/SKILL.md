@@ -137,6 +137,27 @@ If using Flux or manual dark mode:
 - Use specialized text colors for readability: `text-zinc-500 dark:text-zinc-400`.
 - Test by toggling the class `dark` on the `html` tag.
 
+### Charts & Data Visualization
+
+When using libraries like ApexCharts, ensure text colors adapt to the theme:
+
+```javascript
+init() {
+    const isDark = document.documentElement.classList.contains('dark');
+    let chart = new ApexCharts(this.$el, {
+        // ...
+        chart: {
+            foreColor: isDark ? '#e4e4e7' : '#374151', // essential for axes/legends
+            fontFamily: 'inherit'
+        },
+        tooltip: {
+             theme: isDark ? 'dark' : 'light'
+        }
+    });
+    chart.render();
+}
+```
+
 ## Component Reusability
 
 Avoid repeating long class strings. Extract to Blade components.

@@ -5,10 +5,25 @@
             <flux:heading size="xl">{{ __('Feedback & Satisfaction') }}</flux:heading>
             <flux:subheading>{{ __('Analysis of beneficiary feedback and program ratings.') }}</flux:subheading>
         </div>
-        <div class="flex items-center gap-2 no-print">
-            <flux:button icon="printer" onclick="window.print()" class="mr-2">{{ __('Print') }}</flux:button>
-            <flux:input type="date" wire:model.live="dateFrom" label="{{ __('From') }}" />
-            <flux:input type="date" wire:model.live="dateTo" label="{{ __('To') }}" />
+        <div class="no-print">
+            <flux:button icon="printer" onclick="window.print()">{{ __('Print') }}</flux:button>
+        </div>
+    </div>
+    <div>  
+        <div class="flex items-start gap-6 relative">
+            <flux:field>
+                <flux:label>{{ __('From Date') }}</flux:label>
+                <flux:input type="date" wire:model.live="dateFrom" />
+            </flux:field>
+            <flux:field>
+                <flux:label>{{ __('To Date') }}</flux:label>
+                <flux:input type="date" wire:model.live="dateTo" />
+            </flux:field>
+            
+    
+            <div wire:loading class="absolute right-0 top-1/2 -translate-y-1/2">
+                <flux:icon name="arrow-path" class="size-5 animate-spin text-zinc-400" />
+            </div>
         </div>
     </div>
 
@@ -44,12 +59,19 @@
             <div wire:ignore
                  x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                             series: [{ name: 'Count', data: @js($ratingChartData['series']) }],
                             xaxis: { categories: @js($ratingChartData['labels']) },
-                            chart: { type: 'bar', height: 300 },
+                            chart: { 
+                                type: 'bar', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                            },
                             colors: ['#f59e0b'],
-                            plotOptions: { bar: { borderRadius: 4, distributed: true } }
+                            plotOptions: { bar: { borderRadius: 4, distributed: true } },
+                            tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                     }
@@ -64,13 +86,20 @@
             <div wire:ignore
                  x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                             series: [{ name: 'Avg Rating', data: @js($activityChartData['series']) }],
                             xaxis: { categories: @js($activityChartData['labels']) },
-                            chart: { type: 'bar', height: 300 },
+                            chart: { 
+                                type: 'bar', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                            },
                             colors: ['#10b981'],
                             plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
-                             dataLabels: { enabled: true, formatter: function (val) { return val } }
+                             dataLabels: { enabled: true, formatter: function (val) { return val } },
+                             tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                     }
@@ -85,13 +114,20 @@
              <div wire:ignore
                   x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                              series: [{ name: 'Avg Rating', data: @js($trendChartData['series']) }],
                              xaxis: { categories: @js($trendChartData['labels']) },
-                             chart: { type: 'line', height: 300 },
+                             chart: { 
+                                type: 'line', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                             },
                              colors: ['#6366f1'],
                              stroke: { curve: 'smooth', width: 3 },
-                             markers: { size: 5 }
+                             markers: { size: 5 },
+                             tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                     }

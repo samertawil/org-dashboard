@@ -21,6 +21,9 @@ class Index extends Component
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
 
+    public $parentStatuses = [];
+    public $systemNames = [];
+
     // Pagination
     public int $perPage = 10;
 

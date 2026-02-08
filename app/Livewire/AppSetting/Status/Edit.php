@@ -6,6 +6,7 @@ use App\Models\Status;
 use Livewire\Component;
 use App\Models\SystemNames;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Gate;
 
 class Edit extends Component
@@ -48,6 +49,7 @@ class Edit extends Component
        return redirect()->route('status.index');
     }
 
+    #[Computed()]
     public function getParentStatuses()
     {
         return Status::whereNull('p_id_sub')
@@ -55,12 +57,12 @@ class Edit extends Component
             ->orderBy('status_name')
             ->get();
     }
-    public function getChildStatuses()
-    {
-        return Status::whereNotNull('p_id_sub')
-            ->orderBy('created_at', 'DESC')
-            ->get();
-    }
+    // public function getChildStatuses()
+    // {
+    //     return Status::whereNotNull('p_id_sub')
+    //         ->orderBy('created_at', 'DESC')
+    //         ->get();
+    // }
 
     
 
@@ -77,8 +79,8 @@ class Edit extends Component
         }
         return view('livewire.app-setting.status.edit', [
 
-            'parentStatuses' => $this->getParentStatuses(),
-            'childStatuses' => $this->getChildStatuses(),
+            // 'parentStatuses' => $this->getParentStatuses(),
+            // 'childStatuses' => $this->getChildStatuses(),
             'systemNames' => $this->getSystemNames(),
             
         ]);

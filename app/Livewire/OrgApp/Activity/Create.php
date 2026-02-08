@@ -35,6 +35,7 @@ class Create extends Component
         $this->addParcel();
         $this->addBeneficiary();
         $this->addWorkTeam();
+        $this->addActivityPartner();
         $this->addTeachingGroup();
         $this->addFeedback();
     }
@@ -75,8 +76,8 @@ class Create extends Component
                 'end_date' => filled($this->end_date) ? $this->end_date : $this->start_date,
                 'cost' => $this->cost ?? null,
                 'cost_nis' => $this->cost_nis ?? null,
-                'status' => $this->status ?: $this->sector_id,
-                // 'status_name' => $statusModel ? $statusModel->status_name : null,
+                'status' => $this->status ?:null,
+            
                 'region' => $this->region ?: null,
                 'city' => $this->city ?: null,
                 'neighbourhood' => $this->neighbourhood ?: null,
@@ -106,6 +107,12 @@ class Create extends Component
             foreach ($this->work_teams as $team) {
                 if ($team['employee_id']) {
                     $project->workTeams()->create($team);
+                }
+            }
+
+            foreach ($this->activity_partners as $partner) {
+                if ($partner['partner_id']) {
+                    $project->activityPartners()->create($partner);
                 }
             }
 

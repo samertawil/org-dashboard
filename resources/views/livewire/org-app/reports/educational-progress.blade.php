@@ -5,8 +5,13 @@
             <flux:heading size="xl">{{ __('Educational Reports') }}</flux:heading>
             <flux:subheading>{{ __('Student enrollment, demographics, and group distribution.') }}</flux:subheading>
         </div>
+
+        <div class="no-print">
+            <flux:button icon="printer" onclick="window.print()">{{ __('Print') }}</flux:button>
+        </div>
+
         <div class="flex items-center gap-2 no-print">
-            <flux:button icon="printer" onclick="window.print()" class="mr-2">{{ __('Print') }}</flux:button>
+         
             
             <flux:select wire:model.live="selectedRegion" placeholder="{{ __('All Regions') }}" class="w-40">
                 <option value="">{{ __('All Regions') }}</option>
@@ -21,6 +26,10 @@
                     <option value="{{ $group->id }}">{{ $group->name }}</option>
                 @endforeach
             </flux:select>
+        </div>
+        
+        <div wire:loading class="absolute right-0 top-1/2 -translate-y-1/2">
+            <flux:icon name="arrow-path" class="size-5 animate-spin text-zinc-400" />
         </div>
     </div>
 
@@ -52,12 +61,19 @@
             <div wire:ignore
                  x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                             series: @js($genderChartData['series']),
                             labels: @js($genderChartData['labels']),
-                            chart: { type: 'pie', height: 300 },
+                            chart: { 
+                                type: 'pie', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                            },
                             colors: ['#3b82f6', '#ec4899'], // Blue for Male, Pink for Female
-                            legend: { position: 'bottom' }
+                            legend: { position: 'bottom' },
+                            tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                         
@@ -77,12 +93,19 @@
             <div wire:ignore
                  x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                              series: [{ name: 'Students', data: @js($ageChartData['series']) }],
                              xaxis: { categories: @js($ageChartData['labels']) },
-                             chart: { type: 'bar', height: 300 },
+                             chart: { 
+                                type: 'bar', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                             },
                              colors: ['#8b5cf6'],
-                             plotOptions: { bar: { borderRadius: 4 } }
+                             plotOptions: { bar: { borderRadius: 4 } },
+                             tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                     }
@@ -97,12 +120,19 @@
              <div wire:ignore
                   x-data="{
                     init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                              series: [{ name: 'Students', data: @js($groupChartData['series']) }],
                              xaxis: { categories: @js($groupChartData['labels']) },
-                             chart: { type: 'bar', height: 350 },
+                             chart: { 
+                                type: 'bar', 
+                                height: 350,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                             },
                              colors: ['#0ea5e9'],
-                             plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } }
+                             plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+                             tooltip: { theme: isDark ? 'dark' : 'light' }
                         });
                         chart.render();
                     }

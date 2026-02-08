@@ -67,12 +67,19 @@
             <flux:heading size="md" class="mb-4">{{ __('Spending by Sector') }}</flux:heading>
             <div wire:ignore x-data="{
                 init() {
+                        const isDark = document.documentElement.classList.contains('dark');
                         let chart = new ApexCharts(this.$el, {
                             series: @js($sectorChartData['series']),
                             labels: @js($sectorChartData['labels']),
-                            chart: { type: 'pie', height: 300 },
+                            chart: { 
+                                type: 'pie', 
+                                height: 300,
+                                foreColor: isDark ? '#e4e4e7' : '#374151',
+                                fontFamily: 'inherit'
+                            },
                             colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'],
                             legend: { position: 'bottom' },
+                            tooltip: { theme: isDark ? 'dark' : 'light' },
                             dataLabels: { enabled: true, formatter: function(val, opts) { return opts.w.globals.series[opts.seriesIndex] > 0 ? '$' + opts.w.globals.series[opts.seriesIndex].toLocaleString() : '' } }
                         });
                         chart.render();
@@ -91,13 +98,20 @@
             <flux:heading size="md" class="mb-4">{{ __('Monthly Spending Trend') }}</flux:heading>
             <div wire:ignore x-data="{
                 init() {
+                    const isDark = document.documentElement.classList.contains('dark');
                     let chart = new ApexCharts(this.$el, {
                         series: [{ name: 'Spending ($)', data: @js($monthlyChartData['series']) }],
                         xaxis: { categories: @js($monthlyChartData['labels']) },
-                        chart: { type: 'bar', height: 300 },
+                        chart: { 
+                            type: 'bar', 
+                            height: 300,
+                            foreColor: isDark ? '#e4e4e7' : '#374151',
+                            fontFamily: 'inherit'
+                        },
                         colors: ['#10b981'],
                         plotOptions: { bar: { borderRadius: 4, dataLabels: { position: 'top' } } },
-                        dataLabels: { enabled: false }
+                        dataLabels: { enabled: false },
+                        tooltip: { theme: isDark ? 'dark' : 'light' }
                     });
                     chart.render();
                 }

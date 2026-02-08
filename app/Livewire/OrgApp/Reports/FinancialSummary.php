@@ -2,9 +2,10 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
+use App\Models\Status;
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\Status;
+use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\DB;
 
 class FinancialSummary extends Component
@@ -77,7 +78,7 @@ class FinancialSummary extends Component
             'kpis' => compact('totalCostUSD', 'totalCostNIS', 'avgCost', 'totalBeneficiaries', 'costPerBeneficiary'),
             'sectorChartData' => $sectorChartData,
             'monthlyChartData' => $monthlyChartData,
-            'availableSectors' => Status::whereIn('id', $activities->pluck('sector_id')->unique())->get()
+            'availableSectors' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.sectors')) 
 
         ]);
     }

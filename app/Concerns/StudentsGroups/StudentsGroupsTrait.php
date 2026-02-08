@@ -61,16 +61,16 @@ trait StudentsGroupsTrait
 
     public $address_details = '';
 
-    #[Validate('nullable|date')]
+    #[Validate('required|date')]
     public $start_date = '';
 
-    #[Validate('nullable|date|after_or_equal:start_date')]
+    #[Validate('required|date|after_or_equal:start_date')]
     public $end_date = '';
 
-    #[Validate('nullable|date_format:H:i')]
+    #[Validate('required|date_format:H:i')]
     public $start_time = '';
 
-    #[Validate('nullable|date_format:H:i')]
+    #[Validate('required|date_format:H:i')]
     public $end_time = '';
 
 

@@ -56,6 +56,7 @@ trait FormTrait
     public $missionTitles=[];
     public $partners=[];
     public $studentGroups=[];
+    public $activity_partners = [];
  
 
 
@@ -129,6 +130,20 @@ trait FormTrait
     {
         unset($this->work_teams[$index]);
         $this->work_teams = array_values($this->work_teams);
+    }
+
+    public function addActivityPartner()
+    {
+        $this->activity_partners[] = [
+            'partner_id' => '',
+            'notes' => null,
+        ];
+    }
+
+    public function removeActivityPartner($index)
+    {
+        unset($this->activity_partners[$index]);
+        $this->activity_partners = array_values($this->activity_partners);
     }
 
     public $feedbacks = [];

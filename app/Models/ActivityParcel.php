@@ -18,8 +18,4 @@ class ActivityParcel extends Model
         return $this->belongsTo(Status::class, 'parcel_type');
     }
 
-    // public function status()
-    // {
-    //     return $this->belongsTo(Status::class, 'status_id');
-    // }
 }
