@@ -61,8 +61,10 @@ class Index extends Component
 
     public function render()
     {
-       
-
+        if (Gate::denies('partner.index')) 
+        { 
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.partner.index', );
     }
 }

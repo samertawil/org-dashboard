@@ -1,17 +1,23 @@
 <div class="flex flex-col gap-6 print:gap-4" x-data="{ activeTab: 'overview' }">
     {{-- Header with Actions (Hidden on Print) --}}
-    <div class="flex items-start justify-between print:hidden text-left">
+    <div class="flex flex-col  items-start justify-between print:hidden text-left">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Activity Details') }}</flux:heading>
             <flux:subheading>{{ __('Detailed information for Activity:') }} {{ $activity->name }}</flux:subheading>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 mt-3">
             <flux:button wire:click="downloadPdf" variant="outline" icon="document-arrow-down">
                 {{ __('Export PDF') }}
             </flux:button>
             <flux:button onclick="window.print()" variant="ghost" icon="printer">
                 {{ __('Print') }}
+            </flux:button>
+
+         
+
+            <flux:button href="{{ route('sector.show') }}" wire:navigate variant="ghost" icon="list-bullet">
+                {{ __('Sectors List') }}
             </flux:button>
         </div>
     </div>
@@ -32,49 +38,49 @@
 
     {{-- Tabs Navigation (Hidden on Print) --}}
     <div class="border-b border-zinc-200 dark:border-zinc-700 print:hidden text-left">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav class="-mb-px flex flex-col md:flex-row md:space-x-8" aria-label="Tabs">
             <button @click="activeTab = 'overview'"
-                :class="activeTab === 'overview' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
-                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                :class="activeTab === 'overview' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
+                    'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
                 class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
                 <flux:icon icon="information-circle" class="mr-2 h-5 w-5"
-                    x-bind:class="activeTab === 'overview' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                    x-bind:class="activeTab === 'overview' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Overview') }}
             </button>
 
             <button @click="activeTab = 'location'"
-                :class="activeTab === 'location' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
-                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                :class="activeTab === 'location' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
+                    'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
                 class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
                 <flux:icon icon="map-pin" class="mr-2 h-5 w-5"
-                    x-bind:class="activeTab === 'location' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                    x-bind:class="activeTab === 'location' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Location') }}
             </button>
 
             <button @click="activeTab = 'financials'"
-                :class="activeTab === 'financials' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
-                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                :class="activeTab === 'financials' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
+                    'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
                 class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
                 <flux:icon icon="currency-dollar" class="mr-2 h-5 w-5"
-                    x-bind:class="activeTab === 'financials' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                    x-bind:class="activeTab === 'financials' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Financials') }}
             </button>
 
             <button @click="activeTab = 'teams'"
-                :class="activeTab === 'teams' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
-                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                :class="activeTab === 'teams' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
+                    'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
                 class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
                 <flux:icon icon="users" class="mr-2 h-5 w-5"
-                    x-bind:class="activeTab === 'teams' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                    x-bind:class="activeTab === 'teams' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Teams') }}
             </button>
 
             <button @click="activeTab = 'feedback'"
-                :class="activeTab === 'feedback' ? 'border-primary-500 text-primary-600 dark:text-primary-400' :
-                    'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                :class="activeTab === 'feedback' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
+                    'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
                 class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
                 <flux:icon icon="chat-bubble-left-right" class="mr-2 h-5 w-5"
-                    x-bind:class="activeTab === 'feedback' ? 'text-primary-500' : 'text-zinc-400 group-hover:text-zinc-500'" />
+                    x-bind:class="activeTab === 'feedback' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Feed Back') }}
             </button>
         </nav>
@@ -193,7 +199,7 @@
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-zinc-500">{{ __('Last Updated') }}</span>
                             <span
-                                class="text-xs text-zinc-700 dark:text-zinc-300">{{ $activity->updated_at->format('M d, Y H:i') }}</span>
+                                class="text-xs text-zinc-700 dark:text-zinc-300">{{ $activity->updated_at? $activity->updated_at->format('M d, Y H:i') : __('Never') }}</span>
                         </div>
 
                     </div>
@@ -538,6 +544,11 @@
             td {
                 border: 1px solid #e5e7eb;
                 padding: 4px 8px;
+            }
+
+            /* Hide DebugBar */
+            .phpdebugbar, .phpdebugbar-openhandler, .phpdebugbar-openhandler-overlay {
+                display: none !important;
             }
         }
     </style>

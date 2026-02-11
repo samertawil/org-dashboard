@@ -93,7 +93,10 @@ class Edit extends Component
     
     public function render()
     {
-        // if (Gate::denies('partner_institution.edit')) { abort(403); }
+        if (Gate::denies('partner.create')) 
+        { 
+            abort(403, 'You do not have the necessary permissions');
+        }
 
         return view('livewire.org-app.partner.edit', [
             'heading' => __('Edit Partner Institution'),

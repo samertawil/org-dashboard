@@ -4,21 +4,18 @@ namespace App\Livewire\OrgApp\Reports;
 
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\Region;
-use App\Models\Status;
-use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Layout;
+
 
 class ActivityOverview extends Component
 {
-    public $dateFrom;
+    public $dateFrom='2023-10-30';
     public $dateTo;
     public $selectedRegion;
     public $selectedStatus;
 
     public function mount()
     {
-        $this->dateFrom = now()->startOfYear()->format('Y-m-d');
+        // $this->dateFrom = now()->startOfYear()->format('Y-m-d');
         $this->dateTo = now()->endOfYear()->format('Y-m-d');
     }
 
@@ -29,26 +26,28 @@ class ActivityOverview extends Component
             ->select('id', 'name', 'status', 'region', 'cost', 'cost_nis', 'start_date', 'activation')
             ->with(['regions:id,region_name'])
             ->where('activation', 1)
+            ->where('status', '!=', 0) // Exclude 'Not Started' if status 0 means that
             ->whereBetween('start_date', [$this->dateFrom, $this->dateTo]);
 
         if ($this->selectedRegion) {
             $query->where('region', $this->selectedRegion);
         }
 
-        if ($this->selectedStatus) {
-             // Logic to filter by virtual status or db status
-             // For now, let's filter by DB status if integer, or handle virtual logic later if needed
-             // Simple integer match for now
-             if(is_numeric($this->selectedStatus)){
-                 $query->where('status', $this->selectedStatus);
-             }
-        }
+        // if ($this->selectedStatus) {
+        //      // Logic to filter by virtual status or db status
+        //      // For now, let's filter by DB status if integer, or handle virtual logic later if needed
+        //      // Simple integer match for now
+        //      if(is_numeric($this->selectedStatus)){
+        //          $query->where('status', $this->selectedStatus);
+        //      }
+        // }
 
         $activities = $query->get();
-
+       
         // 2. KPIs
         $totalActivities = $activities->count();
         $completedActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'Completed')->count(); 
+      
         $ongoingActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'In Progress')->count();
         $PlannedActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'Planned')->count();
         $totalBudget = $activities->sum('cost');

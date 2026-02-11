@@ -4,6 +4,7 @@ namespace App\Livewire\OrgApp\SubjectForLearn;
 
 use Livewire\Component;
 use Livewire\Attributes\Validate;
+use Illuminate\Support\Facades\Gate;
 use App\Models\StudentSubjectForLearn;
 use App\Concerns\SubjectForLearn\SubjectForLearnTrait;
 
@@ -13,10 +14,6 @@ class Create extends Component
 
     #[Validate('required|string|unique:student_subject_for_learns,name')]
     public $name = '';
-
-   
-    
-    
 
     // public function rules() {
     //     return [
@@ -44,6 +41,9 @@ class Create extends Component
 
     public function render()
     {
+        if(Gate::denies('curricula.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.subject-for-learn.create');
     }
 }

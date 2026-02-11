@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Concerns\PurchaseRequest;
+
+use Livewire\Attributes\Validate;
+use App\Models\PartnerInstitution;
+use App\Models\Status;
+use App\Reposotries\StatusRepo;
+use App\Reposotries\PartnersRepo;
+
+trait PurchaseTrait
+{
+    #[Validate('required|integer')]
+    public $request_number;
+
+
+    #[Validate('required|date')]
+    public $request_date;
+
+    #[Validate('nullable|string|max:255')]
+    public $description;
+
+    #[Validate('nullable|string')]
+    public $justification;
+
+    #[Validate('nullable|array')]
+    public $suggested_vendor_ids = [];
+
+    #[Validate('nullable|date')]
+    public $need_by_date;
+
+    #[Validate('nullable|string')]
+    public $budget_details;
+
+    #[Validate('nullable|integer')]
+    public $estimated_total;
+
+    #[Validate('nullable|integer')]
+    public $estimated_total_currency;
+
+    #[Validate('nullable|exists:statuses,id')]
+    public $status_id;
+
+    public $items = [];
+    
+    public $partners = [];
+    public $statuses = [];
+    public $units = [];
+    public $currencies = [];
+
+    public function bootPurchaseTrait()
+    {
+        $this->partners = PartnersRepo::partners();
+        $this->statuses = StatusRepo::statuses(); 
+        // Assuming units and currencies might come from statuses or config
+        $this->units = StatusRepo::statuses()->where('p_id', 440); // Example, need to verify parent ID for units
+        // Or generic fetch
+    }
+
+    public function addPurchaseRequisitionItem()
+    {
+        $this->items[] = [
+            'item_name' => '',
+            'item_description' => '',
+            'quantity' => 1,
+            'unit_id' => null,
+            'unit_price' => 0,
+            'currency' => null, // Currency for the item
+        ];
+    }
+
+    public function removePurchaseRequisitionItem($index)
+    {
+        unset($this->items[$index]);
+        $this->items = array_values($this->items);
+    }
+}

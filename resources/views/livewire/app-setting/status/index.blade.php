@@ -31,14 +31,14 @@
 
             {{-- Filter by Parent Status --}}
             <div class="relative">
-                <flux:select wire:model.live="searchPid" :label="__('Filter by Parent Status')"
+                <flux:select wire:model.live="searchParentStatus" :label="__('Filter by Parent Status')"
                     :placeholder="__('All parent statuses')">
                     <option value="">{{ __('All Parent Statuses') }}</option>
-                    @foreach ($this->parentStatuses as $status)
+                    @foreach ($this->getParentStatuses as $status)
                         <option value="{{ $status->id }}">{{ $status->status_name }}</option>
                     @endforeach
                 </flux:select>
-                <div wire:loading wire:target="searchPid" class="absolute right-8 top-[2.4rem]">
+                <div wire:loading wire:target="searchParentStatus" class="absolute right-8 top-[2.4rem]">
                     <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
                 </div>
             </div>

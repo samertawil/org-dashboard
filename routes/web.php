@@ -67,91 +67,101 @@ require __DIR__.'/settings.php';
 
 
 // Users
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('dashboard')->group(function () {
    
-Route::get('/dashboard/users/create',UsersCreate::class)->name('user.create');
-Route::get('/dashboard/users/index',UsersIndex::class)->name('user.index');
-Route::get('dashboard/grant-role-to/{userID?}',GrantUserRole::class)->name('grant.role.user');
-
-// Status
-Route::get('/dashboard/system-names/create',SystemNamesCreate::class)->name('system.names.create');
-Route::get('/dashboard/system-names',SystemNamesIndex::class)->name('system.names.index');
-Route::get('/dashboard/status/create',StatusCreate::class)->name('status.create');
-Route::get('/dashboard/status',StatusIndex::class)->name('status.index');
-Route::get('/dashboard/{status}/edit',StatusEdit::class)->name('status.edit');
-
-// Ability
-Route::get('/dashboard/ability/create',AbilityCreate::class)->name('ability.create');
-Route::get('/dashboard/ability/{ability}/edit',AbilityEdit::class)->name('ability.edit');
-Route::get('/dashboard/ability/',AbilityIndex::class)->name('ability.index');
-
-// Role
-Route::get('/dashboard/role-module/create',RoleModuleNameCreate::class)->name('role.module.create');
-Route::get('/dashboard/role/create',RoleCreate::class)->name('role.create');
-Route::get('/dashboard/role',RoleIndex::class)->name('role.index');
-Route::get('dashboard/role/{id?}/edit',RoleEdit::class)->name('role.edit');
-
-
-// OrgApp - Department
-Route::get('/dashboard/department', DepartmentIndex::class)->name('department.index');
-Route::get('/dashboard/department/create', DepartmentCreate::class)->name('department.create');
-Route::get('/dashboard/department/{department}/edit', DepartmentEdit::class)->name('department.edit');
-
-// OrgApp - Employee
-Route::get('/dashboard/employee', EmployeeIndex::class)->name('employee.index');
-Route::get('/dashboard/employee/create', EmployeeCreate::class)->name('employee.create');
-Route::get('/dashboard/employee/{employee}/edit', EmployeeEdit::class)->name('employee.edit');
-
-// OrgApp - activity
-Route::get('/dashboard/activity', ActivityIndex::class)->name('activity.index');
-Route::get('/dashboard/activity/create', ActivityCreate::class)->name('activity.create');
-Route::get('/dashboard/activity/{activity}/edit', ActivityEdit::class)->name('activity.edit');
-Route::get('/dashboard/activity/{activity}/show', ActivityShow::class)->name('activity.show');
-
-Route::get('/dashboard/sectors', Index::class)->name('sector.show');
-
-Route::get('/dashboard/partner/create', PartnerCreate::class)->name('partner.create');
-Route::get('/dashboard/partner/{partner}/edit', PartnerEdit::class)->name('partner.edit');
-Route::get('/dashboard/partner', PartnerIndex::class)->name('partner.index');
-
-Route::get('/dashboard/student-group', StudentGroupIndex::class)->name('student.group.index');
-Route::get('/dashboard/student-group/create', StudentGroupCreate::class)->name('student.group.create');
-Route::get('/dashboard/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
-Route::get('/dashboard/student-group/{group}/schedule', StudentGroupSchedule::class)->name('student.group.schedule');
-Route::get('/dashboard/student-group/{group}/schedule/{date}/students', DailyStudents::class)->name('student.group.date.students');
-Route::get('/dashboard/student-group/{group}/report', \App\Livewire\OrgApp\StudentGroups\Report::class)->name('student.group.report');
-Route::get('/dashboard/reports/groups-attendance', \App\Livewire\OrgApp\Reports\GroupsAttendance::class)->name('reports.groups.attendance');
-Route::get('/dashboard/reports/activity-overview', \App\Livewire\OrgApp\Reports\ActivityOverview::class)->name('reports.activity.overview');
-Route::get('/dashboard/reports/financial-summary', \App\Livewire\OrgApp\Reports\FinancialSummary::class)->name('reports.financial.summary');
-Route::get('/dashboard/reports/beneficiary-impact', \App\Livewire\OrgApp\Reports\BeneficiaryImpact::class)->name('reports.beneficiary.impact');
-Route::get('/dashboard/reports/educational-progress', \App\Livewire\OrgApp\Reports\EducationalProgress::class)->name('reports.educational.progress');
-Route::get('/dashboard/reports/feedback-analysis', \App\Livewire\OrgApp\Reports\FeedbackAnalysis::class)->name('reports.feedback.analysis');
-Route::get('/dashboard/calendar', \App\Livewire\OrgApp\Calendar\Index::class)->name('calendar.index');
-
-
-
-
-
-
-Route::get('dashboard/student',StudentIndex::class)->name('student.index');
-Route::get('dashboard/student/imported-files',ImportedFiles::class)->name('student.imported-files');
-Route::get('dashboard/student/create',StudentCreat::class)->name('student.create');
-Route::get('dashboard/student/{student}/edit',StudentEdit::class)->name('student.edit');
- 
-Route::get('dashboard/teaching-group',TeachingGroupIndex::class)->name('teaching.group.index');
-Route::get('dashboard/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
-Route::get('dashboard/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
-
-Route::get('dashboard/currency', CurrencyIndex::class)->name('currency.index');
-Route::get('dashboard/currency/create', CurrencyCreate::class)->name('currency.create');
-Route::get('dashboard/currency/{currency}/edit', CurrencyEdit::class)->name('currency.edit');
-
-Route::get('dashboard/learnin-subject/create',SubjectCreate::class)->name('subject.create');
-Route::get('dashboard/learnin-subject/{subject}/edit',SubjectEdit::class)->name('subject.edit');
-Route::get('dashboard/learnin-subject',SubjectIndex::class)->name('subject.index');
- 
-Route::get('dashboard/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
- 
-
-Route::get('dashboard/my-tasks', MyTasks::class)->name('my.tasks');
-});
+    Route::get('/users/create',UsersCreate::class)->name('user.create');
+    Route::get('/users/index',UsersIndex::class)->name('user.index');
+    Route::get('/grant-role-to/{userID?}',GrantUserRole::class)->name('grant.role.user');
+    
+    // Status
+    Route::get('/system-names/create',SystemNamesCreate::class)->name('system.names.create');
+    Route::get('/system-names',SystemNamesIndex::class)->name('system.names.index');
+    Route::get('/status/create',StatusCreate::class)->name('status.create');
+    Route::get('/status',StatusIndex::class)->name('status.index');
+    Route::get('/{status}/edit',StatusEdit::class)->name('status.edit');
+    
+    // Ability
+    Route::get('/ability/create',AbilityCreate::class)->name('ability.create');
+    Route::get('/ability/{ability}/edit',AbilityEdit::class)->name('ability.edit');
+    Route::get('/ability/',AbilityIndex::class)->name('ability.index');
+    
+    // Role
+    Route::get('/role-module/create',RoleModuleNameCreate::class)->name('role.module.create');
+    Route::get('/role/create',RoleCreate::class)->name('role.create');
+    Route::get('/role',RoleIndex::class)->name('role.index');
+    Route::get('/role/{id?}/edit',RoleEdit::class)->name('role.edit');
+    
+    
+    
+    
+    // OrgApp - Department
+    Route::get('/department', DepartmentIndex::class)->name('department.index');
+    Route::get('/department/create', DepartmentCreate::class)->name('department.create');
+    Route::get('/department/{department}/edit', DepartmentEdit::class)->name('department.edit');
+    
+    // OrgApp - Employee
+    Route::get('/employee', EmployeeIndex::class)->name('employee.index');
+    Route::get('/employee/create', EmployeeCreate::class)->name('employee.create');
+    Route::get('/employee/{employee}/edit', EmployeeEdit::class)->name('employee.edit');
+    
+    // OrgApp - activity
+    Route::get('/activity', ActivityIndex::class)->name('activity.index');
+    Route::get('/activity/create', ActivityCreate::class)->name('activity.create');
+    Route::get('/activity/{activity}/edit', ActivityEdit::class)->name('activity.edit');
+    Route::get('/activity/{activity}/show', ActivityShow::class)->name('activity.show');
+    
+    Route::get('/sectors', Index::class)->name('sector.show');
+    
+    Route::get('/partner/create', PartnerCreate::class)->name('partner.create');
+    Route::get('/partner/{partner}/edit', PartnerEdit::class)->name('partner.edit');
+    Route::get('/partner', PartnerIndex::class)->name('partner.index');
+    
+    Route::get('/student-group', StudentGroupIndex::class)->name('student.group.index');
+    Route::get('/student-group/create', StudentGroupCreate::class)->name('student.group.create');
+    Route::get('/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
+    Route::get('/student-group/{group}/schedule', StudentGroupSchedule::class)->name('student.group.schedule');
+    Route::get('/student-group/{group}/schedule/{date}/students', DailyStudents::class)->name('student.group.date.students');
+    Route::get('/student-group/{group}/report', \App\Livewire\OrgApp\StudentGroups\Report::class)->name('student.group.report');
+    Route::get('/reports/groups-attendance', \App\Livewire\OrgApp\Reports\GroupsAttendance::class)->name('reports.groups.attendance');
+    Route::get('/reports/activity-overview', \App\Livewire\OrgApp\Reports\ActivityOverview::class)->name('reports.activity.overview');
+    Route::get('/reports/financial-summary', \App\Livewire\OrgApp\Reports\FinancialSummary::class)->name('reports.financial.summary');
+    Route::get('/reports/beneficiary-impact', \App\Livewire\OrgApp\Reports\BeneficiaryImpact::class)->name('reports.beneficiary.impact');
+    Route::get('/reports/educational-progress', \App\Livewire\OrgApp\Reports\EducationalProgress::class)->name('reports.educational.progress');
+    Route::get('/reports/feedback-analysis', \App\Livewire\OrgApp\Reports\FeedbackAnalysis::class)->name('reports.feedback.analysis');
+    Route::get('/calendar', \App\Livewire\OrgApp\Calendar\Index::class)->name('calendar.index');
+    
+    
+    
+    
+    
+    
+    Route::get('/student',StudentIndex::class)->name('student.index');
+    Route::get('/student/imported-files',ImportedFiles::class)->name('student.imported-files');
+    Route::get('/student/create',StudentCreat::class)->name('student.create');
+    Route::get('/student/{student}/edit',StudentEdit::class)->name('student.edit');
+     
+    Route::get('/teaching-group',TeachingGroupIndex::class)->name('teaching.group.index');
+    Route::get('/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
+    Route::get('/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
+    
+    Route::get('/currency', CurrencyIndex::class)->name('currency.index');
+    Route::get('/currency/create', CurrencyCreate::class)->name('currency.create');
+    Route::get('/currency/{currency}/edit', CurrencyEdit::class)->name('currency.edit');
+    
+    Route::get('/learnin-subject/create',SubjectCreate::class)->name('subject.create');
+    Route::get('/learnin-subject/{subject}/edit',SubjectEdit::class)->name('subject.edit');
+    Route::get('/learnin-subject',SubjectIndex::class)->name('subject.index');
+     
+    Route::get('/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
+     
+    
+    Route::get('/my-tasks', MyTasks::class)->name('my.tasks');
+    
+    // OrgApp - Purchase Request
+    Route::get('/purchase-request', \App\Livewire\OrgApp\PurchaseRequest\Index::class)->name('purchase_request.index');
+    Route::get('/purchase-request/create', \App\Livewire\OrgApp\PurchaseRequest\Create::class)->name('purchase_request.create');
+    Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
+    Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
+    
+    });
+    

@@ -3,6 +3,7 @@
 namespace App\Livewire\OrgApp\SubjectForLearn;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Gate;
 use App\Models\StudentSubjectForLearn;
 use App\Concerns\SubjectForLearn\SubjectForLearnTrait;
 
@@ -52,6 +53,9 @@ class Edit extends Component
 
     public function render()
     {
+        if(Gate::denies('curricula.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.subject-for-learn.edit');
     }
 }

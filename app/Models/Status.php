@@ -62,8 +62,8 @@ class Status extends Model
      */
     public function scopeSearchpId(Builder $query, string $value): Builder
     {
+      
         if ($value) {
-
             $query->where('p_id_sub', $value);
         }
         return $query;

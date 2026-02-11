@@ -185,7 +185,7 @@
                                             Details </flux:button>
                                     </flux:modal.trigger>
 
-                                    <flux:modal :name="$modalName" class="md:w-96"
+                                    <flux:modal :name="$modalName" class="w-[85%] md:w-96"
                                         x-on:close-modal="$wire.closeShowModal()">
                                         <div class="mt-4">
                                             @if ($selectedactivityIdForShowModal === $activity->id)

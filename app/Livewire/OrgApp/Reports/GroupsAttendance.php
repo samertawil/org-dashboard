@@ -10,13 +10,13 @@ use Livewire\Attributes\Layout;
 
 class GroupsAttendance extends Component
 {
-    public $dateFrom;
+    public $dateFrom='2023-10-30';
     public $dateTo;
 
     public function mount()
     {
         // Default to current date
-        $this->dateFrom = Carbon::now()->format('Y-m-d');
+        // $this->dateFrom = Carbon::now()->format('Y-m-d');
         $this->dateTo = Carbon::now()->format('Y-m-d');
     }
 

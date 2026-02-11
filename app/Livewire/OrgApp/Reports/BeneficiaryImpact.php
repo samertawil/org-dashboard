@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class BeneficiaryImpact extends Component
 {
-    public $dateFrom;
+    public $dateFrom='2023-10-30';
     public $dateTo;
     public $selectedRegion;
 
     public function mount()
     {
-        $this->dateFrom = now()->startOfYear()->format('Y-m-d');
+        // $this->dateFrom = now()->startOfYear()->format('Y-m-d');
         $this->dateTo = now()->endOfYear()->format('Y-m-d');
     }
 

@@ -6,7 +6,8 @@
 </head>
 
 @php
-    $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
+    // $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
+    $routesToHibernate = [''];
 
     $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
 @endphp
@@ -20,7 +21,7 @@
             <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
         </flux:sidebar.header>
 
-        
+
 
 
 
@@ -30,15 +31,43 @@
                     wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="calendar" :href="route('calendar.index')" :current="request()->routeIs('calendar.index')"
-                    wire:navigate>
+                <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
+                    :current="request()->routeIs('calendar.index')" wire:navigate>
                     {{ __('Calendar') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+            <!-- Reports Group -->
+            <flux:sidebar.group expandable :expanded="false" :heading="__('Reports')" icon="chart-bar"
+                class="grid">
+                <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.activity.overview')"
+                    :current="request()->routeIs('reports.activity.overview')" wire:navigate>
+                    {{ __('Activity Reports') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="currency-dollar" :href="route('reports.financial.summary')"
+                    :current="request()->routeIs('reports.financial.summary')" wire:navigate>
+                    {{ __('Financial Reports') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="user-group" :href="route('reports.beneficiary.impact')"
+                    :current="request()->routeIs('reports.beneficiary.impact')" wire:navigate>
+                    {{ __('Beneficiaries Reports') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
+                    :current="request()->routeIs('reports.educational.progress')" wire:navigate>
+                    {{ __('Educational Reports') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="star" :href="route('reports.feedback.analysis')"
+                    :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
+                    {{ __('Feedback Reports') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
-         
-        
+
+
 
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('App')" class="grid">
@@ -79,18 +108,17 @@
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar"
                         class="grid">
                         @can('currency.create')
-                            
-                        <flux:sidebar.item icon="plus" :href="route('currency.create')"
-                            :current="request()->routeIs('currency.create')" wire:navigate>
-                            {{ __('Create Currency') }}
-                        </flux:sidebar.item>
+                            <flux:sidebar.item icon="plus" :href="route('currency.create')"
+                                :current="request()->routeIs('currency.create')" wire:navigate>
+                                {{ __('Create Currency') }}
+                            </flux:sidebar.item>
                         @endcan
 
                         @can('currency.index')
-                        <flux:sidebar.item icon="list-bullet" :href="route('currency.index')"
-                            :current="request()->routeIs('currency.index')" wire:navigate>
-                            {{ __('Currency List') }}
-                        </flux:sidebar.item>
+                            <flux:sidebar.item icon="list-bullet" :href="route('currency.index')"
+                                :current="request()->routeIs('currency.index')" wire:navigate>
+                                {{ __('Currency List') }}
+                            </flux:sidebar.item>
                         @endcan
                     </flux:sidebar.group>
                 @endcanany
@@ -99,33 +127,43 @@
 
 
                 <!-- Partners Group -->
-                {{-- @can('partner.create') --}}
+              @canany(['partner.index', 'partner.create'])
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="briefcase"
                     class="grid">
+                    @can('partner.create')
                     <flux:sidebar.item icon="plus" :href="route('partner.create')"
                         :current="request()->routeIs('partner.create')" wire:navigate>
                         {{ __('Create Partners') }}
                     </flux:sidebar.item>
+                    @endcan
+                    @can('partner.index')
                     <flux:sidebar.item icon="list-bullet" :href="route('partner.index')"
                         :current="request()->routeIs('partner.index')" wire:navigate>
                         {{ __('Partners List') }}
                     </flux:sidebar.item>
+                    @endcan
                 </flux:sidebar.group>
-                {{-- @endcan --}}
+                @endcanany
 
-                {{-- @can('employee.create') --}}
+             @canany(['curricula.index', 'curricula.create'])
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Curricula')" icon="book-open-text"
-                    class="grid">
+                    class="grid">    
+                    @can('curricula.create')
                     <flux:sidebar.item icon="plus" :href="route('subject.create')"
                         :current="request()->routeIs('subject.create')" wire:navigate>
                         {{ __('Create Curricula') }}
                     </flux:sidebar.item>
+                    @endcan
+                    @can('curricula.index')
                     <flux:sidebar.item icon="list-bullet" :href="route('subject.index')"
                         :current="request()->routeIs('subject.index')" wire:navigate>
                         {{ __('Curricula List') }}
                     </flux:sidebar.item>
+                    @endcan
                 </flux:sidebar.group>
-                {{-- @endcan --}}
+               @endcanany
+
+
 
                 <!-- Students Groups -->
                 {{-- @can('student.group.create') --}}
@@ -190,32 +228,20 @@
 
                 </flux:sidebar.group>
 
-                <!-- Reports Group -->
-                 <flux:sidebar.group expandable :expanded="false" :heading="__('Reports')" icon="chart-bar" class="grid">
-                     <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.activity.overview')"
-                        :current="request()->routeIs('reports.activity.overview')" wire:navigate>
-                        {{ __('Activity Reports') }}
+                <!-- Purchase Group -->
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Purchase')" icon="chart-bar"
+                    class="grid">
+                    <flux:sidebar.item icon="presentation-chart-line" :href="route('purchase_request.create')"
+                        :current="request()->routeIs('purchase_request.create')" wire:navigate>
+                        {{ __('Create Purchase') }}
                     </flux:sidebar.item>
 
-                     <flux:sidebar.item icon="currency-dollar" :href="route('reports.financial.summary')"
-                        :current="request()->routeIs('reports.financial.summary')" wire:navigate>
-                        {{ __('Financial Reports') }}
-                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('purchase_request.index')"
+                    :current="request()->routeIs('purchase_request.index')" wire:navigate>
+                    {{ __('Purchase List') }}
+                </flux:sidebar.item>
 
-                     <flux:sidebar.item icon="user-group" :href="route('reports.beneficiary.impact')"
-                        :current="request()->routeIs('reports.beneficiary.impact')" wire:navigate>
-                        {{ __('Beneficiaries Reports') }}
-                    </flux:sidebar.item>
-
-                     <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
-                        :current="request()->routeIs('reports.educational.progress')" wire:navigate>
-                        {{ __('Educational Reports') }}
-                    </flux:sidebar.item>
-
-                     <flux:sidebar.item icon="star" :href="route('reports.feedback.analysis')"
-                        :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
-                        {{ __('Feedback Reports') }}
-                    </flux:sidebar.item>
+                  
                 </flux:sidebar.group>
 
 

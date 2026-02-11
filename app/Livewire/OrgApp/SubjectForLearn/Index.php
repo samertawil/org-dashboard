@@ -6,11 +6,12 @@ use App\Models\Status;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use App\Models\StudentSubjectForLearn;
-use App\Models\ActivityAttchment;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Attributes\Computed;
 use App\Reposotries\StatusRepo;
+use App\Models\ActivityAttchment;
+use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Gate;
+use App\Models\StudentSubjectForLearn;
+use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
@@ -133,6 +134,9 @@ class Index extends Component
 
     public function render()
     {
+        if(Gate::denies('curricula.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.subject-for-learn.index');
     }
 }

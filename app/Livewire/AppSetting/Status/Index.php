@@ -8,6 +8,7 @@ use App\Models\SystemNames;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 
 class Index extends Component
 {
@@ -72,10 +73,11 @@ class Index extends Component
             ->paginate($this->perPage);
     }
 
+    #[Computed()]
     public function getParentStatuses()
     {
-        return Status::whereNull('p_id_sub')
-            ->orWhere('p_id_sub', 0)
+        return Status::whereNull('p_id_sub')  
+            ->orWhere('p_id_sub', 29)
             ->orderBy('status_name')
             ->get();
     }
@@ -87,12 +89,13 @@ class Index extends Component
     
     public function render()
     {
+      
         if (Gate::denies('status.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.app-setting.status.index', [
             'statuses' => $this->getStatuses(),
-            'parentStatuses' => $this->getParentStatuses(),
+            
             'systemNames' => $this->getSystemNames(),
         ]);
     }

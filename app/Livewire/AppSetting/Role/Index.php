@@ -25,7 +25,7 @@ class Index extends Component
     #[Url()]
     public string $search = '';
     #[Url()]
-    public int $perPage = 5;
+    public int $perPage = 20;
 
 
     public function destroy(int $id): void
