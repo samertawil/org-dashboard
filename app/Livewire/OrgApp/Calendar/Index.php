@@ -72,6 +72,8 @@ class Index extends Component
                 ]
             ];
         });
+        
+        $events = $events->toBase();
 
         $activities = \App\Models\Activity::with(['activityStatus', 'attachments', 'statusSpecificSector'])->get()->map(function ($activity) {
             
@@ -109,6 +111,8 @@ class Index extends Component
                 ]
             ];
         });
+        
+        $activities = $activities->toBase();
 
         // Merge and ensure uniqueness by ID, then reset keys
         $this->events = $events->merge($activities)

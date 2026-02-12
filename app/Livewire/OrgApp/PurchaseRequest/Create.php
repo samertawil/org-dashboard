@@ -6,9 +6,7 @@ use Livewire\Component;
 use App\Models\PurchaseRequisition;
 use App\Concerns\PurchaseRequest\PurchaseTrait;
 use Illuminate\Support\Facades\DB;
-use App\Models\PartnerInstitution;
-use App\Reposotries\StatusRepo;
-use App\Reposotries\PartnersRepo;
+
 
 class Create extends Component
 {
@@ -19,9 +17,20 @@ class Create extends Component
         $this->bootPurchaseTrait(); // Load default data
         $this->addPurchaseRequisitionItem();
         $this->request_date = now()->toDateString();
+        $this->request_number = $this->generateRequestNumber();
        
     }
 
+    public function generateRequestNumber()
+    {
+        $latestRequest = PurchaseRequisition::whereYear('request_date',$this->request_date)->count();
+        return $latestRequest +1  ;
+    }
+
+    public function updatedRequestDate()   {
+     
+        $this->request_number = $this->generateRequestNumber();
+    }
     public function save()
     {
         $this->validate();
@@ -29,13 +38,13 @@ class Create extends Component
         DB::transaction(function () {
             $purchaseRequisition = PurchaseRequisition::create([
                 'request_number' => $this->request_number,
-           
+
                 'request_date' => $this->request_date,
-                'description' => $this->description,
-                'justification' => $this->justification,
+                'description' => $this->description? : null,
+                'justification' => $this->justification? : null,
                 'suggested_vendor_ids' => $this->suggested_vendor_ids,
                 'need_by_date' => $this->need_by_date,
-                'budget_details' => $this->budget_details,
+                'budget_details' => $this->budget_details? : null,
                 'estimated_total' => $this->estimated_total,
                 'estimated_total_currency' => $this->estimated_total_currency,
                 'status_id' => $this->status_id,
@@ -66,7 +75,7 @@ class Create extends Component
     public function render()
     {
         return view('livewire.org-app.purchase-request.create', [
-             'heading' => __('Create Purchase Requisition'),
+            'heading' => __('Create Purchase Requisition'),
         ]);
     }
 }

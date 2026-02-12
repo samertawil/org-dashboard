@@ -6,7 +6,8 @@
             <flux:subheading size="lg">{{ __('monitor and manage your sectors') }}</flux:subheading>
 
         </div>
-        <div class="self-center">
+        <div class="self-center flex gap-2">
+             
             <flux:button href="{{ route('activity.create') }}" wire:navigate variant="ghost" icon="plus">
                 {{ __('New Activity') }}
             </flux:button>
@@ -177,7 +178,7 @@
                                 </div>
 
                                 <div class="flex justify-end items-center">
-                                    @php $modalName = 'activity-show-' . $activity->id; @endphp
+                                    {{-- @php $modalName = 'activity-show-' . $activity->id; @endphp
 
                                     <flux:modal.trigger :name="$modalName">
                                         <flux:button variant="subtle" size="xs" icon="eye"
@@ -193,7 +194,10 @@
                                                     wire:key="show-activity-{{ $activity->id }}" />
                                             @endif
                                         </div>
-                                    </flux:modal>
+                                    </flux:modal> --}}
+                                    <flux:button   tooltip="Show All Data" href="{{ route('activity.show',$activity) }}" wire:navigate variant="subtle" icon="eye">
+                                        {{ __('Details') }}
+                                    </flux:button>
                                 </div>
                             </div>
                         </flux:card>

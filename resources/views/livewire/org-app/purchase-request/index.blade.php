@@ -58,7 +58,7 @@
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
                             <td class="px-6 py-4 text-sm font-medium">{{ $pr->request_number }}</td>
                             <td class="px-6 py-4 text-sm">{{ $pr->request_date ? $pr->request_date->format('Y-m-d') : '-' }}</td>
-                            <td class="px-6 py-4 text-sm truncate max-w-xs">{{ \Illuminate\Support\Str::limit($pr->description, 50) }}</td>
+                            <td class="px-6 py-4 text-sm truncate max-w-xs">{{ \Illuminate\Support\Str::limit($pr->description??'-', 50) }}</td>
                             <td class="px-6 py-4 text-sm">
                                 <flux:badge size="sm">{{ $pr->status->status_name ?? '-' }}</flux:badge>
                             </td>

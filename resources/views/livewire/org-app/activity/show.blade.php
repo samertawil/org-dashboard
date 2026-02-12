@@ -10,15 +10,16 @@
             <flux:button wire:click="downloadPdf" variant="outline" icon="document-arrow-down">
                 {{ __('Export PDF') }}
             </flux:button>
-            <flux:button onclick="window.print()" variant="ghost" icon="printer">
+            <flux:button onclick="window.print()" variant="ghost"   icon="printer">
                 {{ __('Print') }}
             </flux:button>
 
          
 
-            <flux:button href="{{ route('sector.show') }}" wire:navigate variant="ghost" icon="list-bullet">
-                {{ __('Sectors List') }}
+            <flux:button href="{{ url()->previous() }}" variant="ghost" icon="arrow-left">
+                {{ __('Back') }}
             </flux:button>
+          
         </div>
     </div>
 
@@ -100,7 +101,7 @@
 
                     <div class="flex flex-col gap-4">
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Activity Name') }}</span>
                             <div class="flex items-center gap-2">
 
@@ -109,7 +110,7 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Sector Name') }}</span>
                             <div class="flex items-center gap-2">
 
@@ -118,7 +119,7 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Duration') }}</span>
                             <div class="text-xs  ">
                                 <span>{{ $activity->start_date }} -></span>
@@ -128,27 +129,27 @@
 
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Status') }}</span>
                             <span class="text-xs text-zinc-700 dark:text-zinc-300">
                                 {{ $activity->status_info['name'] }}</span>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Total Cost Dollar') }}</span>
                             <span class="text-xs text-zinc-700 dark:text-zinc-300">
                                 ${{ number_format($activity->cost, 2) }} </span>
                         </div>
 
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Total Cost Shikal') }}</span>
                             <span class="text-xs text-zinc-700 dark:text-zinc-300"> NIS &nbsp;
                                 {{ number_format($activity->cost_nis, 2) }} </span>
                         </div>
 
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Rating') }}</span>
                             <div class="flex items-center gap-1">
                                 <flux:icon icon="star" variant="solid"
@@ -174,7 +175,7 @@
                         {{ __('System Metadata') }}</flux:heading>
 
                     <div class="flex flex-col gap-4">
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Created By') }}</span>
                             <div class="flex items-center gap-2">
                                 <flux:avatar src="" name="{{ $activity->creator->name ?? '?' }}"
@@ -184,19 +185,19 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('System ID') }}</span>
                             <span
                                 class="text-xs font-mono text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">#PJ-{{ str_pad($activity->id, 4, '0', STR_PAD_LEFT) }}</span>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Created At') }}</span>
                             <span
                                 class="text-xs text-zinc-700 dark:text-zinc-300">{{ $activity->created_at->format('M d, Y H:i') }}</span>
                         </div>
 
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Last Updated') }}</span>
                             <span
                                 class="text-xs text-zinc-700 dark:text-zinc-300">{{ $activity->updated_at? $activity->updated_at->format('M d, Y H:i') : __('Never') }}</span>
@@ -281,7 +282,28 @@
                 </div>
 
                 @if ($activity->parcels->count() > 0)
-                    <div class="overflow-x-auto">
+                    <div class="block lg:hidden space-y-4">
+                        @foreach ($activity->parcels as $parcel)
+                            <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-100 dark:border-zinc-700/50 flex flex-col gap-2">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $parcel->parcelType->status_name ?? '-' }}</span>
+                                    <span class="text-xs font-mono bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 rounded text-zinc-700 dark:text-zinc-300">
+                                        {{ $parcel->distributed_parcels_count }}
+                                    </span>
+                                </div>
+                                @if ($parcel->notes)
+                                    <div class="text-xs text-zinc-500 italic">{{ $parcel->notes }}</div>
+                                @endif
+                                <div class="flex justify-between items-center text-xs text-zinc-500 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                    <span>{{ __('Unit Cost') }}: ${{ number_format($parcel->cost_for_each_parcel, 2) }}</span>
+                                    <span class="font-bold text-zinc-700 dark:text-zinc-300">
+                                        ${{ number_format($parcel->distributed_parcels_count * $parcel->cost_for_each_parcel, 2) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="hidden lg:block overflow-x-auto">
                         <table class="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
                             <thead class="bg-zinc-50 dark:bg-zinc-900/50 text-xs uppercase font-medium text-zinc-500">
                                 <tr>
@@ -327,7 +349,28 @@
                 </div>
 
                 @if ($activity->beneficiaries->count() > 0)
-                    <div class="overflow-x-auto">
+                    <div class="block lg:hidden space-y-4">
+                        @foreach ($activity->beneficiaries as $beneficiary)
+                            <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-100 dark:border-zinc-700/50 flex flex-col gap-2">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $beneficiary->beneficiaryType->status_name ?? '-' }}</span>
+                                    <span class="text-xs font-mono bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                                        {{ $beneficiary->beneficiaries_count }}
+                                    </span>
+                                </div>
+                                @if ($beneficiary->notes)
+                                    <div class="text-xs text-zinc-500 italic">{{ $beneficiary->notes }}</div>
+                                @endif
+                                <div class="flex justify-between items-center text-xs text-zinc-500 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                                    <span>{{ __('Cost/Person') }}: ${{ number_format($beneficiary->cost_for_each_beneficiary, 2) }}</span>
+                                    <span class="font-bold text-zinc-700 dark:text-zinc-300">
+                                        ${{ number_format($beneficiary->beneficiaries_count * $beneficiary->cost_for_each_beneficiary, 2) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="hidden lg:block overflow-x-auto">
                         <table class="w-full text-left text-sm text-zinc-600 dark:text-zinc-400">
                             <thead class="bg-zinc-50 dark:bg-zinc-900/50 text-xs uppercase font-medium text-zinc-500">
                                 <tr>

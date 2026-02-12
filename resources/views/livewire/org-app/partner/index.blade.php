@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-6">
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
-            <flux:heading level="1" size="xl">{{ __('Partner Institutions') }}</flux:heading>
+            <flux:heading level="1" size="xl">{{ __('Partner/Vendor Institutions') }}</flux:heading>
             <flux:subheading>{{ __('Manage your partner institutions.') }}</flux:subheading>
         </div>
 

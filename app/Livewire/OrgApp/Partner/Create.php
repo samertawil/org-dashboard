@@ -90,10 +90,10 @@ class Create extends Component
         }
 
         return view('livewire.org-app.partner.create', [
-            'heading' => __('Create Partner Institution'),
+            'heading' => __('Create Partner/Vendors Institution'),
             'type' => 'save',
             'activations' => $this->activations,
-            'partnerTypes' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.partner_institutions'))  ,
+            'partnerTypes' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.partners_types'))  ,
         ]);
     }
 }

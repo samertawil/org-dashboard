@@ -59,7 +59,7 @@ Route::get('/', function () {
 
 Route::view('/features', 'features')->name('features');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -109,6 +109,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/activity/create', ActivityCreate::class)->name('activity.create');
     Route::get('/activity/{activity}/edit', ActivityEdit::class)->name('activity.edit');
     Route::get('/activity/{activity}/show', ActivityShow::class)->name('activity.show');
+    Route::get('/activity/{activity}/gallery', \App\Livewire\OrgApp\Activity\Gallery::class)->name('activity.gallery');
     
     Route::get('/sectors', Index::class)->name('sector.show');
     

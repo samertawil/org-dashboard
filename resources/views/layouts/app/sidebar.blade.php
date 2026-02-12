@@ -35,6 +35,10 @@
                     :current="request()->routeIs('calendar.index')" wire:navigate>
                     {{ __('Calendar') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="photo" :href="route('gallery.index')"
+                :current="request()->routeIs('gallery.index')" wire:navigate>
+                {{ __('Gallery') }}
+            </flux:sidebar.item>
             </flux:sidebar.group>
             <!-- Reports Group -->
             <flux:sidebar.group expandable :expanded="false" :heading="__('Reports')" icon="chart-bar"
@@ -325,7 +329,7 @@
         </flux:sidebar.nav>
 
         <flux:spacer />
-
+{{-- 
         <flux:sidebar.nav>
             <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
                 target="_blank">
@@ -336,7 +340,7 @@
                 target="_blank">
                 {{ __('Documentation') }}
             </flux:sidebar.item>
-        </flux:sidebar.nav>
+        </flux:sidebar.nav> --}}
 
         <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
     </flux:sidebar>

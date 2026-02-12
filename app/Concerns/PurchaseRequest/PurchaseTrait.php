@@ -50,13 +50,14 @@ trait PurchaseTrait
 
     public function bootPurchaseTrait()
     {
-        $this->partners = PartnersRepo::partners();
-        $this->statuses = StatusRepo::statuses(); 
-        // Assuming units and currencies might come from statuses or config
-        $this->units = StatusRepo::statuses()->where('p_id', 440); // Example, need to verify parent ID for units
-        // Or generic fetch
+        $this->partners = PartnersRepo::partners()->where('type_id',112);
+        $this->statuses = StatusRepo::statuses()->where('p_id_sub', config('appConstant.purchase_requisition_statuses'));  
+        $this->units = StatusRepo::statuses()->where('p_id_sub', config('appConstant.units_statuses'));   
+     
     }
 
+    
+   
     public function addPurchaseRequisitionItem()
     {
         $this->items[] = [

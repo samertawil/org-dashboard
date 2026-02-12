@@ -35,7 +35,7 @@
              {{-- Request Date --}}
              <flux:field>
                 <flux:label badge="Required" badgeColor="text-red-600">{{ __('Request Date') }}</flux:label>
-                <flux:input type="date" wire:model="request_date" />
+                <flux:input type="date" wire:model.live.lazy="request_date" />
                 <flux:error name="request_date" />
             </flux:field>
  
@@ -66,90 +66,7 @@
                 @endforeach
             </flux:select>
             
-              {{-- Suggested Vendors --}}
-            <div class="col-span-1 md:col-span-2 lg:col-span-3" x-data="{
-                selected: @entangle('suggested_vendor_ids'),
-                options: {{ json_encode($this->partners->map(fn($partner) => ['id' => $partner->id, 'name' => $partner->name])) }},
-                search: '',
-                open: false,
-                get filteredOptions() {
-                    if (this.search === '') {
-                        return this.options.filter(i => !this.selected.includes(i.id));
-                    }
-                    return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !this.selected.includes(i.id));
-                },
-                add(id) {
-                    if (!this.selected.includes(id)) {
-                        this.selected.push(id);
-                    }
-                    this.search = '';
-                    this.open = true; // Keep open to add more
-                },
-                remove(id) {
-                    this.selected = this.selected.filter(i => i !== id);
-                },
-                getName(id) {
-                    const opt = this.options.find(i => i.id == id);
-                    return opt ? opt.name : 'Unknown';
-                }
-            }" class="relative z-50">
-                <flux:label>{{ __('Suggested Vendors') }}</flux:label>
-
-                {{-- Selected Tags Container --}}
-                <div class="flex flex-wrap gap-2 mb-2">
-                    <template x-for="id in selected" :key="id">
-                        <div
-                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-600">
-                            <span x-text="getName(id)"></span>
-                            <button type="button" @click="remove(id)"
-                                class="ml-1.5 inline-flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 focus:outline-none">
-                                <flux:icon name="x-mark" class="size-3" />
-                            </button>
-                        </div>
-                    </template>
-                </div>
-
-                {{-- Search/Dropdown Trigger --}}
-                <div class="relative">
-                    <div class="relative">
-                        <flux:input type="text" x-model="search" @focus="open = true" @click.away="open = false"
-                            @keydown.escape="open = false" placeholder="{{ __('Search and add vendors...') }}"
-                            icon="magnifying-glass" />
-                        <div class="absolute right-0 top-0 h-full flex items-center pr-2">
-                            <button type="button" @click="open = !open"
-                                class="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300">
-                                <flux:icon name="chevron-down" class="size-4" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Dropdown Menu --}}
-                    <div x-show="open && filteredOptions.length > 0"
-                        x-transition:enter="transition ease-out duration-100"
-                        x-transition:enter-start="transform opacity-0 scale-95"
-                        x-transition:enter-end="transform opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-75"
-                        x-transition:leave-start="transform opacity-100 scale-100"
-                        x-transition:leave-end="transform opacity-0 scale-95"
-                        class="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-                        style="display: none;">
-                        <ul class="py-1">
-                            <template x-for="option in filteredOptions" :key="option.id">
-                                <li @click="add(option.id)"
-                                    class="px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer flex items-center justify-between">
-                                    <span x-text="option.name"></span>
-                                    <flux:icon name="plus" class="size-3 text-zinc-400" />
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-                    <div x-show="open && filteredOptions.length === 0 && search !== ''"
-                        class="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg px-4 py-2 text-sm text-zinc-500"
-                        style="display: none;">
-                        {{ __('No vendors found.') }}
-                    </div>
-                </div>
-            </div>
+          
             
              {{-- Need By Date --}}
              <flux:field class="relative z-40">
@@ -243,7 +160,7 @@
                                 </div>
                                 
                                 {{-- Action --}}
-                                <div class="flex items-end justify-end">
+                                <div class=" ">
                                     <flux:button wire:click="removePurchaseRequisitionItem({{ $index }})" variant="ghost" icon="trash" class="text-red-500 hover:text-red-600" />
                                 </div>
                             </div>
@@ -251,7 +168,90 @@
                     @endforeach
                 </div>
             </div>
+    {{-- Suggested Vendors --}}
+    <div class="col-span-1 md:col-span-2 lg:col-span-3" x-data="{
+        selected: @entangle('suggested_vendor_ids'),
+        options: {{ json_encode($this->partners->map(fn($partner) => ['id' => $partner->id, 'name' => $partner->name])) }},
+        search: '',
+        open: false,
+        get filteredOptions() {
+            if (this.search === '') {
+                return this.options.filter(i => !this.selected.includes(i.id));
+            }
+            return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !this.selected.includes(i.id));
+        },
+        add(id) {
+            if (!this.selected.includes(id)) {
+                this.selected.push(id);
+            }
+            this.search = '';
+            this.open = true; // Keep open to add more
+        },
+        remove(id) {
+            this.selected = this.selected.filter(i => i !== id);
+        },
+        getName(id) {
+            const opt = this.options.find(i => i.id == id);
+            return opt ? opt.name : 'Unknown';
+        }
+    }" class="relative z-50">
+        <flux:label>{{ __('Suggested Vendors') }}</flux:label>
 
+        {{-- Selected Tags Container --}}
+        <div class="flex flex-wrap gap-2 mb-2">
+            <template x-for="id in selected" :key="id">
+                <div
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-600">
+                    <span x-text="getName(id)"></span>
+                    <button type="button" @click="remove(id)"
+                        class="ml-1.5 inline-flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 focus:outline-none">
+                        <flux:icon name="x-mark" class="size-3" />
+                    </button>
+                </div>
+            </template>
+        </div>
+
+        {{-- Search/Dropdown Trigger --}}
+        <div class="relative">
+            <div class="relative">
+                <flux:input type="text" x-model="search" @focus="open = true" @click.away="open = false"
+                    @keydown.escape="open = false" placeholder="{{ __('Search and add vendors...') }}"
+                    icon="magnifying-glass" />
+                <div class="absolute right-0 top-0 h-full flex items-center pr-2">
+                    <button type="button" @click="open = !open"
+                        class="text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300">
+                        <flux:icon name="chevron-down" class="size-4" />
+                    </button>
+                </div>
+            </div>
+
+            {{-- Dropdown Menu --}}
+            <div x-show="open && filteredOptions.length > 0"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="transform opacity-0 scale-95"
+                x-transition:enter-end="transform opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="transform opacity-100 scale-100"
+                x-transition:leave-end="transform opacity-0 scale-95"
+                class="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                style="display: none;">
+                <ul class="py-1">
+                    <template x-for="option in filteredOptions" :key="option.id">
+                        <li @click="add(option.id)"
+                            class="px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer flex items-center justify-between">
+                            <span x-text="option.name"></span>
+                            <flux:icon name="plus" class="size-3 text-zinc-400" />
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <div x-show="open && filteredOptions.length === 0 && search !== ''"
+                class="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg px-4 py-2 text-sm text-zinc-500"
+                style="display: none;">
+                {{ __('No vendors found.') }}
+            </div>
+        </div>
+    </div>
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6 relative z-0">
                 <flux:button type="submit" variant="primary" icon="{{ isset($type) && $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">

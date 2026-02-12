@@ -2,23 +2,31 @@
 
 namespace App\Providers;
 
-use App\Models\Status;
 use App\Models\Ability;
-use App\Models\Employee;
+use App\Models\Activity;
+use App\Models\ActivityBeneficiary;
 use App\Models\Department;
-use Carbon\CarbonImmutable;
-use App\Models\StudentGroup;
-use App\Observers\StatusObserver;
+use App\Models\Employee;
+use App\Models\EventAssignee;
 use App\Models\PartnerInstitution;
-use Illuminate\Support\Facades\DB;
+use App\Models\PurchaseRequisition;
+use App\Models\Status;
+use App\Models\StudentGroup;
 use App\Observers\AbilitieObserver;
-use App\Observers\EmployeeObserver;
-use App\Observers\PartnersObserver;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Gate;
+use App\Observers\ActivityObserver;
 use App\Observers\DepartmentObserver;
-use Illuminate\Support\Facades\Cache;
+use App\Observers\EmployeeObserver;
+use App\Observers\EventAssigneeObserver;
+use App\Observers\PartnersObserver;
+use App\Observers\PurchaseRequisitionObserver;
+use App\Observers\StatusObserver;
 use App\Observers\StudentGroupObserver;
+use App\Reposotries\ActivityBeneficiaryRepo;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -45,7 +53,10 @@ class AppServiceProvider extends ServiceProvider
         Ability::observe(AbilitieObserver::class);
         PartnerInstitution::observe(PartnersObserver::class);
         StudentGroup::observe(StudentGroupObserver::class);
-        \App\Models\EventAssignee::observe(\App\Observers\EventAssigneeObserver::class);
+        EventAssignee::observe(EventAssigneeObserver::class);
+        Activity::observe(ActivityObserver::class);
+        ActivityBeneficiary::observe(ActivityBeneficiaryRepo::class);
+        PurchaseRequisition::observe(PurchaseRequisitionObserver::class);
         
 
 

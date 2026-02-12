@@ -34,13 +34,8 @@ class Index extends Component
             ->when($this->search_date, fn($q) => $q->whereDate('request_date', $this->search_date))
             ->when($this->search_status_id, fn($q) => $q->where('status_id', $this->search_status_id))
             ->when($this->search_vendor_id, function($q) {
-                 // MySQL helper for JSON search if it's a JSON column
-                 // Or if it's casted, raw JSON search might be needed
-                 // Assuming JSON column 'suggested_vendor_ids' stores IDs like [1, 2]
-                 // JSON_CONTAINS(suggested_vendor_ids, '1')
                  $q->whereJsonContains('suggested_vendor_ids', $this->search_vendor_id);
-                 // Note: Ensure the ID is passed as string or int depending on storage. JSON_CONTAINS expects string for the needle if purely searching text, but for JSON array it handles strict types.
-                 // Usually casting to string is safer for JSON_CONTAINS on typical columns
+               
             })
             ->latest()
             ->paginate(10);

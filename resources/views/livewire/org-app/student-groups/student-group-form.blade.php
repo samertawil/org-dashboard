@@ -85,9 +85,9 @@
             </flux:select>
 
             {{-- Neighbourhood --}}
-            <flux:select wire:model.live="neighbourhood_id" :label="__('Neighbourhood')"
-             >
-                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Neighbourhood') }}</option>
+            <flux:select wire:model.live="neighbourhood_id" :label="__('Neighbourhood')">
+                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Neighbourhood') }}
+                </option>
                 @foreach ($neighbourhoods as $neighbourhood)
                     <option value="{{ $neighbourhood->id }}">
                         {{ $neighbourhood->neighbourhood_name ?? 'Neighbourhood ' . $neighbourhood->id }}</option>
@@ -95,10 +95,11 @@
             </flux:select>
 
             {{-- Location --}}
-            <flux:select wire:model="location_id" :label="__('Location')"  >
+            <flux:select wire:model="location_id" :label="__('Location')">
                 <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Location') }}</option>
                 @foreach ($locations as $location)
-                    <option value="{{ $location->id }}">{{ $location->location_name ?? 'Location ' . $location->id }}</option>
+                    <option value="{{ $location->id }}">{{ $location->location_name ?? 'Location ' . $location->id }}
+                    </option>
                 @endforeach
             </flux:select>
 
@@ -261,7 +262,8 @@
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">
-                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
+                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}"
+                    wire:loading.attr="disabled">
                     <span wire:loading.remove>{{ $heading }}</span>
                     <span wire:loading>{{ __('Saving...') }}</span>
                 </flux:button>

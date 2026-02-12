@@ -23,7 +23,7 @@
             </div>
             <div class="md:col-span-2">
                 <span class="block text-sm font-medium text-gray-500">{{ __('Description') }}</span>
-                <p class="mt-1 text-gray-900 dark:text-gray-100">{{ $purchaseRequisition->description }}</p>
+                <p class="mt-1 text-gray-900 dark:text-gray-100">{{ $purchaseRequisition->description??'-' }}</p>
             </div>
         </div>
 

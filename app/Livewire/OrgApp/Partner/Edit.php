@@ -99,10 +99,10 @@ class Edit extends Component
         }
 
         return view('livewire.org-app.partner.edit', [
-            'heading' => __('Edit Partner Institution'),
+            'heading' => __('Edit Partner/Vendors Institution'),
             'type' => 'update',
             'activations' => $this->activations,
-            'partnerTypes' => StatusRepo::statuses(),
+            'partnerTypes' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.partners_types'))  ,
         ]);
     }
 }

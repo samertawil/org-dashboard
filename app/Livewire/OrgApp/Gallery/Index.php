@@ -10,30 +10,17 @@ class Index extends Component
 
     public function render()
     {
-        $query = \App\Models\ActivityAttchment::query()
-            ->where('attchment_type', 48)
-            ->whereNotNull('activity_id')
-            ->with(['project' => function ($query) {
-                $query->select('id', 'name', 'start_date', 'end_date', 'sector_id')
-                      ->with(['statusSpecificSector:id,status_name']);
-            }])
-            ->latest();
-
-        $images = $query->paginate(20);
-
-        $slides = $images->getCollection()->map(fn($img) => [
-            'id' => $img->id,
-            'url' => asset('storage/' . $img->attchment_path),
-            'activity_name' => $img->project->name ?? __('Unknown Activity'),
-            'activity_id' => $img->project->id ?? '',
-            'start_date' => $img->project->start_date ?? '-',
-            'end_date' => $img->project->end_date ?? '-',
-            'sector' => $img->project->statusSpecificSector->status_name ?? '-'
-        ])->values();
+        $activities = \App\Models\Activity::query()
+            ->with(['attachments' => function($q) {
+                // $q->latest()->take(5); // Removed take(5) to fix window function SQL error
+                $q->latest();
+            }, 'attachments.attachmentType', 'activityStatus', 'statusSpecificSector'])
+            ->whereHas('attachments') // Only activities with files
+            ->latest('start_date')
+            ->paginate(12);
 
         return view('livewire.org-app.gallery.index', [
-            'images' => $images,
-            'slides' => $slides
+            'activities' => $activities,
         ]);
     }
 }

@@ -180,16 +180,14 @@
                                         </div>
                                     </flux:modal>
 
-                                    <flux:modal.trigger name="activity-attachments">
-                                        <div class="relative">
-                                            <flux:button wire:click="selectActivity({{ $activity->id }})" icon="paper-clip"
+                                    <div class="relative">
+                                            <flux:button href="{{ route('activity.gallery', $activity->id) }}" wire:navigate icon="paper-clip"
                                                 variant="ghost" size="sm" tooltip="Attachments" style="{{ $activity->attachments_count > 0 ? 'color: #3b82f6 !important;' : '' }}">
                                             </flux:button>
                                             @if($activity->attachments_count > 0)
                                                 <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
                                             @endif
                                         </div>
-                                    </flux:modal.trigger>
                                 </div>
                             </td>
                         </tr>
@@ -204,88 +202,7 @@
             </table>
         </div>
 
-        <flux:modal name="activity-attachments" class="w-full md:w-[600px]">
-            <div class="space-y-6">
-                <flux:heading level="2" size="lg">{{ __('Attachments For') }}:
-                    {{ $selectedactivity?->name }}</flux:heading>
 
-                @if ($selectedactivity)
-                    <div class="mb-4">
-                        <x-auth-session-status class="text-center" :status="session('message')" />
-                    </div>
-                    {{-- Existing Attachments --}}
-                    <div class="space-y-2">
-                        <flux:heading size="md">{{ __('Existing Files') }}</flux:heading>
-                        <div class="grid grid-cols-1 gap-2">
-                            @foreach ($attachments as $index => $attachment)
-                                <div wire:key="attachment-{{ $attachment['id'] ?? $index }}"
-                                    class="flex items-center justify-between p-2 border rounded-lg border-zinc-200 dark:border-zinc-700">
-                                    <div class="flex items-center gap-2">
-                                        <flux:icon icon="document" size="sm" class="text-zinc-400" />
-                                        <div class="flex flex-col">
-                                            <span
-                                                class="text-sm font-medium">{{ \Illuminate\Support\Str::limit(basename($attachment['attchment_path'] ?? ''), 25) }}</span>
-                                            <span
-                                                class="text-xs text-zinc-500">{{ $attachment['notes'] ?? '' }}</span>
-                                            <span class="text-xs text-blue-500 dark:text-blue-400 mt-0.5">
-                                                {{ $attachment['attachment_type']['status_name'] ?? '' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <flux:button
-                                            href="{{ asset('storage/' . ($attachment['attchment_path'] ?? '')) }}"
-                                            target="_blank" variant="ghost" size="sm" icon="eye" />
-                                        <flux:button wire:click="deleteAttachment({{ $attachment['id'] }})"
-                                            wire:confirm="Are you sure?" variant="ghost" size="sm"
-                                            wire:loading.attr="disabled"
-                                            icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    {{-- Upload New --}}
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <flux:heading size="md">{{ __('Upload New') }}</flux:heading>
-                            <flux:button wire:click="addAttachment" variant="ghost" size="sm" icon="plus" wire:loading.attr="disabled" />
-                        </div>
-
-                        @foreach ($newAttachments as $index => $item)
-                            <div wire:key="new-attachment-{{ $index }}"
-                                class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4">
-                                <flux:input type="file" wire:model="newAttachments.{{ $index }}.file"
-                                    :label="__('Choose File')" />
-                                <flux:select wire:model="newAttachments.{{ $index }}.attchment_type"
-                                    :label="__('Type')">
-                                    <option value="">{{ __('Select Type') }}</option>
-                                    @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.attchment_types')) as $s)
-                                        <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                                    @endforeach
-                                </flux:select>
-                                <div class="flex items-end gap-2">
-                                    <flux:input wire:model="newAttachments.{{ $index }}.notes"
-                                        :label="__('Notes')" class="flex-1" />
-                                    <flux:button wire:click="removeNewAttachment({{ $index }})"
-                                        variant="ghost" icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
-                                </div>
-                            </div>
-                        @endforeach
-
-                        @if (!empty($newAttachments))
-                            <div class="flex justify-end">
-                                <flux:button wire:click="saveAttachments" variant="primary" icon="cloud-arrow-up" wire:loading.attr="disabled">
-                                    <span wire:loading.remove wire:target="saveAttachments">{{ __('Save All New Files') }}</span>
-                                    <span wire:loading wire:target="saveAttachments">{{ __('Saving...') }}</span>
-                                </flux:button>
-                            </div>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </flux:modal>
 
         <div class="mt-4">
             {{ $this->activities->links() }}
