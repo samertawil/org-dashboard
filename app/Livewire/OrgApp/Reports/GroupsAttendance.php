@@ -2,11 +2,12 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use Livewire\Component;
-use App\Models\StudentGroup;
 use App\Models\StudentDailyAttendance;
+use App\Models\StudentGroup;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class GroupsAttendance extends Component
 {
@@ -22,6 +23,9 @@ class GroupsAttendance extends Component
 
     public function render()
     {
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $groups = StudentGroup::with(['region', 'city', 'neighbourhood', 'location'])
             ->get()
             ->map(function ($group) {

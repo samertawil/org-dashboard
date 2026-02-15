@@ -2,11 +2,12 @@
 
 namespace App\Livewire\OrgApp\Student;
 
-use DateTime;
-use App\Models\Student;
-use Livewire\Component;
-use Livewire\Attributes\Validate;
 use App\Concerns\Student\StudentTrait;
+use App\Models\Student;
+use DateTime;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Create extends Component
 {
@@ -25,6 +26,7 @@ class Create extends Component
     }
     public function save()
     {
+
         $this->validate();
 
         Student::create([
@@ -50,7 +52,9 @@ class Create extends Component
 
     public function render()
     {     
-        
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.student.create', [
             'heading' => __('Create Student'),
             'type' => 'save',

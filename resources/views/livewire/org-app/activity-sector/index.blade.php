@@ -7,10 +7,11 @@
 
         </div>
         <div class="self-center flex gap-2">
-             
+            @can('activity.create') 
             <flux:button href="{{ route('activity.create') }}" wire:navigate variant="ghost" icon="plus">
                 {{ __('New Activity') }}
             </flux:button>
+            @endcan
         </div>
 
     </div>

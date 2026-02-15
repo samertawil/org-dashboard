@@ -2,8 +2,7 @@
 
 namespace App\Livewire\OrgApp\Activity;
 
-use App\Models\City;
-use App\Models\Status;
+
 use Livewire\Component;
 use App\Models\Activity;
 use Livewire\WithPagination;
@@ -25,6 +24,11 @@ class Index extends Component
     public $status_id = '';
     public $region_id = '';
     public $city_id = '';
+
+    protected $listeners = [
+        'refresh-data' => '$refresh',
+       
+    ];
 
     public $selectedactivityIdForShowModal;
 

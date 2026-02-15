@@ -3,14 +3,15 @@
 namespace App\Livewire\OrgApp\Student;
 
 
-use App\Models\Student;
-use Livewire\Component;
-use App\Models\FeedBack;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use App\Imports\StudentsImport;
+use App\Models\FeedBack;
+use App\Models\Student;
 use App\Reposotries\StatusRepo;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
 class Index extends Component
@@ -64,6 +65,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $student = Student::findOrFail($id);
         $student->delete();
         session()->flash('message', __('Student successfully deleted.'));
@@ -71,6 +75,9 @@ class Index extends Component
 
     public function import()
     {
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $this->validate([
             'excelFile' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
@@ -154,6 +161,9 @@ class Index extends Component
 
     public function deleteFeedback($feedbackId)
     {
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $feedback = FeedBack::findOrFail($feedbackId);
         $feedback->delete();
         session()->flash('feedback_success', __('Feedback deleted successfully.'));
@@ -168,6 +178,9 @@ class Index extends Component
     #[Computed()]
     public function studentFeedbacks()
     {
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         if (!$this->selectedStudentId) return [];
         return FeedBack::where('student_id', $this->selectedStudentId)
             ->with('feedbackTypeStatus')
@@ -177,6 +190,9 @@ class Index extends Component
 
     public function render()
     {
+        if(Gate::denies('student.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.student.index');
     }
 }

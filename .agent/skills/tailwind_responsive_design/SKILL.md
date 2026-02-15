@@ -22,16 +22,93 @@ This skill provides best practices for creating responsive, polished, and user-f
 
 Users must know when the app is working.
 
-- **Buttons**: Disable and show a spinner.
+#### A. Livewire Loading (`wire:loading`)
+
+Use `wire:loading` to toggle visibility or attributes based on network requests.
+
+- **Button Loading**: Disable the button and show a spinner while the action is processing.
+
     ```html
     <flux:button wire:click="save" wire:loading.attr="disabled">
         <span wire:loading.remove>Save</span>
-        <span wire:loading>Saving...</span>
+        <span wire:loading class="flex items-center gap-2">
+            <svg
+                class="animate-spin h-5 w-5 text-current"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                ></circle>
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+            </svg>
+            Saving...
+        </span>
     </flux:button>
     ```
-- **Targeted Loading**: Only show loading for the specific action.
+
+- **Targeted Loading**: Only show loading for specific methods or properties using `wire:target`.
     ```html
     <div wire:loading wire:target="delete({{ $id }})">Deleting...</div>
+    ```
+
+#### B. Alpine.js Loading (`x-show`)
+
+For standard form submissions (non-Livewire), use Alpine.js to manage local state.
+
+- **Form Submission**: prevent multiple submissions and show feedback.
+    ```html
+    <form
+        x-data="{ loading: false }"
+        @submit="loading = true"
+        method="POST"
+        action="..."
+    >
+        <!-- Form Inputs -->
+
+        <div class="flex items-center justify-end">
+            <flux:button type="submit" ::disabled="loading">
+                <span x-show="!loading">Submit</span>
+                <span
+                    x-show="loading"
+                    class="flex items-center gap-2"
+                    style="display: none;"
+                >
+                    <svg
+                        class="animate-spin h-5 w-5 text-current"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                    </svg>
+                    Processing...
+                </span>
+            </flux:button>
+        </div>
+    </form>
     ```
 
 ### 2. "Dirty" States (Unsaved Changes)

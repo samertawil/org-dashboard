@@ -37,7 +37,7 @@ trait TeachingGroupTrait
     #[Validate('nullable|exists:statuses,id')]
     public $status = ''; 
 
-    #[Validate('required|integer')]
+    #[Validate('required|global_validation:status')]
     public $activation = GlobalSystemConstant::ACTIVE->value;
 
     #[Validate('required|numeric|min:0')]

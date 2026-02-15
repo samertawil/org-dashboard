@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityParcel extends Model
 {
-    protected $fillable = ['activity_id', 'parcel_type', 'distributed_parcels_count', 'cost_for_each_parcel','notes'];
+    protected $fillable = ['activity_id', 'parcel_type', 'distributed_parcels_count', 'cost_for_each_parcel','notes','unit_id'];
 
     public function activity()
     {
@@ -16,6 +16,11 @@ class ActivityParcel extends Model
     public function parcelType()
     {
         return $this->belongsTo(Status::class, 'parcel_type');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Status::class, 'unit_id');
     }
 
 }

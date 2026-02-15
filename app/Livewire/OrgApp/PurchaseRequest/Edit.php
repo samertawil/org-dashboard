@@ -2,10 +2,11 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
-use Livewire\Component;
-use App\Models\PurchaseRequisition;
 use App\Concerns\PurchaseRequest\PurchaseTrait;
+use App\Models\PurchaseRequisition;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class Edit extends Component
 {
@@ -19,7 +20,6 @@ class Edit extends Component
         $this->purchaseRequisition = $purchaseRequisition;
         
         $this->request_number = $purchaseRequisition->request_number;
-       
         $this->request_date = $purchaseRequisition->request_date ? $purchaseRequisition->request_date->format('Y-m-d') : null;
         $this->description = $purchaseRequisition->description;
         $this->justification = $purchaseRequisition->justification;
@@ -29,7 +29,7 @@ class Edit extends Component
         $this->estimated_total = $purchaseRequisition->estimated_total;
         $this->estimated_total_currency = $purchaseRequisition->estimated_total_currency;
         $this->status_id = $purchaseRequisition->status_id;
-
+        
         $this->items = $purchaseRequisition->items->toArray();
         if(empty($this->items)) {
             $this->addPurchaseRequisitionItem();
@@ -81,6 +81,9 @@ class Edit extends Component
 
     public function render()
     {
+        if(Gate::denies('purchase_request.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.purchase-request.edit', [
             'heading' => __('Edit Purchase Requisition'),
         ]);

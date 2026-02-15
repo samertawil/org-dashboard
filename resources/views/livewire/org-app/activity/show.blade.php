@@ -290,6 +290,9 @@
                                     <span class="text-xs font-mono bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 rounded text-zinc-700 dark:text-zinc-300">
                                         {{ $parcel->distributed_parcels_count }}
                                     </span>
+                                    <span class="text-xs font-mono bg-zinc-200 dark:bg-zinc-700 px-1.5 py-0.5 rounded text-zinc-700 dark:text-zinc-300">
+                                        {{ $parcel->unit->status_name ?? __('-') }}
+                                    </span>
                                 </div>
                                 @if ($parcel->notes)
                                     <div class="text-xs text-zinc-500 italic">{{ $parcel->notes }}</div>
@@ -309,6 +312,7 @@
                                 <tr>
                                     <th class="px-4 py-3 rounded-l-md">{{ __('Parcel Type') }}</th>
                                     <th class="px-4 py-3">{{ __('Quantity') }}</th>
+                                    <th class="px-4 py-3">{{ __('Unit') }}</th>
                                     <th class="px-4 py-3">{{ __('Unit Cost') }}</th>
                                     <th class="px-4 py-3 rounded-r-md">{{ __('Total') }}</th>
                                 </tr>
@@ -325,6 +329,7 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3">{{ $parcel->distributed_parcels_count }}</td>
+                                        <td class="px-4 py-3">{{ $parcel->unit->status_name ?? __('-')  }}</td>
                                         <td class="px-4 py-3">${{ number_format($parcel->cost_for_each_parcel, 2) }}
                                         </td>
                                         <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
@@ -412,14 +417,14 @@
         {{-- Teams Tab --}}
         <div x-show="activeTab === 'teams'" class="print:block print:mt-4" style="display: none;">
             <flux:card>
-                <flux:heading size="lg" class="mb-6">{{ __('Assigned Work Teams') }}</flux:heading>
+                <flux:heading size="lg" class="mb-6 text-left">{{ __('Assigned Work Teams') }}</flux:heading>
 
                 @if ($activity->workTeams->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 text-left">
                         @foreach ($activity->workTeams as $team)
                             <div
-                                class="flex items-start gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:shadow-sm transition-shadow">
-                                <flux:avatar src="" name="{{ $team->employeeRel->full_name ?? '?' }}" />
+                                class="flex   items-start gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:shadow-sm transition-shadow">
+                          
                                 <div class="flex flex-col flex-1 min-w-0">
                                     <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate"
                                         title="{{ $team->employeeRel->full_name ?? '-' }}">

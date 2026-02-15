@@ -104,6 +104,10 @@ class Edit extends Component
 
     public function render()
     {
+        if (Gate::denies('student.group.create')) 
+        { 
+            abort(403, 'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.student-groups.edit', [
             'heading' => __('Edit Student Group'),
             'type' => 'save', // Using save as method name is save() not update()

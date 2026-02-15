@@ -8,11 +8,12 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
 use App\Reposotries\DepartmentRepo;
+use App\Rules\GlobalValidation;
 
 trait EmployeeTrait
 {
 
-    #[Validate('required|integer')]
+ 
     public $gender = '';
 
     #[Validate('nullable|date')]
@@ -42,7 +43,7 @@ trait EmployeeTrait
     #[Validate('nullable|exists:users,id')]
     public $user_id = '';
 
-    #[Validate('required|integer')]
+  
     public $activation = GlobalSystemConstant::ACTIVE->value;
 
     public $genders = [];
@@ -58,6 +59,22 @@ trait EmployeeTrait
         $this->departments = DepartmentRepo::departments();
         $this->users = User::where('activation', GlobalSystemConstant::ACTIVE->value)->get(); 
     }
+
+    
+    public function rules() {
+        return [
+            'activation' => [
+                'required',
+                new GlobalValidation('status'),
+            ],
+
+            'gender' => [
+               'required',
+                new GlobalValidation('gender'),
+            ],
+        ];
+    }
+ 
 
     #[Computed()]
     public function allStatuses()

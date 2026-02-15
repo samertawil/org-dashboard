@@ -2,11 +2,12 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use App\Models\Status;
-use Livewire\Component;
 use App\Models\Activity;
+use App\Models\Status;
 use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class FinancialSummary extends Component
 {
@@ -22,6 +23,9 @@ class FinancialSummary extends Component
 
     public function render()
     {
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // 1. Base Query
         $query = Activity::query()
             ->where('activation', 1)

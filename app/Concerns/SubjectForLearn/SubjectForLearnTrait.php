@@ -19,7 +19,7 @@ trait SubjectForLearnTrait
 
     public $to_age = null;
 
-    #[Validate('required|integer')]
+    #[Validate('required|global_validation:status')]
     public $activation = GlobalSystemConstant::ACTIVE->value;
 
     public $statuses = [];

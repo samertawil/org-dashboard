@@ -70,7 +70,7 @@
                             <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm">
                                 <div class="flex-1 min-w-0">
                                     <p class="font-medium text-sm truncate text-zinc-800 dark:text-zinc-100">{{ $task->event->title ?? 'Untitled Task' }}</p>
-                                    <p class="text-xs text-zinc-500 mt-0.5">{{ $task->event->start->format('M d, H:i') }}</p>
+                                    <p class="text-xs text-zinc-500 mt-0.5">{{ $task->event?$task->event->start->format('M d, H:i') :'' }}</p>
                                 </div>
                                 <flux:badge size="sm" color="zinc" class="rounded-full px-3">{{ $task->status }}</flux:badge>
                             </div>
@@ -89,7 +89,7 @@
                 </div>
                 
                 <div class="space-y-4">
-                    @foreach($plannedActivities as $activity)
+                    @forelse($plannedActivities as $activity)
                         <div class="flex items-center gap-4 group">
                             <div class="size-10 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                 <flux:icon icon="clipboard-document-list" class="size-5" />
@@ -108,7 +108,9 @@
                                 </p>
                             </div>
                         </div>
-                    @endforeach
+                        @empty 
+                        <span class="text-gray-500 placeholder-gray-500">No scheduled activities.</span>
+                    @endforelse
                 </div>
             </flux:card>
         </div>

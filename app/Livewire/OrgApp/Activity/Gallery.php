@@ -90,8 +90,8 @@ class Gallery extends Component
     }
     
 
-    public $uploadFile; // Specific property for single file upload binding
-    public $uploadType;
+    public $uploadFiles = []; // Changed to array for multiple files
+    // public $uploadType; // Removed as it is now auto-detected
     public $uploadNotes;
 
     public function saveUploadedFile()
@@ -101,23 +101,58 @@ class Gallery extends Component
         }
 
         $this->validate([
-            'uploadFile' => 'required|file|max:2048', // 2MB max
-            'uploadType' => 'required',
+            'uploadFiles.*' => 'required|file|max:10240', // Validate each file, increased max size for media
+            // 'uploadType' => 'required', // Removed validation
         ]);
 
-        $path = $this->uploadFile->store('activity-attachments', 'public');
+        foreach ($this->uploadFiles as $file) {
+            // Image Optimization Logic
+            // Check if file is image and larger than 3MB (3 * 1024 * 1024)
+            if (str_starts_with($file->getMimeType(), 'image/') && $file->getSize() > 3145728) {
+                try {
+                    // Create manager instance with desired driver (gd or imagick)
+                    $manager = new \Intervention\Image\ImageManager(
+                        new \Intervention\Image\Drivers\Gd\Driver()
+                    );
+                    
+                    $image = $manager->read($file->getRealPath());
 
-        $this->activity->attachments()->create([
-            'attchment_path' => $path,
-            'attchment_type' => $this->uploadType,
-            'notes' => $this->uploadNotes ?? $this->uploadFile->getClientOriginalName(),
-            'status_id' => 1,
-        ]);
+                    // Resize to max 1920px width or height, maintaining aspect ratio
+                    $image->scale(width: 1920);
+
+                    // Encode to Jpeg with 80% quality and save back to temp file
+                    $image->toJpeg(quality: 80)->save($file->getRealPath());
+                    
+                } catch (\Exception $e) {
+                    // Log error or continue with original file if optimization fails
+                    // \Log::error('Image optimization failed: ' . $e->getMessage());
+                }
+            }
+
+            $path = $file->store('activity-attachments', 'public');
+            $extension = strtolower($file->getClientOriginalExtension());
+            
+            // Determine type ID
+            $typeId = 49; // Default to File
+            
+            if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                $typeId = 48; // Image
+            } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
+                $typeId = 50; // Media
+            }
+
+            $this->activity->attachments()->create([
+                'attchment_path' => $path,
+                'attchment_type' => $typeId,
+                'notes' => $this->uploadNotes ?? $file->getClientOriginalName(),
+                'status_id' => 1,
+            ]);
+        }
 
         // Reset
-        $this->reset(['uploadFile', 'uploadType', 'uploadNotes']);
+        $this->reset(['uploadFiles', 'uploadNotes']);
         $this->dispatch('upload-finished'); 
-        session()->flash('message', 'File uploaded successfully.');
+        session()->flash('message', 'Files uploaded successfully.');
     }
 
     public function render()

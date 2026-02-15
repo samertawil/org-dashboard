@@ -2,12 +2,13 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use Livewire\Component;
+use App\Models\Region;
 use App\Models\Student;
 use App\Models\StudentGroup;
-use App\Models\Region;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class EducationalProgress extends Component
 {
@@ -16,6 +17,9 @@ class EducationalProgress extends Component
 
     public function render()
     {
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // 1. Base Query for Students
         $studentQuery = Student::query()
              ->where('activation', 1);

@@ -2,8 +2,9 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use Livewire\Component;
 use App\Models\Activity;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 
 class ActivityOverview extends Component
@@ -21,6 +22,10 @@ class ActivityOverview extends Component
 
     public function render()
     {
+           
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // 1. Base Query
         $query = Activity::query()
             ->select('id', 'name', 'status', 'region', 'cost', 'cost_nis', 'start_date', 'activation')

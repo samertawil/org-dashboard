@@ -15,7 +15,7 @@ class Show extends Component
 
     public function mount(Activity $activity)
     {
-        $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels', 'beneficiaries', 'workTeams']);
+        $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels', 'beneficiaries', 'workTeams',]);
     }
 
     public function downloadPdf()

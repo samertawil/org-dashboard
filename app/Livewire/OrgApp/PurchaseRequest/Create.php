@@ -2,10 +2,11 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
-use Livewire\Component;
-use App\Models\PurchaseRequisition;
 use App\Concerns\PurchaseRequest\PurchaseTrait;
+use App\Models\PurchaseRequisition;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 
 class Create extends Component
@@ -74,6 +75,9 @@ class Create extends Component
 
     public function render()
     {
+        if(Gate::denies('purchase_request.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.purchase-request.create', [
             'heading' => __('Create Purchase Requisition'),
         ]);

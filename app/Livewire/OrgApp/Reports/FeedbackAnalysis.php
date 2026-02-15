@@ -2,13 +2,15 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use Livewire\Component;
 use App\Models\Activity;
 use App\Models\FeedBack;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class FeedbackAnalysis extends Component
 {
+    
     public $dateFrom='2023-10-30';
     public $dateTo;
 
@@ -20,6 +22,9 @@ class FeedbackAnalysis extends Component
 
     public function render()
     {
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // 1. Base Query for Feedback
         $feedbackQuery = FeedBack::query()
              ->whereBetween('created_at', [$this->dateFrom, $this->dateTo]);

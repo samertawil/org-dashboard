@@ -20,6 +20,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (Gate::denies('department.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $department = Department::findOrFail($id);
         $department->delete();
         session()->flash('message', __('Department successfully deleted.'));
@@ -27,7 +30,7 @@ class Index extends Component
 
     public function render()
     {
-        if (Gate::denies('department.create')) {
+        if (Gate::denies('department.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
         $departments = Department::where('name', 'like', '%' . $this->search . '%')

@@ -163,6 +163,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/purchase-request/create', \App\Livewire\OrgApp\PurchaseRequest\Create::class)->name('purchase_request.create');
     Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
     Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
+    Route::get('/purchase-request/{purchaseRequisition}/gallery', \App\Livewire\OrgApp\PurchaseRequest\Gallery::class)->name('purchase_request.gallery');
     
     });
     

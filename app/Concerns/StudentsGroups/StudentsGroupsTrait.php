@@ -43,7 +43,7 @@ trait StudentsGroupsTrait
     #[Validate('nullable|string')]
     public $description = null;
 
-    #[Validate('required|integer')]
+    #[Validate('required|global_validation:status')]
     public $activation = GlobalSystemConstant::ACTIVE->value;
 
     #[Validate('nullable|exists:statuses,id')]

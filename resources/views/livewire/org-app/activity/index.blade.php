@@ -4,10 +4,11 @@
             <flux:heading level="1" size="xl">{{ __('Activities') }}</flux:heading>
             <flux:subheading>{{ __('Manage and filter organization Activities.') }}</flux:subheading>
         </div>
-
-        <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus">
-            {{ __('Add Activity') }}
-        </flux:button>
+        @can('activity.create')
+            <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus">
+                {{ __('Add Activity') }}
+            </flux:button>
+        @endcan
     </div>
 
     {{-- Success Message --}}
@@ -20,7 +21,8 @@
             {{-- Name Search --}}
             <flux:field class="relative">
                 <flux:label>{{ __('Activity Name') }}</flux:label>
-                <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search by name...')" icon="magnifying-glass" />
+                <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search by name...')"
+                    icon="magnifying-glass" />
                 <div wire:loading wire:target="search" class="absolute right-3 bottom-2">
                     <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
                 </div>
@@ -97,7 +99,7 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Region/City') }}
                         </th>
-{{-- 
+                        {{-- 
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Rating') }}
@@ -146,7 +148,7 @@
                                 {{ $activity->regions->region_name ?? '-' }} /
                                 {{ $activity->cities->city_name ?? '-' }}
                             </td>
-{{-- 
+                            {{-- 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 <div class="flex items-center gap-1">
                                     <flux:icon icon="star" variant="solid" class="{{ $activity->rating_info['color'] }} w-4 h-4" />
@@ -156,12 +158,15 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
+                                    @can('activity.create')
                                     <flux:button href="{{ route('activity.edit', $activity) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
-                                    <flux:button wire:click="delete({{ $activity->id }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this activity?') }}"
-                                        variant="ghost" size="sm" icon="trash"
-                                        class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                 
+                                        <flux:button wire:click="delete({{ $activity->id }})"
+                                            wire:confirm="{{ __('Are you sure you want to delete this activity?') }}"
+                                            variant="ghost" size="sm" icon="trash"
+                                            class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    @endcan
                                     @php $modalName = 'activity-show-' . $activity->id; @endphp
 
                                     <flux:modal.trigger :name="$modalName">
@@ -170,7 +175,8 @@
                                         </flux:button>
                                     </flux:modal.trigger>
 
-                                    <flux:modal :name="$modalName" class="!w-11/12 !max-w-7xl md:!w-11/12 md:!max-w-7xl"
+                                    <flux:modal :name="$modalName"
+                                        class="!w-11/12 !max-w-7xl md:!w-11/12 md:!max-w-7xl"
                                         x-on:close-modal="$wire.closeShowModal()">
                                         <div class="mt-4">
                                             @if ($selectedactivityIdForShowModal === $activity->id)
@@ -179,15 +185,19 @@
                                             @endif
                                         </div>
                                     </flux:modal>
-
+                                    @can('activity.create')
                                     <div class="relative">
-                                            <flux:button href="{{ route('activity.gallery', $activity->id) }}" wire:navigate icon="paper-clip"
-                                                variant="ghost" size="sm" tooltip="Attachments" style="{{ $activity->attachments_count > 0 ? 'color: #3b82f6 !important;' : '' }}">
-                                            </flux:button>
-                                            @if($activity->attachments_count > 0)
-                                                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
-                                            @endif
-                                        </div>
+                                        <flux:button href="{{ route('activity.gallery', $activity->id) }}"
+                                            wire:navigate icon="paper-clip" variant="ghost" size="sm"
+                                            tooltip="Attachments"
+                                            style="{{ $activity->attachments_count > 0 ? 'color: #3b82f6 !important;' : '' }}">
+                                        </flux:button>
+                                        @if ($activity->attachments_count > 0)
+                                            <span
+                                                class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                        @endif
+                                    </div>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

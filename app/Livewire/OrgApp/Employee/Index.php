@@ -20,6 +20,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (Gate::denies('employee.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }  
         $employee = Employee::findOrFail($id);
         $employee->delete();
         session()->flash('message', __('Employee successfully deleted.'));
@@ -27,8 +30,8 @@ class Index extends Component
 
     public function render()
     {
-        if (Gate::denies('employee.create')) {
-            abort(403, 'You do not have the necessary permissions');
+        if (Gate::denies('employee.index')) {
+            abort(403, 'You do not have the necessary permissions.');
         }
         $employees = Employee::with(['department', 'positionStatus'])
             ->where(function($query) {

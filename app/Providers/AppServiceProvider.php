@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Validator;
+use App\Enums\GlobalSystemConstant;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +48,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Validator::extend('global_validation', function ($attribute, $value, $parameters, $validator) {
+            $type = $parameters[0] ?? 'status'; 
+            $enum = GlobalSystemConstant::tryFrom((int)$value);
+            return $enum && $enum->getType() === $type;
+        });
 
         Status::observe(StatusObserver::class);
         Employee::observe(EmployeeObserver::class);
@@ -66,30 +74,53 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             if (!$user) return null;
 
-            $userIdsWithFullAccess = [1];
-            if (in_array($user->id, $userIdsWithFullAccess)) {
+            // 1. Super Admin Check
+            if ($user->isSuperAdmin()) {
                 return true;
             }
 
-            // Dynamically load abilities and check permissions
-            $abilities = Cache::rememberForever('abilities_list', function () {
-                return Ability::all();
-            });
-
-            if ($data = $abilities->firstWhere('ability_name', $ability)) {
-                if ($user->activation != 1) {
-                    return false;
-                }
-
-                foreach ($user->rolesRelation as $role) {
-                    if (in_array($data->ability_name, $role->abilities)) {
-                        return true;
-                    }
-                }
+            // 2. Check Activation
+            if ($user->activation != 1) {
                 return false;
             }
 
-            return null; // Let other gates handle it if not an 'Ability'
+            // 3. Load Abilities Definition (Cached names only for performance)
+            static $cachedAbilityNames = null;
+            if ($cachedAbilityNames === null) {
+                $cachedAbilityNames = Cache::rememberForever('abilities_names_list', function () {
+                    return Ability::pluck('ability_name')->all();
+                });
+            }
+
+            // If the requested capability is NOT in our dynamic abilities list, ignore it (return null)
+            // This allows Policy classes to work for other things.
+            if (!in_array($ability, $cachedAbilityNames)) {
+                return null;
+            }
+
+            // 4. Flatten User Permissions (Runtime Cache/Optimization)
+            // We use a static variable to hold the permissions for the *current request*
+            // so we don't loop through roles for every single @can check on the page.
+            static $userPermissions = [];
+            
+            // Check if user permissions are already loaded for the current user ID to avoid conflict if user changes (rare but safe)
+            static $lastUserId = null;
+
+            if ($lastUserId !== $user->id) {
+                $userPermissions = [];
+                $lastUserId = $user->id;
+                
+                // Eager load roles if possible, or access relation
+                foreach ($user->rolesRelation as $role) {
+                     // Assuming 'abilities' is a JSON casted array on the Role model
+                    if (!empty($role->abilities) && is_array($role->abilities)) {
+                        $userPermissions = array_merge($userPermissions, $role->abilities);
+                    }
+                }
+                $userPermissions = array_unique($userPermissions);
+            }
+
+            return in_array($ability, $userPermissions);
         });
     }
 

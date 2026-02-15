@@ -2,9 +2,10 @@
 
 namespace App\Livewire\OrgApp\Student;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class ImportedFiles extends Component
 {
@@ -19,6 +20,9 @@ class ImportedFiles extends Component
 
     public function render()
     {
+        if(Gate::denies('student.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $files = Storage::files('student_imported_sheet_files');
         
         $fileDetails = collect($files)->map(function($path) {

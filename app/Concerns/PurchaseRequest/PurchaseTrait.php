@@ -3,6 +3,7 @@
 namespace App\Concerns\PurchaseRequest;
 
 use Livewire\Attributes\Validate;
+use Livewire\WithFileUploads;
 use App\Models\PartnerInstitution;
 use App\Models\Status;
 use App\Reposotries\StatusRepo;
@@ -12,7 +13,6 @@ trait PurchaseTrait
 {
     #[Validate('required|integer')]
     public $request_number;
-
 
     #[Validate('required|date')]
     public $request_date;
@@ -66,7 +66,7 @@ trait PurchaseTrait
             'quantity' => 1,
             'unit_id' => null,
             'unit_price' => 0,
-            'currency' => null, // Currency for the item
+            'currency' => null,
         ];
     }
 

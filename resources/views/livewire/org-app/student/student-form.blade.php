@@ -4,7 +4,7 @@
             <flux:heading level="1" size="xl">{{$heading}}</flux:heading>
             <flux:subheading>{{$subheading ?? __('Enter the details for the student below.')}}</flux:subheading>
         </div>
-        
+        @can('student.index')
         <flux:button 
             href="{{ route('student.index') }}" 
             wire:navigate 
@@ -13,6 +13,7 @@
         >
             {{ __('Student List') }}
         </flux:button>
+        @endcan
     </div>
 
     {{-- Success Message --}}

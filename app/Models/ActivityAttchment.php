@@ -13,6 +13,11 @@ class ActivityAttchment extends Model
         return $this->belongsTo(Activity::class, 'activity_id');
     }
 
+    public function activity()
+    {
+        return $this->belongsTo(Activity::class, 'activity_id');
+    }
+
     public function attachmentType()
     {
         return $this->belongsTo(Status::class, 'attchment_type');

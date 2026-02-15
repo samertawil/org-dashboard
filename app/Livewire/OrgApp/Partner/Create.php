@@ -86,7 +86,7 @@ class Create extends Component
     {
         if (Gate::denies('partner.create')) 
         { 
-            abort(403, 'You do not have the necessary permissions');
+            abort(403, 'You do not have the necessary permissions.');
         }
 
         return view('livewire.org-app.partner.create', [

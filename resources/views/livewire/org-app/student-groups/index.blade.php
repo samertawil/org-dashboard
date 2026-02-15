@@ -4,10 +4,11 @@
             <flux:heading level="1" size="xl">{{ __('Student Groups') }}</flux:heading>
             <flux:subheading>{{ __('Manage your student groups.') }}</flux:subheading>
         </div>
-
+        @can('student.group.create') 
         <flux:button href="{{ route('student.group.create') }}" wire:navigate variant="primary" icon="plus">
             {{ __('Add Group') }}
         </flux:button>
+        @endcan
     </div>
 
     {{-- Success Message --}}
@@ -152,10 +153,12 @@
                                         target="_blank" variant="ghost" size="sm" icon="map-pin" title="{{ __('View Map') }}" />
                                     <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
+                                        @can('student.group.create') 
                                     <flux:button wire:click="delete({{ $group->id }})"
                                         wire:confirm="{{ __('Are you sure you want to delete this group?') }}"
                                         variant="ghost" size="sm" icon="trash"
                                         class="text-red-500 hover:text-red-600" />
+                                        @endcan
                                 </div>
                             </td>
                         </tr>

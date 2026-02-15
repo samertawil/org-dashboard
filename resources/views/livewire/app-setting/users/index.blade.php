@@ -125,6 +125,13 @@
                             {{ __('Activation') }}
                         </th>
 
+                        
+                        <th scope="col"
+                        class="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        {{ __('Setting') }}
+                    </th>
+
+
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
@@ -155,10 +162,12 @@
                                         'text-green-600 dark:text-green-400' => $user->activation == 1,
                                         'text-red-600 dark:text-red-400' => $user->activation == 0,
                                     ])>
-                                        {{ data_get(\App\Enums\GlobalSystemConstant::options()->where('type', 'status')->firstWhere('value', $user->activation), 'label', __('No description')) }}
+                                        {{ data_get(\App\Enums\GlobalSystemConstant::options()->where('type', 'status')->firstWhere('value', $user->activation), 'label', __('No Status')) }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+ 
+
+                                <td class="px-6 py-3 whitespace-nowrap text-center text-sm font-medium">
                                     <flux:dropdown>
                                         <flux:button variant="ghost" icon="cog-6-tooth" size="sm" />
 
@@ -169,6 +178,10 @@
 
                                             <flux:menu.item href="{{ route('grant.role.user', $user->id) }}" icon="shield-check" wire:navigate>
                                                 {{ __('grant_privileges') }}
+                                            </flux:menu.item>
+
+                                            <flux:menu.item  wire:click.prevent="switchActivation({{ $user->id }})"  icon="arrow-path" wire:navigate>
+                                                {{ __('Switch Activation') }}
                                             </flux:menu.item>
                                         </flux:menu>
                                     </flux:dropdown>

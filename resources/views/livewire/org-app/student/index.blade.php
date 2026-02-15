@@ -6,15 +6,19 @@
         </div>
 
         <div class="flex gap-2">
+            @can('student.create')
             <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box">
                 {{ __('Archived Imports') }}
             </flux:button>
+            @endcan
+            @can('student.create')
             <flux:modal.trigger name="import-modal">
                 <flux:button variant="ghost" icon="document-arrow-up">{{ __('Import Excel') }}</flux:button>
             </flux:modal.trigger>
             <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus">
                 {{ __('Add Student') }}
             </flux:button>
+            @endcan
         </div>
     </div>
 

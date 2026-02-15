@@ -2,25 +2,16 @@
 
 namespace App\Livewire\OrgApp\Activity;
 
-use App\Models\City;
-use App\Models\Region;
-use App\Models\Status;
-use Livewire\Component;
-use App\Models\Activity;
-use App\Models\Employee;
-use App\Models\Location;
-use App\Models\StudentGroup;
-use App\Models\Neighbourhood;
-use App\Reposotries\CityRepo;
-use App\Reposotries\RegionRepo;
 
+use App\Concerns\Activity\FormTrait;
+use App\Models\Activity;
+use App\Reposotries\CityRepo;
 use App\Reposotries\employeeRepo;
 use App\Reposotries\LocationRepo;
-use App\Models\PartnerInstitution;
-use App\Enums\GlobalSystemConstant;
-use App\Concerns\Activity\FormTrait;
-use Illuminate\Support\Facades\Gate;
 use App\Reposotries\NeighbourhoodRepo;
+use App\Reposotries\RegionRepo;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class Edit extends Component
 {
@@ -49,6 +40,7 @@ class Edit extends Component
         $this->address_details = $activity->address_details;
         $this->sector_id = $activity->sector_id;
         $this->cost_nis = $activity->cost_nis;
+       
 
         $this->parcels = $activity->parcels->toArray();
         if (empty($this->parcels)) $this->addParcel();
@@ -96,6 +88,7 @@ class Edit extends Component
             'location' => $this->location ?: null,
             'address_details' => $this->address_details,
             'sector_id' => $this->sector_id,
+           
         ]);
 
         $this->activity->parcels()->delete();
@@ -150,6 +143,7 @@ class Edit extends Component
             }
         }
 
+        $this->dispatch('refresh-data');
         session()->flash('message', __('Activity successfully updated.'));
 
         return $this->redirect(route('activity.index'), navigate: true);

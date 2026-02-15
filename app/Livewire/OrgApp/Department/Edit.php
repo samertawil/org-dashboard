@@ -66,7 +66,7 @@ class Edit extends Component
     public function render()
     {
         if (Gate::denies('department.create')) {
-            abort(403, 'You do not have the necessary permissions');
+            abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.org-app.department.edit', [
             'heading' => __('Edit Department'),

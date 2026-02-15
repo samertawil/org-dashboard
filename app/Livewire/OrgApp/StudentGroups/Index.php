@@ -64,6 +64,10 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (Gate::denies('student.group.create')) 
+        { 
+            abort(403, 'You do not have the necessary permissions');
+        }
         $group = StudentGroup::findOrFail($id);
         $group->delete();
         session()->flash('message', __('Student Group successfully deleted.'));
@@ -93,7 +97,10 @@ class Index extends Component
 
     public function render()
     {
-
+        if (Gate::denies('student.group.index')) 
+        { 
+            abort(403, 'You do not have the necessary permissions');
+        }
         //          $data = Student::groupBy('student_groups_id')->select('student_groups_id', DB::raw('count(*) as total'))->get();
 
         // dd($data);

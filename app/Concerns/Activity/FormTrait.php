@@ -49,6 +49,10 @@ trait FormTrait
     #[Validate('required|exists:statuses,id')]
     public $sector_id = '';
 
+    #[Validate('nullable|exists:statuses,id')]
+    public $unit_id ;
+
+    
     #[Validate('nullable|string|max:255')]
     public  $address_details = null;
 
@@ -57,6 +61,7 @@ trait FormTrait
     public $partners=[];
     public $studentGroups=[];
     public $activity_partners = [];
+    public $units = [];
  
 
 
@@ -75,6 +80,7 @@ trait FormTrait
       
         $this->beneficiaryTypes = $this->allStatuses()->where('p_id_sub', config('appConstant.beneficiaries_types')) ;
         $this->missionTitles =  $this->allStatuses()->where('p_id_sub', config('appConstant.aids_primary_missions')) ;
+        $this->units =  $this->allStatuses()->where('p_id_sub', config('appConstant.units_statuses')) ;
         $this->partners = PartnersRepo::partners();
         $this->studentGroups = StudentGroupRepo::studentGroups();
         
@@ -88,6 +94,7 @@ trait FormTrait
             'cost_for_each_parcel' => 0.00,
             'status_id' => '',
             'notes' => '',
+            'unit_id' => '',
         ];
     }
 

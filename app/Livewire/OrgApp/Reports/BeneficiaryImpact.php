@@ -2,12 +2,13 @@
 
 namespace App\Livewire\OrgApp\Reports;
 
-use Livewire\Component;
 use App\Models\Activity;
 use App\Models\Region;
 use App\Models\Status; // Assuming beneficiary types are stored in statuses or a similar lookup, based on ActivityBeneficiary code check.
-// Actually, ActivityBeneficiary has 'beneficiary_type' which relates to Status.
 use Illuminate\Support\Facades\DB;
+// Actually, ActivityBeneficiary has 'beneficiary_type' which relates to Status.
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class BeneficiaryImpact extends Component
 {
@@ -23,6 +24,9 @@ class BeneficiaryImpact extends Component
 
     public function render()
     {
+        if (Gate::denies('reports.all')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // 1. Base Query for Activities
         $query = Activity::query()
             ->where('activation', 1)

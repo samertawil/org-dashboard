@@ -2,12 +2,13 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
+use App\Models\PurchaseRequisition;
+use App\Reposotries\PartnersRepo;
+use App\Reposotries\StatusRepo;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\PurchaseRequisition;
-use App\Reposotries\StatusRepo;
-use App\Reposotries\PartnersRepo;
-use Livewire\Attributes\Computed;
 
 class Index extends Component
 {
@@ -55,6 +56,9 @@ class Index extends Component
 
     public function delete($id)
     {
+        if(Gate::denies('purchase_request.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $record = PurchaseRequisition::findOrFail($id);
         $record->delete();
         session()->flash('message', __('Purchase Requisition deleted successfully.'));

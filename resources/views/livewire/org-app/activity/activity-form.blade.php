@@ -174,6 +174,16 @@
                                 <flux:input type="number"
                                     wire:model="parcels.{{ $index }}.distributed_parcels_count"
                                     :label="__('Count')" />
+                                    <flux:select wire:model="parcels.{{ $index }}.unit_id"
+                                    :label="__('Unit Type')">
+                                    <option value="">{{ __('Select') }}</option>
+                                   
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}">{{ $unit->status_name }}</option>
+                                        @endforeach
+                                  
+
+                                </flux:select>
                                 <flux:input type="number" step="0.01"
                                     wire:model="parcels.{{ $index }}.cost_for_each_parcel"
                                     :label="__('Cost Per Parcel')" />

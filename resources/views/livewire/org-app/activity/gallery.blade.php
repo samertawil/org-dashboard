@@ -188,15 +188,7 @@
             <flux:heading level="2" size="lg">{{ __('Upload File') }}</flux:heading>
 
             <div class="space-y-4">
-                <flux:input type="file" wire:model="uploadFile" :label="__('Choose File')" />
-
-                <flux:select wire:model="uploadType" :label="__('Type')">
-                    <option value="">{{ __('Select Type') }}</option>
-                    {{-- Getting statuses via a computed property or injecting them would be cleaner --}}
-                    @foreach (\App\Reposotries\StatusRepo::statuses()->where('p_id_sub', config('appConstant.attchment_types')) as $s)
-                        <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                    @endforeach
-                </flux:select>
+                <flux:input type="file" wire:model="uploadFiles" :label="__('Choose Files')" multiple />
 
                 <flux:input wire:model="uploadNotes" :label="__('Notes / Custom Name')"
                     placeholder="e.g. Site Visit Photo" />
@@ -205,7 +197,7 @@
             <div class="flex justify-end gap-2 mt-2">
                 <flux:button variant="ghost" x-on:click="$dispatch('modal-close', { name: 'upload-modal' })">
                     {{ __('Cancel') }}</flux:button>
-                <flux:button wire:click="saveUploadedFile" variant="primary" wire:loading.attr="disabled">
+                <flux:button wire:click="saveUploadedFile" variant="primary" wire:loading.attr="disabled"  >
                     <span wire:loading.remove wire:target="saveUploadedFile">{{ __('Upload') }}</span>
                     <span wire:loading wire:target="saveUploadedFile">{{ __('Uploading...') }}</span>
                 </flux:button>

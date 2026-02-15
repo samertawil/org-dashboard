@@ -18,11 +18,12 @@ trait StudentTrait
     #[Validate('nullable|exists:student_groups,id')]
     public $student_groups_id = '';
 
-    #[Validate('required|string')]
+    #[Validate('required')]
     public $gender = ''; 
 
-    #[Validate('required|integer')]
-    public $activation = 1;
+    #[Validate('required')]
+    #[Validate('global_validation:status', message: 'Wrong value')]
+    public $activation = GlobalSystemConstant::ACTIVE->value;
 
     #[Validate('nullable|exists:statuses,id')]
     public $status_id = '';

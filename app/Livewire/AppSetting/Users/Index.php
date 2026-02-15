@@ -82,6 +82,22 @@ class Index extends Component
         session()->flash('message', 'Password has been reset to default.');
     }
 
+    // public function test(User $user ) {
+    //     dd($user);
+    // }
+    public function switchActivation(User $user) {
+        
+        if ($user->activation == 0) {
+            $user->activation = 1;
+        } elseif ($user->activation == 1) {
+            $user->activation = 0;
+        }
+        
+        $user->save();
+
+        session()->flash('message', 'User has been switched.');
+    }
+
     public function render()
     {
         if (Gate::denies('user.index')) {

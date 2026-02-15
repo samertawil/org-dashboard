@@ -4,11 +4,13 @@
             <flux:heading level="1" size="xl">{{ __('Imported Files') }}</flux:heading>
             <flux:subheading>{{ __('Archive of imported student Excel files.') }}</flux:subheading>
         </div>
-
+      
         <div class="flex gap-2">
+            @can('student.index')
             <flux:button href="{{ route('student.index') }}" wire:navigate variant="ghost" icon="arrow-left">
                 {{ __('Back to Students') }}
             </flux:button>
+            @endcan
         </div>
     </div>
 

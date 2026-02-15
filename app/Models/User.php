@@ -94,4 +94,9 @@ class User extends Authenticatable
     public function employee(): \Illuminate\Database\Eloquent\Relations\HasOne {
         return $this->hasOne(Employee::class);
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->id === 1; // Or check based on specific Role ID
+    }
 }

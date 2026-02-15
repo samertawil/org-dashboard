@@ -2,8 +2,9 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
-use Livewire\Component;
 use App\Models\PurchaseRequisition;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 
 class Show extends Component
 {
@@ -16,6 +17,9 @@ class Show extends Component
 
     public function render()
     {
+        if(Gate::denies('purchase_request.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.purchase-request.show');
     }
 }

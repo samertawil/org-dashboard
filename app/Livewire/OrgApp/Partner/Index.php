@@ -54,6 +54,10 @@ class Index extends Component
 
     public function delete($id)
     {
+        if (Gate::denies('partner.index')) 
+        { 
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $partner = PartnerInstitution::findOrFail($id);
         $partner->delete();
         session()->flash('message', __('Partner Institution successfully deleted.'));
@@ -63,7 +67,7 @@ class Index extends Component
     {
         if (Gate::denies('partner.index')) 
         { 
-            abort(403, 'You do not have the necessary permissions');
+            abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.org-app.partner.index', );
     }

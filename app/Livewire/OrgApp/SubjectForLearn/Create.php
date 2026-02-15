@@ -41,7 +41,7 @@ class Create extends Component
 
     public function render()
     {
-        if(Gate::denies('curricula.create')) {
+        if(Gate::denies('subject.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.org-app.subject-for-learn.create');
