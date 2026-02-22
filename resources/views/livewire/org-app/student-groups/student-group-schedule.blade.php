@@ -1,3 +1,8 @@
+@php
+    $dayWidthClass = 'min-w-[140px] md:min-w-0 md:flex-1 w-full md:w-[calc(14.28%-0.86rem)]';
+@endphp
+
+
 <div class="flex flex-col gap-6">
     <div class="flex items-center justify-between">
         <div class="flex flex-col gap-1">
@@ -21,19 +26,22 @@
         <flux:button wire:click="nextMonth" icon="chevron-right" variant="ghost" />
     </div>
 
-    <!-- Calendar Grid -->
-    <div class="bg-gray-50/50 dark:bg-zinc-900/50 rounded-xl p-4">
-        
-        <!-- Days -->
-        <div class="flex flex-wrap gap-4">
-            @php
-                // Calculate width for 7 items per row with gap
-                // calc((100% - (6 * 1rem)) / 7)
-                $dayClass = 'w-[calc(14.28%-0.86rem)]';
-            @endphp
+    <!-- Calendar Container with Horizontal Scroll -->
+    <div class="overflow-x-auto pb-4">
+        <!-- Calendar Grid -->
+        <div class="bg-gray-50/50 dark:bg-zinc-900/50 rounded-xl p-4 min-w-[700px] md:min-w-0">
+            <!-- Header Days of Week -->
+            <div class="flex gap-4 mb-4 font-bold text-center text-zinc-500 text-xs uppercase tracking-wider">
+                @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $dayName)
+                    <div class="flex-1">{{ __($dayName) }}</div>
+                @endforeach
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="flex flex-wrap gap-4">
             @foreach($calendar as $day)
                 @if($day === null)
-                     <div class="{{ $dayClass }} min-h-[140px] rounded-xl"></div>
+                     <div class="{{ $dayWidthClass }} min-h-[140px] rounded-xl"></div>
                 @else
                     @php
                         $schedule = $day['schedule'];
@@ -42,7 +50,7 @@
                         $hasTime = $schedule && $schedule->start_time;
                     @endphp
                     <div wire:click="{{ $schedule ? 'editSchedule('.$schedule->id.')' : '' }}" @class([
-                        $dayClass,
+                        $dayWidthClass,
                         'min-h-[140px] p-3 flex flex-col gap-2 rounded-xl border shadow-sm transition-all duration-200 group relative cursor-pointer',
                         'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md' => !$today && !$isOffDay,
                         'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 ring-1 ring-blue-500/20' => $today,

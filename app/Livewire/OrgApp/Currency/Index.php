@@ -50,19 +50,19 @@ class Index extends Component
 
     public function delete($id)
     {
+        if(Gate::denies('currency.create')){
+            abort(403,'You do not have the necessary permissions.');
+        }
         $currency = CurrancyValue::findOrFail($id);
         $currency->delete();
         session()->flash('message', __('Currency Value successfully deleted.'));
     }
 
     public function render()
-    {
-       
+    {     
         if( Gate::denies('currency.index')){
             abort(403,'You do not have the necessary permissions.');
         }
-        
-        
         return view('livewire.org-app.currency.index');
     }
 }

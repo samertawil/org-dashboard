@@ -16,10 +16,11 @@
         <div class="flex items-center gap-3">
             <flux:input wire:model.live.debounce.300ms="search" placeholder="Search files..." icon="magnifying-glass"
                 class="w-full md:w-64" />
-
+                @can('purchase_request.create')
             <flux:modal.trigger name="upload-modal">
                 <flux:button variant="primary" icon="plus">{{ __('Upload File') }}</flux:button>
             </flux:modal.trigger>
+            @endcan
         </div>
     </div>
 
@@ -65,10 +66,13 @@
                         </div>
                         <h3 class="text-sm font-medium text-zinc-900 dark:text-white">{{ __('No files found') }}</h3>
                         <p class="mt-1 text-sm text-zinc-500">{{ __('Upload a new file to get started.') }}</p>
+                        @can('purchase_request.create')
                         <flux:modal.trigger name="upload-modal">
                             <flux:button variant="ghost" class="mt-4" size="sm" icon="plus">
                                 {{ __('Upload File') }}</flux:button>
-                        </flux:modal.trigger>
+                        </flux:modal.trigger>    
+                        @endcan
+                       
                     </div>
                 </div>
             @else
@@ -86,8 +90,8 @@
                                     $isImage = in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
                                 @endphp
 
-                                <a href="{{ Storage::url($attachment['path']) }}" style="width: 170px; height: 150px;" loading="lazy"
-                                    target="_blank"
+                                <a href="{{ Storage::url($attachment['path']) }}" style="width: 170px; height: 150px;"
+                                    loading="lazy" target="_blank"
                                     class="w-full h-full flex items-center justify-center group-hover:opacity-90 transition-opacity">
                                     @if ($isImage)
                                         <img src="{{ Storage::url($attachment['path']) }}"
@@ -120,12 +124,15 @@
                                     <span class="text-[10px] text-zinc-400">
                                         {{ isset($attachment['uploaded_at']) ? \Carbon\Carbon::parse($attachment['uploaded_at'])->format('M d, Y') : '' }}
                                     </span>
-                                    <button wire:click="deleteAttachment({{ $index }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this file?') }}"
-                                        class="text-zinc-400 hover:text-red-600 dark:hover:text-red-500 transition-colors"
-                                        title="{{ __('Delete') }}">
-                                        <flux:icon icon="trash" size="xs" />
-                                    </button>
+                                    @can('purchase_request.create')
+                                        <button wire:click="deleteAttachment({{ $index }})"
+                                            wire:confirm="{{ __('Are you sure you want to delete this file?') }}"
+                                            class="text-zinc-400 hover:text-red-600 dark:hover:text-red-500 transition-colors"
+                                            title="{{ __('Delete') }}">
+                                            <flux:icon icon="trash" size="xs" />
+                                        </button>
+                                    @endcan
+
                                 </div>
                             </div>
                         </div>
@@ -135,26 +142,30 @@
         </div>
     </div>
 
-    {{-- Upload Modal --}}
-    <flux:modal name="upload-modal" class="w-full md:w-[500px]">
-        <div class="space-y-6">
-            <flux:heading level="2" size="lg">{{ __('Upload File') }}</flux:heading>
+    @can('purchase_request.create')
+        {{-- Upload Modal --}}
+        <flux:modal name="upload-modal" class="w-full md:w-[500px]">
 
-            <div class="space-y-4">
-                <flux:input type="file" wire:model="uploadFiles" :label="__('Choose Files')" multiple />
+            <div class="space-y-6">
+                <flux:heading level="2" size="lg">{{ __('Upload File') }}</flux:heading>
 
-                <flux:input wire:model="uploadNotes" :label="__('Display Name (Optional)')"
-                    placeholder="e.g. Invoice #123" />
+                <div class="space-y-4">
+                    <flux:input type="file" wire:model="uploadFiles" :label="__('Choose Files')" multiple />
+
+                    <flux:input wire:model="uploadNotes" :label="__('Display Name (Optional)')"
+                        placeholder="e.g. Invoice #123" />
+                </div>
+
+                <div class="flex justify-end gap-2 mt-2">
+                    <flux:button variant="ghost" x-on:click="$dispatch('modal-close', { name: 'upload-modal' })">
+                        {{ __('Cancel') }}</flux:button>
+                    <flux:button wire:click="saveUploadedFile" variant="primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="saveUploadedFile">{{ __('Upload') }}</span>
+                        <span wire:loading wire:target="saveUploadedFile">{{ __('Uploading...') }}</span>
+                    </flux:button>
+                </div>
             </div>
 
-            <div class="flex justify-end gap-2 mt-2">
-                <flux:button variant="ghost" x-on:click="$dispatch('modal-close', { name: 'upload-modal' })">
-                    {{ __('Cancel') }}</flux:button>
-                <flux:button wire:click="saveUploadedFile" variant="primary" wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="saveUploadedFile">{{ __('Upload') }}</span>
-                    <span wire:loading wire:target="saveUploadedFile">{{ __('Uploading...') }}</span>
-                </flux:button>
-            </div>
-        </div>
-    </flux:modal>
+        </flux:modal>
+    @endcan
 </div>

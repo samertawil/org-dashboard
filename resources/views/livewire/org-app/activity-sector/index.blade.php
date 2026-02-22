@@ -155,7 +155,7 @@
                                     <div class="flex flex-wrap gap-2 pt-2   dark:border-zinc-800">
                                         @foreach ($activity->parcels as $parcel)
                                             <flux:badge size="xs" color="zinc" variant="pill" icon="cube">
-                                                {{ $parcel->parcelType->status_name }}
+                                                {{ $parcel->parcelType? $parcel->parcelType->status_name ?? '-' : '' }}
                                             </flux:badge>
                                         @endforeach
                                     </div>

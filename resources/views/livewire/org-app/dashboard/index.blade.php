@@ -29,14 +29,10 @@
         <flux:card class="flex flex-col gap-2 !bg-violet-50 dark:!bg-violet-900/10 !border-violet-200 dark:!border-violet-800/30">
             <span class="text-sm font-medium text-violet-600 dark:text-violet-400">{{ __('Total Budget') }}</span>
             <div class="flex items-end justify-between">
-                <span class="text-3xl font-bold text-violet-700 dark:text-violet-300">${{ number_format($totalBudget) }}</span>
-                <flux:icon icon="currency-dollar" class="text-violet-600 bg-violet-100 dark:bg-violet-500/20 p-2 rounded-lg size-10" />
+                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300">${{ number_format($totalBudget) }}</span>
+                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300"> {{ number_format($totalBudgetNis) }}Nis</span>
             </div>
-          
-            <div class="flex items-end justify-between">
-                <span class="text-3xl font-bold text-violet-700 dark:text-violet-300"> Nis&nbsp; {{ number_format($totalBudgetNis) }}</span>
-                <flux:icon icon="currency-nis" class="text-violet-600 bg-violet-100 dark:bg-violet-500/20 p-2 rounded-lg size-10" />
-            </div>
+           
         </flux:card>
 
         <flux:card class="flex flex-col gap-2 !bg-amber-50 dark:!bg-amber-900/10 !border-amber-200 dark:!border-amber-800/30">

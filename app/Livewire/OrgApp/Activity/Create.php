@@ -88,8 +88,20 @@ class Create extends Component
 
 
             if ($this->sector_id != 55) {
+                        
                 foreach ($this->parcels as $parcel) {
-                    if ($parcel['parcel_type'] || $parcel['distributed_parcels_count']) {
+                    if ($parcel['parcel_type']) {
+                        $this->validate([
+                            'parcels.*.parcel_type' => 'required_with:parcels.*.distributed_parcels_count,parcels.*.unit_id',
+                            'parcels.*.distributed_parcels_count' => 'required_with:parcels.*.parcel_type,parcels.*.unit_id|nullable|integer|min:1',
+                            'parcels.*.unit_id' => 'required_with:parcels.*.parcel_type,parcels.*.distributed_parcels_count',
+                        ], [
+                            'parcels.*.parcel_type.required_with' => 'The parcel type is required.',
+                            'parcels.*.unit_id.required_with' => 'The unit type is required.',
+                            'parcels.*.distributed_parcels_count.required_with' => 'The count is required.',
+                            'parcels.*.distributed_parcels_count.integer' => 'The count must be an integer.',
+                            'parcels.*.distributed_parcels_count.min' => 'The count must be at least 1.',
+                        ]);
                         $project->parcels()->create($parcel);
                     }
                 }
@@ -115,11 +127,7 @@ class Create extends Component
 
             if ($this->sector_id == 55) {
                 foreach ($this->teaching_groups as $group) {
-                    // dd('Inside loop', $group);
                     if ($group['name']) {
-                        // Ensure dates are null if empty
-
-
                         $project->teachingGroups()->create(array_merge($group, [
                             'created_by' => auth()->id(),
                             'updated_by' => auth()->id(),
@@ -133,16 +141,21 @@ class Create extends Component
                     $project->feedbacks()->create($feedback);
                 }
             }
+
             if (DB::transactionLevel() == 1) {
                 DB::commit();
             }
-        } catch (\Throwable $th) {
-            dd($th->getMessage()); // Debugging
-            return redirect()->back()->with('message', $th->getMessage())->with('type', 'error');
+        } catch (\Illuminate\Validation\ValidationException $e) {
             if (DB::transactionLevel() == 1) {
                 DB::rollBack();
             }
-            return;
+            throw $e; // Critical for Livewire to show errors
+        } catch (\Throwable $th) {
+            if (DB::transactionLevel() == 1) {
+                DB::rollBack();
+            }
+            session()->flash('message', $th->getMessage());
+            return redirect()->back()->with('message', $th->getMessage())->with('type', 'error');
         }
 
 

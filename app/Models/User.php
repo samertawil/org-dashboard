@@ -25,7 +25,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'activation'
+        'activation',
+        'google_id',
+        'avatar'
     ];
 
     /**
@@ -61,37 +63,42 @@ class User extends Authenticatable
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 
-    public function scopeSearchName(Builder  $query,string $value): Builder {
-        if($value) {
-            $query->where('name','like',"%{$value}%");
+    public function scopeSearchName(Builder  $query, string $value): Builder
+    {
+        if ($value) {
+            $query->where('name', 'like', "%{$value}%");
         }
-        return $query;           
+        return $query;
     }
 
-    public function scopeSearchActivation(Builder  $query, $value): Builder {
-        if(!is_null($value) && $value !== '') {
-            $query->where('activation', $value );
+    public function scopeSearchActivation(Builder  $query, $value): Builder
+    {
+        if (!is_null($value) && $value !== '') {
+            $query->where('activation', $value);
         }
-        return $query;           
+        return $query;
     }
 
-    public function scopeSearchEmail(Builder  $query,string $value): Builder {
-        if($value) {
-            $query->where('email','like',"%{$value}%");
+    public function scopeSearchEmail(Builder  $query, string $value): Builder
+    {
+        if ($value) {
+            $query->where('email', 'like', "%{$value}%");
         }
-        return $query;           
+        return $query;
     }
 
 
-    public function rolesRelation(): BelongsToMany {
-        return $this->belongsToMany(Role::class,'role_user');
+    public function rolesRelation(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user');
     }
 
-    public function employee(): \Illuminate\Database\Eloquent\Relations\HasOne {
+    public function employee(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
         return $this->hasOne(Employee::class);
     }
 

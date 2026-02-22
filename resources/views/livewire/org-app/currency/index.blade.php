@@ -4,10 +4,12 @@
             <flux:heading level="1" size="xl">{{ __('Currency Values') }}</flux:heading>
             <flux:subheading>{{ __('Manage your exchange rates.') }}</flux:subheading>
         </div>
+        @can('currency.create')
+            <flux:button href="{{ route('currency.create') }}" wire:navigate variant="primary" icon="plus">
+                {{ __('Add Currency Value') }}
+            </flux:button>
+        @endcan
 
-        <flux:button href="{{ route('currency.create') }}" wire:navigate variant="primary" icon="plus">
-            {{ __('Add Currency Value') }}
-        </flux:button>
     </div>
 
     {{-- Success Message --}}

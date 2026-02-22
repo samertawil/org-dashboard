@@ -2,10 +2,11 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
+use App\Models\PurchaseRequisition;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\PurchaseRequisition;
-use Illuminate\Support\Facades\Storage;
 
 class Gallery extends Component
 {
@@ -30,6 +31,9 @@ class Gallery extends Component
 
     public function saveUploadedFile()
     {
+        if(Gate::denies('purchase_request.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $this->validate([
             'uploadFiles.*' => 'required|file|max:10240', // 10MB max
         ]);
@@ -103,6 +107,9 @@ class Gallery extends Component
 
     public function deleteAttachment($index)
     {
+        if(Gate::denies('purchase_request.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         if (isset($this->existingAttachments[$index])) {
             // Delete file from storage
             if (isset($this->existingAttachments[$index]['path'])) {
@@ -131,6 +138,9 @@ class Gallery extends Component
 
     public function render()
     {
+        if(Gate::denies('purchase_request.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $attachments = collect($this->existingAttachments)->map(function ($item) {
             // Use stored type_id if available, otherwise calculate it (backward compatibility)
             if (!isset($item['type_id'])) {

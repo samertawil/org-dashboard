@@ -4,10 +4,12 @@
             <flux:heading level="1" size="xl">{{ __('Partner/Vendor Institutions') }}</flux:heading>
             <flux:subheading>{{ __('Manage your partner institutions.') }}</flux:subheading>
         </div>
-
-        <flux:button href="{{ route('partner.create') }}" wire:navigate variant="primary" icon="plus">
-            {{ __('Add Partner') }}
-        </flux:button>
+@can('partner.create')
+<flux:button href="{{ route('partner.create') }}" wire:navigate variant="primary" icon="plus">
+    {{ __('Add Partner') }}
+</flux:button> 
+@endcan
+        
     </div>
 
     {{-- Success Message --}}
@@ -126,6 +128,7 @@
                                     -
                                 @endif
                             </td>
+                            @can('partner.create')
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     <flux:button href="{{ route('partner.edit', $partner) }}" wire:navigate
@@ -135,7 +138,9 @@
                                         variant="ghost" size="sm" icon="trash"
                                         class="text-red-500 hover:text-red-600" />
                                 </div>
-                            </td>
+                            </td> 
+                            @endcan
+                            
                         </tr>
                     @empty
                         <tr>

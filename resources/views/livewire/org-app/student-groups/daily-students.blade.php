@@ -1,8 +1,24 @@
-<div class="flex flex-col gap-6">
+
+<div 
+    x-data="offlineAttendance({
+        groupId: '{{ $group->id }}',
+        date: '{{ $date }}',
+        students: @js($students->pluck('id'))
+    })"
+    class="flex flex-col gap-6 landscape-force"
+>
     <div class="flex items-center justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Daily Attendance') }}: {{ $group->name }}</flux:heading>
             <flux:subheading>{{ __('Students scheduled for') }} {{ $formattedDate }} ({{ $dayName }})</flux:subheading>
+            <div x-show="!online" x-cloak class="text-amber-600 dark:text-amber-400 text-sm font-medium flex items-center gap-2">
+                <flux:icon name="wifi" variant="micro" class="size-4" />
+                {{ __('You are offline. Changes will be saved locally.') }}
+            </div>
+             <div x-show="online && unsyncedCount > 0" x-cloak class="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center gap-2">
+                <flux:icon name="arrow-path" variant="micro" class="size-4 animate-spin" />
+                <span x-text="'Syncing ' + unsyncedCount + ' record(s)...'"></span>
+            </div>
         </div>
         <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate variant="ghost" icon="arrow-left">
             {{ __('Back to Schedule') }}
@@ -13,16 +29,16 @@
         <h2 class="text-lg font-medium text-zinc-900 dark:text-white">{{ __('Students List') }}</h2>
         <div class="flex gap-2">
            
-            <flux:button wire:click="saveAttendance" variant="primary" wire:loading.attr="disabled">
-                <span wire:loading.remove>{{ __('Save Attendance') }}</span>
-                <span wire:loading>{{ __('Saving...') }}</span>
+            <flux:button @click="save" variant="primary" x-bind:disabled="saving">
+                <span x-show="!saving">{{ __('Save Attendance') }}</span>
+                <span x-show="saving">{{ __('Saving...') }}</span>
             </flux:button>
         </div>
     </div>
 
     <!-- Students List -->
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-        <flux:button wire:click="markAllPresent" variant="primary" size="sm" class="mb-3 mt-3 ms-4">
+        <flux:button @click="markAllPresent" variant="primary" size="sm" class="mb-3 mt-3 ms-4">
             {{ __('Mark All Present') }}
         </flux:button>
 
@@ -51,13 +67,13 @@
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                         <td class="px-6 py-4 whitespace-nowrap">
                              <div class="relative flex items-center w-fit">
-                                <flux:checkbox wire:model="attendance.{{ $student->id }}" />
-                                @if( ($attendanceStatus[$student->id] ?? null) === 'absent' && !($attendance[$student->id] ?? false) )
-                                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <flux:icon name="x-mark" class="size-4 text-red-600 dark:text-red-500 font-bold" />
-                                    </div>
-                          
-                            @endif
+                                <flux:checkbox 
+                                    x-model="attendance['{{ $student->id }}']" 
+                                    @change="updateStatus('{{ $student->id }}')"
+                                />
+                                <div x-show="attendanceStatus['{{ $student->id }}'] === 'absent' && !attendance['{{ $student->id }}']" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <flux:icon name="x-mark" class="size-4 text-red-600 dark:text-red-500 font-bold" />
+                                </div>
                              </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
@@ -112,4 +128,135 @@
             </tbody>
         </table>
     </div>
+
+    @push('scripts')
+    <script src="/js/offline-attendance.js"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('offlineAttendance', (config) => ({
+                groupId: config.groupId,
+                date: config.date,
+                students: config.students,
+                attendance: @entangle('attendance'),
+                attendanceStatus: @entangle('attendanceStatus'),
+                online: navigator.onLine,
+                saving: false,
+                unsyncedCount: 0,
+
+                async init() {
+                    window.addEventListener('online', () => {
+                        this.online = true;
+                        this.syncOfflineData();
+                    });
+                    window.addEventListener('offline', () => this.online = false);
+                    
+                    await this.checkUnsynced();
+                    if (this.online && this.unsyncedCount > 0) {
+                        this.syncOfflineData();
+                    }
+                },
+
+                updateStatus(studentId) {
+                    // This creates immediate feedback visually before save
+                   // Logic mirrored from PHP side roughly
+                   // But we rely on save to finalize
+                },
+
+                markAllPresent() {
+                   this.students.forEach(id => {
+                       this.attendance[id] = true;
+                   });
+                },
+
+                async save() {
+                    this.saving = true;
+                    
+                    if (this.online) {
+                        try {
+                            await this.$wire.saveAttendance();
+                            // Optional: Success toast
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    } else {
+                        // Offline Save
+                        try {
+                            const promises = this.students.map(studentId => {
+                                const isPresent = this.attendance[studentId] || false;
+                                const status = isPresent ? 'present' : 'absent';
+                                
+                                // Update local UI state to reflect 'saved' status
+                                this.attendanceStatus[studentId] = status;
+
+                                return window.OfflineAttendance.saveAttendance(
+                                    this.groupId, 
+                                    this.date, 
+                                    studentId, 
+                                    status
+                                );
+                            });
+
+                            await Promise.all(promises);
+                            this.checkUnsynced();
+                            alert('Attendance saved locally. Will sync when online.');
+                        } catch (e) {
+                            console.error('Offline save failed', e);
+                        }
+                    }
+                    
+                    this.saving = false;
+                },
+
+                async checkUnsynced() {
+                     const records = await window.OfflineAttendance.getUnsyncedRecords();
+                     this.unsyncedCount = records.length;
+                },
+
+                async syncOfflineData() {
+                    const records = await window.OfflineAttendance.getUnsyncedRecords();
+                    if (records.length === 0) return;
+
+                    // Group by date because PHP controller might handle one date at a time
+                    // But for now let's just push them one by one or batched?
+                    // The simplest way to leverage existing Livewire component is to:
+                    // 1. If we are on the page of that group/date, update the wire model and save.
+                    // 2. If not, we might need a dedicated API endpoint or Livewire method that accepts JSON.
+                    
+                    // For THIS specific page's context:
+                    const pageRecords = records.filter(r => r.groupId === this.groupId && r.date === this.date);
+                    
+                    if (pageRecords.length > 0) {
+                        try {
+                            console.log('Starting sync for', pageRecords.length, 'records');
+                            
+                            // Update Livewire state
+                            pageRecords.forEach(r => {
+                                this.attendance[r.studentId] = (r.status === 'present');
+                            });
+                            
+                            // Save to server
+                            await this.$wire.saveAttendance();
+                            
+                            // Mark as synced (delete from IDB)
+                            const deletePromises = pageRecords.map(r => window.OfflineAttendance.markAsSynced(r.id));
+                            await Promise.all(deletePromises);
+                            
+                            console.log('Sync successful');
+                        } catch (error) {
+                            console.error('Sync failed:', error);
+                            // Optional: Retry logic or alert
+                        } finally {
+                            // Always re-check so the spinner updates/stops
+                            await this.checkUnsynced();
+                        }
+                    } else {
+                        // If no records for this page, but unsynced count > 0, we should still update UI?
+                        // For now, let's just re-check to be safe.
+                        await this.checkUnsynced();
+                    }
+                }
+            }))
+        })
+    </script>
+    @endpush
 </div>

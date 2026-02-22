@@ -115,6 +115,11 @@ class Activity extends Model
         ];
     }
 
+    public function summary()
+    {
+        return $this->hasOne(ActivitySummary::class, 'activity_id');
+    }
+
     /**
      * Get the virtual status information for display.
      */

@@ -21,7 +21,7 @@ class Index extends Component
     public string $searchModuleName = '';
     
     // Pagination
-    public int $perPage = 10;
+    public int $perPage = 30;
 
     protected $queryString = [
         'search' => ['except' => ''],

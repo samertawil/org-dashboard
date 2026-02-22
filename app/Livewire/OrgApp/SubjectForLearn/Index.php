@@ -78,12 +78,18 @@ class Index extends Component
 
     public function removeNewAttachment($index)
     {
+        if(Gate::denies('subject.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         unset($this->newAttachments[$index]);
         $this->newAttachments = array_values($this->newAttachments);
     }
 
     public function deleteAttachment($id)
     {
+        if(Gate::denies('subject.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $attachment = ActivityAttchment::find($id);
         if ($attachment) {
             Storage::disk('public')->delete($attachment->attchment_path);
@@ -95,6 +101,9 @@ class Index extends Component
 
     public function saveAttachments()
     {
+        if(Gate::denies('subject.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $this->validate([
             'newAttachments.*.file' => 'required|file|max:10240', // Increased max size slightly
             'newAttachments.*.attchment_type' => 'required',
@@ -134,8 +143,8 @@ class Index extends Component
 
     public function render()
     {
-        if(Gate::denies('subject.create')) {
-            abort(403, 'You do not have the necessary permissions');
+        if(Gate::denies('subject.index')) {
+            abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.org-app.subject-for-learn.index');
     }

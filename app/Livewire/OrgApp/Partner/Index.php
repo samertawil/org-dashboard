@@ -54,7 +54,7 @@ class Index extends Component
 
     public function delete($id)
     {
-        if (Gate::denies('partner.index')) 
+        if (Gate::denies('partner.create')) 
         { 
             abort(403, 'You do not have the necessary permissions.');
         }

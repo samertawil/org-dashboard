@@ -20,7 +20,8 @@
 
             {{-- Basic Information Header --}}
             <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-2">
-                <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Basic Information') }}</flux:heading>
+                <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Basic Information') }}
+                </flux:heading>
             </div>
 
             {{-- activity Name --}}
@@ -98,7 +99,8 @@
             {{-- Location Information Header --}}
             @if ($sector_id != 55)
                 <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mt-4 mb-2">
-                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Location Details') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Location Details') }}
+                    </flux:heading>
                 </div>
 
                 {{-- Region --}}
@@ -152,7 +154,8 @@
             @if ($sector_id != 55)
                 <div class="md:col-span-2 lg:col-span-3">
                     <div class="flex items-center justify-between mb-2">
-                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Parcels') }}</flux:heading>
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Parcels') }}
+                        </flux:heading>
                         <flux:button wire:click="addParcel" variant="ghost" icon="plus" size="sm">
                             {{ __('Add Parcel') }}</flux:button>
                     </div>
@@ -160,39 +163,58 @@
                     <div class="space-y-4">
                         @foreach ($parcels as $index => $parcel)
                             <div wire:key="parcel-{{ $index }}"
-                                class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 relative">
-                                <flux:select wire:model="parcels.{{ $index }}.parcel_type"
-                                    :label="__('Parcel Type')">
-                                    <option value="">{{ __('Select') }}</option>
-                                    @if ($this->sector_id)
-                                        @foreach ($this->allStatuses->where('p_id_sub', $this->sector_id) as $s)
-                                            <option value="{{ $s->id }}">{{ $s->status_name }}</option>
-                                        @endforeach
-                                    @endif
+                                class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 relative">
+                                <flux:field>
+                                    <flux:label>{{ __('Parcel Type') }}</flux:label>
+                                    <flux:select wire:model="parcels.{{ $index }}.parcel_type">
+                                        <option value="">{{ __('Select') }}</option>
+                                        @if ($this->sector_id)
+                                            @foreach ($this->allStatuses->where('p_id_sub', $this->sector_id) as $s)
+                                                <option value="{{ $s->id }}">{{ $s->status_name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </flux:select>
+                                    <flux:error name="parcels.{{ $index }}.parcel_type" />
+                                </flux:field>
 
-                                </flux:select>
-                                <flux:input type="number"
-                                    wire:model="parcels.{{ $index }}.distributed_parcels_count"
-                                    :label="__('Count')" />
-                                    <flux:select wire:model="parcels.{{ $index }}.unit_id"
-                                    :label="__('Unit Type')">
-                                    <option value="">{{ __('Select') }}</option>
-                                   
+                                <flux:field>
+                                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Count') }}
+                                    </flux:label>
+                                    <flux:input type="number"
+                                        wire:model="parcels.{{ $index }}.distributed_parcels_count" />
+                                    <flux:error name="parcels.{{ $index }}.distributed_parcels_count" />
+                                </flux:field>
+
+                                <flux:field>
+                                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Unit Type') }} </flux:label>
+                                    <flux:select wire:model="parcels.{{ $index }}.unit_id">
+                                        <option value="">{{ __('Select') }}</option>
                                         @foreach ($units as $unit)
                                             <option value="{{ $unit->id }}">{{ $unit->status_name }}</option>
                                         @endforeach
-                                  
+                                    </flux:select>
+                                    <flux:error name="parcels.{{ $index }}.unit_id" />
+                                </flux:field>
 
-                                </flux:select>
-                                <flux:input type="number" step="0.01"
-                                    wire:model="parcels.{{ $index }}.cost_for_each_parcel"
-                                    :label="__('Cost Per Parcel')" />
-                                <flux:input type="text" wire:model="parcels.{{ $index }}.notes"
-                                    :label="__('Notes')" placeholder="Optional" />
-                                    <div class="flex items-center mt-5   ">
-                                <flux:button wire:click="removeParcel({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
-                                    </div>
+
+                                <flux:field>
+                                    <flux:label>{{ __('Cost Per Parcel') }}</flux:label>
+                                    <flux:input type="float" step="0.01"
+                                        wire:model="parcels.{{ $index }}.cost_for_each_parcel" />
+                                    <flux:error name="parcels.{{ $index }}.cost_for_each_parcel" />
+                                </flux:field>
+
+                                <flux:field>
+                                    <flux:label>{{ __('Notes') }}</flux:label>
+                                    <flux:input type="text" wire:model="parcels.{{ $index }}.notes"
+                                        placeholder="Optional" />
+                                    <flux:error name="parcels.{{ $index }}.notes" />
+                                </flux:field>
+                                <div class="flex items-center mt-5   ">
+                                    <flux:button wire:click="removeParcel({{ $index }})" variant="ghost"
+                                        icon="trash"
+                                        class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -203,7 +225,8 @@
             @if ($sector_id != 55)
                 <div class="md:col-span-2 lg:col-span-3 mt-4">
                     <div class="flex items-center justify-between mb-2">
-                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Beneficiaries') }}</flux:heading>
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">
+                            {{ __('Beneficiaries') }}</flux:heading>
                         <flux:button wire:click="addBeneficiary" variant="ghost" icon="plus" size="sm">
                             {{ __('Add Beneficiary') }}</flux:button>
                     </div>
@@ -224,13 +247,14 @@
                                 <flux:input type="number" step="0.01"
                                     wire:model="beneficiaries.{{ $index }}.cost_for_each_beneficiary"
                                     :label="__('Cost Per Beneficiary')" />
-                              
+
                                 <flux:input type="text" wire:model="beneficiaries.{{ $index }}.notes"
                                     :label="__('Notes')" placeholder="Optional" />
-                                    <div class="flex items-center mt-5   ">
-                                <flux:button wire:click="removeBeneficiary({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
-                                    </div>
+                                <div class="flex items-center mt-5   ">
+                                    <flux:button wire:click="removeBeneficiary({{ $index }})" variant="ghost"
+                                        icon="trash"
+                                        class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -241,7 +265,8 @@
             @if ($sector_id == 55)
                 <div class="md:col-span-2 lg:col-span-3 mt-4">
                     <div class="flex items-center justify-between mb-2">
-                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Educational Point') }}
+                        <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">
+                            {{ __('Educational Point') }}
                         </flux:heading>
                         <flux:button wire:click="addTeachingGroup" variant="ghost" icon="plus" size="sm">
                             {{ __('Add Educational Point') }}</flux:button>
@@ -313,21 +338,23 @@
                                 {{-- Row 6: Notes --}}
                                 <flux:input type="text" wire:model="teaching_groups.{{ $index }}.notes"
                                     :label="__('Notes')" placeholder="Optional" />
-                                    <div class="flex items-center mt-5">
-                                <flux:button wire:click="removeTeachingGroup({{ $index }})" variant="ghost"
-                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
-                                    </div>
+                                <div class="flex items-center mt-5">
+                                    <flux:button wire:click="removeTeachingGroup({{ $index }})"
+                                        variant="ghost" icon="trash"
+                                        class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                </div>
                             </div>
                         @endforeach
                     </div>
                 </div>
             @endif
 
-            
+
             {{-- Activity Partners Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Partners') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Partners') }}
+                    </flux:heading>
                     <flux:button wire:click="addActivityPartner" variant="ghost" icon="plus" size="sm">
                         {{ __('Add Partner') }}</flux:button>
                 </div>
@@ -343,25 +370,26 @@
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
                                 @endforeach
                             </flux:select>
-                           
-                                <flux:input type="text" wire:model="activity_partners.{{ $index }}.notes"
+
+                            <flux:input type="text" wire:model="activity_partners.{{ $index }}.notes"
                                 :label="__('Notes')" placeholder="Optional" />
                             <div class="flex items-center mt-5">
                                 <flux:button wire:click="removeActivityPartner({{ $index }})" variant="ghost"
-                                icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                             </div>
-                          
-                           
-                          
+
+
+
                         </div>
                     @endforeach
                 </div>
             </div>
-            
+
             {{-- Work Team Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Work Team') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Work Team') }}
+                    </flux:heading>
                     <flux:button wire:click="addWorkTeam" variant="ghost" icon="plus" size="sm">
                         {{ __('Add Member') }}</flux:button>
                 </div>
@@ -385,16 +413,16 @@
                                     <option value="{{ $s->id }}">{{ $s->status_name }}</option>
                                 @endforeach
                             </flux:select>
-                           
-                                <flux:input type="text" wire:model="work_teams.{{ $index }}.notes"
+
+                            <flux:input type="text" wire:model="work_teams.{{ $index }}.notes"
                                 :label="__('Notes')" placeholder="Optional" />
                             <div class="flex items-center mt-5">
                                 <flux:button wire:click="removeWorkTeam({{ $index }})" variant="ghost"
-                                icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
+                                    icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                             </div>
-                          
-                           
-                          
+
+
+
                         </div>
                     @endforeach
                 </div>
@@ -404,7 +432,8 @@
             {{-- Feedback Section --}}
             <div class="md:col-span-2 lg:col-span-3 mt-4">
                 <div class="flex items-center justify-between mb-2">
-                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Feedbacks') }}</flux:heading>
+                    <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Feedbacks') }}
+                    </flux:heading>
                     <flux:button wire:click="addFeedback" variant="ghost" icon="plus" size="sm">
                         {{ __('Add Feedback') }}</flux:button>
                 </div>
@@ -430,7 +459,7 @@
 
                             <flux:input type="text" wire:model="feedbacks.{{ $index }}.comment"
                                 :label="__('Comment')" placeholder="Enter feedback..." class="flex-1" />
-                                <div class="flex items-center mt-5   ">
+                            <div class="flex items-center mt-5   ">
                                 <flux:button wire:click="removeFeedback({{ $index }})" variant="ghost"
                                     icon="trash" class="text-red-500 hover:text-red-600 dark:hover:text-red-400" />
                             </div>
@@ -442,12 +471,15 @@
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">
-                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
+                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}"
+                    wire:loading.attr="disabled">
                     <span wire:loading.remove>{{ $heading }}</span>
                     <span wire:loading>{{ $type === 'save' ? __('Saving...') : __('Updating...') }}</span>
                 </flux:button>
             </div>
             @include('layouts._show_all_input_error')
+            <x-auth-session-status class="{{ session('type') == 'error' ? 'text-red-500' : '' }}"
+                :status="session('message')" />
         </form>
     </div>
 </div>
