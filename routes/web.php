@@ -8,11 +8,12 @@ use App\Livewire\AppSetting\Role\Edit as RoleEdit;
 use App\Livewire\AppSetting\Role\GrantUserRole;
 use App\Livewire\AppSetting\Role\Index as RoleIndex;
 use App\Livewire\AppSetting\RoleModuleName\Create as RoleModuleNameCreate;
+use App\Livewire\AppSetting\Setting\SettingCreate;
+use App\Livewire\AppSetting\Setting\SettingIndex;
 use App\Livewire\AppSetting\Status\Create as StatusCreate;
 use App\Livewire\AppSetting\Status\Edit as StatusEdit;
 use App\Livewire\AppSetting\Status\Index as StatusIndex;
 use App\Livewire\AppSetting\SystemNames\Create as SystemNamesCreate;
-
 use App\Livewire\AppSetting\SystemNames\Index as SystemNamesIndex;
 use App\Livewire\AppSetting\Users\Create as  UsersCreate;
 use App\Livewire\AppSetting\Users\Index as  UsersIndex;
@@ -20,10 +21,11 @@ use App\Livewire\OrgApp\Activity\Create as ActivityCreate;
 use App\Livewire\OrgApp\Activity\Edit as ActivityEdit;
 use App\Livewire\OrgApp\Activity\Index as ActivityIndex;
 use App\Livewire\OrgApp\Activity\Show as ActivityShow;
-use App\Livewire\OrgApp\ActivitySector\Index;
+use App\Livewire\OrgApp\ActivitySector\Index as ActivitySectorIndex;
 use App\Livewire\OrgApp\Currency\Create as CurrencyCreate;
 use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
 use App\Livewire\OrgApp\Currency\Index as CurrencyIndex;
+use App\Livewire\OrgApp\Dashboard\FullPageChat;
 use App\Livewire\OrgApp\Dashboard\MyTasks;
 use App\Livewire\OrgApp\Department\Create as DepartmentCreate;
 use App\Livewire\OrgApp\Department\Edit as DepartmentEdit;
@@ -34,16 +36,16 @@ use App\Livewire\OrgApp\Employee\Index as EmployeeIndex;
 use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
 use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
 use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
+use App\Livewire\OrgApp\PurchaseRequest\Index as PurchaseRequestIndex ;
+use App\Livewire\OrgApp\PurchaseRequest\Create as PurchaseRequestCreate ;
 use App\Livewire\OrgApp\Student\Create as StudentCreat;
 use App\Livewire\OrgApp\Student\Edit as StudentEdit;
 use App\Livewire\OrgApp\Student\ImportedFiles;
 use App\Livewire\OrgApp\Student\Index as StudentIndex;
 use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
-
 use App\Livewire\OrgApp\StudentGroups\DailyStudents;
 use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
 use App\Livewire\OrgApp\StudentGroups\Index as StudentGroupIndex;
-
 use App\Livewire\OrgApp\StudentGroups\ShowSchedule as StudentGroupSchedule;
 use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
 use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
@@ -63,6 +65,8 @@ Route::view('/features', 'features')->name('features');
 Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+
 
 require __DIR__.'/settings.php';
 
@@ -114,7 +118,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/activity/{activity}/show', ActivityShow::class)->name('activity.show');
     Route::get('/activity/{activity}/gallery', \App\Livewire\OrgApp\Activity\Gallery::class)->name('activity.gallery');
     
-    Route::get('/sectors', Index::class)->name('sector.show');
+    Route::get('/sectors', ActivitySectorIndex::class)->name('sector.show');
     
     Route::get('/partner/create', PartnerCreate::class)->name('partner.create');
     Route::get('/partner/{partner}/edit', PartnerEdit::class)->name('partner.edit');
@@ -133,9 +137,6 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/reports/educational-progress', \App\Livewire\OrgApp\Reports\EducationalProgress::class)->name('reports.educational.progress');
     Route::get('/reports/feedback-analysis', \App\Livewire\OrgApp\Reports\FeedbackAnalysis::class)->name('reports.feedback.analysis');
     Route::get('/calendar', \App\Livewire\OrgApp\Calendar\Index::class)->name('calendar.index');
-    
-    
-    
     
     
     
@@ -162,11 +163,20 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/my-tasks', MyTasks::class)->name('my.tasks');
     
     // OrgApp - Purchase Request
-    Route::get('/purchase-request', \App\Livewire\OrgApp\PurchaseRequest\Index::class)->name('purchase_request.index');
-    Route::get('/purchase-request/create', \App\Livewire\OrgApp\PurchaseRequest\Create::class)->name('purchase_request.create');
+    Route::get('/purchase-request',PurchaseRequestIndex::class)->name('purchase_request.index');
+    Route::get('/purchase-request/create', PurchaseRequestCreate::class)->name('purchase_request.create');
     Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
     Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
     Route::get('/purchase-request/{purchaseRequisition}/gallery', \App\Livewire\OrgApp\PurchaseRequest\Gallery::class)->name('purchase_request.gallery');
+
+    Route::get('/settings/create',SettingCreate::class)->name('setting.create');
+    Route::get('/settings',SettingIndex::class)->name('setting.index');
     
+
+    // ai 
+
+    Route::get('ai-copilot', FullPageChat::class)->name('ai_copilot');
+    
+
     });
     

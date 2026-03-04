@@ -37,7 +37,7 @@ class AIService
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post($this->endpoint, [
+            ])->timeout(90)->post($this->endpoint, [
                 'contents' => [
                     [
                         'parts' => [

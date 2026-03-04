@@ -172,4 +172,6 @@
 
         </div>
     </div>
+
+    @livewire('org-app.dashboard.a-i-chatbot')
 </div>

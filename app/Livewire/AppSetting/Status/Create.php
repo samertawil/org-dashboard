@@ -65,7 +65,7 @@ class Create extends Component
         
 
         if (Gate::denies('status.create')) {
-            abort(403, 'You do not have the necessary permissions');
+            abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.app-setting.status.create', [
 

@@ -24,21 +24,39 @@
 
 
 
-
+        
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Platform')" class="grid">
-                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>
-                    {{ __('Dashboard') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
-                    :current="request()->routeIs('calendar.index')" wire:navigate>
-                    {{ __('Calendar') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="photo" :href="route('gallery.index')"
-                    :current="request()->routeIs('gallery.index')" wire:navigate>
-                    {{ __('Gallery') }}
-                </flux:sidebar.item>
+            @auth
+            <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                wire:navigate>
+                {{ __('Dashboard') }}
+            </flux:sidebar.item>   
+            @endauth
+                
+               @canany(['activity.index'])
+               <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
+               :current="request()->routeIs('calendar.index')" wire:navigate>
+               {{ __('Calendar') }}
+           </flux:sidebar.item>  
+                @endcanany
+              
+                @canany(['activity.index', 'purchase_request.index', 'subject.index', 'student.group.index', 'student.index', 'reports.groups.attendance
+                ' ])
+                    <flux:sidebar.item icon="photo" :href="route('gallery.index')"
+                        :current="request()->routeIs('gallery.index')" wire:navigate>
+                        {{ __('Gallery') }}
+                    </flux:sidebar.item>
+                @endcanany
+
+                @can('ai_copilot')
+                    <flux:sidebar.item icon="cpu-chip" :href="route('ai_copilot')"
+                        :current="request()->routeIs('ai_copilot')" wire:navigate
+                        class="text-indigo-600 dark:text-indigo-400 font-bold">
+                        {{ __('AI Copilot ✨') }}
+                    </flux:sidebar.item>
+                @endcan
+
             </flux:sidebar.group>
 
         </flux:sidebar.nav>
@@ -165,12 +183,12 @@
 
         <flux:sidebar.nav>
 
-     @canany(['department.index', 'department.create', 'employee.index', 'employee.create', 'partner.index',
-                    'partner.create', 'status.index', 'status.create', 'system.names.index',
-                    'system.names.create', 'ability.create', 'ability.index', 'role.create', 'role.index',
-                    'user.create', 'user.index', 'currency.index', 'currency.create'])
-            <flux:sidebar.group :heading="__('Admin Setting')" class="grid">
-        @endcanany
+            @canany(['department.index', 'department.create', 'employee.index', 'employee.create', 'partner.index',
+                'partner.create', 'status.index', 'status.create', 'system.names.index', 'system.names.create',
+                'ability.create', 'ability.index', 'role.create', 'role.index', 'user.create', 'user.index',
+                'currency.index', 'currency.create', 'setting.index', 'setting.create'])
+                <flux:sidebar.group :heading="__('Admin Setting')" class="grid">
+                @endcanany
                 <!-- Department Group -->
                 @can('department.create')
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Department')" icon="flag"
@@ -312,6 +330,13 @@
                         </flux:sidebar.item>
                     </flux:sidebar.group>
                 @endcan
+                @canany(['setting.index', 'setting.create'])
+                    <flux:sidebar.item icon="cog-6-tooth" :href="route('setting.index')"
+                        :current="request()->routeIs('setting.index')" wire:navigate>
+                        {{ __('App Settings') }}
+                    </flux:sidebar.item>
+                @endcanany
+
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
@@ -328,13 +353,16 @@
         <flux:spacer />
 
         <flux:dropdown position="top" align="end">
-            <flux:profile :avatar="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null" :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
+            <flux:profile :avatar="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null"
+                :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
 
             <flux:menu>
                 <flux:menu.radio.group>
                     <div class="p-0 text-sm font-normal">
                         <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                            <flux:avatar :src="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null" :name="auth()->user()->name" :initials="auth()->user()->initials()" />
+                            <flux:avatar
+                                :src="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null"
+                                :name="auth()->user()->name" :initials="auth()->user()->initials()" />
 
                             <div class="grid flex-1 text-start text-sm leading-tight">
                                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>

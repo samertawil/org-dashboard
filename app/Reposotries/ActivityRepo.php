@@ -11,7 +11,7 @@ class ActivityRepo
     public static function activites()
     {
         return Cache::rememberForever('activites-all', function () {
-            return Activity::latest()->get();
+            return Activity::with(['activityStatus', 'attachments'])->latest()->get();
         });
     }
 
