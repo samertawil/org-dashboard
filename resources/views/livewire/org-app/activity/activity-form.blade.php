@@ -477,9 +477,13 @@
                     <span wire:loading>{{ $type === 'save' ? __('Saving...') : __('Updating...') }}</span>
                 </flux:button>
             </div>
-            @include('layouts._show_all_input_error')
-            <x-auth-session-status class="{{ session('type') == 'error' ? 'text-red-500' : '' }}"
-                :status="session('message')" />
+            <div class="md:col-span-2 lg:col-span-3 flex justify-end w-full text-end">
+                <div class="flex flex-col items-end gap-2">
+                    @include('layouts._show_all_input_error')
+                    <x-auth-session-status class="{{ session('type') == 'error' ? 'text-red-500' : '' }}"
+                        :status="session('message')" />
+                </div>
+            </div>
         </form>
     </div>
 </div>

@@ -145,6 +145,19 @@
 
                     </flux:sidebar.group>
                 @endcanany
+
+                <!-- Camps And Beneficiaries -->
+                @canany(['displacement.camps.index','displacement.camps.create', ])
+                <flux:sidebar.group expandable :expanded="false" :heading="__('Camps And Beneficiaries')" icon="map"
+                    class="grid">
+                    @can('displacement.camps.index')
+                        <flux:sidebar.item icon="list-bullet" :href="route('displacement.camps.index')"
+                            :current="request()->routeIs('displacement.camps.index')" wire:navigate>
+                            {{ __('Displacement Camps') }}
+                        </flux:sidebar.item>
+                    @endcan
+                </flux:sidebar.group>
+               @endcanany
                 <!-- Statistics  Group -->
 
                 @canany(['reports.all'])

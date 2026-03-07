@@ -53,6 +53,13 @@ use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
+use \App\Livewire\OrgApp\DisplacementCamps\Index as  DisplacementCampsIndex;
+use \App\Livewire\OrgApp\DisplacementCamps\Create as  DisplacementCampsCreate;
+use \App\Livewire\OrgApp\DisplacementCamps\Edit as  DisplacementCampsEdit;
+use \App\Livewire\OrgApp\DisplacementCamps\Gallery as  DisplacementCampsGallery;
+use \App\Livewire\OrgApp\CampsResidents\Index as  CampsResidentsIndex;
+use \App\Livewire\OrgApp\CampsResidents\Create as  CampsResidentsCreate;
+use \App\Livewire\OrgApp\CampsResidents\Edit as  CampsResidentsEdit;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -168,6 +175,17 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
     Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
     Route::get('/purchase-request/{purchaseRequisition}/gallery', \App\Livewire\OrgApp\PurchaseRequest\Gallery::class)->name('purchase_request.gallery');
+
+    // OrgApp - Displacement Camps
+    Route::get('/displacement-camps',DisplacementCampsIndex::class)->name('displacement.camps.index');
+    Route::get('/displacement-camps/create',DisplacementCampsCreate::class)->name('displacement.camps.create');
+    Route::get('/displacement-camps/{displacementCamp}/edit',DisplacementCampsEdit::class)->name('displacement.camps.edit');
+    Route::get('/displacement-camps/{displacementCamp}/gallery', DisplacementCampsGallery::class)->name('displacement.camps.gallery');
+
+    // OrgApp - Camps Residents
+    Route::get('/camps-residents',CampsResidentsIndex::class)->name('camps.residents.index');
+    Route::get('/camps-residents/create',CampsResidentsCreate::class)->name('camps.residents.create');
+    Route::get('/camps-residents/{campsResident}/edit',CampsResidentsEdit::class)->name('camps.residents.edit');
 
     Route::get('/settings/create',SettingCreate::class)->name('setting.create');
     Route::get('/settings',SettingIndex::class)->name('setting.index');
