@@ -50,7 +50,7 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->employee->update([
+        $this->employee->fill([
             'employee_number' => $this->employee_number,
             'full_name' => $this->full_name,
             'gender' => $this->gender,
@@ -67,7 +67,13 @@ class Edit extends Component
             'activation' => $this->activation,
         ]);
 
-        session()->flash('message', __('Employee successfully updated.'));
+        if ($this->employee->isDirty()) {
+            $this->employee->save();
+            session()->flash('message', __('Employee successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
 
         return $this->redirect(route('employee.index'), navigate: true);
     }

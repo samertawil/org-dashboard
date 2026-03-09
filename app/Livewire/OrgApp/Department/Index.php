@@ -12,10 +12,22 @@ class Index extends Component
     use WithPagination;
 
     public $search = '';
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
 
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
     }
 
     public function delete($id)
@@ -28,19 +40,21 @@ class Index extends Component
         session()->flash('message', __('Department successfully deleted.'));
     }
 
+    #[\Livewire\Attributes\Computed]
+    public function departments()
+    {
+        return Department::where('name', 'like', '%' . $this->search . '%')
+            ->orWhere('location', 'like', '%' . $this->search . '%')
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(10);
+    }
+
     public function render()
     {
         if (Gate::denies('department.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
-        $departments = Department::where('name', 'like', '%' . $this->search . '%')
-         
-            ->orwhere('location', 'like', '%' . $this->search . '%')
-            ->latest()
-            ->paginate(10);
 
-        return view('livewire.org-app.department.index', [
-            'departments' => $departments,
-        ]);
+        return view('livewire.org-app.department.index');
     }
 }

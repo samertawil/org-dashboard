@@ -20,6 +20,8 @@ class Index extends Component
     public $search_city_id = '';
     public $search_address_details = '';
     public $search_camp_main_needs = '';
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
    
     // NOTE: The activity_id search is not implemented here because the relationship
     // or column does not exist on the DisplacementCamp model/migration.
@@ -30,6 +32,16 @@ class Index extends Component
     public function updatingSearchCityId() { $this->resetPage(); }
     public function updatingSearchAddressDetails() { $this->resetPage(); }
     public function updatingSearchCampMainNeeds() { $this->resetPage(); }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
 
     #[Computed]
     public function displacementCamps()
@@ -45,7 +57,7 @@ class Index extends Component
             ->when($this->search_city_id, fn($q) => $q->where('city_id', $this->search_city_id))
             ->when($this->search_address_details, fn($q) => $q->where('address_details', 'like', '%' . $this->search_address_details . '%'))
             ->when($this->search_camp_main_needs, fn($q) => $q->whereJsonContains('camp_main_needs', $this->search_camp_main_needs))
-            ->latest()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
     }
 

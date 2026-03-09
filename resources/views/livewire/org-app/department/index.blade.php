@@ -40,17 +40,41 @@
         @endif
 
         <div class="overflow-x-auto">
+            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                        {{ __('Showing') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->departments->firstItem() }}</span>
+                        {{ __('to') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->departments->lastItem() }}</span>
+                        {{ __('of') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->departments->total() }}</span>
+                        {{ __('results') }}
+                    </p>
+                </div>
+            </div>
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Name') }}
+                        <th wire:click="sortBy('name')" class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer transition-colors hover:text-zinc-700 dark:hover:text-zinc-200">
+                            <div class="flex items-center gap-1">
+                                {{ __('Name') }}
+                                <flux:icon name="{{ $sortField === 'name' ? ($sortDirection === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevron-up-down' }}" class="size-3" />
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Location') }}
+                        <th wire:click="sortBy('location')" class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer transition-colors hover:text-zinc-700 dark:hover:text-zinc-200">
+                            <div class="flex items-center gap-1">
+                                {{ __('Location') }}
+                                <flux:icon name="{{ $sortField === 'location' ? ($sortDirection === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevron-up-down' }}" class="size-3" />
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Description') }}
+                        <th wire:click="sortBy('description')" class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer transition-colors hover:text-zinc-700 dark:hover:text-zinc-200">
+                            <div class="flex items-center gap-1">
+                                {{ __('Description') }}
+                                <flux:icon name="{{ $sortField === 'description' ? ($sortDirection === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevron-up-down' }}" class="size-3" />
+                            </div>
                         </th>
                         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Actions') }}
@@ -58,7 +82,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @forelse($departments as $department)
+                    @forelse($this->departments as $department)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                 {{ $department->name }}
@@ -101,7 +125,7 @@
         </div>
 
         <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">
-            {{ $departments->links() }}
+            {{ $this->departments->links() }}
         </div>
     </div>
 </div>

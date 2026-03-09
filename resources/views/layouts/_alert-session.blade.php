@@ -1,1 +1,3 @@
 <x-auth-session-status class="text-center" :status="session('message')" />
+
+

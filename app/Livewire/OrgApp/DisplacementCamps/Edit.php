@@ -50,9 +50,9 @@ class Edit extends Component
     public function update()
     {
         $this->validate();
-
+ 
         DB::transaction(function () {
-            $this->displacementCamp->update([
+            $this->displacementCamp->fill([
                 'name' => $this->name,
                 'region_id' => $this->region_id,
                 'city_id' => $this->city_id,
@@ -68,9 +68,22 @@ class Edit extends Component
                 'camp_main_needs' => $this->camp_main_needs,
                 'notes' => $this->notes,
             ]);
+
+           
+
+            if ($this->displacementCamp->isDirty()) {
+          
+                $this->displacementCamp->save();
+              
+                session()->flash('message', __('Displacement Camp updated successfully.'));
+            } else {
+                session()->flash('message', __('No changes were made!'));         
+                session()->flash('type','warning');
+            }
+
         });
 
-        session()->flash('message', __('Displacement Camp updated successfully.'));
+     
         return $this->redirect(route('displacement.camps.index'), navigate: true);
     }
 

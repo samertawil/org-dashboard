@@ -19,6 +19,18 @@ class Index extends Component
     public $search_date = '';
     public $search_status_id = '';
     public $search_vendor_id = ''; // For suggested_vendor_ids
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
 
     public function updatingSearchNumber() { $this->resetPage(); }
     public function updatingSearchYear() { $this->resetPage(); }
@@ -38,7 +50,7 @@ class Index extends Component
                  $q->whereJsonContains('suggested_vendor_ids', $this->search_vendor_id);
                
             })
-            ->latest()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
     }
 

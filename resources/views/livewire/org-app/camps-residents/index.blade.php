@@ -93,9 +93,17 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Identity Number') }}
                         </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Camp') }}
+                        <th wire:click="sortBy('displacement_camp_id')"
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Camp') }}
+                                @if ($sortField === 'displacement_camp_id')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                        class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">

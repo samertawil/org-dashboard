@@ -12,7 +12,7 @@ class Edit extends Component
 
     public TeachingGroup $group;
 
-    public function rules() 
+    public function rules()
     {
         return [
             'name' => 'required|string|unique:teaching_groups,name,' . $this->group->id,
@@ -27,11 +27,11 @@ class Edit extends Component
         $this->name = $group->name;
         $this->activity_id = $group->activity_id;
         $this->student_groups_id = $group->student_groups_id;
-       
+
         $this->Moderator = $group->Moderator;
         $this->Moderator_phone = $group->Moderator_phone;
         $this->Moderator_email = $group->Moderator_email;
-        $this->status = $group->status; 
+        $this->status = $group->status;
         $this->activation = $group->activation;
         $this->cost_usd = $group->cost_usd;
         $this->cost_nis = $group->cost_nis;
@@ -43,14 +43,14 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->group->update([
+        $this->group->fill([
             'name' => ucfirst($this->name),
             'activity_id' => $this->activity_id,
             'student_groups_id' => $this->student_groups_id ?: null,
-          
-            'Moderator' => ucfirst($this->Moderator)?: null,
-            'Moderator_phone' => $this->Moderator_phone?: null,
-            'Moderator_email' => $this->Moderator_email?: null,
+
+            'Moderator' => ucfirst($this->Moderator) ?: null,
+            'Moderator_phone' => $this->Moderator_phone ?: null,
+            'Moderator_email' => $this->Moderator_email ?: null,
             'status' => $this->status ?: null,
             'activation' => $this->activation,
             'cost_usd' => $this->cost_usd,
@@ -60,7 +60,13 @@ class Edit extends Component
             'updated_by' => auth()->id(),
         ]);
 
-        session()->flash('message', __('Teaching Group successfully updated.'));
+        if ($this->group->isDirty()) {
+            $this->group->save();
+            session()->flash('message', __('Teaching Group successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+        }
+
 
         return $this->redirect(route('teaching.group.index'), navigate: true);
     }

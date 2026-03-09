@@ -24,6 +24,8 @@ class Index extends Component
     public $status_id = '';
     public $region_id = '';
     public $city_id = '';
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
 
     protected $listeners = [
         'refresh-data' => '$refresh',
@@ -54,6 +56,16 @@ class Index extends Component
         'region_id' => ['except' => ''],
         'city_id' => ['except' => ''],
     ];
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
 
     public function updatingSearch()
     {
@@ -164,7 +176,7 @@ class Index extends Component
             })
             ->when($this->region_id, fn($q) => $q->where('region', $this->region_id))
             ->when($this->city_id, fn($q) => $q->where('city', $this->city_id))
-            ->latest()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
     }
 

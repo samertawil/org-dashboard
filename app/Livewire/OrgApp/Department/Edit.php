@@ -39,13 +39,19 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->department->update([
+        $this->department->fill([
             'name' => $this->name,
             'location' => $this->location,
             'description' => $this->description,
         ]);
 
-        session()->flash('message', __('Department successfully updated.'));
+        if ($this->department->isDirty()) {
+            $this->department->save();
+            session()->flash('message', __('Department successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
 
         return $this->redirect(route('department.index'), navigate: true);
     }

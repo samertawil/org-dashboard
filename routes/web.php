@@ -60,6 +60,9 @@ use \App\Livewire\OrgApp\DisplacementCamps\Gallery as  DisplacementCampsGallery;
 use \App\Livewire\OrgApp\CampsResidents\Index as  CampsResidentsIndex;
 use \App\Livewire\OrgApp\CampsResidents\Create as  CampsResidentsCreate;
 use \App\Livewire\OrgApp\CampsResidents\Edit as  CampsResidentsEdit;
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Index as ActivityBeneficiaryNameIndex;
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Create as ActivityBeneficiaryNameCreate;
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Edit as ActivityBeneficiaryNameEdit;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -186,6 +189,11 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/camps-residents',CampsResidentsIndex::class)->name('camps.residents.index');
     Route::get('/camps-residents/create',CampsResidentsCreate::class)->name('camps.residents.create');
     Route::get('/camps-residents/{campsResident}/edit',CampsResidentsEdit::class)->name('camps.residents.edit');
+
+    // OrgApp - Activity Beneficiaries
+    Route::get('/activity-beneficiaries',ActivityBeneficiaryNameIndex::class)->name('activity.beneficiaries.index');
+    Route::get('/activity-beneficiaries/create',ActivityBeneficiaryNameCreate::class)->name('activity.beneficiaries.create');
+    Route::get('/activity-beneficiaries/{activityBeneficiaryName}/edit',ActivityBeneficiaryNameEdit::class)->name('activity.beneficiaries.edit');
 
     Route::get('/settings/create',SettingCreate::class)->name('setting.create');
     Route::get('/settings',SettingIndex::class)->name('setting.index');

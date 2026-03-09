@@ -60,7 +60,7 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->partner->update([
+        $this->partner->fill([
             'name' => $this->name,
             'manager_name' => $this->manager_name,
             'type_id' => $this->type_id ?: null,
@@ -72,7 +72,13 @@ class Edit extends Component
             'activation' => $this->activation,
         ]);
 
-        session()->flash('message', __('Partner Institution successfully updated.'));
+        if ($this->partner->isDirty()) {
+            $this->partner->save();
+            session()->flash('message', __('Partner Institution successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
 
         return $this->redirect(route('partner.index'), navigate: true);
     }

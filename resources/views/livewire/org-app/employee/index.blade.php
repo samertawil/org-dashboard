@@ -40,34 +40,75 @@
         @endif
 
         <div class="overflow-x-auto">
+            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                        {{ __('Showing') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->employees->firstItem() }}</span>
+                        {{ __('to') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->employees->lastItem() }}</span>
+                        {{ __('of') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->employees->total() }}</span>
+                        {{ __('results') }}
+                    </p>
+                </div>
+            </div>
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('EMP#') }}
+                        <th wire:click="sortBy('employee_number')" class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('EMP#') }}
+                                @if ($sortField === 'employee_number')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Name') }}
+                        <th wire:click="sortBy('full_name')" class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Name') }}
+                                @if ($sortField === 'full_name')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Department') }}
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Position') }}
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Gender') }}
+                        <th wire:click="sortBy('gender')" class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Gender') }}
+                                @if ($sortField === 'gender')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Status') }}
+                        <th wire:click="sortBy('activation')" class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Status') }}
+                                @if ($sortField === 'activation')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Actions') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @forelse($employees as $employee)
+                    @forelse($this->employees as $employee)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-xs font-mono text-zinc-600 dark:text-zinc-400">
                                 {{ $employee->employee_number }}
@@ -142,7 +183,7 @@
         </div>
 
         <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">
-            {{ $employees->links() }}
+            {{ $this->employees->links() }}
         </div>
     </div>
 </div>

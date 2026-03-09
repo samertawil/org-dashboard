@@ -43,7 +43,7 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->student->update([
+        $this->student->fill([
             'identity_number' => $this->identity_number,
             'full_name' => $this->full_name,
             'birth_date' => $this->birth_date,
@@ -58,7 +58,14 @@ class Edit extends Component
             'updated_by' => auth()->id(),
         ]);
 
-        session()->flash('message', __('Student successfully updated.'));
+        if ($this->student->isDirty()) {  
+            $this->student->save();
+            session()->flash('message', __('Student successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+        }
+
+       
 
         return $this->redirect(route('student.index'), navigate: true);
     }

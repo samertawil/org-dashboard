@@ -73,7 +73,7 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->group->update([
+        $this->group->fill([
             'name' => ucfirst($this->name),
             'max_students' => $this->max_students,
             'min_students' => $this->min_students,
@@ -96,7 +96,14 @@ class Edit extends Component
             'end_time' => $this->end_time?: null,
         ]);
 
-        session()->flash('message', __('Student Group successfully updated.'));
+        if ($this->group->isDirty()) {  
+            $this->group->save();
+            session()->flash('message', __('Student Group successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+        }
+
+     
 
         return $this->redirect(route('student.group.index'), navigate: true);
     }

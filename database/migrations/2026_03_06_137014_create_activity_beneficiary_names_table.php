@@ -16,11 +16,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('activity_id')->constrained();
             $table->foreignId('displacement_camps_id')->nullable()->constrained('displacement_camps');
-            $table->integer('identity_number')->unique();
+            $table->integer('identity_number');
             $table->string('full_name');
             $table->string('phone',15)->nullable();  
             $table->date('receipt_date'); // تاريخ استلام المساعدة
-            $table->foreignId('receipt_method')->constrained('statuses'); // طريقة استلام المساعدة
+            $table->foreignId('receive_method')->nullable()->constrained('statuses'); // طريقة استلام المساعدة
+            $table->string('receive_by_name')->nullable(); // اسم المستلم بحال كان شخص غير المستفيد هو من استلم المساعدة
+            $table->unique(['activity_id', 'identity_number']);
             $table->timestamps();
         });
     }

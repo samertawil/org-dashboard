@@ -12,7 +12,7 @@ class Create extends Component
 {
     use CampsResidentTrait;
 
-    #[Validate('required|integer|unique:displacement_camp_residents,identity_number')]
+    #[Validate('required|integer|min_digits:9|max_digits:9|unique:displacement_camp_residents,identity_number')]
     public $identity_number = '';
 
 

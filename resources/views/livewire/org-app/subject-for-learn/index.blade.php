@@ -32,6 +32,21 @@
         @endif
 
         <div class="overflow-x-auto">
+            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                        {{ __('Showing') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->subjects->firstItem() }}</span>
+                        {{ __('to') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->subjects->lastItem() }}</span>
+                        {{ __('of') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->subjects->total() }}</span>
+                        {{ __('results') }}
+                    </p>
+                </div>
+            </div>
             {{-- Table --}}
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">

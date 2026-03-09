@@ -24,25 +24,32 @@
 
 
 
-        
+
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Platform')" class="grid">
-            @auth
-            <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                wire:navigate>
-                {{ __('Dashboard') }}
-            </flux:sidebar.item>   
-            @endauth
-                
-               @canany(['activity.index'])
-               <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
-               :current="request()->routeIs('calendar.index')" wire:navigate>
-               {{ __('Calendar') }}
-           </flux:sidebar.item>  
+                @auth
+                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                        wire:navigate>
+                        {{ __('Dashboard') }}
+                    </flux:sidebar.item>
+                @endauth
+
+                @canany(['activity.index'])
+                    <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
+                        :current="request()->routeIs('calendar.index')" wire:navigate>
+                        {{ __('Calendar') }}
+                    </flux:sidebar.item>
                 @endcanany
-              
-                @canany(['activity.index', 'purchase_request.index', 'subject.index', 'student.group.index', 'student.index', 'reports.groups.attendance
-                ' ])
+
+                @canany([
+                    'activity.index',
+                    'purchase_request.index',
+                    'subject.index',
+                    'student.group.index',
+                    'student.index',
+                    'reports.groups.attendance
+                    ',
+                    ])
                     <flux:sidebar.item icon="photo" :href="route('gallery.index')"
                         :current="request()->routeIs('gallery.index')" wire:navigate>
                         {{ __('Gallery') }}
@@ -147,17 +154,32 @@
                 @endcanany
 
                 <!-- Camps And Beneficiaries -->
-                @canany(['displacement.camps.index','displacement.camps.create', ])
-                <flux:sidebar.group expandable :expanded="false" :heading="__('Camps And Beneficiaries')" icon="map"
-                    class="grid">
-                    @can('displacement.camps.index')
-                        <flux:sidebar.item icon="list-bullet" :href="route('displacement.camps.index')"
-                            :current="request()->routeIs('displacement.camps.index')" wire:navigate>
-                            {{ __('Displacement Camps') }}
-                        </flux:sidebar.item>
+                @canany(['displacement.camps.index', 'displacement.camps.create', 'camps.residents.index','activity.beneficiaries.index'])
+                    <flux:sidebar.group expandable :expanded="false"  :heading="__('Camps/Beneficiaries')"
+                        icon="map" class="grid">
+                        @can('displacement.camps.index')
+                            <flux:sidebar.item icon="list-bullet" :href="route('displacement.camps.index')"
+                                :current="request()->routeIs('displacement.camps.index')" wire:navigate>
+                                {{ __('Displacement Camps') }}
+                            </flux:sidebar.item>
+                        @endcan
+
+                        @can('camps.residents.index')
+                            <flux:sidebar.item icon="list-bullet" :href="route('camps.residents.index')"
+                                :current="request()->routeIs('camps.residents.index')" wire:navigate>
+                                {{ __('Camps Residents') }}
+                            </flux:sidebar.item>
                     @endcan
-                </flux:sidebar.group>
-               @endcanany
+
+
+                        @can('activity.beneficiaries.index')
+                            <flux:sidebar.item icon="list-bullet" :href="route('activity.beneficiaries.index')"
+                                :current="request()->routeIs('activity.beneficiaries.index')" wire:navigate>
+                                {{ __('Activity Beneficiaries') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+                @endcanany
                 <!-- Statistics  Group -->
 
                 @canany(['reports.all'])
@@ -366,7 +388,8 @@
         <flux:spacer />
 
         <flux:dropdown position="top" align="end">
-            <flux:profile :avatar="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null"
+            <flux:profile
+                :avatar="auth()->user()->google_id && auth()->user()->avatar ? auth()->user()->avatar : null"
                 :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
 
             <flux:menu>

@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\GlobalSystemConstant;
 use App\Models\Ability;
 use App\Models\Activity;
 use App\Models\ActivityBeneficiary;
 use App\Models\Department;
+use App\Models\DisplacementCamp;
 use App\Models\Employee;
 use App\Models\EventAssignee;
 use App\Models\PartnerInstitution;
@@ -15,6 +17,7 @@ use App\Models\StudentGroup;
 use App\Observers\AbilitieObserver;
 use App\Observers\ActivityObserver;
 use App\Observers\DepartmentObserver;
+use App\Observers\DisplacementCampObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\EventAssigneeObserver;
 use App\Observers\PartnersObserver;
@@ -27,10 +30,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\Validator;
-use App\Enums\GlobalSystemConstant;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -65,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
         Activity::observe(ActivityObserver::class);
         ActivityBeneficiary::observe(ActivityBeneficiaryRepo::class);
         PurchaseRequisition::observe(PurchaseRequisitionObserver::class);
+        DisplacementCamp::observe(DisplacementCampObserver::class);
         
 
 

@@ -77,14 +77,21 @@ class Edit extends Component
             $abilities[] = $ability->ability_name ?? null;
         }
 
-        Role::where('id', $this->roles['id'])->update([
-                'name' => $this->name,
-                'abilities' => $abilities,
-                'abilities_description' => $abilitiesDescription,
-                'created_by' => Auth::id(),
-            ]);
+        $role = Role::find($this->roles['id']);
+        $role->fill([
+            'name' => $this->name,
+            'abilities' => $abilities,
+            'abilities_description' => $abilitiesDescription,
+            'created_by' => Auth::id(),
+        ]);
 
+        if ($role->isDirty()) {
+            $role->save();
             session()->flash('message', 'Role updated successfully.');
+        } else {
+            session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
 
         return $this->redirect(route('role.index'), navigate: true);
     }

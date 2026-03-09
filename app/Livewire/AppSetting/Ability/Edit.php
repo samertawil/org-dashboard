@@ -50,14 +50,20 @@ class Edit extends Component
 
         $this->validate();
 
-        $this->ability->update([
+        $this->ability->fill([
             'ability_description' => $this->ability_description,
             'module_id' => $this->module_id,
             'description' => $this->description,
             'activation' => $this->activation,
         ]);
  
-        $this->dispatch('closeModel');
+        if ($this->ability->isDirty()) {  
+            $this->ability->save();
+            session()->flash('message', __('Ability successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+        }
+        
         $this->dispatch('Refresh_Ability_Index');
 
         return redirect()->route('ability.index');

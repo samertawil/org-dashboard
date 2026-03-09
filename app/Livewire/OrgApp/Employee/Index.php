@@ -12,10 +12,22 @@ class Index extends Component
     use WithPagination;
 
     public $search = '';
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
 
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
     }
 
     public function delete($id)
@@ -28,12 +40,10 @@ class Index extends Component
         session()->flash('message', __('Employee successfully deleted.'));
     }
 
-    public function render()
+    #[\Livewire\Attributes\Computed]
+    public function employees()
     {
-        if (Gate::denies('employee.index')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-        $employees = Employee::with(['department', 'positionStatus'])
+        return Employee::with(['department', 'positionStatus'])
             ->where(function($query) {
                 $query->where('full_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('department', function($q) {
@@ -41,11 +51,16 @@ class Index extends Component
                     })
                     ->orWhere('employee_number', 'like', '%' . $this->search . '%');
             })
-            ->latest()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
+    }
 
-        return view('livewire.org-app.employee.index', [
-            'employees' => $employees,
-        ]);
+    public function render()
+    {
+        if (Gate::denies('employee.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
+
+        return view('livewire.org-app.employee.index');
     }
 }

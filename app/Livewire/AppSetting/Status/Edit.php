@@ -37,14 +37,22 @@ class Edit extends Component
             'status_name' => 'required|string|max:255|unique:statuses,status_name,' . $this->data->id . ',id',
         ]);
        
-        $this->data->update([
+        $this->data->fill([
             'status_name' => ucfirst( $this->status_name),
             'p_id_sub' => $this->p_id_sub,  
             'used_in_system_id' => $this->used_in_system_id,
             'description' => ucfirst($this->description),
         ]);
 
-        session()->flash('message', 'Status Updated successfully.');
+        if($this->data->isDirty()){
+            $this->data->save();
+            session()->flash('message', 'Status Updated successfully.');
+        }else {
+             session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
+
+     
 
        return redirect()->route('status.index');
     }

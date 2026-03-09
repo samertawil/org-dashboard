@@ -37,7 +37,7 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->subject->update([
+        $this->subject->fill([
             'name' => ucfirst($this->name),
             'type_id' => $this->type_id ?: null,
             'description' => $this->description,
@@ -46,7 +46,14 @@ class Edit extends Component
             'to_age' => $this->to_age,
         ]);
 
-        session()->flash('message', __('Subject successfully updated.'));
+        if ($this->subject->isDirty()) {
+          
+            $this->subject->save();
+          
+            session()->flash('message', __('Subject updated successfully.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+        }
 
         return $this->redirect(route('subject.index'), navigate: true);
     }

@@ -54,7 +54,9 @@ self.addEventListener("fetch", (event) => {
                     const responseClone = response.clone();
 
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
+                        if (event.request.method === "GET") {
+                            cache.put(event.request, responseClone);
+                        }
                     });
 
                     return response;
@@ -82,8 +84,9 @@ self.addEventListener("fetch", (event) => {
 
                 // Open cache and put the cloned response
                 caches.open(CACHE_NAME).then((cache) => {
-                    // Only cache successful responses and valid http(s) requests
+                    // Only cache successful responses and valid http(s) GET requests
                     if (
+                        event.request.method === "GET" &&
                         event.request.url.startsWith("http") &&
                         response.status === 200
                     ) {

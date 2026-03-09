@@ -30,16 +30,17 @@ class Edit extends Component
         ]);
     }
 
-    public function rules() {
+    public function rules()
+    {
         return [
-            'identity_number' => 'required|integer|unique:displacement_camp_residents,identity_number,' . $this->campsResident->id,
+            'identity_number' => 'required|integer|min_digits:9|max_digits:9|unique:displacement_camp_residents,identity_number,' . $this->campsResident->id,
         ];
     }
     public function update()
     {
         $this->validate();
 
-        $this->campsResident->update([
+        $this->campsResident->fill([
             'displacement_camp_id' => $this->displacement_camp_id,
             'resident_type' => $this->resident_type,
             'identity_number' => $this->identity_number,
@@ -50,14 +51,24 @@ class Edit extends Component
             'activation' => $this->activation,
         ]);
 
-        session()->flash('message', __('Displacement Camp Resident successfully updated.'));
+
+        if ($this->campsResident->isDirty()) {
+
+            $this->campsResident->save();
+            session()->flash('type','success');
+            session()->flash('message', __('Displacement Camp Resident successfully updated.'));
+        } else {
+            session()->flash('type','warning');
+            session()->flash('message', __('No changes were made!'));     
+        }
+
 
         return $this->redirect(route('camps.residents.index'), navigate: true);
     }
 
     public function render()
-    {     
-        if(Gate::denies('displacement.camps.create')) {
+    {
+        if (Gate::denies('displacement.camps.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
 

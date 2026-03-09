@@ -41,12 +41,18 @@ class Edit extends Component
     {
         $this->validate();
 
-        $this->currency->update([
+        $this->currency->fill([
             'exchange_date' => $this->exchange_date,
             'currency_value' => $this->currency_value,
         ]);
 
-        session()->flash('message', __('Currency Value successfully updated.'));
+        if ($this->currency->isDirty()) {
+            $this->currency->save();
+            session()->flash('message', __('Currency Value successfully updated.'));
+        } else {
+            session()->flash('message', __('No changes were made!'));
+            session()->flash('type', 'warning');
+        }
 
         return $this->redirect(route('currency.index'), navigate: true);
     }

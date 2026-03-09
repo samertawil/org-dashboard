@@ -67,6 +67,7 @@ Use `wire:loading` to toggle visibility or attributes based on network requests.
 For standard form submissions (non-Livewire), use Alpine.js to manage local state.
 
 - **Form Submission**: prevent multiple submissions and show feedback.
+
     ```html
     <form
         x-data="{ loading: false }"
@@ -172,14 +173,89 @@ $this->dispatch('notify', message: 'Saved!', type: 'success');
 </div>
 ```
 
-### Responsive Tables with Overflow
+### Responsive & Interactive Tables
 
-Wrap tables in a container to allow horizontal scrolling on small screens without breaking the layout.
+When building data tables (e.g., Index views), wrap tables in a container to allow horizontal scrolling on small screens (`overflow-x-auto`) without breaking the layout.
+
+Additionally, standard tables should implement:
+
+1. **Clear Filters Button**: Display a ghost button positioned to the right to reset applied search properties.
+2. **Pagination Summary Block**: Display the "Showing X to Y of Z results" text block directly above the `<table/>`.
+3. **Sortable Column Headers**: Add clickable `<th wire:click="sortBy('field')">` headers paired with dynamic Flux chevron icons.
+
+#### Example Architecture
 
 ```html
-<div class="overflow-x-auto border rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-        <!-- ... -->
+<div class="mb-4">
+    <!-- 1. Clear Filters Container (Shown conditionally if filters are active) -->
+    @if ($search || $status_id)
+    <div class="mt-4 flex items-center justify-end">
+        <flux:button
+            wire:click="$set('search', ''); $set('status_id', '');"
+            variant="ghost"
+            size="sm"
+            icon="x-mark"
+        >
+            {{ __('Clear Filters') }}
+        </flux:button>
+    </div>
+    @endif
+</div>
+
+<div class="overflow-x-auto -mx-6">
+    <!-- 2. Pagination Summary Block -->
+    <div
+        class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900"
+    >
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                {{ __('Showing') }}
+                <span class="font-medium text-zinc-900 dark:text-white"
+                    >{{ $this->records->firstItem() }}</span
+                >
+                {{ __('to') }}
+                <span class="font-medium text-zinc-900 dark:text-white"
+                    >{{ $this->records->lastItem() }}</span
+                >
+                {{ __('of') }}
+                <span class="font-medium text-zinc-900 dark:text-white"
+                    >{{ $this->records->total() }}</span
+                >
+                {{ __('results') }}
+            </p>
+        </div>
+    </div>
+
+    <!-- 3. The Responsive Table -->
+    <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+        <thead class="bg-zinc-50 dark:bg-zinc-900">
+            <tr>
+                <th
+                    wire:click="sortBy('name')"
+                    class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                >
+                    <div class="flex items-center gap-1">
+                        {{ __('Name') }} @if ($sortField === 'name')
+                        <flux:icon
+                            name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                            class="size-3"
+                        />
+                        @else
+                        <flux:icon
+                            name="chevron-up-down"
+                            class="size-3 text-zinc-300"
+                        />
+                        @endif
+                    </div>
+                </th>
+                <th
+                    class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
+                >
+                    {{ __('Actions') }}
+                </th>
+            </tr>
+        </thead>
+        <!-- Table Body ... -->
     </table>
 </div>
 ```

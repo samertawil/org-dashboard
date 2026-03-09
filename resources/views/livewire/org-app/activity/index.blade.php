@@ -74,20 +74,59 @@
         </div>
 
         <div class="overflow-x-auto -mx-6">
+            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                        {{ __('Showing') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->activities->firstItem() }}</span>
+                        {{ __('to') }}
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->activities->lastItem() }}</span>
+                        {{ __('of') }}
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->activities->total() }}</span>
+                        {{ __('results') }}
+                    </p>
+                </div>
+            </div>
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Name') }}
+                        <th wire:click="sortBy('name')"
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Name') }}
+                                @if ($sortField === 'name')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                        class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Start Date') }}
+                        <th wire:click="sortBy('start_date')"
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Start Date') }}
+                                @if ($sortField === 'start_date')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                        class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Status') }}
+                        <th wire:click="sortBy('status')"
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Status') }}
+                                @if ($sortField === 'status')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                        class="size-3" />
+                                @else
+                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                @endif
+                            </div>
                         </th>
 
                         <th scope="col"

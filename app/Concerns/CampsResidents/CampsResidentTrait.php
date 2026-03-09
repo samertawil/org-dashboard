@@ -2,10 +2,11 @@
 
 namespace App\Concerns\CampsResidents;
 
+use App\Enums\GlobalSystemConstant;
 use App\Models\displacementCamp;
+use App\Reposotries\displacementCampRepo;
 use App\Reposotries\StatusRepo;
 use Livewire\Attributes\Validate;
-use App\Enums\GlobalSystemConstant;
 
 trait CampsResidentTrait
 {
@@ -50,6 +51,6 @@ trait CampsResidentTrait
         // Let's assume StatusRepo::statuses() and filter if necessary in the view.
         $this->residentTypes = StatusRepo::statuses()->where('p_id_sub',config('appConstant.beneficiaries_types')); 
         
-        $this->displacementCamps = displacementCamp::all();
+        $this->displacementCamps = displacementCampRepo::camps();;
     }
 }

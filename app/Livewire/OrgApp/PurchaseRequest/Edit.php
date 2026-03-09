@@ -41,7 +41,7 @@ class Edit extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $this->purchaseRequisition->update([
+            $this->purchaseRequisition->fill([
                 'request_number' => $this->request_number,
                
                 'request_date' => $this->request_date,
@@ -55,27 +55,61 @@ class Edit extends Component
                 'status_id' => $this->status_id,
             ]);
 
-            // Re-create items
-            $this->purchaseRequisition->items()->delete();
+            if ($this->purchaseRequisition->isDirty()) {
+                $this->purchaseRequisition->save();
+                   session()->flash('message', __('Purchase Requisition updated successfully.'));
+            } else {
+                session()->flash('message', __('No changes were made!'));
+                session()->flash('type', 'warning');
+            }
+
+            // Smart Sync Items
+            $submittedItemIds = collect($this->items)->filter(fn($item) => !empty($item['id']))->pluck('id')->toArray();
+            
+            // Delete items that are no longer in the array
+            $isDeleted = $this->purchaseRequisition->items()->whereNotIn('id', $submittedItemIds)->delete();
+            if ($isDeleted > 0) {
+                session()->flash('type', 'success');
+                session()->flash('message', __('Items successfully updated.'));
+            }
             
             foreach ($this->items as $index => $item) {
                 if (!empty($item['item_name'])) {
-                    $this->purchaseRequisition->items()->create([
+                    $itemData = [
                         'line_number' => $index + 1,
                         'item_name' => $item['item_name'],
-                        'item_description' => $item['item_description'],
-                        'quantity' => $item['quantity'],
-                        'unit_id' => $item['unit_id'],
-                        'unit_price' => $item['unit_price'],
-                        'currency' => $item['currency'],
-                        'created_by' => auth()->id(), // Preserve original? Or new val? Usually auth id on new creation
+                        'item_description' => $item['item_description'] ?? null,
+                        'quantity' => $item['quantity'] ?? 0,
+                        'unit_id' => $item['unit_id'] ?? null,
+                        'unit_price' => $item['unit_price'] ?? 0,
+                        'currency' => $item['currency'] ?? null,
                         'status_id' => $item['status_id'] ?? null,
-                    ]);
+                    ];
+
+                    if (!empty($item['id'])) {
+                        // Update existing
+                        $existingItem = $this->purchaseRequisition->items()->where('id', $item['id'])->first();
+                        if ($existingItem) {
+                            $existingItem->fill($itemData);
+                            if ($existingItem->isDirty()) {
+                                $existingItem->save();
+                                session()->flash('type', 'success');
+                                session()->flash('message', __('Item successfully updated.'));
+                            } 
+                        }
+                    } else {
+                        // Create new
+                        $this->purchaseRequisition->items()->create(array_merge($itemData, [
+                            'created_by' => auth()->id(),
+                        ]));
+                       session()->flash('type', 'success');
+                       session()->flash('message', __('Item successfully created.'));
+                    }
                 }
             }
         });
 
-        session()->flash('message', __('Purchase Requisition updated successfully.'));
+     
         return $this->redirect(route('purchase_request.index'), navigate: true);
     }
 

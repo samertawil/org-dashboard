@@ -96,6 +96,34 @@ $users = User::all()->filter(function($user) {
 $users = User::where('created_at', '>', now()->subDays(30))->get();
 ```
 
+### 6. Optimizing Updates (`isDirty`)
+
+**Problem**: Updating a model and saving it even when no attributes have actually changed. This causes unnecessary database `UPDATE` queries and triggers Eloquent events (`saving`, `updating`, etc.) needlessly.
+
+```php
+// ❌ Bad
+// Calling update() directly might still trigger unnecessary processing depending on the context
+$user->update([
+    'name' => $request->name,
+    'email' => $request->email,
+]);
+
+// ✅ Good
+// Use fill() to assign values, then check if any changes were actually made before saving
+$user->fill([
+    'name' => $request->name,
+    'email' => $request->email,
+]);
+
+if ($user->isDirty()) {
+    $user->save(); // Only hits the database if values actually changed
+    session()->flash('message', __('Data successfully updated.'));
+} else {
+    session()->flash('message', __('No changes were made!'));
+    session()->flash('type', 'warning');
+}
+```
+
 ## Advanced Techniques
 
 ### Subqueries
