@@ -4,8 +4,11 @@ namespace App\Livewire\OrgApp\Student;
 
 use App\Concerns\Student\StudentTrait;
 use App\Models\Student;
+use App\Services\CivilRegistryApiResponse;
+use App\Services\CivilRegistryApiServices;
 use DateTime;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -50,8 +53,12 @@ class Create extends Component
         return $this->redirect(route('student.index'), navigate: true);
     }
 
+
+
+
     public function render()
     {     
+         
         if(Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }

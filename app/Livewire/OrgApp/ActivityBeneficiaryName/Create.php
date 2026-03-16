@@ -52,6 +52,9 @@ class Create extends Component
 
     public function render()
     {     
+        if (Gate::denies('activity.beneficiaries.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.activity-beneficiary-name.create', [
             'heading' => __('Create Activity Beneficiary'),
             'type' => 'save',

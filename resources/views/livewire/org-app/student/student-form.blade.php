@@ -18,7 +18,13 @@
 
     {{-- Success Message --}}
     <x-auth-session-status class="text-center" :status="session('message')" />
-
+    <flux:button 
+    wire:click.prevent="getData"
+    variant="ghost"
+    icon="magnifying-glass"
+>
+    {{ __('Fetch Civil Registry Data') }}
+</flux:button>
     {{-- Form Section --}}
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
         <form wire:submit="{{$type}}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

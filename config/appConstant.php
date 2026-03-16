@@ -16,5 +16,5 @@ return [
     'purchase_requisition_statuses'=>105,
     'units_statuses'=>81,
     'partners_types'=>110,
-    'receive_method'=>113,
+    'receive_method'=>114,
 ];

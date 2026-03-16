@@ -7,32 +7,54 @@ use App\Models\activityBeneficiaryName;
 use App\Models\displacementCamp;
 use App\Models\Status;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+ 
 
 class ActivityBeneficiaryNameImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function rules(): array
     {
         return [
-            'activity_id' => 'required|exists:activities,id',
-            'identity_number' => 'required|numeric', // We'll handle unique validation carefully based on activity_id
+            'activity_id' => 'required',
+            'identity_number' => [
+                'required',
+                'integer',
+                'min_digits:9',
+                'max_digits:9',
+            ],
             'full_name' => 'required',
-            'camp_name' => 'nullable|exists:displacement_camps,name',
-            'receive_method' => 'nullable|exists:statuses,status_name',
+             'camp_name' => 'nullable|exists:displacement_camps,id',
+         
             'receipt_date' => 'required',
         ];
     }
 
     public function model(array $row)
     {
+
+        // Handle Activit Id
+        $camp = null;
+        if (isset($row['activity_id'])) {
+            if (is_numeric($row['activity_id'])) {
+               
+                $activityData = Activity::find($row['activity_id']);
+            } else {
+ 
+                $activityData = Activity::where('name', $row['activity_id'])->first();
+            }
+        }
+
         // Handle Camp
         $camp = null;
         if (isset($row['camp_name'])) {
             if (is_numeric($row['camp_name'])) {
+               
                 $camp = displacementCamp::find($row['camp_name']);
             } else {
+ 
                 $camp = displacementCamp::where('name', $row['camp_name'])->first();
             }
         }
@@ -64,11 +86,14 @@ class ActivityBeneficiaryNameImport implements ToModel, WithHeadingRow, WithVali
             ->exists();
 
         if ($exists) {
-            return null; // Skip if already exists
+            
+            throw ValidationException::withMessages([
+                'identity_number' =>  [$row['identity_number'].' - '.__('The identity number has already been taken for this activity.')]
+            ]);
         }
 
         return new activityBeneficiaryName([
-            'activity_id'           => $row['activity_id'],
+            'activity_id'           => $activityData ? $activityData->id : null,
             'displacement_camps_id' => $camp ? $camp->id : null,
             'identity_number'       => $row['identity_number'],
             'full_name'             => $row['full_name'],

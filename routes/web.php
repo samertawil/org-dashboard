@@ -63,6 +63,7 @@ use \App\Livewire\OrgApp\CampsResidents\Edit as  CampsResidentsEdit;
 use \App\Livewire\OrgApp\ActivityBeneficiaryName\Index as ActivityBeneficiaryNameIndex;
 use \App\Livewire\OrgApp\ActivityBeneficiaryName\Create as ActivityBeneficiaryNameCreate;
 use \App\Livewire\OrgApp\ActivityBeneficiaryName\Edit as ActivityBeneficiaryNameEdit;
+use App\Livewire\OrgApp\SurveyQuestions\Index as SurveyQuestionsIndex;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -202,6 +203,9 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     // ai 
 
     Route::get('ai-copilot', FullPageChat::class)->name('ai_copilot');
+    
+    //Survey
+    Route::get('/survey',SurveyQuestionsIndex::class)->name('survey.index');
     
 
     });

@@ -1,1 +1,0 @@
-beneficiary-<?php echo e($index); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/8055d42bf861e413c4b672a2e1914bc9.blade.php ENDPATH**/ ?>

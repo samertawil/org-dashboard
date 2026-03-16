@@ -5,34 +5,55 @@ namespace App\Livewire\OrgApp\StudentGroups;
 use Livewire\Component;
 use App\Models\StudentGroup;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StudentGroupSchedule extends Component
 {
+   
     public StudentGroup $group;
     public $month;
     public $year;
+    public ?string $groupStartDate = null;
+    public ?string $groupEndDate = null;
 
     public function mount(StudentGroup $group)
     {
         $this->group = $group;
-        // Use group start date if available, otherwise current date
-        $startDate = $group->start_date ? Carbon::parse($group->start_date) : Carbon::now();
-        $this->month = $startDate->month;
-        $this->year = $startDate->year;
+
+        // Read dates raw from DB to avoid Eloquent cast interference
+        $rawGroup = DB::table('student_groups')
+            ->where('id', $group->id)
+            ->select('start_date', 'end_date')
+            ->first();
+
+        $this->groupStartDate = $rawGroup->start_date ?? null;
+        $this->groupEndDate   = $rawGroup->end_date   ?? null;
+
+        // Default to current month if group has already started
+        $now = Carbon::now();
+        $startDate = $this->groupStartDate ? Carbon::parse($this->groupStartDate) : $now;
+
+        if ($startDate->isPast()) {
+            $this->month = (int) $now->month;
+            $this->year  = (int) $now->year;
+        } else {
+            $this->month = (int) $startDate->month;
+            $this->year  = (int) $startDate->year;
+        }
     }
 
     public function nextMonth()
     {
-        $date = Carbon::createFromDate($this->year, $this->month, 1)->addMonth();
-        $this->month = $date->month;
-        $this->year = $date->year;
+        $date = Carbon::createFromDate((int) $this->year, (int) $this->month, 1)->addMonth();
+        $this->month = (int) $date->month;
+        $this->year = (int) $date->year;
     }
 
     public function previousMonth()
     {
-        $date = Carbon::createFromDate($this->year, $this->month, 1)->subMonth();
-        $this->month = $date->month;
-        $this->year = $date->year;
+        $date = Carbon::createFromDate((int) $this->year, (int) $this->month, 1)->subMonth();
+        $this->month = (int) $date->month;
+        $this->year = (int) $date->year;
     }
 
     public $showEditModal = false;
@@ -42,6 +63,7 @@ class StudentGroupSchedule extends Component
     public $edit_is_off_day;
     public $edit_notes;
     public $edit_date;
+    public $edit_subjects = [];
 
     public function editSchedule($scheduleId)
     {
@@ -123,16 +145,19 @@ class StudentGroupSchedule extends Component
 
     public function render()
     {
-        dd(2);
-        $startOfMonth = Carbon::createFromDate($this->year, $this->month, 1);
+      
+        $startOfMonth = Carbon::createFromDate($this->year, $this->month, 1)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
         $daysInMonth = $startOfMonth->daysInMonth;
         
         // Get schedules for this month
+        // We use a broader range to be safe and normalize the keys to Y-m-d
         $schedules = $this->group->studentGroupSchedules()
-            ->whereYear('schedule_date', $this->year)
-            ->whereMonth('schedule_date', $this->month)
+            ->whereBetween('schedule_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->get()
-            ->keyBy('schedule_date');
+            ->keyBy(function($item) {
+                return Carbon::parse($item->schedule_date)->format('Y-m-d');
+            });
             
         // Pre-fetch student counts by enrollment type
         $studentCounts = $this->group->students()
@@ -141,32 +166,30 @@ class StudentGroupSchedule extends Component
             ->pluck('count', 'enrollment_type')
             ->toArray();
 
-        // Pre-calculate group dates
-        $groupStartDate = $this->group->start_date ? Carbon::parse($this->group->start_date)->format('Y-m-d') : null;
-        $groupEndDate = $this->group->end_date ? Carbon::parse($this->group->end_date)->format('Y-m-d') : null;
-        
+        // Group date boundaries (already stored as Y-m-d strings from mount)
+        $groupStart = $this->groupStartDate; // e.g. '2026-01-01'
+        $groupEnd   = $this->groupEndDate;   // e.g. '2026-04-30'
+
+
         // Generate calendar grid
         $startDayOfWeek = $startOfMonth->dayOfWeek;
         
         $calendar = [];
         $currentDate = $startOfMonth->copy();
         
-        // Fill empty days at start
-        for ($i = 0; $i < $startDayOfWeek; $i++) {
-            $calendar[] = null;
-        }
+        // We no longer need empty days at start for 2/4 column grid
 
         // Fill days
         for ($i = 1; $i <= $daysInMonth; $i++) {
              $dateStr = $currentDate->format('Y-m-d');
              $dayOfWeek = $currentDate->dayOfWeek;
 
-             // Check if date is within group start/end dates
+             // Check if date is within group start/end dates using simple string comparison
              $inRange = true;
-             if ($groupStartDate && $dateStr < $groupStartDate) {
+             if ($groupStart && $dateStr < $groupStart) {
                  $inRange = false;
              }
-             if ($groupEndDate && $dateStr > $groupEndDate) {
+             if ($groupEnd && $dateStr > $groupEnd) {
                  $inRange = false;
              }
              
@@ -183,7 +206,7 @@ class StudentGroupSchedule extends Component
              $calendar[] = [
                  'date' => $currentDate->copy(),
                  'day' => $i,
-                 'schedule' => $schedules[$dateStr] ?? null,
+                 'schedule' => $schedules->get($dateStr),
                  'student_count' => $dailyStudentCount,
              ];
              $currentDate->addDay();

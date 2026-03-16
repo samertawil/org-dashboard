@@ -145,7 +145,27 @@ $this->dispatch('notify', message: 'Saved!', type: 'success');
         class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded shadow-lg"
     >
         <span x-text="message"></span>
-    </div>
+</div>
+```
+
+### 4. Auto-Scroll on Success (Scroll to Top)
+
+To provide a smooth user experience when a user saves a long form and the success message is at the top of the page, dispatch an event to scroll up automatically.
+
+```php
+// In Livewire Component
+public function save()
+{
+    // ... validation and saving logic ...
+   
+    $this->dispatch('scroll-to-top');
+}
+```
+
+```html
+<!-- In Blade View (Main Container) -->
+<div class="flex flex-col gap-6" x-data x-on:scroll-to-top.window="window.scrollTo({ top: 0, behavior: 'smooth' })">
+    <!-- Form and Messages -->
 </div>
 ```
 

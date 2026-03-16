@@ -41,7 +41,7 @@ class Create extends Component
         // TODO: Ensure valid gates exist or remove conditionally once configured
         if(Gate::denies('displacement.camps.create')) {
             abort(403, 'You do not have the necessary permissions.');
-        }
+        } 
 
         return view('livewire.org-app.camps-residents.create', [
             'heading' => __('Create Camp Resident'),

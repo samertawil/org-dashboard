@@ -6,6 +6,7 @@ use App\Models\StudentGroup;
 use App\Reposotries\StatusRepo;
 use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
+use App\Services\CivilRegistryApiServices;
 
 trait StudentTrait
 {
@@ -52,5 +53,11 @@ trait StudentTrait
         $this->statuses = StatusRepo::statuses();
         $this->studentGroups = StudentGroup::all();
         $this->livingStatuses = StatusRepo::statuses();
+    }
+
+    public function getData(CivilRegistryApiServices $CivilRegistryApiServices) {
+        $identity_number = $this->identity_number ?: 800097818;
+        $response =  $CivilRegistryApiServices->getData($identity_number);
+        dd($response);
     }
 }

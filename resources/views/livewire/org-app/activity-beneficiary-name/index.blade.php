@@ -56,6 +56,19 @@
     {{-- Search and Table Section --}}
     <div
         class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
+
+        
+        <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 relative">
+            <flux:select wire:model.live.debounce.300ms="activity" :placeholder="__('activity...')"
+                icon="magnifying-glass"  >
+                <option value="">{{ __('All Activities') }}</option>
+                @foreach ($activites as $activity)
+                    <option value="{{ $activity->id }}">{{ $activity->name }}</option>
+                @endforeach
+            </flux:select>
+            
+        </div>
+
         <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 relative">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search by name, identity, camp or activity...')"
                 icon="magnifying-glass" />
@@ -64,9 +77,12 @@
             </div>
         </div>
 
-        @if ($search)
+
+       
+
+        @if ($search|| $activity)
             <div class="mt-4 flex items-center justify-end">
-                <flux:button wire:click="$set('search', '');" variant="ghost" size="sm" icon="x-mark">
+                <flux:button wire:click="$set('search', '');$set('activity', '');" variant="ghost" size="sm" icon="x-mark">
                     {{ __('Clear Filters') }}
                 </flux:button>
             </div>

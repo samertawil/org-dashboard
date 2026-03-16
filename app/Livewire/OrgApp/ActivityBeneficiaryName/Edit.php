@@ -84,6 +84,10 @@ class Edit extends Component
 
     public function render()
     {
+        if (Gate::denies('activity.beneficiaries.create')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
+        
         return view('livewire.org-app.activity-beneficiary-name.edit', [
             'heading' => __('Edit Activity Beneficiary'),
             'type' => 'update',

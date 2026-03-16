@@ -1,5 +1,5 @@
 @php
-    $dayWidthClass = 'min-w-[140px] md:min-w-0 md:flex-1 w-full md:w-[calc(14.28%-0.86rem)]';
+    $dayWidthClass = 'w-full';
 @endphp
 
 
@@ -21,35 +21,32 @@
  
     <!-- Calendar Navigation -->
     <div class="flex items-center justify-between bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm">
-        <flux:button wire:click="previousMonth" icon="chevron-left" variant="ghost" />
+        <button wire:click="previousMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">{{ $currentMonthName }}</h2>
-        <flux:button wire:click="nextMonth" icon="chevron-right" variant="ghost" />
+        <button wire:click="nextMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
     </div>
 
     <!-- Calendar Container with Horizontal Scroll -->
     <div class="overflow-x-auto pb-4">
         <!-- Calendar Grid -->
-        <div class="bg-gray-50/50 dark:bg-zinc-900/50 rounded-xl p-4 min-w-[700px] md:min-w-0">
-            <!-- Header Days of Week -->
-            <div class="flex gap-4 mb-4 font-bold text-center text-zinc-500 text-xs uppercase tracking-wider">
-                @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $dayName)
-                    <div class="flex-1">{{ __($dayName) }}</div>
-                @endforeach
-            </div>
+        <div class="bg-gray-50/50 dark:bg-zinc-900/50 rounded-xl p-4 md:min-w-0">
+
+
 
             <!-- Calendar Days -->
-            <div class="flex flex-wrap gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @foreach($calendar as $day)
-                @if($day === null)
-                     <div class="{{ $dayWidthClass }} min-h-[140px] rounded-xl"></div>
-                @else
-                    @php
-                        $schedule = $day['schedule'];
-                        $isOffDay = $schedule && $schedule->is_off_day;
-                        $today = $day['date']->isToday();
-                        $hasTime = $schedule && $schedule->start_time;
-                    @endphp
-                    <div wire:click="{{ $schedule ? 'editSchedule('.$schedule->id.')' : '' }}" @class([
+                @php
+                    $schedule = $day['schedule'];
+                    $isOffDay = $schedule && $schedule->is_off_day;
+                    $today = $day['date']->isToday();
+                    $hasTime = $schedule && $schedule->start_time;
+                @endphp
+                    <div wire:key="day-{{ $day['date']->format('Y-m-d') }}" wire:click="{{ $schedule ? 'editSchedule('.$schedule->id.')' : '' }}" @class([
                         $dayWidthClass,
                         'min-h-[140px] p-3 flex flex-col gap-2 rounded-xl border shadow-sm transition-all duration-200 group relative cursor-pointer',
                         'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md' => !$today && !$isOffDay,
@@ -130,7 +127,6 @@
                              </div>
                         @endif
                     </div>
-                @endif
             @endforeach
         </div>
     </div>
