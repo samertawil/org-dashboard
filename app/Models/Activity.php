@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Activity extends Model
 {
@@ -127,12 +128,14 @@ class Activity extends Model
     {
         // If status is set in database, use it
         if ($this->status !== null) {
+            $name = $this->activityStatus->status_name ?? '-';
             return [
-                'name' => $this->activityStatus->status_name ?? '-',
+                'name' => __($name),
+                'raw_name' => $name,
                 'color' => match ((int) $this->status) {
                     27 => 'green',
                     26 => 'yellow',
-                    25 => 'indigo',
+                    25 => 'blue',
                     28 => 'red',
                     default => 'zinc',
                 },
@@ -142,17 +145,38 @@ class Activity extends Model
         // Virtual status logic when status is NULL
         $today = now()->toDateString();
         $startDate = $this->start_date;
+        $endDate = $this->end_date;
 
         if ($this->attachments->isNotEmpty()) {
             return [
                 'name' => __('Completed'),
-            'color' => 'green',
+                'raw_name' => 'Completed',
+                'color' => 'green',
             ];
         }
 
-        if ($startDate > $today && $this->attachments->isEmpty()) {
+        if (($startDate > $today && $endDate > $today) && $this->attachments->isEmpty()) {
+
             return [
                 'name' => __('Planned'),
+                'raw_name' => 'Planned',
+                'color' => 'blue',
+            ];
+        }
+
+        if (($startDate < $today && $endDate > $today) && $this->attachments->isEmpty()) {
+
+            return [
+                'name' => __('In Progress'),
+                'raw_name' => 'In Progress',
+                'color' => 'yellow',
+            ];
+        }
+
+        if ($startDate > $today  && $this->attachments->isEmpty()) {
+            return [
+                'name' => __('Planned'),
+                'raw_name' => 'Planned',
                 'color' => 'blue',
             ];
         }
@@ -160,6 +184,7 @@ class Activity extends Model
         if ($startDate === $today && $this->attachments->isEmpty()) {
             return [
                 'name' => __('In Progress'),
+                'raw_name' => 'In Progress',
                 'color' => 'yellow',
             ];
         }
@@ -167,13 +192,15 @@ class Activity extends Model
         // For past dates
         if ($this->attachments->isEmpty()) {
             return [
-                'name' => __('Need Procedure / On Hold'),
-                'color' => 'orange',
+                'name' => __('On Hold'),
+                'raw_name' => 'On Hold',
+                'color' => 'red',
             ];
         }
 
         return [
             'name' => __('Undefined'),
+            'raw_name' => 'Undefined',
             'color' => 'indigo',
         ];
     }

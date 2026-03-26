@@ -284,14 +284,6 @@
                                         :label="__('Point Name')" />
 
 
-
-                                    <flux:select wire:model="teaching_groups.{{ $index }}.status"
-                                        :label="__('Status')">
-                                        <option value="">{{ __('Select Status') }}</option>
-                                        @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.activity_status')) as $status)
-                                            <option value="{{ $status->id }}">{{ $status->status_name }}</option>
-                                        @endforeach
-                                    </flux:select>
                                     <flux:input type="number" step="0.01"
                                         wire:model="teaching_groups.{{ $index }}.cost_usd"
                                         :label="__('Cost USD')" />
@@ -322,18 +314,7 @@
                                     </flux:select>
                                 </div>
 
-                                {{-- Row 5: Moderator --}}
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <flux:input type="text"
-                                        wire:model="teaching_groups.{{ $index }}.Moderator"
-                                        :label="__('Moderator Name')" placeholder="Enter Moderator Name" />
-                                    <flux:input type="text"
-                                        wire:model="teaching_groups.{{ $index }}.Moderator_phone"
-                                        :label="__('Moderator Phone')" placeholder="Enter Moderator Phone" />
-                                    <flux:input type="text"
-                                        wire:model="teaching_groups.{{ $index }}.Moderator_email"
-                                        :label="__('Moderator Email')" placeholder="Enter Moderator Email" />
-                                </div>
+                            
 
                                 {{-- Row 6: Notes --}}
                                 <flux:input type="text" wire:model="teaching_groups.{{ $index }}.notes"

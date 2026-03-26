@@ -28,20 +28,20 @@ self.addEventListener("activate", (event) => {
 // Runtime Caching for Student Groups and JS
 self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
+    const isLivewire = event.request.headers.has("X-Livewire");
 
     // Cache Strategy: Network First, falling back to cache
     // Applies to:
     // 1. Student Group pages (navigation)
     // 2. Offline Attendance JS (script)
     if (
-        (url.pathname.startsWith("/student-group") &&
+        (url.pathname.includes("/student-group") &&
             event.request.mode === "navigate") ||
         url.pathname === "/js/offline-attendance.js"
     ) {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
-                    // Check if we received a valid response
                     if (
                         !response ||
                         response.status !== 200 ||
@@ -50,9 +50,7 @@ self.addEventListener("fetch", (event) => {
                         return response;
                     }
 
-                    // Clone the response
                     const responseClone = response.clone();
-
                     caches.open(CACHE_NAME).then((cache) => {
                         if (event.request.method === "GET") {
                             cache.put(event.request, responseClone);
@@ -63,10 +61,7 @@ self.addEventListener("fetch", (event) => {
                 })
                 .catch(() => {
                     return caches.match(event.request).then((response) => {
-                        if (response) {
-                            return response;
-                        }
-                        // If it's a navigation request and not in cache, show offline page
+                        if (response) return response;
                         if (event.request.mode === "navigate") {
                             return caches.match("/offline.html");
                         }
@@ -76,15 +71,15 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
+    // Generic Fetch handling
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Clone the response
-                const responseClone = response.clone();
+                // Don't cache Livewire fragments as they can break full-page reloads
+                if (isLivewire) return response;
 
-                // Open cache and put the cloned response
+                const responseClone = response.clone();
                 caches.open(CACHE_NAME).then((cache) => {
-                    // Only cache successful responses and valid http(s) GET requests
                     if (
                         event.request.method === "GET" &&
                         event.request.url.startsWith("http") &&
@@ -98,10 +93,7 @@ self.addEventListener("fetch", (event) => {
             })
             .catch(() => {
                 return caches.match(event.request).then((response) => {
-                    if (response) {
-                        return response;
-                    }
-                    // If offline and request is for navigation (HTML page), return offline page
+                    if (response) return response;
                     if (event.request.mode === "navigate") {
                         return caches.match("/offline.html");
                     }

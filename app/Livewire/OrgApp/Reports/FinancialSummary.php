@@ -38,7 +38,7 @@ class FinancialSummary extends Component
         $activities = $query->with('statusSpecificSector')->get();
 
         // 2. KPIs
-        $totalCostUSD = $activities->sum('cost');
+        $totalCostUSD = ($activities->sum('cost'));
         $totalCostNIS = $activities->sum('cost_nis');
         $avgCost = $activities->avg('cost') ?? 0;
         
@@ -55,7 +55,7 @@ class FinancialSummary extends Component
         
         // Chart 1: Cost by Sector
         $sectorCosts = $activities->groupBy(fn($a) => $a->statusSpecificSector->status_name ?? 'Unknown')
-            ->map->sum('cost'); // Sum USD cost
+            ->map(fn($group) => round($group->sum('cost'))); // Sum USD cost
             
         $sectorChartData = [
             'labels' => $sectorCosts->keys()->toArray(),
@@ -65,8 +65,7 @@ class FinancialSummary extends Component
         // Chart 2: Monthly Spending
         // Group by month and sum cost
         $monthlySpending = $activities->groupBy(fn($a) => \Carbon\Carbon::parse($a->start_date)->format('M Y'))
-            ->map->sum('cost');
-            
+            ->map(fn($group) => round($group->sum('cost')));
          $monthlyChartData = [
              'labels' => $monthlySpending->keys()->toArray(),
              'series' => $monthlySpending->values()->toArray()

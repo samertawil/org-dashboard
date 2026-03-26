@@ -17,6 +17,9 @@ class Index extends Component
         'questions.*.question_ar_text' => 'required|string|max:255',
         'questions.*.question_en_text' => 'nullable|string|max:255',
         'questions.*.answer_input_type' => 'required|numeric',
+        'questions.*.answer_options' => 'nullable|array',
+        'questions.*.answer_options.*.label' => 'nullable|string',
+        'questions.*.answer_options.*.value' => 'nullable|string',
         'questions.*.require_detail' => 'nullable|boolean',
         'questions.*.detail' => 'nullable|string',
         'questions.*.note' => 'nullable|string',
@@ -53,6 +56,7 @@ class Index extends Component
                 ->map(function($q) {
                     $qArray = $q->toArray();
                     $qArray['require_detail'] = (bool) $q->require_detail;
+                    $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
                     return $qArray;
                 })
                 ->toArray();
@@ -76,6 +80,7 @@ class Index extends Component
             'question_ar_text' => '',
             'question_en_text' => '',
             'answer_input_type' => 1,
+            'answer_options' => [],
             'require_detail' => false,
             'detail' => '',
             'note' => '',
@@ -94,6 +99,22 @@ class Index extends Component
         session()->flash('message', __('Deleted successfully'));
     }
 
+    public function addAnswerOption($questionIndex)
+    {
+        if (!isset($this->questions[$questionIndex]['answer_options']) || !is_array($this->questions[$questionIndex]['answer_options'])) {
+            $this->questions[$questionIndex]['answer_options'] = [];
+        }
+        $this->questions[$questionIndex]['answer_options'][] = ['label' => '', 'value' => ''];
+    }
+
+    public function removeAnswerOption($questionIndex, $optionIndex)
+    {
+        if (isset($this->questions[$questionIndex]['answer_options'][$optionIndex])) {
+            unset($this->questions[$questionIndex]['answer_options'][$optionIndex]);
+            $this->questions[$questionIndex]['answer_options'] = array_values($this->questions[$questionIndex]['answer_options']);
+        }
+    }
+
     public function save()
     {
         $this->validate();
@@ -109,6 +130,7 @@ class Index extends Component
                     'question_ar_text' => $q['question_ar_text'] ?? '',
                     'question_en_text' => $q['question_en_text'] ?? null,
                     'answer_input_type' => $q['answer_input_type'] ?? 1,
+                    'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
@@ -120,6 +142,7 @@ class Index extends Component
                     'question_ar_text' => $q['question_ar_text'] ?? '',
                     'question_en_text' => $q['question_en_text'] ?? null,
                     'answer_input_type' => $q['answer_input_type'] ?? 1,
+                    'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,

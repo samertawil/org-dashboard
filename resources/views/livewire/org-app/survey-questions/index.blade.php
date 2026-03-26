@@ -59,23 +59,26 @@
                         
                         {{-- Row 1 --}}
                         <div class="md:col-span-1  ">
-                            <flux:input type="number" label="{{ __('Order') }}" wire:model="questions.{{ $index }}.question_order" min="1" />
+                            <flux:input type="text" label="{{ __('Question Text (Arabic)') }}"  
+                            style="height:auto;" 
+                            wire:model="questions.{{ $index }}.question_ar_text" />
+                            @error('questions.'.$index.'.question_ar_text') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="md:col-span-5">
-                            <flux:input type="text" label="{{ __('Question Text (Arabic)') }}" wire:model="questions.{{ $index }}.question_ar_text" />
-                            @error('questions.'.$index.'.question_ar_text') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                           <flux:select label="{{ __('Answer Type') }}" wire:model.live="questions.{{ $index }}.answer_input_type">
+                                <option value="1">{{ __('Short Text (Text)') }}</option>
+                                {{-- <option value="2">{{ __('Number') }}</option>
+                                <option value="3">{{ __('Date') }}</option>
+                                <option value="4">{{ __('Long Text (Textarea)') }}</option> --}}
+                                <option value="2">{{ __('Multiple Choice') }}</option>
+                            </flux:select> 
                         </div>
                         <div class="md:col-span-4">
                             <flux:input type="text" label="{{ __('Question Text (English)') }}" wire:model="questions.{{ $index }}.question_en_text" />
                         </div>
                         <div class="md:col-span-2">
-                            <flux:select label="{{ __('Answer Type') }}" wire:model="questions.{{ $index }}.answer_input_type">
-                                <option value="1">{{ __('Short Text (Text)') }}</option>
-                                <option value="2">{{ __('Number') }}</option>
-                                <option value="3">{{ __('Date') }}</option>
-                                <option value="4">{{ __('Long Text (Textarea)') }}</option>
-                                <option value="5">{{ __('Multiple Choice') }}</option>
-                            </flux:select>
+                           
+                            <flux:input type="number" label="{{ __('Order') }}" wire:model="questions.{{ $index }}.question_order" min="1" />
                         </div>
                         
                         {{-- Row 2 --}}
@@ -92,6 +95,42 @@
                             <flux:button wire:click="removeQuestion({{ $index }})" variant="danger" size="sm" icon="trash" wire:confirm="{{ __('Are you sure you want to delete?') }}" class="p-2 h-8 w-8 rounded-full!" />
                         </div>
     
+                        {{-- Row 3 : Answer Options --}}
+                        @if((isset($question['answer_input_type']) && $question['answer_input_type'] == 2))
+                        <div class="md:col-span-12 mt-4 bg-zinc-100 dark:bg-zinc-800/50 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <div class="flex justify-between items-center mb-4">
+                                <flux:heading size="sm">{{ __('Answer Options (Multiple Choice)') }}</flux:heading>
+                                <flux:button wire:click="addAnswerOption({{ $index }})" variant="primary" size="sm" icon="plus">
+                                    {{ __('Add Option') }}
+                                </flux:button>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                @if(isset($question['answer_options']) && is_array($question['answer_options']))
+                                    @foreach($question['answer_options'] as $optIndex => $option)
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex-1">
+                                                <flux:input type="text" placeholder="{{ __('Label (e.g., Yes)') }}" wire:model="questions.{{ $index }}.answer_options.{{ $optIndex }}.label" />
+                                            </div>
+                                            <div class="flex-1">
+                                                <flux:input type="text" placeholder="{{ __('Value (e.g., 1)') }}" wire:model="questions.{{ $index }}.answer_options.{{ $optIndex }}.value" />
+                                            </div>
+                                            <div>
+                                                <flux:button wire:click="removeAnswerOption({{ $index }}, {{ $optIndex }})" variant="danger" size="sm" icon="trash" class="p-2 h-8 w-8 rounded-full!" />
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                                
+                                @if(!isset($question['answer_options']) || empty($question['answer_options']))
+                                    <div class="text-center py-4 text-xs text-zinc-500">
+                                        {{ __('No options added yet. Click "Add Option" to create choices.') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
                     </div>
                 </div>
             @empty

@@ -29,7 +29,7 @@
     @if (session('error'))
         <div class="rounded-md bg-red-50 dark:bg-red-900/50 p-4">
             <div class="flex">
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <flux:icon name="x-circle" class="h-5 w-5 text-red-400" />
                 </div>
                 <div class="ml-3">
@@ -102,10 +102,10 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Group') }}
                         </th>
-                        <th scope="col"
+                        {{-- <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Gender') }}
-                        </th>
+                        </th> --}}
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Enrollment') }}
                         </th>
@@ -131,9 +131,12 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $student->studentGroup?->name ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ ucfirst($student->gender) }}
-                            </td>
+                            {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                @php
+                                    $genderEnum = \App\Enums\GlobalSystemConstant::tryFrom($student->gender);
+                                @endphp
+                                {{ $genderEnum ? $genderEnum->label() : '-' }}
+                            </td> --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 @if($student->enrollment_type === 'full_week')
                                     {{ __('Full Week') }}
@@ -144,6 +147,7 @@
                                 @else
                                     -
                                 @endif
+                               - {{ $student->group->status_name??''}}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php
@@ -165,6 +169,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
+                                    <flux:button href="{{ route('student.show', $student) }}" wire:navigate
+                                        variant="ghost" size="sm" icon="eye" />
                                     <flux:button href="{{ route('student.edit', $student) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
                                     <flux:modal.trigger name="feedback-modal">
@@ -178,7 +184,9 @@
                                             @endif
                                         </div>
                                     </flux:modal.trigger>
-                                    <flux:button wire:click="delete({{ $student->id }})"
+                                    <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})"
+                                        variant="ghost" size="sm" icon="clipboard-document-check" />
+                                    <flux:button wire:click="delete({{ $student->identity_number }})"
                                         wire:confirm="{{ __('Are you sure you want to delete this student?') }}"
                                         variant="ghost" size="sm" icon="trash"
                                         class="text-red-500 hover:text-red-600" />
@@ -234,7 +242,7 @@
     </flux:modal>
 
     {{-- Feedback Modal --}}
-    <flux:modal name="feedback-modal" class="md:w-[32rem]">
+    <flux:modal name="feedback-modal" class="md:w-lg">
         <div class="p-6 space-y-6">
             <div class="flex flex-col gap-1">
                 <flux:heading size="lg">{{ __('Student Feedback') }}</flux:heading>
@@ -343,6 +351,63 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </flux:modal>
+
+    {{-- Survey Answer Modal --}}
+    <flux:modal name="survey-answer-modal" class="md:w-lg">
+        <div class="p-6 space-y-6">
+            <div class="flex flex-col gap-1">
+                <flux:heading size="lg">{{ __('Take Survey Answer') }}</flux:heading>
+                <flux:subheading>{{ __('Record a survey answer for this student.') }}</flux:subheading>
+            </div>
+
+            <form wire:submit="saveSurveyAnswer" class="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <flux:field>
+                    <flux:label>{{ __('Survey No') }} <span class="text-red-500">*</span></flux:label>
+                    <flux:input wire:model="surveyAnswerNo" type="number" />
+                    <flux:error name="surveyAnswerNo" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Question') }}</flux:label>
+                    <flux:select wire:model="surveyAnswerQuestionId">
+                        <option value="">{{ __('Select Question') }}</option>
+                        @foreach($this->surveyQuestions as $question)
+                            <option value="{{ $question->id }}">{{ $question->question_ar_text ?? $question->question_en_text }}</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="surveyAnswerQuestionId" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Answer (AR)') }}</flux:label>
+                    <flux:textarea wire:model="surveyAnswerArText" rows="3" />
+                    <flux:error name="surveyAnswerArText" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Answer (EN)') }}</flux:label>
+                    <flux:textarea wire:model="surveyAnswerEnText" rows="3" />
+                    <flux:error name="surveyAnswerEnText" />
+                </flux:field>
+
+                <div class="flex justify-end gap-2 border-t border-zinc-200 dark:border-zinc-700 pt-4 mt-4">
+                    <flux:modal.close>
+                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="saveSurveyAnswer">
+                        <span wire:loading.remove wire:target="saveSurveyAnswer">{{ __('Save Answer') }}</span>
+                        <span wire:loading wire:target="saveSurveyAnswer" class="flex items-center gap-2">
+                            <svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ __('Saving...') }}
+                        </span>
+                    </flux:button>
+                </div>
+            </form>
         </div>
     </flux:modal>
 </div>

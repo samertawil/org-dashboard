@@ -277,17 +277,23 @@ class Edit extends Component
 
         if ($this->sector_id == 55) {
             foreach ($this->teaching_groups as $group) {
-                if ($group['name']) {
-                    $group['start_date'] = $group['start_date'] ?: null;
-                    $group['end_date'] = $group['end_date'] ?: null;
+                if (($group['name'] ?? null)) {
+                    $group['cost_usd'] = $group['cost_usd'] ?? null;
+                    $group['cost_nis'] = $group['cost_nis'] ?? null;
+                    $group['partner_id'] = $group['partner_id'] ?? null;
+                    $group['notes'] = $group['notes'] ?? null;
+                    $group['student_groups_id'] = $group['student_groups_id'] ?? null;
 
                     if (!empty($group['id'])) {
                         $existingGroup = $this->activity->teachingGroups()->where('id', $group['id'])->first();
                         if ($existingGroup) {
                             $existingGroup->fill([
                                 'name' => $group['name'],
-                                'start_date' => $group['start_date'],
-                                'end_date' => $group['end_date'],
+                                'cost_usd' => $group['cost_usd'],
+                                'cost_nis' => $group['cost_nis'],
+                                'partner_id' => $group['partner_id'],
+                                'notes' => $group['notes'],
+                                'student_groups_id' => $group['student_groups_id'],
                                 'updated_by' => auth()->id(),
                             ]);
 

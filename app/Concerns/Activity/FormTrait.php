@@ -195,18 +195,14 @@ trait FormTrait
         $count = count(TeachingGroup::get()) + 1;
         
         $this->teaching_groups[] = [
-            'name' => "Teaching Point #{$count}",
-          
-            'Moderator' => null,
-            'Moderator_phone' => null,
-            'Moderator_email' => null,
-            'status' => null,
+            'name' => "Teaching Point #{$count}",    
             'activation' => 1,
             'cost_usd' => 0.00,
             'cost_nis' => 0.00,
             'partner_id' => null,
             'notes' => '',
             'student_groups_id' => null,
+          
         ];
     }
 

@@ -16,8 +16,8 @@ class CivilRegistryApiServices
     {
 
         $response = Http::withHeaders([
-            'beneficiary' => 'mersal',
-            'appkey' => 'uyG6wfbOsxYJKGxGrQVgTvfZ6MFV8xBs0Ct',
+            'beneficiary' =>  config('services.civil_registry_api.beneficiary'),
+            'appkey' =>  config('services.civil_registry_api.appkey'),
         ])->get('https://apisso.gov.ps/api/check-citzen/' . $identity_number);
 
         return $this->civilRegistryApiResponse->validate($response);

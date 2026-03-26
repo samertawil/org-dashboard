@@ -43,7 +43,9 @@ class Student extends Model
     }
 
 
-
+    public function surveyStudentanswers() {
+        return $this->hasMany(SurveyAnswer::class,'account_id','identity_number');
+    }
 
     public function city()
     {
@@ -77,6 +79,11 @@ class Student extends Model
     public function livingParent()
     {
         return $this->belongsTo(Status::class, 'living_parent_id');
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Status::class, 'status_id');
     }
 
     public function feedbacks()

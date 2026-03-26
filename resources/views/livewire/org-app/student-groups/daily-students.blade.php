@@ -132,7 +132,10 @@
     @push('scripts')
     <script src="/js/offline-attendance.js"></script>
     <script>
-        document.addEventListener('alpine:init', () => {
+        function registerOfflineAttendance() {
+            if (!window.Alpine) return;
+            if (window.Alpine.data('offlineAttendance')) return;
+
             Alpine.data('offlineAttendance', (config) => ({
                 groupId: config.groupId,
                 date: config.date,
@@ -157,9 +160,7 @@
                 },
 
                 updateStatus(studentId) {
-                    // This creates immediate feedback visually before save
-                   // Logic mirrored from PHP side roughly
-                   // But we rely on save to finalize
+                    // Logic mirrored from PHP side roughly
                 },
 
                 markAllPresent() {
@@ -174,18 +175,14 @@
                     if (this.online) {
                         try {
                             await this.$wire.saveAttendance();
-                            // Optional: Success toast
                         } catch (e) {
                             console.error(e);
                         }
                     } else {
-                        // Offline Save
                         try {
                             const promises = this.students.map(studentId => {
                                 const isPresent = this.attendance[studentId] || false;
                                 const status = isPresent ? 'present' : 'absent';
-                                
-                                // Update local UI state to reflect 'saved' status
                                 this.attendanceStatus[studentId] = status;
 
                                 return window.OfflineAttendance.saveAttendance(
@@ -216,47 +213,36 @@
                     const records = await window.OfflineAttendance.getUnsyncedRecords();
                     if (records.length === 0) return;
 
-                    // Group by date because PHP controller might handle one date at a time
-                    // But for now let's just push them one by one or batched?
-                    // The simplest way to leverage existing Livewire component is to:
-                    // 1. If we are on the page of that group/date, update the wire model and save.
-                    // 2. If not, we might need a dedicated API endpoint or Livewire method that accepts JSON.
-                    
-                    // For THIS specific page's context:
                     const pageRecords = records.filter(r => r.groupId === this.groupId && r.date === this.date);
                     
                     if (pageRecords.length > 0) {
                         try {
                             console.log('Starting sync for', pageRecords.length, 'records');
-                            
-                            // Update Livewire state
                             pageRecords.forEach(r => {
                                 this.attendance[r.studentId] = (r.status === 'present');
                             });
                             
-                            // Save to server
                             await this.$wire.saveAttendance();
                             
-                            // Mark as synced (delete from IDB)
                             const deletePromises = pageRecords.map(r => window.OfflineAttendance.markAsSynced(r.id));
                             await Promise.all(deletePromises);
-                            
-                            console.log('Sync successful');
                         } catch (error) {
                             console.error('Sync failed:', error);
-                            // Optional: Retry logic or alert
                         } finally {
-                            // Always re-check so the spinner updates/stops
                             await this.checkUnsynced();
                         }
                     } else {
-                        // If no records for this page, but unsynced count > 0, we should still update UI?
-                        // For now, let's just re-check to be safe.
                         await this.checkUnsynced();
                     }
                 }
-            }))
-        })
+            }));
+        }
+
+        if (window.Alpine) {
+            registerOfflineAttendance();
+        } else {
+            document.addEventListener('alpine:init', registerOfflineAttendance);
+        }
     </script>
     @endpush
 </div>

@@ -4,7 +4,11 @@ namespace App\Livewire\OrgApp\Student;
 
 use App\Concerns\Student\StudentTrait;
 use App\Models\Student;
+use App\Models\SurveyAnswer;
+use App\Models\SurveyQuestion;
+use App\Rules\GlobalValidation;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class Edit extends Component
@@ -13,6 +17,7 @@ class Edit extends Component
 
     public Student $student;
     public $enrollment_type;
+    public $answer = [];
 
     public function rules()
     {
@@ -20,6 +25,11 @@ class Edit extends Component
             'identity_number' => 'required|integer|min_digits:9|max_digits:9|unique:students,identity_number,' . $this->student->id,
             'birth_date' => 'required|date|before_or_equal:' . Student::maxBirthDate() . '|after_or_equal:' . Student::minBirthDate(),
             'enrollment_type' => 'required|in:full_week,sat_mon_wed,sun_tue_thu', 
+          
+            'gender' => [
+               'required',
+                new GlobalValidation('gender'),
+            ],
         ];
     }
 
@@ -37,6 +47,11 @@ class Edit extends Component
         $this->parent_phone = $student->parent_phone;
         $this->living_parent_id = $student->living_parent_id;
         $this->notes = $student->notes;
+
+
+        foreach ( $student->surveyStudentanswers as $surveyAnswer) {
+            $this->answer[$surveyAnswer->question_id] = $surveyAnswer->answer_ar_text;
+        }
     }
 
     public function save()
@@ -58,8 +73,26 @@ class Edit extends Component
             'updated_by' => auth()->id(),
         ]);
 
-        if ($this->student->isDirty()) {  
+        $isDirty = $this->student->isDirty();
+        if ($isDirty) {  
             $this->student->save();
+        }
+
+        if (is_array($this->answer)) {
+            foreach ($this->answer as $questionId => $answerText) {
+                if (!empty($answerText)) {
+                    $answerModel = $this->student->surveyStudentanswers()->updateOrCreate(
+                        ['question_id' => $questionId, 'survey_no' => 120],
+                        ['answer_ar_text' => $answerText]
+                    );
+                    if ($answerModel->wasRecentlyCreated || $answerModel->wasChanged()) {
+                        $isDirty = true;
+                    }
+                }
+            }
+        }
+
+        if ($isDirty) {
             session()->flash('message', __('Student successfully updated.'));
         } else {
             session()->flash('message', __('No changes were made!'));
@@ -68,6 +101,12 @@ class Edit extends Component
        
 
         return $this->redirect(route('student.index'), navigate: true);
+    }
+
+    #[Computed()]
+    public function surveyquestions()
+    {
+        return  SurveyQuestion::where('survey_for_section', 120)->orderBy('question_order')->get();
     }
 
     public function render()

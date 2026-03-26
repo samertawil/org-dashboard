@@ -36,7 +36,7 @@
 
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <flux:card class="flex flex-col gap-2">
             <span class="text-zinc-500 text-sm font-medium">{{ __('Total Activities') }}</span>
             <div class="text-3xl font-bold">{{ $kpis['totalActivities'] }}</div>
@@ -55,6 +55,11 @@
         <flux:card class="flex flex-col gap-2">
             <span class="text-zinc-500 text-sm font-medium">{{ __('Planned') }}</span>
             <div class="text-3xl font-bold text-blue-600">{{ $kpis['PlannedActivities'] }}</div>
+        </flux:card>
+
+        <flux:card class="flex flex-col gap-2">
+            <span class="text-zinc-500 text-sm font-medium">{{ __('On Hold') }}</span>
+            <div class="text-3xl font-bold text-red-600">{{ $kpis['OnHoldActivities'] }}</div>
         </flux:card>
 
         <flux:card class="flex flex-col gap-2">

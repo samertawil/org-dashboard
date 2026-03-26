@@ -1,5 +1,15 @@
 <?php
 
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Create as ActivityBeneficiaryNameCreate;
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Edit as ActivityBeneficiaryNameEdit;
+use \App\Livewire\OrgApp\ActivityBeneficiaryName\Index as ActivityBeneficiaryNameIndex;
+use \App\Livewire\OrgApp\CampsResidents\Create as  CampsResidentsCreate;
+use \App\Livewire\OrgApp\CampsResidents\Edit as  CampsResidentsEdit;
+use \App\Livewire\OrgApp\CampsResidents\Index as  CampsResidentsIndex;
+use \App\Livewire\OrgApp\DisplacementCamps\Create as  DisplacementCampsCreate;
+use \App\Livewire\OrgApp\DisplacementCamps\Edit as  DisplacementCampsEdit;
+use \App\Livewire\OrgApp\DisplacementCamps\Gallery as  DisplacementCampsGallery;
+use \App\Livewire\OrgApp\DisplacementCamps\Index as  DisplacementCampsIndex;
 use App\Livewire\AppSetting\Ability\Create as AbilityCreate;
 use App\Livewire\AppSetting\Ability\Edit as AbilityEdit;
 use App\Livewire\AppSetting\Ability\Index as AbilityIndex;
@@ -36,12 +46,13 @@ use App\Livewire\OrgApp\Employee\Index as EmployeeIndex;
 use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
 use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
 use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
-use App\Livewire\OrgApp\PurchaseRequest\Index as PurchaseRequestIndex ;
 use App\Livewire\OrgApp\PurchaseRequest\Create as PurchaseRequestCreate ;
+use App\Livewire\OrgApp\PurchaseRequest\Index as PurchaseRequestIndex ;
 use App\Livewire\OrgApp\Student\Create as StudentCreat;
 use App\Livewire\OrgApp\Student\Edit as StudentEdit;
 use App\Livewire\OrgApp\Student\ImportedFiles;
 use App\Livewire\OrgApp\Student\Index as StudentIndex;
+use App\Livewire\OrgApp\Student\Show as StudentShow;
 use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
 use App\Livewire\OrgApp\StudentGroups\DailyStudents;
 use App\Livewire\OrgApp\StudentGroups\Edit as StudentGroupEdit;
@@ -50,20 +61,13 @@ use App\Livewire\OrgApp\StudentGroups\ShowSchedule as StudentGroupSchedule;
 use App\Livewire\OrgApp\SubjectForLearn\Create as SubjectCreate;
 use App\Livewire\OrgApp\SubjectForLearn\Edit as SubjectEdit;
 use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
+use App\Livewire\OrgApp\SurveyAnswers\Create as SurveyAnswersCreate;
+use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
+use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
+use App\Livewire\OrgApp\SurveyQuestions\Index as SurveyQuestionsIndex;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
-use \App\Livewire\OrgApp\DisplacementCamps\Index as  DisplacementCampsIndex;
-use \App\Livewire\OrgApp\DisplacementCamps\Create as  DisplacementCampsCreate;
-use \App\Livewire\OrgApp\DisplacementCamps\Edit as  DisplacementCampsEdit;
-use \App\Livewire\OrgApp\DisplacementCamps\Gallery as  DisplacementCampsGallery;
-use \App\Livewire\OrgApp\CampsResidents\Index as  CampsResidentsIndex;
-use \App\Livewire\OrgApp\CampsResidents\Create as  CampsResidentsCreate;
-use \App\Livewire\OrgApp\CampsResidents\Edit as  CampsResidentsEdit;
-use \App\Livewire\OrgApp\ActivityBeneficiaryName\Index as ActivityBeneficiaryNameIndex;
-use \App\Livewire\OrgApp\ActivityBeneficiaryName\Create as ActivityBeneficiaryNameCreate;
-use \App\Livewire\OrgApp\ActivityBeneficiaryName\Edit as ActivityBeneficiaryNameEdit;
-use App\Livewire\OrgApp\SurveyQuestions\Index as SurveyQuestionsIndex;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -155,7 +159,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/student/imported-files',ImportedFiles::class)->name('student.imported-files');
     Route::get('/student/create',StudentCreat::class)->name('student.create');
     Route::get('/student/{student}/edit',StudentEdit::class)->name('student.edit');
-     
+    Route::get('/student/{student}/show',StudentShow::class)->name('student.show');
     Route::get('/teaching-group',TeachingGroupIndex::class)->name('teaching.group.index');
     Route::get('/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
     Route::get('/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
@@ -206,6 +210,9 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     
     //Survey
     Route::get('/survey',SurveyQuestionsIndex::class)->name('survey.index');
+    Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
+    Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
+    Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');
     
 
     });

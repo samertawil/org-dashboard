@@ -188,6 +188,56 @@ class Index extends Component
             ->get();
     }
 
+    public $surveyAnswerNo = '';
+    public $surveyAnswerQuestionId = '';
+    public $surveyAnswerArText = '';
+    public $surveyAnswerEnText = '';
+    public $surveySelectedStudentId = null;
+
+    public function takeSurveyAnswer($studentId)
+    {
+        $this->surveySelectedStudentId = $studentId;
+        $this->surveyAnswerNo = '';
+        $this->surveyAnswerQuestionId = '';
+        $this->surveyAnswerArText = '';
+        $this->surveyAnswerEnText = '';
+        $this->resetErrorBag();
+        $this->dispatch('open-modal', 'survey-answer-modal');
+    }
+
+    public function saveSurveyAnswer()
+    {
+        $this->validate([
+            'surveyAnswerNo' => 'required|integer',
+            'surveyAnswerQuestionId' => 'nullable|exists:survey_questions,id',
+            'surveyAnswerArText' => 'nullable|string',
+            'surveyAnswerEnText' => 'nullable|string',
+            'surveySelectedStudentId' => 'required|exists:students,id',
+        ]);
+
+        \App\Models\SurveyAnswer::create([
+            'account_id' => $this->surveySelectedStudentId,
+            'survey_no' => $this->surveyAnswerNo,
+            'question_id' => $this->surveyAnswerQuestionId ?: null,
+            'answer_ar_text' => $this->surveyAnswerArText,
+            'answer_en_text' => $this->surveyAnswerEnText,
+            'created_by' => auth()->user()?->employee?->id ?? null,
+        ]);
+
+        $this->dispatch('close-modal', 'survey-answer-modal');
+        $this->surveyAnswerNo = '';
+        $this->surveyAnswerQuestionId = '';
+        $this->surveyAnswerArText = '';
+        $this->surveyAnswerEnText = '';
+        session()->flash('message', __('Survey answer saved successfully.'));
+    }
+
+    #[Computed()]
+    public function surveyQuestions()
+    {
+        return \App\Models\SurveyQuestion::all();
+    }
+
     public function render()
     {
         if(Gate::denies('student.index')) {

@@ -46,4 +46,8 @@ return [
         'key' => env('GEMINI_API_KEY'),
     ],
 
+    'civil_registry_api' => [
+        'beneficiary' => env('CIVIL_REGISTRY_API_BENEFICIARY'),
+        'appkey' => env('CIVIL_REGISTRY_API_APPKEY'),
+    ],
 ];

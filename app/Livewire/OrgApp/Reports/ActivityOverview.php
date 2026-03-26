@@ -28,10 +28,9 @@ class ActivityOverview extends Component
         }
         // 1. Base Query
         $query = Activity::query()
-            ->select('id', 'name', 'status', 'region', 'cost', 'cost_nis', 'start_date', 'activation')
-            ->with(['regions:id,region_name'])
+            ->select('id', 'name', 'status', 'region', 'cost', 'cost_nis', 'start_date', 'end_date', 'activation')
+            ->with(['regions:id,region_name', 'activityStatus', 'attachments'])
             ->where('activation', 1)
-            ->where('status', '!=', 0) // Exclude 'Not Started' if status 0 means that
             ->whereBetween('start_date', [$this->dateFrom, $this->dateTo]);
 
         if ($this->selectedRegion) {
@@ -51,10 +50,13 @@ class ActivityOverview extends Component
        
         // 2. KPIs
         $totalActivities = $activities->count();
-        $completedActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'Completed')->count(); 
-      
-        $ongoingActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'In Progress')->count();
-        $PlannedActivities = $activities->filter(fn($a) => $a->status_info['name'] === 'Planned')->count();
+        $completedActivities = $activities->filter(fn($a) => $a->status_info['raw_name'] === 'Completed')->count();
+
+        $ongoingActivities = $activities->filter(fn($a) => $a->status_info['raw_name'] === 'In Progress')->count();
+        $PlannedActivities = $activities->filter(fn($a) => $a->status_info['raw_name'] === 'Planned')->count();
+
+        $OnHoldActivities = $activities->filter(fn($a) => $a->status_info['raw_name'] === 'On Hold')->count();
+
         $totalBudget = $activities->sum('cost');
 
         // 3. Chart Data Preparation
@@ -90,7 +92,7 @@ class ActivityOverview extends Component
         return view('livewire.org-app.reports.activity-overview', [
             'activities' => $activities,
             'regions' => \App\Reposotries\RegionRepo::regions(),
-            'kpis' => compact('totalActivities', 'completedActivities', 'ongoingActivities', 'totalBudget', 'PlannedActivities'),
+            'kpis' => compact('totalActivities', 'completedActivities', 'ongoingActivities', 'totalBudget', 'PlannedActivities','OnHoldActivities'),
             'statusChartData' => $statusChartData,
             'geoChartData' => $geoChartData,
             'monthlyChartData' => $monthlyChartData

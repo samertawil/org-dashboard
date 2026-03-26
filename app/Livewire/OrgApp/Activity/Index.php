@@ -167,8 +167,24 @@ class Index extends Component
                         match ((int) $this->status_id) {
                             27 => $subQuery->whereHas('attachments'), // Completed
                             25 => $subQuery->whereDoesntHave('attachments')->where('start_date', '>', $today), // Planned
-                            26 => $subQuery->whereDoesntHave('attachments')->where('start_date', '=', $today), // In Progress
-                            28 => $subQuery->whereDoesntHave('attachments')->where('start_date', '<', $today), // On Hold / Undefined
+                            26 => $subQuery->whereDoesntHave('attachments')
+                                ->where(function($q) use ($today) {
+                                    $q->where('start_date', $today)
+                                      ->orWhere(function($sq) use ($today) {
+                                          $sq->where('start_date', '<', $today)
+                                            ->where('end_date', '>', $today);
+                                      });
+                                }), // In Progress
+                            28 => $subQuery->whereDoesntHave('attachments')
+                                ->where(function($q) use ($today) {
+                                    $q->where(function($sq) use ($today) {
+                                        $sq->where('start_date', '<', $today)
+                                          ->where(function($esq) use ($today) {
+                                              $esq->where('end_date', '<=', $today)
+                                                ->orWhereNull('end_date');
+                                          });
+                                    })->orWhereNull('start_date');
+                                }), // Need Procedure / On Hold
                             default => $subQuery->whereRaw('1=0'), // No match for other IDs
                         };
                     });

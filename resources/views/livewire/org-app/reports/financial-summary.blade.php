@@ -36,12 +36,12 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <flux:card class="flex flex-col gap-2">
             <span class="text-zinc-500 text-sm font-medium">{{ __('Total Spending (USD)') }}</span>
-            <div class="text-3xl font-bold text-green-600">${{ number_format($kpis['totalCostUSD'], 2) }}</div>
+            <div class="text-3xl font-bold text-green-600">${{ number_format($kpis['totalCostUSD'], 0) }}</div>
         </flux:card>
 
         <flux:card class="flex flex-col gap-2">
             <span class="text-zinc-500 text-sm font-medium">{{ __('Total Spending (NIS)') }}</span>
-            <div class="text-3xl font-bold text-blue-600">₪{{ number_format($kpis['totalCostNIS'], 2) }}</div>
+            <div class="text-3xl font-bold text-blue-600">₪{{ number_format($kpis['totalCostNIS'], 0) }}</div>
         </flux:card>
 
         <flux:card class="flex flex-col gap-2">

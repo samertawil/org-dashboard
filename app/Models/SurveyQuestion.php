@@ -12,9 +12,14 @@ class SurveyQuestion extends Model
         'question_ar_text',
         'question_en_text',
         'answer_input_type',
+        'answer_options',
         'require_detail',
         'detail',
         'note',
+    ];
+
+    protected $casts = [
+        'answer_options' => 'array',
     ];
 
     public function surveyForSection()

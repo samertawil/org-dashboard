@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('question_id')->nullable()->constrained('survey_questions')->nullOnDelete();
             $table->string('answer_ar_text')->nullable();
             $table->string('answer_en_text')->nullable();
+            
+$table->foreignId('created_by')->nullable()->constrained('employees')->nullOnDelete();
             $table->timestamps();
         });
     }

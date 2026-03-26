@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Student;
 use App\Models\StudentGroup;
 use App\Models\Status;
+use App\Enums\GlobalSystemConstant;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -55,16 +56,29 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation
              $birthDate = null;
          }
 
+        // Handle Gender
+        $gender = null;
+        if (isset($row['gender'])) {
+            $genderVal = strtolower(trim($row['gender']));
+            if ($genderVal === 'male' || $genderVal == GlobalSystemConstant::MALE->value) {
+                $gender = GlobalSystemConstant::MALE->value;
+            } elseif ($genderVal === 'female' || $genderVal == GlobalSystemConstant::FEMALE->value) {
+                $gender = GlobalSystemConstant::FEMALE->value;
+            } else {
+                $gender = $row['gender']; // fallback
+            }
+        }
+
         return new Student([
             'identity_number'   => $row['identity_number'],
             'full_name'         => $row['full_name'],
             'birth_date'        => $birthDate,
-            'gender'            => $row['gender'] ?? null,
+            'gender'            => $gender,
             'enrollment_type'   => $row['enrollment_type'] ?? 'sat_mon_wed', 
             'student_groups_id' => $studentGroup ? $studentGroup->id : null,
             'status_id'         => $status ? $status->id : null, 
-            'parent_phone'      => $row['parent_phone'] ?? null,
-            'notes'             => $row['notes'] ?? null,
+            // 'parent_phone'      => $row['parent_phone'] ?? null,
+           // 'notes'             => $row['notes'] ?? null,
             'activation'        => 1, // Default to active
              'added_type' => 1, // Assuming 1 for imported or manual
         ]);

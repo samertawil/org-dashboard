@@ -28,9 +28,9 @@
 
         <flux:card class="flex flex-col gap-2 !bg-violet-50 dark:!bg-violet-900/10 !border-violet-200 dark:!border-violet-800/30">
             <span class="text-sm font-medium text-violet-600 dark:text-violet-400">{{ __('Total Budget') }}</span>
-            <div class="flex items-end justify-between">
-                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300">${{ number_format($totalBudget) }}</span>
-                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300"> {{ number_format($totalBudgetNis) }}Nis</span>
+            <div class="flex flex-col items-start justify-between">
+                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300">{{ number_format($totalBudget) }}&nbsp;$</span>
+                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300"> {{ number_format($totalBudgetNis) }}&nbsp;nis</span>
             </div>
            
         </flux:card>

@@ -158,7 +158,13 @@
                                 {{ $activity->name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $activity->start_date }}
+                                {{ $activity->start_date }} 
+                                @if ($activity->end_date <> $activity->start_date)
+                                <br>
+                                &rarr;
+                                <br>   
+                                {{ $activity->end_date }}
+                                @endif
                             </td>
 
                             {{--
