@@ -2,12 +2,14 @@
 
 namespace App\Livewire\OrgApp\SurveyAnswers;
 
-use App\Models\SurveyAnswer;
 use App\Models\Employee;
+use App\Models\Student;
+use App\Models\SurveyAnswer;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\Gate;
 
 class Index extends Component
 {
@@ -17,13 +19,18 @@ class Index extends Component
     public $searchSurveyNo = '';
     public $searchCreatedBy = '';
     public $searchCreatedAt = '';
-    
+    public $searchAccountName = '';
+
     public $sortField = 'created_at';
-    public $sortDirection = 'desc';
+    public $sortDirection = 'asc';
     public $perPage = 10;
+    public $readyToLoad = false;
+ 
+
 
     protected $queryString = [
         'searchAccountId' => ['except' => ''],
+        'searchAccountName' => ['except' => ''],
         'searchSurveyNo' => ['except' => ''],
         'searchCreatedBy' => ['except' => ''],
         'searchCreatedAt' => ['except' => ''],
@@ -41,33 +48,56 @@ class Index extends Component
 
     public function updating($property)
     {
-        if (in_array($property, ['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt'])) {
+        if (in_array($property, ['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt', 'searchAccountName'])) {
             $this->resetPage();
+            $this->readyToLoad = false;
         }
     }
 
     public function clearFilters()
     {
-        $this->reset(['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt']);
+        $this->reset(['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt','searchAccountName']);
+        $this->readyToLoad = false;
+        $this->resetPage();
+    }
+
+    public function searchData()
+    {
+        $this->readyToLoad = true;
         $this->resetPage();
     }
 
     #[Computed()]
     public function answers()
     {
-        return SurveyAnswer::query()
-            ->with(['question', 'creator'])
-            ->when($this->searchAccountId !== '', fn($q) => $q->where('account_id', $this->searchAccountId))
-            ->when($this->searchSurveyNo !== '', fn($q) => $q->where('survey_no', $this->searchSurveyNo))
-            ->when($this->searchCreatedBy !== '', fn($q) => $q->where('created_by', $this->searchCreatedBy))
-            ->when($this->searchCreatedAt !== '', fn($q) => $q->whereDate('created_at', $this->searchCreatedAt))
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
+        if ($this->readyToLoad && $this->searchAccountId !== '' || $this->searchAccountName!== '') {
+
+            return SurveyAnswer::query()
+                ->select('survey_answers.*')
+                ->join('survey_questions', 'survey_answers.question_id', '=', 'survey_questions.id')
+                ->with(['question', 'creator', 'surveyfor', 'student'])
+                ->when($this->searchAccountId !== '', fn($q) => $q->where('survey_answers.account_id', $this->searchAccountId))
+                ->when($this->searchAccountName !== '', fn($q) => $q->where('survey_answers.account_id', $this->searchAccountName))
+                ->when($this->searchSurveyNo !== '', fn($q) => $q->where('survey_answers.survey_no', $this->searchSurveyNo))
+                ->when($this->searchCreatedBy !== '', fn($q) => $q->where('survey_answers.created_by', $this->searchCreatedBy))
+                ->when($this->searchCreatedAt !== '', fn($q) => $q->whereDate('survey_answers.created_at', $this->searchCreatedAt))
+
+                ->orderBy('survey_questions.survey_for_section')
+                ->orderBy('survey_questions.question_order', $this->sortDirection)
+                ->paginate($this->perPage);
+        } else {
+            return new LengthAwarePaginator(
+                collect([]), // empty collection
+                0, // total
+                $this->perPage, // per page
+                1 // current page
+            );
+        }
     }
 
     public function delete($id)
     {
-        if (Gate::denies('survey.create')) { 
+        if (Gate::denies('survey.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
         $answer = SurveyAnswer::findOrFail($id);
@@ -77,11 +107,14 @@ class Index extends Component
 
     public function render()
     {
+ 
         if (Gate::denies('survey.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.org-app.survey-answers.index', [
-            'employees' => Employee::all()
+            'employees' => Employee::all(),
+             'students' => Student::get(),
         ]);
     }
 }
+ 

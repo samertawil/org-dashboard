@@ -64,7 +64,7 @@ use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
 use App\Livewire\OrgApp\SurveyAnswers\Create as SurveyAnswersCreate;
 use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
 use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
-use App\Livewire\OrgApp\SurveyQuestions\Index as SurveyQuestionsIndex;
+use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
@@ -209,7 +209,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('ai-copilot', FullPageChat::class)->name('ai_copilot');
     
     //Survey
-    Route::get('/survey',SurveyQuestionsIndex::class)->name('survey.index');
+    Route::get('/survey-manage',SurveyQuestionsManage::class)->name('survey.manage');
     Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
     Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,6 +24,8 @@ class Student extends Model
         'created_by',
         'updated_by',
     ];
+
+    protected $appends = ['student_age_when_join'];
 
     public static function maxBirthDate()
     {
@@ -94,5 +97,23 @@ class Student extends Model
     public function dailyAttendances()
     {
         return $this->hasMany(StudentDailyAttendance::class);
+    }
+
+    public function getStudentAgeWhenJoinAttribute(): int
+    {
+      
+        $birthDate = $this->birth_date;
+        $joinDate = StudentGroup::where('id', $this->student_groups_id)->first()->start_date ?? null;
+        
+        $this->join_date;
+        
+        if (!$birthDate || !$joinDate) {
+            return 0;
+        }
+        
+        $birth = Carbon::parse($birthDate);
+        $join = Carbon::parse($joinDate);
+        
+        return $birth->diffInYears($join);
     }
 }

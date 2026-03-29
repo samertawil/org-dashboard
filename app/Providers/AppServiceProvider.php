@@ -13,7 +13,10 @@ use App\Models\EventAssignee;
 use App\Models\PartnerInstitution;
 use App\Models\PurchaseRequisition;
 use App\Models\Status;
+use App\Models\Student;
 use App\Models\StudentGroup;
+use App\Models\SurveyAnswer;
+use App\Models\SurveyQuestion;
 use App\Observers\AbilitieObserver;
 use App\Observers\ActivityObserver;
 use App\Observers\DepartmentObserver;
@@ -24,6 +27,9 @@ use App\Observers\PartnersObserver;
 use App\Observers\PurchaseRequisitionObserver;
 use App\Observers\StatusObserver;
 use App\Observers\StudentGroupObserver;
+use App\Observers\StudentObserver;
+use App\Observers\SurveyAnswerObserver;
+use App\Observers\SurveyQuestionObserver;
 use App\Reposotries\ActivityBeneficiaryRepo;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
@@ -68,6 +74,9 @@ class AppServiceProvider extends ServiceProvider
         ActivityBeneficiary::observe(ActivityBeneficiaryRepo::class);
         PurchaseRequisition::observe(PurchaseRequisitionObserver::class);
         DisplacementCamp::observe(DisplacementCampObserver::class);
+        SurveyQuestion::observe(SurveyQuestionObserver::class);
+        SurveyAnswer::observe(SurveyAnswerObserver::class);
+        Student::observe(StudentObserver::class);
         
 
 

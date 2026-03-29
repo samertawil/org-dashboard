@@ -54,7 +54,7 @@ class ImportStudentsResultSurveyCommand extends Command
                 if ($index == 0 ||$index == 1 ||$index == 2 || empty($questionText)) continue; // تخطي عمود "اسم الطالب"
 
                 $questionId = DB::table('survey_questions')->insertGetId([
-                    'survey_for_section' => 137,
+                    'survey_for_section' => 138,
                     'question_order' => $index-2,
                     'question_ar_text' => $questionText,
                     'answer_input_type' => 1,
@@ -89,10 +89,10 @@ class ImportStudentsResultSurveyCommand extends Command
                 foreach ($row as $index => $answerText) {
                     if ($index == 0 || $index == 1 || $index == 2 || empty($answerText) || !isset($questionIds[$index])) continue;
 
-                    DB::table('survey_answers')->insert([
+                    DB::table('survey_answers_temp')->insert([
                         'account_id' => $studentName,
                         'created_by' => $createdby,
-                        'survey_no' => 137,
+                        'survey_no' => 138,
                         'question_id' => $questionIds[$index],
                         'answer_ar_text' => $answerText,
                         'created_at' => $formattedCreatedAt,  

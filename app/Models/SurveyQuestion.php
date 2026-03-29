@@ -16,6 +16,8 @@ class SurveyQuestion extends Model
         'require_detail',
         'detail',
         'note',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

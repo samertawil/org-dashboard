@@ -24,4 +24,12 @@ class SurveyAnswer extends Model
     {
         return $this->belongsTo(Employee::class, 'created_by');
     }
+
+    public function surveyfor() {
+        return $this->belongsTo(Status::class,'survey_no');
+    }
+
+    public function student() {
+        return $this->belongsTo(Student::class,'account_id','identity_number');
+    }
 }

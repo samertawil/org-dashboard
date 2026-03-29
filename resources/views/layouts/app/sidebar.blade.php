@@ -303,19 +303,19 @@
                 <flux:sidebar.group expandable :expanded="false" :heading="__('Surveys')" icon="briefcase"
                     class="grid">
                     
-                    @can('partner.index')
-                        <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
-                            :current="request()->routeIs('survey.index')" wire:navigate>
-                            {{ __('Surveys List') }}
+                    @can('survey.manage')
+                        <flux:sidebar.item icon="list-bullet" :href="route('survey.manage')"
+                            :current="request()->routeIs('survey.manage')" wire:navigate>
+                            {{ __('Manage Surveys') }}
                         </flux:sidebar.item>
                     @endcan
 
-                    @can('survey.index')
+                  
                         <flux:sidebar.item icon="clipboard-document-check" :href="route('survey-answers.index')"
                             :current="request()->routeIs('survey-answers.index')" wire:navigate>
                             {{ __('Survey Answers') }}
                         </flux:sidebar.item>
-                    @endcan
+                 
                 </flux:sidebar.group>
             @endcanany
 

@@ -3,10 +3,14 @@
 namespace App\Livewire\OrgApp\Student;
 
 
+use App\Enums\GlobalSystemConstant;
 use App\Imports\StudentsImport;
 use App\Models\FeedBack;
 use App\Models\Student;
 use App\Reposotries\StatusRepo;
+use App\Reposotries\StudentGroupRepo;
+use App\Reposotries\StudentRepo;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -19,11 +23,11 @@ class Index extends Component
     use WithPagination;
     use WithFileUploads;
 
-    public $search = '';
+ 
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
-    public $perPage = 10;
-    
+    public $perPage = 20;
+
     public $excelFile; // For file upload
 
     public $feedbackComment = '';
@@ -31,9 +35,20 @@ class Index extends Component
     public $feedbackType = null;
     public $studentFeedBackTime = null;
     public $selectedStudentId = null;
+    public $searchIdentityNumber = '';
+    public $searchStudentName = '';
+    public $searchStudentGroupName = '';
+    public $searchEnrollment = '';
+    public $searchActivation = '';
+    public $readyToLoad = false;
 
     protected $queryString = [
-        'search' => ['except' => ''],
+ 
+        'searchIdentityNumber' => ['except' => ''],
+        'searchStudentName' => ['except' => ''],
+        'searchStudentGroupName' => ['except' => ''],
+        'searchEnrollment' => ['except' => ''],
+        'searchActivation' => ['except' => ''],
     ];
 
     public function sortBy($field): void
@@ -46,26 +61,71 @@ class Index extends Component
         }
     }
 
-    public function updatingSearch()
+   
+    public function updating($property)
     {
+        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation'])) {
+            $this->resetPage();
+            $this->readyToLoad = false;
+        }
+    }
+
+
+    public function clearFilters()
+    {
+        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation']);
+        $this->readyToLoad = false;
         $this->resetPage();
+    }
+
+    public function searchData()
+    {
+        $this->readyToLoad = true;
+        $this->resetPage();
+    }
+
+
+
+    #[Computed()]
+    public function studentsNames() {
+        return StudentRepo::students();
+    }
+
+    #[Computed()]
+    public function educationPoints() {
+        return StudentGroupRepo::studentGroups();
     }
 
     #[Computed()]
     public function students()
     {
+        if($this->readyToLoad) {
+            
         return Student::query()
             ->with(['studentGroup', 'status', 'city', 'region'])
             ->withCount('feedbacks')
-            ->where('full_name', 'like', '%' . $this->search . '%')
-            ->orWhere('identity_number', 'like', '%' . $this->search . '%')
+
+            ->when($this->searchIdentityNumber !== '', fn($q) => $q->where('identity_number', $this->searchIdentityNumber))
+            ->when($this->searchStudentName !== '', fn($q) => $q->where('id',$this->searchStudentName))
+            ->when($this->searchStudentGroupName !== '', fn($q) => $q->where('student_groups_id',$this->searchStudentGroupName))
+            ->when($this->searchEnrollment !== '', fn($q) => $q->where('enrollment_type',$this->searchEnrollment))
+            ->when($this->searchActivation !== '', fn($q) => $q->where('activation',$this->searchActivation))
+          
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
+        } else {
+            return new LengthAwarePaginator(
+                collect([]), // empty collection
+                0, // total
+                $this->perPage, // per page
+                1 // current page
+            );
+        }
     }
 
     public function delete($id)
     {
-        if(Gate::denies('student.create')) {
+        if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         $student = Student::findOrFail($id);
@@ -75,56 +135,55 @@ class Index extends Component
 
     public function import()
     {
-        if(Gate::denies('student.create')) {
+        if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         $this->validate([
             'excelFile' => 'required|mimes:xlsx,xls,csv|max:10240',
         ]);
-        
+
         try {
-             Excel::import(new StudentsImport, $this->excelFile);
+            Excel::import(new StudentsImport, $this->excelFile);
 
-             // Archive the file
-             $date = now()->format('Y-m-d');
-             $userName = \Illuminate\Support\Str::slug(auth()->user()->name);
-             $filename = "Student_{$date}_{$userName}.xlsx";
-             
-             // Ensure directory exists
-             if (!\Illuminate\Support\Facades\Storage::exists('student_imported_sheet_files')) {
-                 \Illuminate\Support\Facades\Storage::makeDirectory('student_imported_sheet_files');
-             }
+            // Archive the file
+            $date = now()->format('Y-m-d');
+            $userName = \Illuminate\Support\Str::slug(auth()->user()->name);
+            $filename = "Student_{$date}_{$userName}.xlsx";
 
-             $this->excelFile->storeAs('student_imported_sheet_files', $filename);
-             
-             $this->reset('excelFile');
-             session()->flash('message', __('Students imported successfully.'));
-             $this->dispatch('close-modal', 'import-modal');
+            // Ensure directory exists
+            if (!\Illuminate\Support\Facades\Storage::exists('student_imported_sheet_files')) {
+                \Illuminate\Support\Facades\Storage::makeDirectory('student_imported_sheet_files');
+            }
 
+            $this->excelFile->storeAs('student_imported_sheet_files', $filename);
+
+            $this->reset('excelFile');
+            session()->flash('message', __('Students imported successfully.'));
+            $this->dispatch('close-modal', 'import-modal');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-             $failures = $e->failures();
-             
-             $messages = [];
-             foreach ($failures as $failure) {
-                 $row = $failure->row();
-                 $attribute = $failure->attribute();
-                 $value = $failure->values()[$attribute] ?? 'N/A';
-                 $errors = implode(', ', $failure->errors());
-                 $messages[] = "Row {$row}: ({$value}) - {$errors}";
-             }
-             
-             session()->flash('error', implode('<br>', $messages));
+            $failures = $e->failures();
+
+            $messages = [];
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                $attribute = $failure->attribute();
+                $value = $failure->values()[$attribute] ?? 'N/A';
+                $errors = implode(', ', $failure->errors());
+                $messages[] = "Row {$row}: ({$value}) - {$errors}";
+            }
+
+            session()->flash('error', implode('<br>', $messages));
         }
     }
 
-    
+
     public function manageFeedback($studentId)
     {
         $this->selectedStudentId = $studentId;
         $this->feedbackComment = '';
         $this->feedbackRating = 5; // Default rating
         $this->feedbackType = null;
-        $this->studentFeedBackTime= null;
+        $this->studentFeedBackTime = null;
         $this->resetErrorBag();
         $this->dispatch('open-modal', 'feedback-modal');
     }
@@ -149,19 +208,19 @@ class Index extends Component
         $this->feedbackComment = '';
         $this->feedbackRating = 5;
         $this->feedbackType = null;
-        $this->studentFeedBackTime= null;
+        $this->studentFeedBackTime = null;
         session()->flash('feedback_success', __('Feedback added successfully.'));
     }
 
     #[Computed()]
     public function feedbackTypes()
     {
-        return StatusRepo::statuses()->whereIn('p_id_sub',[ 56,60]);
+        return StatusRepo::statuses()->whereIn('p_id_sub', [56, 60]);
     }
 
     public function deleteFeedback($feedbackId)
     {
-        if(Gate::denies('student.create')) {
+        if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         $feedback = FeedBack::findOrFail($feedbackId);
@@ -178,7 +237,7 @@ class Index extends Component
     #[Computed()]
     public function studentFeedbacks()
     {
-        if(Gate::denies('student.create')) {
+        if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         if (!$this->selectedStudentId) return [];
@@ -188,61 +247,17 @@ class Index extends Component
             ->get();
     }
 
-    public $surveyAnswerNo = '';
-    public $surveyAnswerQuestionId = '';
-    public $surveyAnswerArText = '';
-    public $surveyAnswerEnText = '';
-    public $surveySelectedStudentId = null;
-
-    public function takeSurveyAnswer($studentId)
-    {
-        $this->surveySelectedStudentId = $studentId;
-        $this->surveyAnswerNo = '';
-        $this->surveyAnswerQuestionId = '';
-        $this->surveyAnswerArText = '';
-        $this->surveyAnswerEnText = '';
-        $this->resetErrorBag();
-        $this->dispatch('open-modal', 'survey-answer-modal');
-    }
-
-    public function saveSurveyAnswer()
-    {
-        $this->validate([
-            'surveyAnswerNo' => 'required|integer',
-            'surveyAnswerQuestionId' => 'nullable|exists:survey_questions,id',
-            'surveyAnswerArText' => 'nullable|string',
-            'surveyAnswerEnText' => 'nullable|string',
-            'surveySelectedStudentId' => 'required|exists:students,id',
-        ]);
-
-        \App\Models\SurveyAnswer::create([
-            'account_id' => $this->surveySelectedStudentId,
-            'survey_no' => $this->surveyAnswerNo,
-            'question_id' => $this->surveyAnswerQuestionId ?: null,
-            'answer_ar_text' => $this->surveyAnswerArText,
-            'answer_en_text' => $this->surveyAnswerEnText,
-            'created_by' => auth()->user()?->employee?->id ?? null,
-        ]);
-
-        $this->dispatch('close-modal', 'survey-answer-modal');
-        $this->surveyAnswerNo = '';
-        $this->surveyAnswerQuestionId = '';
-        $this->surveyAnswerArText = '';
-        $this->surveyAnswerEnText = '';
-        session()->flash('message', __('Survey answer saved successfully.'));
-    }
-
-    #[Computed()]
-    public function surveyQuestions()
-    {
-        return \App\Models\SurveyQuestion::all();
-    }
-
     public function render()
     {
-        if(Gate::denies('student.index')) {
+       
+        if (Gate::denies('student.index')) {
             abort(403, 'You do not have the necessary permissions.');
         }
-        return view('livewire.org-app.student.index');
+
+        $activations = GlobalSystemConstant::options()->where('type', 'status'); 
+
+        return view('livewire.org-app.student.index', [
+            'activations' => $activations,
+        ]);
     }
 }

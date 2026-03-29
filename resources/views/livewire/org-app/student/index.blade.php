@@ -7,17 +7,17 @@
 
         <div class="flex gap-2">
             @can('student.create')
-            <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box">
-                {{ __('Archived Imports') }}
-            </flux:button>
+                <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box">
+                    {{ __('Archived Imports') }}
+                </flux:button>
             @endcan
             @can('student.create')
-            <flux:modal.trigger name="import-modal">
-                <flux:button variant="ghost" icon="document-arrow-up">{{ __('Import Excel') }}</flux:button>
-            </flux:modal.trigger>
-            <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus">
-                {{ __('Add Student') }}
-            </flux:button>
+                <flux:modal.trigger name="import-modal">
+                    <flux:button variant="ghost" icon="document-arrow-up">{{ __('Import Excel') }}</flux:button>
+                </flux:modal.trigger>
+                <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus">
+                    {{ __('Add Student') }}
+                </flux:button>
             @endcan
         </div>
     </div>
@@ -47,21 +47,259 @@
     {{-- Search and Table Section --}}
     <div
         class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 relative">
-            <flux:input wire:model.live="search" :placeholder="__('Search by name or identity number...')"
-                icon="magnifying-glass" />
-            <div wire:loading wire:target="search" class="absolute right-6 top-1/2 -translate-y-1/2">
-                <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 relative">
+
+            <flux:input wire:model="searchIdentityNumber" :placeholder="__('Search by identity number...')" class="p-1"/>
+               
+
+            {{-- Searchable Student Name Field --}}
+            <div class="px-4 pb-3" x-data="{
+                open: false,
+                query: '',
+                selectedId: @entangle('searchStudentName'),
+                selectedLabel: '',
+                students: @js($this->studentsNames->map(fn($s) => ['id' => $s->id, 'label' => $s->full_name ?? ''])->values()),
+                get filtered() {
+                    if (!this.query.trim()) return this.students.slice(0, 50);
+                    const q = this.query.toLowerCase();
+                    return this.students.filter(s => s.label.toLowerCase().includes(q)).slice(0, 50);
+                },
+                select(student) {
+                    this.selectedId = student.id;
+                    this.selectedLabel = student.label;
+                    this.query = student.label;
+                    this.open = false;
+                },
+                clear() {
+                    this.selectedId = '';
+                    this.selectedLabel = '';
+                    this.query = '';
+                    this.open = false;
+                },
+                init() {
+                    if (this.selectedId) {
+                        const found = this.students.find(s => s.id == this.selectedId);
+                        if (found) {
+                            this.query = found.label;
+                            this.selectedLabel = found.label;
+                        }
+                    }
+                    this.$watch('selectedId', val => {
+                        if (!val) {
+                            this.query = '';
+                            this.selectedLabel = '';
+                        }
+                    });
+                }
+            }" @click.outside="open = false">
+                {{-- <flux:label>{{ __('Search Student by Name') }}</flux:label> --}}
+
+                <div class="relative mt-1">
+                    <div class="relative flex items-center">
+                        <input type="text" x-model="query" @focus="open = true"
+                            @input="open = true; if (!query) clear()" @keydown.escape="open = false"
+                            @keydown.enter.prevent="if (filtered.length === 1) select(filtered[0])"
+                            placeholder="{{ __('Type student name to filter...') }}" autocomplete="off"
+                            class="w-full px-3 pr-9 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600
+                               bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100
+                               placeholder-zinc-400 dark:placeholder-zinc-500
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                               transition-colors duration-150" />
+                        {{-- Clear button --}}
+                        <button type="button" x-show="query" @click="clear()"
+                            class="absolute right-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                            tabindex="-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Selected badge --}}
+                    {{-- <div x-show="selectedId && selectedLabel" x-cloak class="mt-1 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <span x-text="selectedLabel"></span>
+                    </span>
+                </div> --}}
+
+                    {{-- Dropdown list --}}
+                    <div x-show="open && filtered.length > 0" x-cloak
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto
+                           rounded-lg border border-zinc-200 dark:border-zinc-600
+                           bg-white dark:bg-zinc-800 shadow-lg">
+                        <template x-for="student in filtered" :key="student.id">
+                            <button type="button" @click="select(student)"
+                                class="w-full text-left px-4 py-2.5 text-sm
+                                   text-zinc-700 dark:text-zinc-200
+                                   hover:bg-blue-50 dark:hover:bg-blue-500/10
+                                   hover:text-blue-700 dark:hover:text-blue-300
+                                   transition-colors duration-100 flex items-center gap-2"
+                                :class="{
+                                    'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 font-medium': selectedId ==
+                                        student.id
+                                }">
+                                <svg x-show="selectedId == student.id" class="w-3.5 h-3.5 shrink-0" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span x-text="student.label"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    {{-- No results --}}
+                    <div x-show="open && query && filtered.length === 0" x-cloak
+                        class="absolute z-50 mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-600
+                           bg-white dark:bg-zinc-800 shadow-lg px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                        {{ __('No students found matching your search.') }}
+                    </div>
+                </div>
+                <flux:error name="searchStudentName" />
             </div>
+
+            {{-- Searchable Student Group Field --}}
+            <div class="px-4 pb-3" x-data="{
+                open: false,
+                query: '',
+                selectedId: @entangle('searchStudentGroupName'),
+                selectedLabel: '',
+                items: @js($this->educationPoints->map(fn($g) => ['id' => $g->id, 'label' => $g->name ?? ''])->values()),
+                get filtered() {
+                    if (!this.query.trim()) return this.items.slice(0, 50);
+                    const q = this.query.toLowerCase();
+                    return this.items.filter(i => i.label.toLowerCase().includes(q)).slice(0, 50);
+                },
+                select(item) {
+                    this.selectedId = item.id;
+                    this.selectedLabel = item.label;
+                    this.query = item.label;
+                    this.open = false;
+                },
+                clear() {
+                    this.selectedId = '';
+                    this.selectedLabel = '';
+                    this.query = '';
+                    this.open = false;
+                },
+                init() {
+                    if (this.selectedId) {
+                        const found = this.items.find(i => i.id == this.selectedId);
+                        if (found) {
+                            this.query = found.label;
+                            this.selectedLabel = found.label;
+                        }
+                    }
+                    this.$watch('selectedId', val => {
+                        if (!val) {
+                            this.query = '';
+                            this.selectedLabel = '';
+                        }
+                    });
+                }
+            }" @click.outside="open = false">
+                <div class="relative mt-1">
+                    <div class="relative flex items-center">
+                        <input type="text" x-model="query" @focus="open = true"
+                            @input="open = true; if (!query) clear()" @keydown.escape="open = false"
+                            @keydown.enter.prevent="if (filtered.length === 1) select(filtered[0])"
+                            placeholder="{{ __('Type group name to filter...') }}" autocomplete="off"
+                            class="w-full px-3 pr-9 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600
+                               bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100
+                               placeholder-zinc-400 dark:placeholder-zinc-500
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                               transition-colors duration-150" />
+                        {{-- Clear button --}}
+                        <button type="button" x-show="query" @click="clear()"
+                            class="absolute right-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                            tabindex="-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Dropdown list --}}
+                    <div x-show="open && filtered.length > 0" x-cloak
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto
+                           rounded-lg border border-zinc-200 dark:border-zinc-600
+                           bg-white dark:bg-zinc-800 shadow-lg">
+                        <template x-for="item in filtered" :key="item.id">
+                            <button type="button" @click="select(item)"
+                                class="w-full text-left px-4 py-2.5 text-sm
+                                   text-zinc-700 dark:text-zinc-200
+                                   hover:bg-blue-50 dark:hover:bg-blue-500/10
+                                   hover:text-blue-700 dark:hover:text-blue-300
+                                   transition-colors duration-100 flex items-center gap-2"
+                                :class="{
+                                    'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 font-medium': selectedId ==
+                                        item.id
+                                }">
+                                <svg x-show="selectedId == item.id" class="w-3.5 h-3.5 shrink-0" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span x-text="item.label"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    {{-- No results --}}
+                    <div x-show="open && query && filtered.length === 0" x-cloak
+                        class="absolute z-50 mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-600
+                           bg-white dark:bg-zinc-800 shadow-lg px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                        {{ __('No groups found matching your search.') }}
+                    </div>
+                </div>
+                <flux:error name="searchStudentGroupName" />
+            </div>
+
+             {{-- Enrollment Type --}}
+        <flux:select wire:model="searchEnrollment">
+            <option value="">All Enrollment Days</option>
+            <option value="sat_mon_wed">{{ __('Saturday / Monday / Wednesday') }}</option>
+            <option value="sun_tue_thu">{{ __('Sunday / Tuesday / Thursday') }}</option>
+            <option value="full_week">{{ __('Full Week') }}</option>
+        </flux:select>
+
+        {{-- activation Type --}}
+        <flux:field class="col-start-1 md:col-start-1 lg:col-start-1">
+            <flux:select wire:model="searchActivation">
+                <option value="">All Activaion Status</option>
+                @foreach ($activations as $a)
+                    <option value="{{ $a['value'] }}">{{ $a['label'] }}</option>
+                @endforeach
+            </flux:select>
+        </flux:field>
         </div>
 
-        @if ($search)
-            <div class="mt-4 flex items-center justify-end">
-                <flux:button wire:click="$set('search', '');" variant="ghost" size="sm" icon="x-mark">
+       
+
+        <div class="px-4 pb-4 flex items-center justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
+            <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass">
+                {{ __('Find Data') }}
+            </flux:button>
+            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $readyToLoad)
+                <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">
                     {{ __('Clear Filters') }}
                 </flux:button>
-            </div>
-        @endif
+            @endif
+        </div>
 
         <div class="overflow-x-auto">
             <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
@@ -106,7 +344,8 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Gender') }}
                         </th> --}}
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Enrollment') }}
                         </th>
                         <th scope="col"
@@ -138,7 +377,7 @@
                                 {{ $genderEnum ? $genderEnum->label() : '-' }}
                             </td> --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                @if($student->enrollment_type === 'full_week')
+                                @if ($student->enrollment_type === 'full_week')
                                     {{ __('Full Week') }}
                                 @elseif($student->enrollment_type === 'sat_mon_wed')
                                     {{ __('Sat/Mon/Wed') }}
@@ -147,7 +386,7 @@
                                 @else
                                     -
                                 @endif
-                               - {{ $student->group->status_name??''}}
+                                - {{ $student->status->status_name ?? '' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php
@@ -169,7 +408,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
-                                    <flux:button href="{{ route('student.show', $student) }}" wire:navigate
+                                    <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate
                                         variant="ghost" size="sm" icon="eye" />
                                     <flux:button href="{{ route('student.edit', $student) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
@@ -354,60 +593,5 @@
         </div>
     </flux:modal>
 
-    {{-- Survey Answer Modal --}}
-    <flux:modal name="survey-answer-modal" class="md:w-lg">
-        <div class="p-6 space-y-6">
-            <div class="flex flex-col gap-1">
-                <flux:heading size="lg">{{ __('Take Survey Answer') }}</flux:heading>
-                <flux:subheading>{{ __('Record a survey answer for this student.') }}</flux:subheading>
-            </div>
 
-            <form wire:submit="saveSurveyAnswer" class="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                <flux:field>
-                    <flux:label>{{ __('Survey No') }} <span class="text-red-500">*</span></flux:label>
-                    <flux:input wire:model="surveyAnswerNo" type="number" />
-                    <flux:error name="surveyAnswerNo" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>{{ __('Question') }}</flux:label>
-                    <flux:select wire:model="surveyAnswerQuestionId">
-                        <option value="">{{ __('Select Question') }}</option>
-                        @foreach($this->surveyQuestions as $question)
-                            <option value="{{ $question->id }}">{{ $question->question_ar_text ?? $question->question_en_text }}</option>
-                        @endforeach
-                    </flux:select>
-                    <flux:error name="surveyAnswerQuestionId" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>{{ __('Answer (AR)') }}</flux:label>
-                    <flux:textarea wire:model="surveyAnswerArText" rows="3" />
-                    <flux:error name="surveyAnswerArText" />
-                </flux:field>
-
-                <flux:field>
-                    <flux:label>{{ __('Answer (EN)') }}</flux:label>
-                    <flux:textarea wire:model="surveyAnswerEnText" rows="3" />
-                    <flux:error name="surveyAnswerEnText" />
-                </flux:field>
-
-                <div class="flex justify-end gap-2 border-t border-zinc-200 dark:border-zinc-700 pt-4 mt-4">
-                    <flux:modal.close>
-                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
-                    </flux:modal.close>
-                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="saveSurveyAnswer">
-                        <span wire:loading.remove wire:target="saveSurveyAnswer">{{ __('Save Answer') }}</span>
-                        <span wire:loading wire:target="saveSurveyAnswer" class="flex items-center gap-2">
-                            <svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            {{ __('Saving...') }}
-                        </span>
-                    </flux:button>
-                </div>
-            </form>
-        </div>
-    </flux:modal>
 </div>
