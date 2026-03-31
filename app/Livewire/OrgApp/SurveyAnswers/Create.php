@@ -19,7 +19,18 @@ class Create extends Component
     public $surveyForSection = '';
 
     public array $answers = [];
-    public $surveyAnswers = [];
+
+    #[Computed()]
+    public function filledSurveys()
+    {
+        if (!$this->account_id) {
+            return [];
+        }
+        return SurveyAnswer::where('account_id', $this->account_id)
+            ->pluck('survey_no')
+            ->unique()
+            ->toArray();
+    }
 
     #[Computed()]
     public function questionsBySurveyForSection()
@@ -27,9 +38,18 @@ class Create extends Component
         if (!$this->surveyForSection) {
             return collect();
         }
-        return SurveyQuestion::where('survey_for_section', $this->surveyForSection)
+        return SurveyQuestion::with('domainRel')->where('survey_for_section', $this->surveyForSection)
             ->orderBy('question_order', 'asc')
             ->get();
+    }
+
+    #[Computed()]
+    public function student()
+    {
+        if (!$this->account_id) {
+            return null;
+        }
+        return \App\Models\Student::where('identity_number', $this->account_id)->first();
     }
 
     // Triggered automatically by Livewire when surveyForSection is changed
@@ -38,8 +58,6 @@ class Create extends Component
         $this->answers = [];
         $this->loadAnswers();
     }
-
-    
 
     // Triggered automatically by Livewire when account_id is changed
     public function updatedAccountId()
@@ -54,12 +72,13 @@ class Create extends Component
         }
 
         // Fetch any existing answers for this specific student and survey section
-        $this->surveyAnswers = SurveyAnswer::where('survey_no', $this->surveyForSection)
+        $existingAnswers = SurveyAnswer::where('survey_no', $this->surveyForSection)
             ->where('account_id', $this->account_id)
             ->get();
 
+        $this->answers = [];
         // Populate the $answers array so the blade form inputs show the previously saved answers
-        foreach ($this->surveyAnswers as $answer) {
+        foreach ($existingAnswers as $answer) {
             $arText = $answer->answer_ar_text;
             
             // Check if what is saved is a JSON array (like for checked checkboxes)
@@ -76,48 +95,50 @@ class Create extends Component
     {
         $this->validate([
             'surveyForSection' => 'required|integer',
-            'account_id' => 'required|integer', // Ensure student is selected
+            'account_id' => 'required|integer', 
         ]);
 
-        $questions = collect($this->questionsBySurveyForSection);
+        $questions = $this->questionsBySurveyForSection;
+        
+        // Eager load all existing answers for this section and account to avoid N+1 in the loop
+        $existingAnswers = SurveyAnswer::where('survey_no', $this->surveyForSection)
+            ->where('account_id', $this->account_id)
+            ->get()
+            ->keyBy('question_id');
+
         $savedCount = 0;
+        $employeeId = auth()->user()?->employee?->id ?? null;
 
         foreach ($questions as $question) {
             $arText = $this->answers[$question->id] ?? null;
 
             if ($arText !== null && $arText !== '') {
-                // Encode array choices into JSON smoothly
                 if (is_array($arText)) {
                     $arText = json_encode($arText, JSON_UNESCAPED_UNICODE);
                 }
 
-                // Fetch existing or initialize a new model
-                $surveyAnswer = SurveyAnswer::firstOrNew([
+                $surveyAnswer = $existingAnswers->get($question->id) ?? new SurveyAnswer([
                     'survey_no' => $this->surveyForSection,
                     'account_id' => $this->account_id,
                     'question_id' => $question->id,
                 ]);
 
-                // Fill values securely
                 $surveyAnswer->fill([
                     'answer_ar_text' => $arText,
                     'answer_en_text' => null,
-                    'created_by' => auth()->user()?->employee?->id ?? null,
+                    'created_by' => $employeeId,
+                    
                 ]);
 
-                // Only save and increment count if the values actually changed
                 if ($surveyAnswer->isDirty()) {
                     $surveyAnswer->save();
                     $savedCount++;
                 }
             } else {
-                // If answer was cleared out by user, check if we need to delete
-                $deletedCount = SurveyAnswer::where('survey_no', $this->surveyForSection)
-                    ->where('account_id', $this->account_id)
-                    ->where('question_id', $question->id)
-                    ->delete();
-
-                if ($deletedCount > 0) {
+                // If answer was cleared, delete if it exists
+                $answerToDelete = $existingAnswers->get($question->id);
+                if ($answerToDelete instanceof SurveyAnswer) {
+                    $answerToDelete->delete();
                     $savedCount++;
                 }
             }
@@ -126,14 +147,31 @@ class Create extends Component
         if ($savedCount > 0) {
             session()->flash('message', __(':count Survey Answers successfully saved/updated.', ['count' => $savedCount]));
         } else {
-            session()->flash('message', __('No answers were provided.'));
+            session()->flash('message', __('No changes were made.'));
         }
-
-        return $this->redirect(route('survey-answers.index'), navigate: true);
+        $this->dispatch('scroll-to-top');
+        // return $this->redirect(route('survey-answers.index'), navigate: true);
     }
 
+    #[Computed()]
+    public function calcAnswers() {
+       if( ($this->surveyForSection) &&  ($this->account_id)) {
+         $answersCount = SurveyAnswer::calculateAnswer($this->surveyForSection, $this->account_id );
+         $questionsCount = count($this->questionsBySurveyForSection);
+          return [
+              'answersCount' => $answersCount,
+              'questionsCount' => $questionsCount
+          ];
+        } else {
+            return [
+                'answersCount' => 0,
+                'questionsCount' => 0
+            ];
+        }
+    }
     public function render()
     {
+      
         $surceyFor = StatusRepo::statuses()->where('p_id_sub',config('appConstant.survey_for')) ;
 
         if (Gate::denies('survey.create')) {

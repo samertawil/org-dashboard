@@ -1,2 +1,0 @@
-<img src="<?php echo e(asset('logo2.png')); ?>" alt="Logo" <?php echo e($attributes); ?> />
-<?php /**PATH C:\xampp\htdocs\feras\org-dashboard\resources\views/components/app-logo-icon.blade.php ENDPATH**/ ?>

@@ -33,7 +33,7 @@
         <div >
             <flux:select label="{{ __('Select Section') }}" wire:model.live='surveyForSection'>
                 <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Section...') }}</option>
-                @foreach ($surveyFor as $section)
+                @foreach ($surveyFor->where('p_id_sub',config('appConstant.survey_for')) as $section)
                     <option value="{{ $section->id }}">{{ $section->status_name ?? __('No Section Name') }}</option>
                 @endforeach
             </flux:select>
@@ -58,13 +58,25 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2 ">
                         
                         {{-- Row 1 --}}
-                        <div class="md:col-span-1  ">
+                        <div class="md:col-span-5">
                             <flux:input type="text" label="{{ __('Question Text (Arabic)') }}"  
                             style="height:auto;color: blue; " 
                             wire:model="questions.{{ $index }}.question_ar_text" />
                             @error('questions.'.$index.'.question_ar_text') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
-                        <div class="md:col-span-5">
+                    
+
+                        <div >
+                            <flux:select label="{{ __('Select Domain') }}" wire:model="questions.{{ $index }}.domain_id">
+                                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Domain...') }}</option>
+                                @foreach ($surveyFor->where('p_id_sub',config('appConstant.domains_of_assessment')) as $section)
+                                    <option value="{{ $section->id }}">{{ $section->status_name ?? __('No Domain Name') }}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:subheading class="mt-3">To add new Domain go from Status or <a href="{{route('status.create')}}"><span class="text-blue-500">Press Here</span></a> and make child for "Domains of Assessment"</flux:subheading>
+                        </div>
+
+                        <div class="md:col-span-3">
                            <flux:select label="{{ __('Answer Type') }}" wire:model.live="questions.{{ $index }}.answer_input_type">
                                 <option value="1">{{ __('Short Text (Text)') }}</option>
                                 <option value="2">{{ __('Multiple Choice') }}</option>
@@ -74,10 +86,7 @@
                               
                             </flux:select> 
                         </div>
-                        {{-- <div class="md:col-span-4">
-                            <flux:input type="text" label="{{ __('Question Text (English)') }}" wire:model="questions.{{ $index }}.question_en_text" />
-                        </div> --}}
-                      <flux:field>
+                      <flux:field class="md:col-span-2">
                         <flux:label >Order</flux:label>
                         <flux:input  type="number"  wire:model="questions.{{ $index }}.question_order" min="1" />
                       </flux:field>

@@ -217,14 +217,15 @@
                 </div>
 
                 <div class="space-y-3 print:space-y-1">
-                    <div class="space-y-3 grid grid-cols-1 gap-y-4 gap-x-2 text-sm print:grid-cols-3 print:gap-y-1 print:gap-x-4">
+                    <div
+                        class="space-y-3 grid grid-cols-1 gap-y-4 gap-x-2 text-sm print:grid-cols-3 print:gap-y-1 print:gap-x-4">
 
-                        
-                    <div class="info-pair">
-                        <span class="text-zinc-500 min-w-fit">{{ __('Group') }}:</span>
-                        <span
-                            class="font-medium text-zinc-900 dark:text-zinc-100">{{ $student->studentGroup?->name ?? '-' }}</span>
-                    </div>
+
+                        <div class="info-pair">
+                            <span class="text-zinc-500 min-w-fit">{{ __('Group') }}:</span>
+                            <span
+                                class="font-medium text-zinc-900 dark:text-zinc-100">{{ $student->studentGroup?->name ?? '-' }}</span>
+                        </div>
 
                         <div class="info-pair">
                             <span class="text-zinc-500 min-w-fit">{{ __('Birth Date') }}:</span>
@@ -236,7 +237,7 @@
                             <span class="text-zinc-500 min-w-fit">{{ __('Age When Join') }}:</span>
                             <span
                                 class="font-medium text-zinc-900 dark:text-zinc-100">{{ $this->studentData->student_age_when_join ?? '-' }}
-                             
+
                                 y</span>
                         </div>
 
@@ -293,7 +294,7 @@
                             </span>
                         </div>
 
-                        
+
                     </div>
 
 
@@ -304,6 +305,17 @@
                             <p class="text-sm text-zinc-900 dark:text-zinc-100 print:text-xs">{{ $student->notes }}</p>
                         </div>
                     @endif
+
+                        @foreach ($lateSurveyStudentData as $data)
+                        
+                        <div class="info-pair flex">
+                            <span class="text-zinc-500 min-w-fit">{{ __('Late Survey') }}:</span>
+                            <div
+                                class="font-medium text-zinc-900 dark:text-zinc-100">{{ $data->section_name ?? $data->survey_for_section }}</div>
+                        </div>
+                        
+                        @endforeach
+
                 </div>
             </div>
         </div>
@@ -315,7 +327,7 @@
                 <div
                     class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 print:px-2 print:py-1">
                     <h3 class="text-lg font-medium text-zinc-900 dark:text-white print:text-base">
-                        {{ __('Survey Answers') }}</h3>
+                        {{ __('اجابات النماذج والتقيمات') }}</h3>
                 </div>
 
                 <div class="p-0">
@@ -324,43 +336,178 @@
                             {{ __('No survey answers recorded for this student.') }}
                         </div>
                     @else
-                        <div class="overflow-x-auto">
-                            <table class="w-full survey-table border-collapse">
-                                <thead class="bg-zinc-50 dark:bg-zinc-900/50 print:bg-white">
-                                    <tr>
-                                        <th class="px-4 py-2 border text-sm font-semibold text-right">
-                                            {{ __('Question') }}</th>
-                                        <th class="px-4 py-2 border text-sm font-semibold text-right">
-                                            {{ __('Answer') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($student->surveyStudentanswers as $answer)
-                                        <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
-                                            <td class="px-4 py-2 border text-sm">
-                                                <div class="font-medium text-zinc-900 dark:text-zinc-100">
-                                                    {{ $answer->question?->question_ar_text ?? __('Unknown Question') }}
+                        @forelse ($student->surveyStudentanswers->unique('survey_no')->values() as $survey)
+                            <div class="overflow-x-auto">
+                                <table class="w-full survey-table border-collapse">
+                                    <thead class="bg-zinc-50 dark:bg-zinc-900/50 print:bg-white">
+                                        <tr>
+                                            <th class="px-4 py-2 border text-sm font-semibold text-center">
+                                             # </th>
+                                            <th class="px-4 py-2 border text-sm font-semibold text-center">
+                                                {{ __('أسئلة نموذج') }} - {{ $survey->surveyfor->status_name }} </th>
+                                            <th class="px-4 py-2 border text-sm font-semibold text-center">
+                                                {{ __('الإجابة') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+
+                                        @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no) as $answer)
+                                            <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
+                                                <td class="px-4 py-2 border text-sm">
+                                                    <div class="font-medium text-zinc-900 dark:text-zinc-100"
+                                                        style="width: 10px;">
+                                                        {{ $answer->question?->question_order ?? __('Unknown Question') }}
+
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-2 border text-sm">
+                                                    
+                                                    <div class="font-medium text-zinc-900 dark:text-zinc-100"
+                                                        style="width: 350px;">
+                                                        {{ $answer->question?->question_ar_text ?? __('Unknown Question') }}
+
+                                                    </div>
+                                                    @if ($answer->question?->question_en_text)
+                                                        <div class="text-xs text-zinc-500 print:hidden">
+                                                            {{ $answer->question->question_en_text }}
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-2 border text-sm text-zinc-700 dark:text-zinc-300"
+                                                    style="width: 200px;">
+                                                    @php
+                                                        $displayAnswerAr = $answer->answer_ar_text;
+                                                        if (
+                                                            !empty($answer->answer_ar_text) &&
+                                                            !empty($answer->question?->answer_options)
+                                                        ) {
+                                                            $decodedAr = json_decode($answer->answer_ar_text, true);
+                                                            $valuesAr =
+                                                                json_last_error() === JSON_ERROR_NONE &&
+                                                                is_array($decodedAr)
+                                                                    ? $decodedAr
+                                                                    : [$answer->answer_ar_text];
+                                                            $labelsAr = [];
+                                                            foreach ($valuesAr as $val) {
+                                                                $found = $val;
+                                                                $options = is_string($answer->question->answer_options)
+                                                                    ? json_decode(
+                                                                        $answer->question->answer_options,
+                                                                        true,
+                                                                    )
+                                                                    : $answer->question->answer_options;
+                                                                if (is_array($options)) {
+                                                                    foreach ($options as $option) {
+                                                                        if (
+                                                                            is_array($option) &&
+                                                                            isset($option['value']) &&
+                                                                            isset($option['label'])
+                                                                        ) {
+                                                                            if (
+                                                                                (string) $option['value'] ===
+                                                                                (string) $val
+                                                                            ) {
+                                                                                $found = $option['label'];
+                                                                                break;
+                                                                            }
+                                                                        } elseif (is_string($option)) {
+                                                                            if ((string) $option === (string) $val) {
+                                                                                $found = $option;
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                $labelsAr[] = $found;
+                                                            }
+                                                            $displayAnswerAr = implode('، ', $labelsAr);
+                                                        } else {
+                                                            $decodedAr = json_decode($answer->answer_ar_text, true);
+                                                            if (
+                                                                json_last_error() === JSON_ERROR_NONE &&
+                                                                is_array($decodedAr)
+                                                            ) {
+                                                                $displayAnswerAr = implode('، ', $decodedAr);
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    {{ $displayAnswerAr ?? '-' }}
+                                                    @if ($answer->answer_en_text)
+                                                        @php
+                                                            $displayAnswerEn = $answer->answer_en_text;
+                                                            if (!empty($answer->answer_en_text)) {
+                                                                $decodedEn = json_decode($answer->answer_en_text, true);
+                                                                if (
+                                                                    json_last_error() === JSON_ERROR_NONE &&
+                                                                    is_array($decodedEn)
+                                                                ) {
+                                                                    $displayAnswerEn = implode(', ', $decodedEn);
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        <div
+                                                            class="text-xs text-zinc-500 mt-1 border-t border-zinc-100 pt-1 print:hidden">
+                                                            {{ $displayAnswerEn }}
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="bg-zinc-50 dark:bg-zinc-900/50 print:bg-white">
+                                        <tr>
+                                            <td colspan="2"
+                                                class="px-4 py-2 border text-sm text-zinc-500 dark:text-zinc-400 text-center font-medium">
+                                                @php
+                                                    $creators = $student->surveyStudentanswers
+                                                        ->where('survey_no', $survey->survey_no)
+                                                        ->map(fn($ans) => $ans->creator?->full_name ?? $ans->created_by)
+                                                        ->filter()
+                                                        ->unique()
+                                                        ->implode('، ');
+                                                @endphp
+                                                <div class="flex items-center justify-center gap-6">
+                                                    <div class="flex items-center gap-1">
+                                                        <flux:icon name="user" class="size-4" />
+                                                        <span>{{ __('بواسطة') }}: {{ $creators ?: '-' }}</span>
+                                                    </div>
+
+                                                    @php
+                                                        $created = $student->surveyStudentanswers
+                                                            ->where('survey_no', $survey->survey_no)
+                                                            ->map(function ($ans) {
+                                                             
+                                                                if (!$ans->created_at) {
+                                                                  
+                                                                    return null;
+                                                                }
+                                                                return \Carbon\Carbon::parse($ans->created_at)->format(
+                                                                    'Y-m-d',
+                                                                );
+                                                            })
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->implode('، ');
+                                                    @endphp
+
+                                                    <div class="flex items-center gap-1">
+                                                        <flux:icon name="calendar" class="size-4" />
+                                                        <span dir="ltr">{{ $created }}</span>
+                                                    </div>
+
                                                 </div>
-                                                @if ($answer->question?->question_en_text)
-                                                    <div class="text-xs text-zinc-500 print:hidden">
-                                                        {{ $answer->question->question_en_text }}
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="px-4 py-2 border text-sm text-zinc-700 dark:text-zinc-300">
-                                                {{ $answer->answer_ar_text ?? '-' }}
-                                                @if ($answer->answer_en_text)
-                                                    <div
-                                                        class="text-xs text-zinc-500 mt-1 border-t border-zinc-100 pt-1 print:hidden">
-                                                        {{ $answer->answer_en_text }}
-                                                    </div>
-                                                @endif
+
                                             </td>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        @empty
+                            <li>No surveys found</li>
+                        @endforelse
+
+
                     @endif
                 </div>
             </div>

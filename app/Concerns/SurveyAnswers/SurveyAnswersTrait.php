@@ -2,10 +2,13 @@
 
 namespace App\Concerns\SurveyAnswers;
 
-use Livewire\Attributes\Validate;
-use App\Models\SurveyQuestion;
 use App\Models\Employee;
 use App\Models\Student;
+use App\Models\SurveyQuestion;
+use App\Reposotries\employeeRepo;
+use App\Reposotries\StudentRepo;
+use Livewire\Attributes\Validate;
+use Livewire\Attributes\Computed;
 
 trait SurveyAnswersTrait
 {
@@ -27,16 +30,21 @@ trait SurveyAnswersTrait
     #[Validate('nullable|exists:employees,id')]
     public $created_by = '';
 
-    public $questions = [];
-    public $employees = [];
-    public $students = [];
-  
-
-    public function bootSurveyAnswersTrait()
+    #[Computed]
+    public function questions()
     {
-        $this->questions = SurveyQuestion::all();
-        $this->employees = Employee::all();
-        $this->students = Student::get();
-       
+        return SurveyQuestion::all();
+    }
+
+    #[Computed]
+    public function employees()
+    {
+        return employeeRepo::employees();
+    }
+
+    #[Computed]
+    public function students()
+    {
+        return StudentRepo::students();
     }
 }

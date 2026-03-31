@@ -11,6 +11,7 @@ class SurveyQuestion extends Model
         'question_order',
         'question_ar_text',
         'question_en_text',
+        'domain_id',
         'answer_input_type',
         'answer_options',
         'require_detail',
@@ -27,5 +28,10 @@ class SurveyQuestion extends Model
     public function surveyForSection()
     {
         return $this->belongsTo(Status::class, 'survey_for_section');
+    }
+
+    public function domainRel()
+    {
+        return $this->belongsTo(Status::class, 'domain_id');
     }
 }

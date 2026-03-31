@@ -247,6 +247,20 @@ class Index extends Component
             ->get();
     }
 
+    #[Computed()]
+    public function exportParams()
+    {
+        $filters = [
+            'searchIdentityNumber' => $this->searchIdentityNumber,
+            'searchStudentName' => $this->searchStudentName,
+            'searchStudentGroupName' => $this->searchStudentGroupName,
+            'searchEnrollment' => $this->searchEnrollment,
+            'searchActivation' => $this->searchActivation,
+        ];
+
+        return base64_encode(json_encode($filters));
+    }
+
     public function render()
     {
        

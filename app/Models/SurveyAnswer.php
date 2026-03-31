@@ -32,4 +32,8 @@ class SurveyAnswer extends Model
     public function student() {
         return $this->belongsTo(Student::class,'account_id','identity_number');
     }
+
+    public function scopeCalculateAnswer($query, $surveyNo, $account_id) {
+        return $query->where('survey_no', $surveyNo)->where('account_id', $account_id)->count();
+    }
 }

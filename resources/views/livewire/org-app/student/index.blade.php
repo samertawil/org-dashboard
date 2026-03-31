@@ -21,7 +21,11 @@
             @endcan
         </div>
     </div>
+<div>
 
+ 
+    
+</div>
     {{-- Success Message --}}
     <x-auth-session-status class="text-center" :status="session('message')" />
 
@@ -293,6 +297,9 @@
         <div class="px-4 pb-4 flex items-center justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
             <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass">
                 {{ __('Find Data') }}
+            </flux:button>
+            <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}" variant="ghost" size="sm" icon="document-arrow-down">
+                {{ __('Export Excel') }}
             </flux:button>
             @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $readyToLoad)
                 <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">

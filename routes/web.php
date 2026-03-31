@@ -10,6 +10,7 @@ use \App\Livewire\OrgApp\DisplacementCamps\Create as  DisplacementCampsCreate;
 use \App\Livewire\OrgApp\DisplacementCamps\Edit as  DisplacementCampsEdit;
 use \App\Livewire\OrgApp\DisplacementCamps\Gallery as  DisplacementCampsGallery;
 use \App\Livewire\OrgApp\DisplacementCamps\Index as  DisplacementCampsIndex;
+use App\Http\Controllers\ExportController;
 use App\Livewire\AppSetting\Ability\Create as AbilityCreate;
 use App\Livewire\AppSetting\Ability\Edit as AbilityEdit;
 use App\Livewire\AppSetting\Ability\Index as AbilityIndex;
@@ -64,6 +65,7 @@ use App\Livewire\OrgApp\SubjectForLearn\Index as SubjectIndex;
 use App\Livewire\OrgApp\SurveyAnswers\Create as SurveyAnswersCreate;
 use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
 use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
+use App\Livewire\OrgApp\SurveyQuestions\ExportFiles;
 use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
@@ -213,7 +215,11 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
     Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');
+    Route::get('/survey-export',ExportFiles::class)->name('survey.export');
     
+    // Export
+
+    Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');
 
     });
     

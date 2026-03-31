@@ -5,7 +5,6 @@ namespace App\Livewire\OrgApp\SurveyQuestions;
 use App\Models\SurveyQuestion;
 use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -25,6 +24,7 @@ class Manage extends Component
         'questions.*.require_detail' => 'nullable|boolean',
         'questions.*.detail' => 'nullable|string',
         'questions.*.note' => 'nullable|string',
+        'questions.*.domain_id' => 'required|integer',
     ];
 
     public function mount()
@@ -81,6 +81,7 @@ class Manage extends Component
             'require_detail' => false,
             'detail' => '',
             'note' => '',
+            'domain_id' => '',
         ]);
     }
 
@@ -114,6 +115,7 @@ class Manage extends Component
 
     public function save()
     {
+        
         $this->validate();
 
         if (!$this->surveyForSection) {
@@ -135,9 +137,11 @@ class Manage extends Component
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
+                    'domain_id' => $q['domain_id'] ?? null,
                     'updated_by'=>Auth::user()->id,
                    
                 ]);
+               
                 if ($question->isDirty()) {
                     $question->save();
                     $anyUpdated = true;
@@ -153,6 +157,7 @@ class Manage extends Component
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
+                    'domain_id' => $q['domain_id'] ?? null,
                     'created_by'=>Auth::user()->id,
                    
                 ]);
@@ -176,7 +181,8 @@ class Manage extends Component
     #[Title('Survey Questions')]
     public function render()
     {
-        $surceyFor = StatusRepo::statuses()->where('p_id_sub', config('appConstant.survey_for'));
+         
+        $surceyFor = StatusRepo::statuses()->whereIn('p_id_sub', [config('appConstant.survey_for'),config('appConstant.domains_of_assessment')]);
 
         return view('livewire.org-app.survey-questions.manage', [
             'heading' => __('New Survey Questions'),

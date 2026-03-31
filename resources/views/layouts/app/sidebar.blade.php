@@ -311,11 +311,16 @@
                     @endcan
 
                   
-                        <flux:sidebar.item icon="clipboard-document-check" :href="route('survey-answers.index')"
-                            :current="request()->routeIs('survey-answers.index')" wire:navigate>
-                            {{ __('Survey Answers') }}
+                        <flux:sidebar.item icon="plus" :href="route('survey-answers.create')"
+                            :current="request()->routeIs('survey-answers.create')" wire:navigate>
+                            {{ __('Answers Survey') }}
                         </flux:sidebar.item>
-                 
+
+                        <flux:sidebar.item icon="document-arrow-down" :href="route('survey.export')"
+                            :current="request()->routeIs('survey.export')" wire:navigate>
+                            {{ __('Export Files') }}
+                        </flux:sidebar.item>
+
                 </flux:sidebar.group>
             @endcanany
 
