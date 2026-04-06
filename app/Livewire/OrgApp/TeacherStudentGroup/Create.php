@@ -36,6 +36,7 @@ class Create extends Component
 
     public function render()
     {
+        dd(1);
         if (Gate::denies('teacher-student-groups.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
