@@ -130,8 +130,12 @@
                                 <flux:select wire:model="answer.{{ $q->id }}">
                                     <option value="" class="text-gray-500 placeholder-gray-500">
                                         {{ __('Select answer') }}</option>
-                                    @foreach ($q->answer_options as $value)
-                                        <option value="{{ $value }}">{{ $value }}</option>
+                                    @foreach ($q->answer_options as $option)
+                                        @if (is_array($option) && isset($option['value']) && isset($option['label']))
+                                            <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+                                        @elseif(!is_array($option))
+                                            <option value="{{ $option }}">{{ $option }}</option>
+                                        @endif
                                     @endforeach
                                 </flux:select>
                             @else

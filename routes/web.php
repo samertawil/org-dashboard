@@ -67,9 +67,15 @@ use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
 use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
 use App\Livewire\OrgApp\SurveyQuestions\ExportFiles;
 use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
+use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Index as GradingScaleIndex;
+use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Create as GradingScaleCreate;
+use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Edit as GradingScaleEdit;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
+use App\Livewire\OrgApp\TeacherStudentGroup\Create as TeacherStudentGroupCreate;
+use App\Livewire\OrgApp\TeacherStudentGroup\Edit as TeacherStudentGroupEdit;
+use App\Livewire\OrgApp\TeacherStudentGroup\Index as TeacherStudentGroupIndex;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -166,6 +172,9 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
     Route::get('/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
     
+    Route::get('/teacher-student-groups', TeacherStudentGroupIndex::class)->name('teacher-student-groups.index');
+    Route::get('/teacher-student-groups/create', TeacherStudentGroupCreate::class)->name('teacher-student-groups.create');
+    Route::get('/teacher-student-groups/{teacherStudentGroup}/edit', TeacherStudentGroupEdit::class)->name('teacher-student-groups.edit');    
     Route::get('/currency', CurrencyIndex::class)->name('currency.index');
     Route::get('/currency/create', CurrencyCreate::class)->name('currency.create');
     Route::get('/currency/{currency}/edit', CurrencyEdit::class)->name('currency.edit');
@@ -216,6 +225,10 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
     Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');
     Route::get('/survey-export',ExportFiles::class)->name('survey.export');
+    
+    Route::get('/survey-grading-scale', GradingScaleIndex::class)->name('survey.grading.scale.index');
+    Route::get('/survey-grading-scale/create', GradingScaleCreate::class)->name('survey.grading.scale.create');
+    Route::get('/survey-grading-scale/{scale}/edit', GradingScaleEdit::class)->name('survey.grading.scale.edit');
     
     // Export
 

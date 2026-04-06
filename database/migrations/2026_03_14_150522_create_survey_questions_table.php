@@ -17,6 +17,8 @@ return new class extends Migration
             $table->tinyInteger('question_order')->nullable();
             $table->string('question_ar_text');
             $table->string('question_en_text')->nullable();
+            $table->tinyInteger('min_score')->nullable();
+            $table->tinyInteger('max_score')->nullable();
             $table->string('domain')->nullable();
             $table->tinyInteger('answer_input_type'); 
             $table->tinyInteger('require_detail')->default(0); 

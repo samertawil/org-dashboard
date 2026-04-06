@@ -38,7 +38,17 @@ class Create extends Component
         if (!$this->surveyForSection) {
             return collect();
         }
-        return SurveyQuestion::with('domainRel')->where('survey_for_section', $this->surveyForSection)
+
+        $student = $this->student;
+        $batch_no = $student?->studentGroup?->batch_no;
+
+        if (!$batch_no) {
+            return collect();
+        }
+
+        return SurveyQuestion::with('domainRel')
+            ->where('survey_for_section', $this->surveyForSection)
+            ->where('batch_no', $batch_no)
             ->orderBy('question_order', 'asc')
             ->get();
     }
@@ -171,10 +181,10 @@ class Create extends Component
     }
     public function render()
     {
-      
+        
         $surceyFor = StatusRepo::statuses()->where('p_id_sub',config('appConstant.survey_for')) ;
 
-        if (Gate::denies('survey.create')) {
+        if (Gate::denies('survey-answers.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
 

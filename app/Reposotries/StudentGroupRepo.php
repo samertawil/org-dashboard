@@ -13,4 +13,16 @@ class StudentGroupRepo
             return StudentGroup::select('id', 'name')->get();
         });
     }
+
+    public static function educationPoints()
+    {
+        $user = auth()->user();
+
+        if ($user->isSuperAdmin()) {
+            return self::studentGroups();
+        }
+
+        return $user->employee?->studentGroups()
+            ->get() ?: collect();
+    }
 }

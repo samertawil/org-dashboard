@@ -60,6 +60,18 @@
                                     <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
                                         class="size-3" />
                                 @else
+                                @endif
+                            </div>
+                        </th>
+
+                        <th wire:click="sortBy('batch_no')"
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            <div class="flex items-center gap-1">
+                                {{ __('Batch No') }}
+                                @if ($sortField === 'batch_no')
+                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                        class="size-3" />
+                                @else
                                     <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
                                 @endif
                             </div>
@@ -100,6 +112,9 @@
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                 {{ $group->name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 text-center">
+                                {{ $group->batch_no }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->Moderator ?? '-' }}

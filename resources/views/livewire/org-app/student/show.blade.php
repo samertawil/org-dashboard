@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-6">
     {{-- Header Section --}}
     <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 hidden md:block">
             <flux:heading level="1" size="xl">{{ __('Student Details') }}: {{ $student->full_name }}
             </flux:heading>
             <flux:subheading>{{ __('View comprehensive information and survey answers for this student.') }}
@@ -11,6 +11,9 @@
             <flux:button href="{{ route('student.index') }}" wire:navigate variant="ghost" icon="arrow-left"
                 class="print:hidden">
                 {{ __('Back to List') }}
+            </flux:button>
+             <flux:button wire:click="$set('showGradingScale', true)" variant="ghost" icon="chart-bar" class="print:hidden">
+                {{ __('Grading Scale') }}
             </flux:button>
             <flux:button onclick="printWithDynamicName()" variant="ghost" icon="printer" class="print:hidden">
                 {{ __('Print') }}
@@ -512,6 +515,85 @@
                 </div>
             </div>
         </div>
-    </div>
+        <flux:modal wire:model="showGradingScale" class="md:w-[800px]">
+        @if ($showGradingScale)
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <flux:heading level="2" size="lg">
+                        {{ __('Grading Scale Results') }}
+                    </flux:heading>
+                </div>
+@forelse ($this->studentGradingScale->unique('survey_no')->values() as $survey  )
+<div>
+    <p class="text-center" style="font-weight: 500;">{!!$survey->status_name ?? '-'!!}</p>
 </div>
+<div class="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+    <table class="w-full table-auto divide-y divide-zinc-200 dark:divide-zinc-700">
+        <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+            <tr>
+                <th class="px-4 py-3 text-start text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Domain') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Total Marks') }}</th>
+               
+                <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Grade %') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Evaluation') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Description') }}</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+            @forelse ($this->studentGradingScale->where('survey_no', $survey->survey_no)  as $grade)
+                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                    @php
+                        $domain = \App\Models\Status::find($grade->domain_id);
+                    @endphp
+                    <td @class([
+                        'px-4 py-3 text-sm font-medium',
+                     
+                        'text-red-600 dark:text-red-400' => !$domain,
+                    ])>
+                        <p>{{ $domain?->status_name ?? __('التقييم الكلي للطفل') }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-center text-zinc-600 dark:text-zinc-300">
+                        {{ intval($grade->total_marks) }}/{{ $grade->max_total_score }}
+                    </td>
+                    
+                    <td class="px-4 py-3 text-sm text-center font-bold text-indigo-600 dark:text-indigo-400">
+                        {{ $grade->grade }}%
+                    </td>
+                    <td class="px-4 py-3 text-sm text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400">
+                            {{ $grade->evaluation }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5  text-xs font-medium ">
+                            {{ $grade->description }}
+                        </span>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                        {{ __('No grading scale data available for this student.') }}
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+@empty
+    
+@endforelse
+               
+
+                <div class="flex justify-end">
+                    <flux:button wire:click="$set('showGradingScale', false)" variant="ghost">
+                        {{ __('Close') }}
+                    </flux:button>
+                </div>
+            </div>
+        @endif
+    </flux:modal>
+</div>
+</div>
+
 </div>

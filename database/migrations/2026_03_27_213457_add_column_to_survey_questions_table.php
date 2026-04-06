@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('survey_questions', function (Blueprint $table) {
+            
            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
         });

@@ -19,6 +19,7 @@ class SurveyQuestion extends Model
         'note',
         'created_by',
         'updated_by',
+        'batch_no',
     ];
 
     protected $casts = [
@@ -33,5 +34,10 @@ class SurveyQuestion extends Model
     public function domainRel()
     {
         return $this->belongsTo(Status::class, 'domain_id');
+    }
+
+    public function batchs()
+    {
+        return $this->belongsTo(StudentGroup::class, 'batch_no', 'batch_no');
     }
 }

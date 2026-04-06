@@ -5,9 +5,11 @@ namespace App\Livewire\OrgApp\SurveyQuestions;
 use App\Exports\SurveyAnswersExport;
 use App\Exports\SurveyAnswersPivotExport;
 use App\Exports\SurveyLate;
+use App\Exports\SurveyResultsExport;
 use App\Models\Status;
 use App\Models\StudentGroup;
 use App\Reposotries\StudentGroupRepo;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class ExportFiles extends Component
@@ -17,6 +19,8 @@ class ExportFiles extends Component
     public $surveyLate = '';
     public $groupIdPivot = '';
     public $groupIdLate = '';
+    public $surveyNoResults = '';
+    public $groupIdResults = '';
 
     public function exportSurveyAnswers()
     {
@@ -52,8 +56,23 @@ class ExportFiles extends Component
         return (new SurveyLate($this->surveyLate, $this->groupIdLate))->download($filename);
     }
 
+    public function exportSurveyResults()
+    {
+        $surveyName = $this->surveyNoResults 
+            ? Status::find($this->surveyNoResults)?->status_name 
+            : __('All Surveys');
+
+        $filename = "Survey_Results_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
+
+        return (new SurveyResultsExport($this->surveyNoResults, $this->groupIdResults))->download($filename);
+    }
+
     public function render()
     {
+        
+        if (Gate::denies('survey.export')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $surveys = Status::whereIn('p_id_sub', [config('appConstant.survey_for')])
             ->orderBy('status_name')
         ->get();

@@ -22,11 +22,17 @@
                 <flux:heading size="lg">{{ __('Basic Information') }}</flux:heading>
             </div>
 
-            {{-- Name --}}
             <flux:field>
                 <flux:label badge="Required" badgeColor="text-red-600">{{ __('Name') }}</flux:label>
                 <flux:input type="text" wire:model="name" :placeholder="__('Enter group name')" />
                 <flux:error name="name" />
+            </flux:field>
+
+            {{-- Batch No --}}
+            <flux:field>
+                <flux:label badge="Required" badgeColor="text-red-600">{{ __('Batch No') }}</flux:label>
+                <flux:input type="number" wire:model="batch_no" min="1" :placeholder="__('Enter batch number')" />
+                <flux:error name="batch_no" />
             </flux:field>
             {{-- Dates --}}
             <flux:field>

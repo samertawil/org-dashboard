@@ -54,10 +54,11 @@ class ImportStudentsResultSurveyCommand extends Command
                 if ($index == 0 ||$index == 1 ||$index == 2 || empty($questionText)) continue; // تخطي عمود "اسم الطالب"
 
                 $questionId = DB::table('survey_questions')->insertGetId([
-                    'survey_for_section' => 138,
+                    'survey_for_section' => 142,
                     'question_order' => $index-2,
                     'question_ar_text' => $questionText,
                     'answer_input_type' => 1,
+                    'batch_no' => 1,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -92,7 +93,7 @@ class ImportStudentsResultSurveyCommand extends Command
                     DB::table('survey_answers_temp')->insert([
                         'account_id' => $studentName,
                         'created_by' => $createdby,
-                        'survey_no' => 138,
+                        'survey_no' => 142,
                         'question_id' => $questionIds[$index],
                         'answer_ar_text' => $answerText,
                         'created_at' => $formattedCreatedAt,  

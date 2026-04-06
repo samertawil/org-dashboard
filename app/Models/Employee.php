@@ -37,4 +37,9 @@ class Employee extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function studentGroups()
+    {
+        return $this->belongsToMany(StudentGroup::class, 'teacher_student_group', 'teacher_id', 'student_group_id', 'user_id', 'id');
+    }
 }

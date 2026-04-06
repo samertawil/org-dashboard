@@ -18,14 +18,16 @@ class StudentGroup extends Model
         'Moderator_email',
         'description',
         'activation',
-        'status_id', 
-        'subject_to_learn_id','neighbourhood_id',
+        'status_id',
+        'subject_to_learn_id',
+        'neighbourhood_id',
         'location_id',
         'address_details',
         'start_date',
         'end_date',
         'start_time',
-        'end_time',   
+        'end_time',
+        'batch_no',
     ];
 
     protected $casts = [
@@ -33,7 +35,7 @@ class StudentGroup extends Model
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
     ];
-    
+
     public function region()
     {
         return $this->belongsTo(Region::class);
@@ -58,10 +60,7 @@ class StudentGroup extends Model
         return $this->belongsTo(Status::class);
     }
 
-    public function students()
-    {
-        return $this->hasMany(Student::class, 'student_groups_id');
-    }
+
 
     public function studentGroupSchedules()
     {
@@ -84,5 +83,23 @@ class StudentGroup extends Model
     public function dailyAttendances()
     {
         return $this->hasMany(StudentDailyAttendance::class);
+    }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Employee::class, 'teacher_student_group', 'student_group_id', 'teacher_id', 'id', 'user_id');
+    }
+
+    //  that means  
+    //    student_groups
+    // JOIN teacher_student_group
+    // ON student_groups.id = teacher_student_group.student_group_id
+
+    // JOIN employees
+    // ON employees.id = teacher_student_group.teacher_id
+
+    public function students()
+    {
+        return $this->hasMany(Student::class, 'student_groups_id');
     }
 }

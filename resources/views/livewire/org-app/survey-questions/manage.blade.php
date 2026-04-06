@@ -5,7 +5,7 @@
             <flux:subheading>{{ $subheading ?? __('Enter the details for the student below.') }}</flux:subheading>
         </div>
         <div class="flex space-x-2 space-x-reverse">
-            @if($surveyForSection)
+            @if($surveyForSection && $batch_no)
             <flux:button wire:click="addQuestion" variant="primary" icon="plus">
                 {{ __('Add New Question') }}
             </flux:button>
@@ -30,22 +30,33 @@
             <flux:heading size="lg">{{ __('Survey Section') }}</flux:heading>
         </div>
 
-        <div >
-            <flux:select label="{{ __('Select Section') }}" wire:model.live='surveyForSection'>
-                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Section...') }}</option>
-                @foreach ($surveyFor->where('p_id_sub',config('appConstant.survey_for')) as $section)
-                    <option value="{{ $section->id }}">{{ $section->status_name ?? __('No Section Name') }}</option>
-                @endforeach
-            </flux:select>
-            <flux:subheading class="mt-3">To add new section go from Status or <a href="{{route('status.create')}}"><span class="text-blue-500">Press Here</span></a> and make child for "Sector For"</flux:subheading>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <flux:select label="{{ __('Select Section') }}" wire:model.live='surveyForSection'>
+                    <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Section...') }}</option>
+                    @foreach ($surveyFor->where('p_id_sub',config('appConstant.survey_for')) as $section)
+                        <option value="{{ $section->id }}">{{ $section->status_name ?? __('No Section Name') }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:subheading class="mt-3">To add new section go from Status or <a href="{{route('status.create')}}"><span class="text-blue-500">Press Here</span></a> and make child for "Sector For"</flux:subheading>
+            </div>
+            <div>
+                <flux:select label="{{ __('Select Batch') }}" wire:model.live='batch_no'>
+                    <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Batch...') }}</option>
+                    @foreach ($batches as $batch)
+                        <option value="{{ $batch->batch_no }}">{{ $batch->batch_no }}</option>
+                    @endforeach
+                </flux:select>
+                <flux:subheading class="mt-3">Batch numbers come from <a href="{{route('student.group.index')}}"><span class="text-blue-500">Student Groups</span></a></flux:subheading>
+            </div>
         </div>
        
     </div>
-    <div wire:loading wire:target="surveyForSection" >
+    <div wire:loading wire:target="surveyForSection,batch_no" >
         <flux:icon name="arrow-path" class="size-7 animate-spin text-blue-400" />
     </div>
 
-    @if($surveyForSection)
+    @if($surveyForSection && $batch_no)
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
         <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4 flex justify-between items-center">
             <flux:heading size="lg">{{ __('Listed Questions') }}</flux:heading>

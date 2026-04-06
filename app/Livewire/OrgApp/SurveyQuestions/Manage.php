@@ -5,12 +5,14 @@ namespace App\Livewire\OrgApp\SurveyQuestions;
 use App\Models\SurveyQuestion;
 use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class Manage extends Component
 {
     public $surveyForSection = null;
+    public $batch_no = null;
     public $questions = [];
 
     protected $rules = [
@@ -29,8 +31,8 @@ class Manage extends Component
 
     public function mount()
     {
-        // Load data on mount if surveyForSection is already set .
-        if ($this->surveyForSection) {
+        // Load data on mount if surveyForSection and batch_no are already set.
+        if ($this->surveyForSection && $this->batch_no) {
             $this->loadQuestions();
         }
     }
@@ -38,7 +40,11 @@ class Manage extends Component
 
     public function updatedSurveyForSection($value)
     {
+        $this->loadQuestions();
+    }
 
+    public function updatedBatchNo($value)
+    {
         $this->loadQuestions();
     }
 
@@ -46,11 +52,12 @@ class Manage extends Component
     {
         $this->resetValidation();
 
-        if ($this->surveyForSection) {
+        if ($this->surveyForSection && $this->batch_no) {
             $this->questions = SurveyQuestion::where('survey_for_section', $this->surveyForSection)
+                ->where('batch_no', $this->batch_no)
                 ->orderBy('question_order')
                 ->get()
-                ->map(function ($q) {
+                ->map(function (SurveyQuestion $q) {
                     $qArray = $q->toArray();
                     $qArray['require_detail'] = (bool) $q->require_detail;
                     $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
@@ -64,7 +71,7 @@ class Manage extends Component
 
     public function addQuestion()
     {
-        if (!$this->surveyForSection) {
+        if (!$this->surveyForSection || !$this->batch_no) {
             return;
         }
 
@@ -73,6 +80,7 @@ class Manage extends Component
         array_unshift($this->questions, [
             'id' => null,
             'survey_for_section' => $this->surveyForSection,
+            'batch_no' => $this->batch_no,
             'question_order' => $maxOrder + 1,
             'question_ar_text' => '',
             'question_en_text' => '',
@@ -118,7 +126,7 @@ class Manage extends Component
         
         $this->validate();
 
-        if (!$this->surveyForSection) {
+        if (!$this->surveyForSection || !$this->batch_no) {
             return;
         }
 
@@ -138,6 +146,7 @@ class Manage extends Component
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
                     'domain_id' => $q['domain_id'] ?? null,
+                    'batch_no' => $this->batch_no,
                     'updated_by'=>Auth::user()->id,
                    
                 ]);
@@ -158,6 +167,7 @@ class Manage extends Component
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
                     'domain_id' => $q['domain_id'] ?? null,
+                    'batch_no' => $this->batch_no,
                     'created_by'=>Auth::user()->id,
                    
                 ]);
@@ -181,13 +191,18 @@ class Manage extends Component
     #[Title('Survey Questions')]
     public function render()
     {
-         
+        if (Gate::denies('survey.manage')) 
+        { 
+            abort(403, __('You do not have the necessary permissions.'));
+        }
         $surceyFor = StatusRepo::statuses()->whereIn('p_id_sub', [config('appConstant.survey_for'),config('appConstant.domains_of_assessment')]);
+        $batches = \App\Models\StudentGroup::select('batch_no')->distinct()->whereNotNull('batch_no')->get();
 
         return view('livewire.org-app.survey-questions.manage', [
             'heading' => __('New Survey Questions'),
             'subheading' => __('Create and manage survey questions'),
             'surveyFor' => $surceyFor,
+            'batches' => $batches,
 
         ]);
     }

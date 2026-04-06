@@ -46,8 +46,9 @@ class Student extends Model
     }
 
 
-    public function surveyStudentanswers() {
-        return $this->hasMany(SurveyAnswer::class,'account_id','identity_number');
+    public function surveyStudentanswers()
+    {
+        return $this->hasMany(SurveyAnswer::class, 'account_id', 'identity_number');
     }
 
     public function city()
@@ -65,10 +66,7 @@ class Student extends Model
         return $this->belongsTo(Status::class);
     }
 
-    public function studentGroup()
-    {
-        return $this->belongsTo(StudentGroup::class,'student_groups_id');
-    }
+ 
 
     public function creator()
     {
@@ -89,6 +87,7 @@ class Student extends Model
         return $this->belongsTo(Status::class, 'status_id');
     }
 
+
     public function feedbacks()
     {
         return $this->hasMany(FeedBack::class);
@@ -101,19 +100,43 @@ class Student extends Model
 
     public function getStudentAgeWhenJoinAttribute(): int
     {
-      
+
         $birthDate = $this->birth_date;
         $joinDate = StudentGroup::where('id', $this->student_groups_id)->first()->start_date ?? null;
-        
+
         $this->join_date;
-        
+
         if (!$birthDate || !$joinDate) {
             return 0;
         }
-        
+
         $birth = Carbon::parse($birthDate);
         $join = Carbon::parse($joinDate);
-        
+
         return $birth->diffInYears($join);
     }
+
+
+ 
+    public function studentGroup()
+    {
+        return $this->belongsTo(StudentGroup::class, 'student_groups_id');
+    }
+
+
+
+public function scopeVisibleToTeacher($query, $user)
+{
+        // ->when(!$user->isSuperAdmin() || \Illuminate\Support\Facades\DB::table('teacher_student_group')->where('teacher_id', $user->id)->exists(), function ($query) use ($user) {
+
+    return $query->when(!$user->isSuperAdmin(), function ($q) use ($user) {
+        $q->whereIn('student_groups_id', function ($subQuery) use ($user) {
+            $subQuery->select('student_group_id')
+                ->from('teacher_student_group')
+                ->where('teacher_id', $user->id);
+        });
+    });
+}
+
+ 
 }

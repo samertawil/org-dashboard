@@ -3,6 +3,7 @@
 namespace App\Livewire\OrgApp\SurveyQuestions;
 
 use App\Models\SurveyQuestion;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -159,6 +160,11 @@ class Index extends Component
     #[Title('Survey Questions')]
     public function render()
     {
+        if (Gate::denies('survey.manage')) 
+        { 
+            abort(403, __('You do not have the necessary permissions.'));
+        }
+        
         return view('livewire.org-app.survey-questions.index', [
             'heading' => __('Survey Questions'),
             // 'subheading' => __('إدارة أسئلة الاستبيان بطريقة مرنة وسهلة'),

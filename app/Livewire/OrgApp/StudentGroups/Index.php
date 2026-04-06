@@ -56,7 +56,8 @@ class Index extends Component
 }])
             ->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('Moderator', 'like', '%' . $this->search . '%');
+                      ->orWhere('Moderator', 'like', '%' . $this->search . '%')
+                      ->orWhere('batch_no', 'like', '%' . $this->search . '%');
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);      

@@ -48,6 +48,7 @@ class Create extends Component
             'end_date' => $this->end_date?: null,
             'start_time' => $this->start_time?: null,
             'end_time' => $this->end_time?: null,
+            'batch_no' => $this->batch_no,
             
             'Moderator' => ucfirst($this->Moderator)?:null,
             'Moderator_phone' => $this->Moderator_phone,

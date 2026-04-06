@@ -24,6 +24,9 @@ trait StudentsGroupsTrait
         message: ['lt:max_students' => 'Min students must be less than max students.']
     )]
     public $min_students = 0;
+    
+    #[Validate('required|integer|min:1')]
+    public $batch_no = '';
 
     #[Validate('nullable|exists:regions,id')]
     public $region_id = '';

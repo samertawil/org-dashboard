@@ -144,6 +144,56 @@
                 </flux:button>
             </div>
         </div>
+        {{-- Survey Results Export Card --}}
+        <div
+            class="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <flux:icon name="presentation-chart-line" class="size-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <flux:heading size="lg">{{ __('Survey Results Export') }}</flux:heading>
+                </div>
+
+                <flux:text class="text-sm">
+                    {{ __('Export detailed survey results with scores and evaluations for each domain.') }}
+                </flux:text>
+
+                <div class="pt-2">
+                    <flux:field>
+                        <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                        <flux:select wire:model="surveyNoResults">
+                            <option value="">{{ __('All Surveys') }}</option>
+                            @foreach ($surveys as $survey)
+                                <option value="{{ $survey->id }}">{{ $survey->status_name }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="surveyNoResults" />
+                    </flux:field>
+                </div>
+
+
+                <div class="pt-2">
+                    <flux:field>
+                        <flux:label>{{ __('Select Education Point Name') }}</flux:label>
+                        <flux:select wire:model="groupIdResults">
+                            <option value="">{{ __('Select Point...') }}</option>
+                            @foreach ($groupNames as $groupName)
+                                <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="groupIdResults" />
+                    </flux:field>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <flux:button wire:click="exportSurveyResults" variant="primary" icon="document-arrow-down" class="w-full">
+                    {{ __('Download Results') }}
+                </flux:button>
+            </div>
+        </div>
+
         {{-- Future Export Cards can go here --}}
         <div
             class="bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-6 flex flex-col items-center justify-center text-center opacity-70">

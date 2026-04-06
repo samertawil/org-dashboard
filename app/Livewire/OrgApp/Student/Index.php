@@ -23,7 +23,7 @@ class Index extends Component
     use WithPagination;
     use WithFileUploads;
 
- 
+
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
     public $perPage = 20;
@@ -43,7 +43,7 @@ class Index extends Component
     public $readyToLoad = false;
 
     protected $queryString = [
- 
+
         'searchIdentityNumber' => ['except' => ''],
         'searchStudentName' => ['except' => ''],
         'searchStudentGroupName' => ['except' => ''],
@@ -61,7 +61,7 @@ class Index extends Component
         }
     }
 
-   
+
     public function updating($property)
     {
         if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation'])) {
@@ -87,32 +87,35 @@ class Index extends Component
 
 
     #[Computed()]
-    public function studentsNames() {
-        return StudentRepo::students();
+    public function studentsNames()
+    {
+        return StudentRepo::studentsNames();
     }
 
+
     #[Computed()]
-    public function educationPoints() {
-        return StudentGroupRepo::studentGroups();
+    public function educationPoints()
+    {
+        return StudentGroupRepo::educationPoints();
     }
+
 
     #[Computed()]
     public function students()
     {
-        if($this->readyToLoad) {
-            
-        return Student::query()
-            ->with(['studentGroup', 'status', 'city', 'region'])
-            ->withCount('feedbacks')
+        if ($this->readyToLoad) {
+            $user = auth()->user();
+            return Student::query()->visibleToTeacher($user)
+                ->with(['studentGroup', 'status', 'city', 'region'])
+                ->withCount('feedbacks')
 
-            ->when($this->searchIdentityNumber !== '', fn($q) => $q->where('identity_number', $this->searchIdentityNumber))
-            ->when($this->searchStudentName !== '', fn($q) => $q->where('id',$this->searchStudentName))
-            ->when($this->searchStudentGroupName !== '', fn($q) => $q->where('student_groups_id',$this->searchStudentGroupName))
-            ->when($this->searchEnrollment !== '', fn($q) => $q->where('enrollment_type',$this->searchEnrollment))
-            ->when($this->searchActivation !== '', fn($q) => $q->where('activation',$this->searchActivation))
-          
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
+                ->when($this->searchIdentityNumber !== '', fn($q) => $q->where('identity_number', $this->searchIdentityNumber))
+                ->when($this->searchStudentName !== '', fn($q) => $q->where('id', $this->searchStudentName))
+                ->when($this->searchStudentGroupName !== '', fn($q) => $q->where('student_groups_id', $this->searchStudentGroupName))
+                ->when($this->searchEnrollment !== '', fn($q) => $q->where('enrollment_type', $this->searchEnrollment))
+                ->when($this->searchActivation !== '', fn($q) => $q->where('activation', $this->searchActivation))
+                ->orderBy($this->sortField, $this->sortDirection)
+                ->paginate($this->perPage);
         } else {
             return new LengthAwarePaginator(
                 collect([]), // empty collection
@@ -263,12 +266,11 @@ class Index extends Component
 
     public function render()
     {
-       
         if (Gate::denies('student.index')) {
             abort(403, 'You do not have the necessary permissions.');
         }
 
-        $activations = GlobalSystemConstant::options()->where('type', 'status'); 
+        $activations = GlobalSystemConstant::options()->where('type', 'status');
 
         return view('livewire.org-app.student.index', [
             'activations' => $activations,

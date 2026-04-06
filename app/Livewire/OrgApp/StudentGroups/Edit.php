@@ -39,11 +39,11 @@ class Edit extends Component
         $this->min_students = $group->min_students;
         $this->region_id = $group->region_id;
         $this->city_id = $group->city_id;
+        $this->batch_no = $group->batch_no;
         $this->Moderator = $group->Moderator;
         $this->Moderator_phone = $group->Moderator_phone;
         $this->Moderator_email = $group->Moderator_email;
         $this->description = $group->description;
-        $this->activation = $group->activation;
         $this->activation = $group->activation;
         $this->status_id = $group->status_id;
         $this->subject_to_learn_id = $group->subject_to_learn_id ?? [];
@@ -84,7 +84,6 @@ class Edit extends Component
             'Moderator_phone' => $this->Moderator_phone,
             'Moderator_email' => $this->Moderator_email,
             'description' => $this->description,
-            'description' => $this->description,
             'activation' => $this->activation,
             'subject_to_learn_id' => $this->subject_to_learn_id,
             'neighbourhood_id' => $this->neighbourhood_id ?: null,
@@ -94,6 +93,7 @@ class Edit extends Component
             'end_date' => $this->end_date?: null,
             'start_time' => $this->start_time?: null,
             'end_time' => $this->end_time?: null,
+            'batch_no' => $this->batch_no,
         ]);
 
         if ($this->group->isDirty()) {  
