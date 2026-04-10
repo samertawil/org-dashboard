@@ -24,7 +24,7 @@
             </div>
 
             {{-- Identity Number --}}
-            <div class="flex items-end gap-2 md:col-span-12">
+            <div class="flex items-end gap-2 col-span-full">
                 <flux:field class="flex-1">
                     <flux:label badge="Required" badgeColor="text-red-600">{{ __('Identity Number') }}</flux:label>
                     <flux:input type="number" wire:model="identity_number" />
@@ -72,14 +72,14 @@
             </flux:select>
 
             {{-- Status --}}
-            <flux:select wire:model="status_id" :label="__('Student Group')">
-    <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Status') }}</option>
-    @foreach ($statuses as $status)
-        <option value="{{ $status->id }}">
-            {{ $status->status_name }}{{ $status->description ? '  - ' . $status->description : '' }}
-        </option>
-    @endforeach
-</flux:select>
+            <flux:select wire:model="status_id" :label="__('Status')">
+                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Status') }}</option>
+                @foreach ($statuses as $status)
+                    <option value="{{ $status->id }}">
+                        {{ $status->status_name }}{{ $status->description ? '  - ' . $status->description : '' }}
+                    </option>
+                @endforeach
+            </flux:select>
 
             {{-- Notes --}}
             <flux:field class="md:col-span-2 lg:col-span-3">
@@ -94,7 +94,7 @@
                 <flux:heading size="lg">{{ __('System Settings') }}</flux:heading>
             </div>
             {{-- Activation --}}
-            <flux:field class="col-start-1 md:col-start-1 lg:col-start-1">
+            <flux:field>
                 <flux:label badge="Required" badgeColor="text-red-600">{{ __('Status') }}</flux:label>
                 <flux:select wire:model="activation">
                     @foreach ($activations as $a)
@@ -122,7 +122,7 @@
                 @endif
 
                 @foreach ($this->surveyquestions as $index => $q)
-                    <flux:field class="md:col-span-1 lg:col-span-1">
+                    <flux:field class="col-span-full">
 
                         <flux:label>{{ $index + 1 }} - {{ $q->question_ar_text }}</flux:label>
                         @if ($q->answer_input_type == 2)

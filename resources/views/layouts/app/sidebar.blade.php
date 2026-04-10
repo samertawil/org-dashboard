@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     @include('partials.head')
 </head>
 
 @php
+    //  $routesToHibernate = [ 'student.setup.map'];
     // $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
     $routesToHibernate = [''];
 
@@ -77,6 +78,12 @@
                     'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Education')" icon="book-open-text"
                         class="grid">
+
+                        <flux:sidebar.item icon="map" :href="route('student.setup.map')"
+                            :current="request()->routeIs('student.setup.map')" wire:navigate
+                            class="text-indigo-600 dark:text-indigo-400 font-bold">
+                            {{ __('Setup & Tracking') }}
+                        </flux:sidebar.item>
 
                         @can('subject.index')
                             <flux:sidebar.item icon="list-bullet" :href="route('subject.index')"

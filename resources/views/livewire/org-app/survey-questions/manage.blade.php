@@ -58,8 +58,15 @@
 
     @if($surveyForSection && $batch_no)
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
-        <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4 flex justify-between items-center">
-            <flux:heading size="lg">{{ __('Listed Questions') }}</flux:heading>
+        <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4">
+            <div class="flex justify-between items-center">
+                <flux:heading size="lg">{{ __('Listed Questions') }}</flux:heading>
+            </div>
+            <flux:subheading class="mt-2">
+                {{ __('To add a new Domain, go to Status or') }} 
+                <a href="{{ route('status.create') }}" class="text-blue-500 hover:underline">{{ __('Press Here') }}</a> 
+                {{ __('and create a child for "Domains of Assessment"') }}
+            </flux:subheading>
         </div>
 
         <div class="space-y-4">
@@ -69,22 +76,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2 ">
                         
                         {{-- Row 1 --}}
-                        <div class="md:col-span-5">
+                        <div class="md:col-span-4">
                             <flux:input type="text" label="{{ __('Question Text (Arabic)') }}"  
-                            style="height:auto;color: blue; " 
-                            wire:model="questions.{{ $index }}.question_ar_text" />
+                            class="h-auto text-blue-600" 
+                            wire:model="questions.{{ $index }}.question_ar_text" style="height: auto;" />
                             @error('questions.'.$index.'.question_ar_text') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                     
 
-                        <div >
+                        <div class="md:col-span-3">
                             <flux:select label="{{ __('Select Domain') }}" wire:model="questions.{{ $index }}.domain_id">
                                 <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Choose Domain...') }}</option>
                                 @foreach ($surveyFor->where('p_id_sub',config('appConstant.domains_of_assessment')) as $section)
                                     <option value="{{ $section->id }}">{{ $section->status_name ?? __('No Domain Name') }}</option>
                                 @endforeach
                             </flux:select>
-                            <flux:subheading class="mt-3">To add new Domain go from Status or <a href="{{route('status.create')}}"><span class="text-blue-500">Press Here</span></a> and make child for "Domains of Assessment"</flux:subheading>
                         </div>
 
                         <div class="md:col-span-3">

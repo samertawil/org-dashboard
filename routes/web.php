@@ -37,6 +37,7 @@ use App\Livewire\OrgApp\Currency\Create as CurrencyCreate;
 use App\Livewire\OrgApp\Currency\Edit as CurrencyEdit;
 use App\Livewire\OrgApp\Currency\Index as CurrencyIndex;
 use App\Livewire\OrgApp\Dashboard\FullPageChat;
+use App\Livewire\OrgApp\Dashboard\Map;
 use App\Livewire\OrgApp\Dashboard\MyTasks;
 use App\Livewire\OrgApp\Department\Create as DepartmentCreate;
 use App\Livewire\OrgApp\Department\Edit as DepartmentEdit;
@@ -53,6 +54,7 @@ use App\Livewire\OrgApp\Student\Create as StudentCreat;
 use App\Livewire\OrgApp\Student\Edit as StudentEdit;
 use App\Livewire\OrgApp\Student\ImportedFiles;
 use App\Livewire\OrgApp\Student\Index as StudentIndex;
+use App\Livewire\OrgApp\Student\SetupMap as StudentSetupMap;
 use App\Livewire\OrgApp\Student\Show as StudentShow;
 use App\Livewire\OrgApp\StudentGroups\Create as StudentGroupCreate;
 use App\Livewire\OrgApp\StudentGroups\DailyStudents;
@@ -66,18 +68,20 @@ use App\Livewire\OrgApp\SurveyAnswers\Create as SurveyAnswersCreate;
 use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
 use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
 use App\Livewire\OrgApp\SurveyQuestions\ExportFiles;
-use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
-use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Index as GradingScaleIndex;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Create as GradingScaleCreate;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Edit as GradingScaleEdit;
-use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
-use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
-use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
+use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Index as GradingScaleIndex;
+use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
 use App\Livewire\OrgApp\TeacherStudentGroup\Create as TeacherStudentGroupCreate;
 use App\Livewire\OrgApp\TeacherStudentGroup\Edit as TeacherStudentGroupEdit;
 use App\Livewire\OrgApp\TeacherStudentGroup\Index as TeacherStudentGroupIndex;
+use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
+use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
+use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
 use App\Livewire\SocialLogin;
 use Illuminate\Support\Facades\Route;
+
+Route::view('test1', 'test')->name('test1');
 
 Route::get('/', function () {
     return view('welcome');
@@ -163,6 +167,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     
     
     
+    Route::get('/student-setup-map',StudentSetupMap::class)->name('student.setup.map');
     Route::get('/student',StudentIndex::class)->name('student.index');
     Route::get('/student/imported-files',ImportedFiles::class)->name('student.imported-files');
     Route::get('/student/create',StudentCreat::class)->name('student.create');
@@ -233,6 +238,6 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     // Export
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');
-
+    Route::get('map',Map::class);
     });
     

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\GlobalSystemConstant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class StudentGroup extends Model
@@ -29,6 +31,13 @@ class StudentGroup extends Model
         'end_time',
         'batch_no',
     ];
+
+    public function scopeActiveToday($query)
+    {
+        return $query->with(['region','city','students'])->where('activation', GlobalSystemConstant::ACTIVE)->where('start_date', '<=', Carbon::today())
+            ->where('end_date', '>=', Carbon::today());
+    }
+
 
     protected $casts = [
         'subject_to_learn_id' => 'array',

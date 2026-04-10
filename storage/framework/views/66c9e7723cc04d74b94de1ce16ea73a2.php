@@ -1,0 +1,1 @@
+activity-<?php echo e($activity->id); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/07ff846983e938e1ce729dcb860829f7.blade.php ENDPATH**/ ?>

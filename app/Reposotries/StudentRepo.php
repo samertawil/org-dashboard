@@ -47,6 +47,7 @@ class StudentRepo
                   AND CURDATE() <= sg.end_date)
             )
         AND sa.account_id IS NULL
+        
     ");
   }
 
