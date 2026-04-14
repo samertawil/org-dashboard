@@ -11,6 +11,7 @@ use Livewire\Component;
 
 class Manage extends Component
 {
+    public $survey_table_id = null;
     public $surveyForSection = null;
     public $batch_no = null;
     public $questions = [];
@@ -26,13 +27,24 @@ class Manage extends Component
         'questions.*.require_detail' => 'nullable|boolean',
         'questions.*.detail' => 'nullable|string',
         'questions.*.note' => 'nullable|string',
-        'questions.*.domain_id' => 'required|integer',
+        'questions.*.domain_id' => 'nullable|integer',
+        'questions.*.min_score' => 'nullable|integer',
+        'questions.*.max_score' => 'nullable|integer',
     ];
 
-    public function mount()
+    public function mount($survey_table_id = null)
     {
-        // Load data on mount if surveyForSection and batch_no are already set.
-        if ($this->surveyForSection && $this->batch_no) {
+        $this->survey_table_id = $survey_table_id;
+        
+        if ($this->survey_table_id) {
+            $survey = \App\Models\SurveyTable::find($this->survey_table_id);
+            if ($survey) {
+                $this->surveyForSection = $survey->survey_for_section;
+            }
+        }
+
+        // Load data on mount if survey_table_id is set.
+        if ($this->survey_table_id || ($this->surveyForSection && $this->batch_no)) {
             $this->loadQuestions();
         }
     }
@@ -52,26 +64,32 @@ class Manage extends Component
     {
         $this->resetValidation();
 
-        if ($this->surveyForSection && $this->batch_no) {
-            $this->questions = SurveyQuestion::where('survey_for_section', $this->surveyForSection)
-                ->where('batch_no', $this->batch_no)
-                ->orderBy('question_order')
-                ->get()
-                ->map(function (SurveyQuestion $q) {
-                    $qArray = $q->toArray();
-                    $qArray['require_detail'] = (bool) $q->require_detail;
-                    $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
-                    return $qArray;
-                })
-                ->toArray();
+        $query = SurveyQuestion::query();
+
+        if ($this->survey_table_id) {
+            $query->where('survey_table_id', $this->survey_table_id);
+        } elseif ($this->surveyForSection && $this->batch_no) {
+            $query->where('survey_for_section', $this->surveyForSection)
+                  ->where('batch_no', $this->batch_no);
         } else {
             $this->questions = [];
+            return;
         }
+
+        $this->questions = $query->orderBy('question_order')
+            ->get()
+            ->map(function (SurveyQuestion $q) {
+                $qArray = $q->toArray();
+                $qArray['require_detail'] = (bool) $q->require_detail;
+                $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
+                return $qArray;
+            })
+            ->toArray();
     }
 
     public function addQuestion()
     {
-        if (!$this->surveyForSection || !$this->batch_no) {
+        if (!$this->survey_table_id && (!$this->surveyForSection || !$this->batch_no)) {
             return;
         }
 
@@ -79,17 +97,20 @@ class Manage extends Component
 
         array_unshift($this->questions, [
             'id' => null,
+            'survey_table_id' => $this->survey_table_id,
             'survey_for_section' => $this->surveyForSection,
             'batch_no' => $this->batch_no,
             'question_order' => $maxOrder + 1,
-            'question_ar_text' => '',
-            'question_en_text' => '',
+            'question_ar_text' => null,
+            'question_en_text' =>null,
             'answer_input_type' => 1,
             'answer_options' => [],
             'require_detail' => false,
-            'detail' => '',
-            'note' => '',
-            'domain_id' => '',
+            'detail' => null,
+            'note' =>null,
+            'domain_id' => null,
+            'min_score' => 0,
+            'max_score' => 0,
         ]);
     }
 
@@ -126,7 +147,7 @@ class Manage extends Component
         
         $this->validate();
 
-        if (!$this->surveyForSection || !$this->batch_no) {
+        if (!$this->survey_table_id && (!$this->surveyForSection || !$this->batch_no)) {
             return;
         }
 
@@ -137,6 +158,7 @@ class Manage extends Component
             if (!empty($q['id'])) {
                 $question = SurveyQuestion::findOrFail($q['id']);
                 $question->fill([
+                    'survey_table_id' => $this->survey_table_id,
                     'question_order' => $q['question_order'] ?? null,
                     'question_ar_text' => $q['question_ar_text'] ?? '',
                     'question_en_text' => $q['question_en_text'] ?? null,
@@ -146,6 +168,8 @@ class Manage extends Component
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
                     'domain_id' => $q['domain_id'] ?? null,
+                    'min_score' => $q['min_score'] ?? null,
+                    'max_score' => $q['max_score'] ?? null,
                     'batch_no' => $this->batch_no,
                     'updated_by'=>Auth::user()->id,
                    
@@ -156,7 +180,9 @@ class Manage extends Component
                     $anyUpdated = true;
                 }
             } else {
+             
                 $created = SurveyQuestion::create([
+                    'survey_table_id' => $this->survey_table_id,
                     'survey_for_section' => $this->surveyForSection,
                     'question_order' => $q['question_order'] ?? null,
                     'question_ar_text' => $q['question_ar_text'] ?? '',
@@ -166,7 +192,10 @@ class Manage extends Component
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
-                    'domain_id' => $q['domain_id'] ?? null,
+                   
+                    'domain_id' => empty($q['domain_id']) ? null : $q['domain_id'],
+                    'min_score' => $q['min_score'] ?? null,
+                    'max_score' => $q['max_score'] ?? null,
                     'batch_no' => $this->batch_no,
                     'created_by'=>Auth::user()->id,
                    

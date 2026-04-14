@@ -5,7 +5,7 @@
             <flux:subheading>{{ $subheading ?? __('Enter the details for the student below.') }}</flux:subheading>
         </div>
         <div class="flex space-x-2 space-x-reverse">
-            @if($surveyForSection && $batch_no)
+            @if($survey_table_id || ($surveyForSection && $batch_no))
             <flux:button wire:click="addQuestion" variant="primary" icon="plus">
                 {{ __('Add New Question') }}
             </flux:button>
@@ -16,6 +16,21 @@
         </div>
     </div>
 
+    @if($survey_table_id)
+    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 p-4 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                <flux:icon name="information-circle" class="size-5 text-blue-600 dark:text-blue-300" />
+            </div>
+            <div>
+                <flux:heading size="sm">{{ __('Editing Questions for:') }} {{ \App\Models\SurveyTable::find($survey_table_id)->survey_name ?? '' }}</flux:heading>
+                <flux:subheading>{{ __('All questions added here will be linked to this specific survey.') }}</flux:subheading>
+            </div>
+        </div>
+        <flux:button href="{{ route('survey.index') }}" variant="ghost" size="sm" icon="arrow-left">{{ __('Back to Surveys') }}</flux:button>
+    </div>
+    @endif
+
     {{-- Success Message --}}
     {{-- @if (session()->has('message'))
         <div class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 rounded-lg p-4 text-center">
@@ -25,6 +40,7 @@
     <x-auth-session-status class="text-center" :status="session('message')" />
 
     {{-- Section Selector --}}
+    @if(!$survey_table_id)
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
         <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4">
             <flux:heading size="lg">{{ __('Survey Section') }}</flux:heading>
@@ -52,11 +68,13 @@
         </div>
        
     </div>
+    @endif
+
     <div wire:loading wire:target="surveyForSection,batch_no" >
         <flux:icon name="arrow-path" class="size-7 animate-spin text-blue-400" />
     </div>
 
-    @if($surveyForSection && $batch_no)
+    @if($survey_table_id || ($surveyForSection && $batch_no))
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
         <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4">
             <div class="flex justify-between items-center">
@@ -98,8 +116,8 @@
                                 <option value="1">{{ __('Short Text (Text)') }}</option>
                                 <option value="2">{{ __('Multiple Choice') }}</option>
                                  <option value="3">{{ __('Number') }}</option>
-                                <option value="3">{{ __('Date') }}</option>
-                                <option value="4">{{ __('Long Text (Textarea)') }}</option>
+                                 <option value="5">{{ __('Date') }}</option>
+                                 <option value="4">{{ __('Long Text (Textarea)') }}</option>
                               
                             </flux:select> 
                         </div>
@@ -122,6 +140,16 @@
                         </div>
                         <div class="md:col-span-1 flex items-center pt-6 md:pt-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             <flux:button wire:click="removeQuestion({{ $index }})" variant="danger" size="sm" icon="trash" wire:confirm="{{ __('Are you sure you want to delete?') }}" class="p-2 h-8 w-8 rounded-full!" />
+                        </div>
+
+                        {{-- Row 3 --}}
+                        <div class="md:col-span-2">
+                            <flux:input type="number" label="{{ __('Min Score') }}" wire:model="questions.{{ $index }}.min_score" />
+                             @error('questions.'.$index.'.min_score') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="md:col-span-2">
+                            <flux:input type="number" label="{{ __('Max Score') }}" wire:model="questions.{{ $index }}.max_score" />
+                             @error('questions.'.$index.'.max_score') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
     
                         {{-- Row 3 : Answer Options --}}

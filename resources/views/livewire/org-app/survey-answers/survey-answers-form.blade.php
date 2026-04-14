@@ -74,75 +74,63 @@
  
                 <div class="space-y-6">
                     @foreach ($this->questionsBySurveyForSection->unique('domain_id')->values() as $domainNames)
-             <div class="my-1" style="color:blue;font-weight:bold;">
-                <span>{{$domainNames->domainRel?$domainNames->domainRel->status_name:''}}</span>
-             </div>
-                    @foreach ($this->questionsBySurveyForSection->where('domain', $domainNames->domain) as $index => $question)
-                        <div
-                            class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-700 shadow-sm">
-                            <flux:field>
-                                <flux:label class="text-base font-semibold text-zinc-800 dark:text-zinc-200 mb-4">
-                                    {{ $index + 1 }}.
-                                    {{ $question->question_ar_text ?? '' }}
-                                    @if ($question->note)
-                                        <span
-                                            class="block text-sm font-normal text-zinc-500 mt-1">{{ $question->note }}</span>
-                                    @endif
-                                </flux:label>
-
-                                <div class="mt-2">
-                                    @if ($question->answer_input_type == 2 && is_array($question->answer_options))
-                                        {{-- Type 2: Multiple Choice / Radio --}}
-                                        <flux:radio.group wire:model="answers.{{ $question->id }}"
-                                            class="flex flex-col gap-3">
-                                            @foreach ($question->answer_options as $option)
-                                                @if (is_array($option) && isset($option['value']) && isset($option['label']))
-                                                    <flux:radio value="{{ $option['value'] }}"
-                                                        label="{{ $option['label'] }}" />
-                                                @elseif(is_string($option))
-                                                    <flux:radio value="{{ $option }}"
-                                                        label="{{ $option }}" />
-                                                @endif
-                                            @endforeach
-                                        </flux:radio.group>
-                                    @elseif($question->answer_input_type == 3 && is_array($question->answer_options))
-                                        {{-- Type 3: Checkbox Group --}}
-                                        <flux:checkbox.group wire:model="answers.{{ $question->id }}"
-                                            class="flex flex-col gap-3">
-                                            @foreach ($question->answer_options as $option)
-                                                @if (is_array($option) && isset($option['value']) && isset($option['label']))
-                                                    <flux:checkbox value="{{ $option['value'] }}"
-                                                        label="{{ $option['label'] }}" />
-                                                @elseif(is_string($option))
-                                                    <flux:checkbox value="{{ $option }}"
-                                                        label="{{ $option }}" />
-                                                @endif
-                                            @endforeach
-                                        </flux:checkbox.group>
-                                    @elseif($question->answer_input_type == 4 && is_array($question->answer_options))
-                                        {{-- Type 4: Select Dropdown --}}
-                                        <flux:select wire:model="answers.{{ $question->id }}"
-                                            :placeholder="__('Select Option')">
-                                            <option value="">{{ __('Select...') }}</option>
-                                            @foreach ($question->answer_options as $option)
-                                                @if (is_array($option) && isset($option['value']) && isset($option['label']))
-                                                    <option value="{{ $option['value'] }}">{{ $option['label'] }}
-                                                    </option>
-                                                @elseif(is_string($option))
-                                                    <option value="{{ $option }}">{{ $option }}</option>
-                                                @endif
-                                            @endforeach
-                                        </flux:select>
-                                    @else
-                                        {{-- Type 1 or fallback: Text --}}
-                                        <flux:textarea wire:model="answers.{{ $question->id }}" rows="3"
-                                            placeholder="{{ __('Write your answer here...') }}" />
-                                    @endif
-                                </div>
-                                <flux:error name="answers.{{ $question->id }}" />
-                            </flux:field>
+                        <div class="my-4 border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-r-lg">
+                            <span class="text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-sm">
+                                {{ $domainNames->domainRel ? $domainNames->domainRel->status_name : __('General') }}
+                            </span>
                         </div>
-                    @endforeach
+
+                        @foreach ($this->questionsBySurveyForSection->where('domain_id', $domainNames->domain_id) as $index => $question)
+                            <div
+                                class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-6 border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                                <flux:field>
+                                    <flux:label class="text-base font-semibold text-zinc-800 dark:text-zinc-200 mb-4">
+                                        {{ $question->question_order ?? $index + 1 }}.
+                                        {{ $question->question_ar_text ?? '' }}
+                                        @if ($question->note)
+                                            <span
+                                                class="block text-sm font-normal text-zinc-500 mt-1">{{ $question->note }}</span>
+                                        @endif
+                                    </flux:label>
+
+                                    <div class="mt-2">
+                                        @if ($question->answer_input_type == 2 && is_array($question->answer_options))
+                                            {{-- Type 2: Multiple Choice / Radio --}}
+                                            <flux:radio.group wire:model="answers.{{ $question->id }}"
+                                                class="flex flex-col gap-3">
+                                                @foreach ($question->answer_options as $option)
+                                                    @if (is_array($option) && isset($option['value']) && isset($option['label']))
+                                                        <flux:radio value="{{ $option['value'] }}"
+                                                            label="{{ $option['label'] }}" />
+                                                    @elseif(is_string($option))
+                                                        <flux:radio value="{{ $option }}"
+                                                            label="{{ $option }}" />
+                                                    @endif
+                                                @endforeach
+                                            </flux:radio.group>
+                                        @elseif($question->answer_input_type == 3)
+                                            {{-- Type 3: Number --}}
+                                            <flux:input type="number" wire:model="answers.{{ $question->id }}"
+                                                placeholder="{{ __('Enter number...') }}" 
+                                                min="{{ $question->min_score }}" 
+                                                max="{{ $question->max_score }}" />
+                                        @elseif($question->answer_input_type == 4)
+                                            {{-- Type 4: Long Text (Textarea) --}}
+                                            <flux:textarea wire:model="answers.{{ $question->id }}" rows="4"
+                                                placeholder="{{ __('Write your detailed answer here...') }}" />
+                                        @elseif($question->answer_input_type == 5)
+                                            {{-- Type 5: Date --}}
+                                            <flux:input type="date" wire:model="answers.{{ $question->id }}" />
+                                        @else
+                                            {{-- Type 1 or fallback: Short Text --}}
+                                            <flux:input wire:model="answers.{{ $question->id }}"
+                                                placeholder="{{ __('Write your answer here...') }}" />
+                                        @endif
+                                    </div>
+                                    <flux:error name="answers.{{ $question->id }}" />
+                                </flux:field>
+                            </div>
+                        @endforeach
                     @endforeach
                 </div>
             </div>

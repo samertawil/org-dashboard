@@ -1,4 +1,4 @@
-const CACHE_NAME = "afsc-dashboard-v3";
+const CACHE_NAME = "afsc-dashboard-v4";
 const STATIC_ASSETS = ["/offline.html", "/logo2.png", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -27,8 +27,22 @@ self.addEventListener("activate", (event) => {
 
 // Runtime Caching for Student Groups and JS
 self.addEventListener("fetch", (event) => {
+    // 1. Only intercept GET requests
+    if (event.request.method !== "GET") return;
+
     const url = new URL(event.request.url);
     const isLivewire = event.request.headers.has("X-Livewire");
+
+    // 2. Filter out external tracking/analytics scripts to avoid noise and ERR_FAILED issues
+    const ignoredDomains = [
+        "static.cloudflareinsights.com",
+        "google-analytics.com",
+        "googletagmanager.com",
+    ];
+
+    if (ignoredDomains.some((domain) => url.hostname.includes(domain))) {
+        return;
+    }
 
     // Cache Strategy: Network First, falling back to cache
     // Applies to:
@@ -52,20 +66,21 @@ self.addEventListener("fetch", (event) => {
 
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
-                        if (event.request.method === "GET") {
-                            cache.put(event.request, responseClone);
-                        }
+                        cache.put(event.request, responseClone);
                     });
 
                     return response;
                 })
-                .catch(() => {
-                    return caches.match(event.request).then((response) => {
-                        if (response) return response;
-                        if (event.request.mode === "navigate") {
-                            return caches.match("/offline.html");
-                        }
-                    });
+                .catch(async () => {
+                    const cacheResponse = await caches.match(event.request);
+                    if (cacheResponse) return cacheResponse;
+
+                    if (event.request.mode === "navigate") {
+                        return (await caches.match("/offline.html")) || 
+                               new Response("Offline page not available", { status: 503, headers: { "Content-Type": "text/plain" } });
+                    }
+                    
+                    return new Response("Network error occurred", { status: 408, headers: { "Content-Type": "text/plain" } });
                 }),
         );
         return;
@@ -81,7 +96,6 @@ self.addEventListener("fetch", (event) => {
                 const responseClone = response.clone();
                 caches.open(CACHE_NAME).then((cache) => {
                     if (
-                        event.request.method === "GET" &&
                         event.request.url.startsWith("http") &&
                         response.status === 200
                     ) {
@@ -91,13 +105,16 @@ self.addEventListener("fetch", (event) => {
 
                 return response;
             })
-            .catch(() => {
-                return caches.match(event.request).then((response) => {
-                    if (response) return response;
-                    if (event.request.mode === "navigate") {
-                        return caches.match("/offline.html");
-                    }
-                });
+            .catch(async () => {
+                const cacheResponse = await caches.match(event.request);
+                if (cacheResponse) return cacheResponse;
+
+                if (event.request.mode === "navigate") {
+                    return (await caches.match("/offline.html")) || 
+                           new Response("Offline page not available", { status: 503, headers: { "Content-Type": "text/plain" } });
+                }
+
+                return new Response("Network error occurred", { status: 408, headers: { "Content-Type": "text/plain" } });
             }),
     );
 });

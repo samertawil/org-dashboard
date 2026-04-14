@@ -10,6 +10,7 @@
             <span class="font-bold text-sm">{{ __('الرئيسية') }}</span>
         </a>
     </div>
+    
     {{-- Header & Progress Hero --}}
     <div class="mb-8 pt-4">
         <flux:card
@@ -17,7 +18,7 @@
             <img src="{{ asset('images/school5.jpg') }}" alt="Banner"
                 class="hidden md:block absolute inset-0 w-full h-full object-cover pointer-events-none z-0" />
             <img src="{{ asset('images/school-mobile4.png') }}" alt="Banner"
-                class="block md:hidden absolute inset-0 w-full h-full object-contain pointer-events-none z-0" />
+                class="block md:hidden absolute inset-0 w-full h-full object-fit pointer-events-none z-0" />
 
             {{-- Background Deco --}}
             <div
@@ -30,7 +31,11 @@
             </div>
         </flux:card>
     </div>
-
+    <div class="max-w-6xl mx-auto mt-12 mb-8 flex justify-center ">
+        <flux:button variant="filled" color="indigo" icon="home" href="{{ route('dashboard') }}" wire:navigate class="px-8">
+            {{ __('العودة للرئيسية') }}
+        </flux:button>
+    </div>
     <div class="text-center mb-10 flex flex-col items-center mt-2">
         {{-- <div class="inline-flex items-center justify-center p-3 bg-teal-100 rounded-full mb-4 ring-4 ring-teal-50 shadow-sm">
             <flux:icon icon="academic-cap" class="size-8 text-teal-600" />
@@ -424,7 +429,7 @@
                         class="p-0 overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-500 group border-t-4 border-indigo-500">
                         <!-- Card Header -->
                         <div
-                            class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 px-6 py-5 flex justify-between items-start">
+                            class="bg-light-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 px-6 py-5 flex justify-between items-start">
                             <div class="space-y-1">
                                 <flux:heading level="3"
                                     class="text-xl font-black text-indigo-900 dark:text-indigo-300">
@@ -526,11 +531,14 @@
                                         <div class="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
                                             style="width: {{ $group->today_attendance_percentage }}%"></div>
                                     </div>
-                                    <div class="mt-3 flex items-center justify-center gap-4">
-                                        <flux:badge color="slate" variant="outline" size="sm"
-                                            class="font-mono">{{ __('البيانات مفقودة:') }}
-                                            {{ $group->missing_attendance_count }} سجل لم يتم ادخال حضور او غياب
-                                        </flux:badge>
+                                    <div class="mt-3 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+                                        <div>
+                                          
+                                         <p>   {{ __('البيانات مفقودة:') }}</p>
+                                         <p>   {{ $group->missing_attendance_count }} سجل لم يتم ادخال حضور او غياب</p>
+                                       
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -646,7 +654,7 @@
     </div> --}}
 
     {{-- Bottom Navigation (Standard HTML) --}}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-24 flex justify-center  ">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12  flex justify-center  ">
         <a href="{{ route('dashboard') }}" 
            class="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white shadow-xl hover:shadow-teal-500/20 px-10 py-5 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 no-underline font-black uppercase tracking-wide decoration-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

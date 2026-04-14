@@ -7,6 +7,8 @@ use App\Enums\GlobalSystemConstant;
 use App\Imports\StudentsImport;
 use App\Models\FeedBack;
 use App\Models\Student;
+use App\Reposotries\CityRepo;
+use App\Reposotries\RegionRepo;
 use App\Reposotries\StatusRepo;
 use App\Reposotries\StudentGroupRepo;
 use App\Reposotries\StudentRepo;
@@ -40,6 +42,9 @@ class Index extends Component
     public $searchStudentGroupName = '';
     public $searchEnrollment = '';
     public $searchActivation = '';
+    public $searchBatchNo = '';
+    public $searchRegionId = '';
+    public $searchCityId = '';
     public $readyToLoad = false;
 
     protected $queryString = [
@@ -49,6 +54,9 @@ class Index extends Component
         'searchStudentGroupName' => ['except' => ''],
         'searchEnrollment' => ['except' => ''],
         'searchActivation' => ['except' => ''],
+        'searchBatchNo' => ['except' => ''],
+        'searchRegionId' => ['except' => ''],
+        'searchCityId' => ['except' => ''],
     ];
 
     public function sortBy($field): void
@@ -64,7 +72,7 @@ class Index extends Component
 
     public function updating($property)
     {
-        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation'])) {
+        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation','searchBatchNo', 'searchRegionId', 'searchCityId'])) {
             $this->resetPage();
             $this->readyToLoad = false;
         }
@@ -73,7 +81,7 @@ class Index extends Component
 
     public function clearFilters()
     {
-        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation']);
+        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation','searchBatchNo', 'searchRegionId', 'searchCityId']);
         $this->readyToLoad = false;
         $this->resetPage();
     }
@@ -114,6 +122,12 @@ class Index extends Component
                 ->when($this->searchStudentGroupName !== '', fn($q) => $q->where('student_groups_id', $this->searchStudentGroupName))
                 ->when($this->searchEnrollment !== '', fn($q) => $q->where('enrollment_type', $this->searchEnrollment))
                 ->when($this->searchActivation !== '', fn($q) => $q->where('activation', $this->searchActivation))
+                ->when($this->searchBatchNo !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('batch_no', $this->searchBatchNo)))
+                ->when($this->searchRegionId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('region_id', $this->searchRegionId)))
+                ->when($this->searchCityId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('city_id', $this->searchCityId)))
+
+ 
+
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate($this->perPage);
         } else {
@@ -259,6 +273,9 @@ class Index extends Component
             'searchStudentGroupName' => $this->searchStudentGroupName,
             'searchEnrollment' => $this->searchEnrollment,
             'searchActivation' => $this->searchActivation,
+            'searchBatchNo' => $this->searchBatchNo,
+            'searchRegionId' => $this->searchRegionId,
+            'searchCityId' => $this->searchCityId,
         ];
 
         return base64_encode(json_encode($filters));
@@ -271,9 +288,13 @@ class Index extends Component
         }
 
         $activations = GlobalSystemConstant::options()->where('type', 'status');
+        $regions =RegionRepo::regions();
+        $cities = CityRepo::cities()->where('region_id', $this->searchRegionId);
 
         return view('livewire.org-app.student.index', [
             'activations' => $activations,
+            'regions' => $regions,
+            'cities' => $cities,
         ]);
     }
 }

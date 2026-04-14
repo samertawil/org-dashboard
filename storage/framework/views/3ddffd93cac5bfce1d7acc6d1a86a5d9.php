@@ -1,1 +1,0 @@
-<?php echo e($value); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/06e2e782b26f199715575e6c2cf63422.blade.php ENDPATH**/ ?>

@@ -1,0 +1,113 @@
+<div class="flex flex-col gap-6">
+    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div class="flex flex-col gap-1">
+            <flux:heading level="1" size="xl">{{ __('Survey Management') }}</flux:heading>
+            <flux:subheading>{{ __('Create and manage survey definitions and their target audience.') }}</flux:subheading>
+        </div>
+        <div class="flex space-x-2 space-x-reverse">
+            <flux:button wire:click="openModal()" variant="primary" icon="plus">
+                {{ __('Create New Survey') }}
+            </flux:button>
+        </div>
+    </div>
+
+    <x-auth-session-status class="text-center" :status="session('message')" />
+    
+    @if (session()->has('error'))
+        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 p-4 rounded-lg text-center">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+                <thead class="bg-zinc-50 dark:bg-zinc-900">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Survey Name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Target Audience') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Status') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Section') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Semester') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+                    @forelse($surveys as $survey)
+                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">{{ $survey->survey_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">
+                                    {{ $survey->targetRel->status_name ?? __('N/A') }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <flux:switch wire:click="toggleStatus({{ $survey->id }})" :checked="$survey->is_active" color="green" />
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $survey->sectionRel->status_name ?? __('N/A') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $survey->semester }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end gap-2">
+                                    <flux:button wire:click="openModal({{ $survey->id }})" variant="ghost" size="sm" icon="pencil-square" />
+                                    <flux:button wire:click="delete({{ $survey->id }})" variant="ghost" size="sm" icon="trash" wire:confirm="{{ __('Are you sure?') }}" class="text-red-500 hover:text-red-600" />
+                                    <flux:button href="{{ route('survey.manage', ['survey_table_id' => $survey->id]) }}" variant="ghost" size="sm" icon="question-mark-circle" class="text-blue-500" />
+                                    <flux:button href="{{ route('survey.public', ['id' => $survey->id]) }}" target="_blank" variant="ghost" size="sm" icon="link" class="text-green-500" title="{{ __('Public Link') }}" />
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500">
+                                {{ __('No surveys found. Create your first survey now.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="p-4 border-t border-zinc-100 dark:border-zinc-700">
+            {{ $surveys->links() }}
+        </div>
+    </div>
+
+    {{-- Modal for Create/Edit --}}
+    <flux:modal wire:model="showModal" class="md:w-[500px]">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ $survey_id ? __('Edit Survey') : __('Create New Survey') }}</flux:heading>
+                <flux:subheading>{{ __('Fill in the survey details below.') }}</flux:subheading>
+            </div>
+
+            <form wire:submit="save" class="space-y-4">
+                <flux:input label="{{ __('Survey Name') }}" wire:model="survey_name" placeholder="{{ __('e.g. Parent Satisfaction 2024') }}" />
+                
+                <flux:select label="{{ __('Target Audience') }}" wire:model="survey_target">
+                    <option value="">{{ __('Select Target...') }}</option>
+                    @foreach($targets as $target)
+                        <option value="{{ $target->id }}">{{ $target->status_name }}</option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select label="{{ __('Belongs to Section') }}" wire:model="survey_for_section">
+                    <option value="">{{ __('Select Section...') }}</option>
+                    @foreach($sections as $section)
+                        <option value="{{ $section->id }}">{{ $section->status_name }}</option>
+                    @endforeach
+                </flux:select>
+
+                <flux:input type="number" label="{{ __('Semester') }}" wire:model="semester" />
+
+                <div class="flex items-center gap-3">
+                    <flux:switch wire:model="is_active" color="green" />
+                    <flux:label>{{ __('Survey Active') }}</flux:label>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4">
+                    <flux:button wire:click="$set('showModal', false)" variant="ghost">{{ __('Cancel') }}</flux:button>
+                    <flux:button type="submit" variant="primary">{{ __('Save Survey') }}</flux:button>
+                </div>
+            </form>
+        </div>
+    </flux:modal>
+</div>

@@ -26,10 +26,10 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
         \Illuminate\Support\Facades\Log::info("SurveyResultsExport for No: {$this->surveyNo}, Group: {$this->groupId}");
     
         // 1. Subquery RAW (الأساسي) مع ربط الطلاب والمجموعات والـ batch
-        $rawSub = DB::table('afsc.survey_answers as a')
-            ->join('afsc.survey_questions as q', 'a.question_id', '=', 'q.id')
-            ->join('afsc.students as st', 'st.identity_number', '=', 'a.account_id')
-            ->join('afsc.student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
+        $rawSub = DB::table('survey_answers as a')
+            ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
+            ->join('students as st', 'st.identity_number', '=', 'a.account_id')
+            ->join('student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
             ->where('q.survey_for_section', '!=', 120)
             ->whereNotNull('q.min_score')
             ->whereNotNull('q.max_score')
@@ -59,7 +59,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             );
     
         // 2. Subquery G مع الـ joins (type = 150 + الربط الجديد)
-        $gSub = DB::table('afsc.survey_grading_scale_tables as sg')
+        $gSub = DB::table('survey_grading_scale_tables as sg')
             ->rightJoinSub($rawSub, 'raw', function($join) {
                 $join->on('raw.grade', '>=', 'sg.from_percentage')
                      ->on('raw.grade', '<=', 'sg.to_percentage')
@@ -67,10 +67,10 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
                      ->whereColumn('sg.batch_no', 'raw.batch_no')
                      ->whereColumn('sg.survey_for_section', 'raw.survey_for_section');
             })
-            ->leftJoin('afsc.statuses as s', 'raw.survey_no', '=', 's.id')
-            ->leftJoin('afsc.students as st', 'st.identity_number', '=', 'raw.account_id')
-            ->leftJoin('afsc.student_groups as ep', 'ep.id', '=', 'st.student_groups_id')
-            ->leftJoin('afsc.employees as e', 'e.id', '=', 'raw.created_by')
+            ->leftJoin('statuses as s', 'raw.survey_no', '=', 's.id')
+            ->leftJoin('students as st', 'st.identity_number', '=', 'raw.account_id')
+            ->leftJoin('student_groups as ep', 'ep.id', '=', 'st.student_groups_id')
+            ->leftJoin('employees as e', 'e.id', '=', 'raw.created_by')
             ->when($this->groupId, function ($query) {
                 $query->where('st.student_groups_id', $this->groupId);
             })
@@ -88,7 +88,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             );
     
         // 3. Subquery P (Pivot)
-        $pQuery = DB::table('afsc.survey_answers') // placeholder
+        $pQuery = DB::table('survey_answers') // placeholder
             ->fromSub($gSub, 'g')
             ->groupBy('g.account_id', 'g.full_name', 'g.education_point_name', 'g.teacher_name', 'g.survey_no')
             ->select([
@@ -103,15 +103,24 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
                 DB::raw('MAX(CASE WHEN g.domain_id = 147 THEN g.evaluation END) AS تقييم_البعد_النفسي_والعقلي'),
                 DB::raw('MAX(CASE WHEN g.domain_id = 148 THEN g.total_marks END) AS درجات_البعد_الجسدي_والاجتماعي'),
                 DB::raw('MAX(CASE WHEN g.domain_id = 148 THEN g.evaluation END) AS تقييم_البعد_الجسدي_والاجتماعي'),
+                DB::raw('MAX(CASE WHEN g.domain_id = 158 THEN g.total_marks END) AS درجات_اللغة_العربية'),
+                DB::raw('MAX(CASE WHEN g.domain_id = 158 THEN g.evaluation END) AS تقييم_اللغة_العربية'),
+
+                DB::raw('MAX(CASE WHEN g.domain_id = 159 THEN g.total_marks END) AS درجات_اللغة_الانجليزية'),
+                DB::raw('MAX(CASE WHEN g.domain_id = 159 THEN g.evaluation END) AS تقييم_اللغة_الانجليزية'),
+
+                DB::raw('MAX(CASE WHEN g.domain_id = 160 THEN g.total_marks END) AS درجات_مادة_الحساب'),
+                DB::raw('MAX(CASE WHEN g.domain_id = 160 THEN g.evaluation END) AS تقييم_مادة_الحساب'),
+
                 DB::raw('SUM(g.total_marks) AS المجموع_الكلي'),
                 DB::raw('MAX(g.status_name) AS survey_name')
             ]);
     
         // 4. Subquery TOT (التقييم الكلي - مع batch_no و survey_for_section وربط الطلاب والمجموعات)
-        $tSub = DB::table('afsc.survey_answers as a')
-            ->join('afsc.survey_questions as q', 'a.question_id', '=', 'q.id')
-            ->join('afsc.students as st', 'st.identity_number', '=', 'a.account_id')
-            ->join('afsc.student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
+        $tSub = DB::table('survey_answers as a')
+            ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
+            ->join('students as st', 'st.identity_number', '=', 'a.account_id')
+            ->join('student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
             ->where('q.survey_for_section', '!=', 120)
             ->whereNotNull('q.min_score')
             ->whereNotNull('q.max_score')
@@ -128,7 +137,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             })
             ->groupBy('a.account_id', 'a.survey_no', 'sgp.batch_no', 'q.survey_for_section');
     
-        $totQuery = DB::table('afsc.survey_grading_scale_tables as sg2')
+        $totQuery = DB::table('survey_grading_scale_tables as sg2')
             ->rightJoinSub($tSub, 't', function($join) {
                 $join->on('t.total_grade', '>=', 'sg2.from_percentage')
                      ->on('t.total_grade', '<=', 'sg2.to_percentage')
@@ -161,6 +170,15 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
                 'p.تقييم_البعد_النفسي_والعقلي',
                 'p.درجات_البعد_الجسدي_والاجتماعي',
                 'p.تقييم_البعد_الجسدي_والاجتماعي',
+                'p.درجات_اللغة_العربية',
+                'p.تقييم_اللغة_العربية',
+
+                'p.درجات_اللغة_الانجليزية',
+                'p.تقييم_اللغة_الانجليزية',
+
+                'p.درجات_مادة_الحساب',
+                'p.تقييم_مادة_الحساب',
+
                 'p.المجموع_الكلي',
                 'tot.evaluation AS التقييم_الكلي',
                 'p.survey_name AS اسم_الاستبيان'
@@ -178,8 +196,8 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             'account_id', 'full_name', 'education_point_name', 'teacher_name', 'survey_no',
             'درجات البعد العاطفي الانفعالي', 'تقييم البعد العاطفي الانفعالي',
             'درجات البعد النفسي والعقلي', 'تقييم البعد النفسي والعقلي',
-            'درجات البعد الجسدي والاجتماعي', 'تقييم البعد الجسدي والاجتماعي',
-            'المجموع الكلي', 'التقييم الكلي', 'اسم الاستبيان'
+            'درجات البعد الجسدي والاجتماعي', 'تقييم البعد الجسدي والاجتماعي','درجات اللغة العربية','تقييم اللغة العربية','درجات اللغة الانجليزية','تقييم اللغة الانجليزية',  'درجات مادة الحساب','تقييم مادة الحساب',
+            'المجموع الكلي', 'التقييم الكلي',   'اسم الاستبيان'
         ];
     }
 
@@ -198,6 +216,15 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             $row->تقييم_البعد_النفسي_والعقلي ?? '',
             $row->درجات_البعد_الجسدي_والاجتماعي ?? 0,
             $row->تقييم_البعد_الجسدي_والاجتماعي ?? '',
+            $row->درجات_اللغة_العربية ?? 0,
+            $row->تقييم_اللغة_العربية ?? '',
+
+            $row->درجات_اللغة_الانجليزية ?? 0,
+            $row->تقييم_اللغة_الانجليزية ?? '',
+
+            $row->درجات_مادة_الحساب ?? 0,
+            $row->تقييم_مادة_الحساب ?? '',
+
             $row->المجموع_الكلي,
             $row->التقييم_الكلي,
             $row->اسم_الاستبيان

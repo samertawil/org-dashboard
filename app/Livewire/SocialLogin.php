@@ -19,12 +19,13 @@ class SocialLogin extends Component
 
     public function socialRedirect($provider)
     {
-
+      
         return Socialite::driver($provider)->redirect();
     }
 
     public function socialCallback($provider)
     {
+        
         try {
             $socialUser = Socialite::driver($provider)->user();
 
@@ -47,6 +48,9 @@ class SocialLogin extends Component
                         'google_id' => $socialUser->id, // Ensure migration exists
                         'avatar' => $socialUser->avatar,
                         'activation' => GlobalSystemConstant::INACTIVE->value, // Set default activation status
+                    ]);
+                    throw ValidationException::withMessages([
+                        Fortify::username() => ['Your account has been suspended. Please contact the administrator.'],
                     ]);
                 } else {
                     // Update Google info for existing users

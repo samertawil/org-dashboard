@@ -6,14 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class SurveyAnswer extends Model
 {
-   protected $fillable= [
-    'account_id',
-    'survey_no',
-    'question_id',
-    'answer_ar_text',
-    'answer_en_text',
-    'created_by',
-   ];
+    protected $fillable = [
+        'survey_table_id',
+        'account_id',
+        'survey_no',
+        'question_id',
+        'answer_ar_text',
+        'answer_en_text',
+        'created_by',
+    ];
+
+    public function surveyTable()
+    {
+        return $this->belongsTo(SurveyTable::class, 'survey_table_id');
+    }
 
     public function question()
     {

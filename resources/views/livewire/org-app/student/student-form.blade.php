@@ -109,7 +109,7 @@
                     <flux:heading size="md">{{ __('Survey Questions') }}</flux:heading>
                 </div>
 
-                @if(!empty($relations_data))
+                @if($this->identity_number && !empty($relations_data))
                     <div class="md:col-span-2 lg:col-span-3 mb-4 mt-2 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
                         <flux:radio.group wire:model.live="selected_relation" label="{{ __('Select Relation for Answers') }}">
                             <div class="flex flex-col gap-2 mt-2">

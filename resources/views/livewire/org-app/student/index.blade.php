@@ -55,7 +55,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 relative">
 
             <flux:input wire:model="searchIdentityNumber" :placeholder="__('Search by identity number...')" class="p-1"/>
-               
+            <flux:input wire:model="searchBatchNo" :placeholder="__('Search by batch no...')" class="p-1"/>
 
             {{-- Searchable Student Name Field --}}
             <div class="px-4 pb-3" x-data="{
@@ -282,7 +282,7 @@
         </flux:select>
 
         {{-- activation Type --}}
-        <flux:field class="col-start-1 md:col-start-1 lg:col-start-1">
+        <flux:field class="">
             <flux:select wire:model="searchActivation">
                 <option value="">All Activaion Status</option>
                 @foreach ($activations as $a)
@@ -290,6 +290,28 @@
                 @endforeach
             </flux:select>
         </flux:field>
+
+        {{-- Region Type --}}
+        <flux:field>
+            <flux:select wire:model.live="searchRegionId">
+                <option value="">{{ __('All Regions') }}</option>
+                @foreach ($regions as $region)
+                    <option value="{{ $region->id }}">{{ $region->region_name }}</option>
+                @endforeach
+            </flux:select>
+        </flux:field>
+
+        {{-- City Type --}}
+        <flux:field>
+            <flux:select wire:model="searchCityId">
+                <option value="">{{ __('All Cities') }}</option>
+                @foreach ($cities as $city)
+                    <option value="{{ $city->id }}">{{ $city->city_name }}</option>
+                @endforeach
+            </flux:select>
+        </flux:field>
+
+      
         </div>
 
        
@@ -301,7 +323,7 @@
             <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}" variant="ghost" size="sm" icon="document-arrow-down">
                 {{ __('Export Excel') }}
             </flux:button>
-            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $readyToLoad)
+            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $searchBatchNo || $searchActivation || $searchRegionId || $searchCityId || $readyToLoad)
                 <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">
                     {{ __('Clear Filters') }}
                 </flux:button>
@@ -345,7 +367,11 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Group') }}
+                            {{ __('Education Point') }}
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Batch No') }}
                         </th>
                         {{-- <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -375,7 +401,11 @@
                                 {{ $student->identity_number }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $student->studentGroup?->name ?? '-' }}
+                                {{ $student->studentGroup?->name ?? '-' }}  <br>
+                                <span class = "text-blue-600"> {{ $student->studentGroup?->region->region_name ?? '-' }}/ {{ $student->studentGroup?->city->city_name ?? '-' }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                {{ $student->studentGroup?->batch_no ?? '-' }}
                             </td>
                             {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 @php
@@ -393,7 +423,8 @@
                                 @else
                                     -
                                 @endif
-                                - {{ $student->status->status_name ?? '' }}
+                                <span class="text-blue-600">{{ $student->status->status_name ?? '' }}</span>
+                              
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php

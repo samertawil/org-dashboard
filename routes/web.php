@@ -89,6 +89,9 @@ Route::get('/', function () {
 
 Route::view('/features', 'features')->name('features');
 
+// Public Survey Route
+Route::get('/survey/{id}', \App\Livewire\OrgApp\Survey\PublicResponse::class)->name('survey.public');
+
 Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -225,7 +228,8 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('ai-copilot', FullPageChat::class)->name('ai_copilot');
     
     //Survey
-    Route::get('/survey-manage',SurveyQuestionsManage::class)->name('survey.manage');
+    Route::get('/surveys', \App\Livewire\OrgApp\Survey\Index::class)->name('survey.index');
+    Route::get('/survey-manage/{survey_table_id?}',SurveyQuestionsManage::class)->name('survey.manage');
     Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
     Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');

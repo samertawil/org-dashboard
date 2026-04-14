@@ -27,8 +27,8 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
         \Illuminate\Support\Facades\Log::info("SurveyResultsExport for No: {$this->surveyNo}, Group: {$this->groupId}");
         
         // 1. Subquery RAW (الأساسي)
-        $rawSub = DB::table('afsc.survey_answers as a')
-            ->join('afsc.survey_questions as q', 'a.question_id', '=', 'q.id')
+        $rawSub = DB::table('survey_answers as a')
+            ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
             ->where('q.survey_for_section', '!=', 120)
             ->whereNotNull('q.min_score')
             ->whereNotNull('q.max_score')
@@ -47,16 +47,16 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             ->groupBy('a.account_id', 'q.domain_id', 'a.survey_no');
 
         // 2. Subquery G مع الـ joins
-        $gSub = DB::table('afsc.survey_grading_scale_tables as sg')
+        $gSub = DB::table('survey_grading_scale_tables as sg')
             ->rightJoinSub($rawSub, 'raw', function($join) {
                 $join->on('raw.grade', '>=', 'sg.from_percentage')
                      ->on('raw.grade', '<=', 'sg.to_percentage')
                      ->where('sg.type', '=', 150);
             })
-            ->leftJoin('afsc.statuses as s', 'raw.survey_no', '=', 's.id')
-            ->leftJoin('afsc.students as st', 'st.identity_number', '=', 'raw.account_id')
-            ->leftJoin('afsc.student_groups as ep', 'ep.id', '=', 'st.student_groups_id')
-            ->leftJoin('afsc.employees as e', 'e.id', '=', 'raw.created_by')
+            ->leftJoin('statuses as s', 'raw.survey_no', '=', 's.id')
+            ->leftJoin('students as st', 'st.identity_number', '=', 'raw.account_id')
+            ->leftJoin('student_groups as ep', 'ep.id', '=', 'st.student_groups_id')
+            ->leftJoin('employees as e', 'e.id', '=', 'raw.created_by')
             ->when($this->groupId, function ($query) {
                 $query->where('st.student_groups_id', $this->groupId);
             })
@@ -74,7 +74,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             );
 
         // 3. Subquery P (الـ Pivot الرئيسي)
-        $pQuery = DB::table('afsc.survey_answers') // base doesn't matter, will be replaced by fromSub
+        $pQuery = DB::table('survey_answers') // base doesn't matter, will be replaced by fromSub
             ->fromSub($gSub, 'g')
             ->groupBy('g.account_id', 'g.full_name', 'g.education_point_name', 'g.teacher_name', 'g.survey_no')
             ->select([
@@ -96,8 +96,8 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             ]);
 
         // 4. Subquery TOT (التقييم الكلي - مُصحح)
-        $tSub = DB::table('afsc.survey_answers as a')
-            ->join('afsc.survey_questions as q', 'a.question_id', '=', 'q.id')
+        $tSub = DB::table('survey_answers as a')
+            ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
             ->where('q.survey_for_section', '!=', 120)
             ->whereNotNull('q.min_score')
             ->whereNotNull('q.max_score')
@@ -111,7 +111,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             })
             ->groupBy('a.account_id', 'a.survey_no');
 
-        $totQuery = DB::table('afsc.survey_grading_scale_tables as sg2')
+        $totQuery = DB::table('survey_grading_scale_tables as sg2')
             ->rightJoinSub($tSub, 't', function($join) {
                 $join->on('t.total_grade', '>=', 'sg2.from_percentage')
                      ->on('t.total_grade', '<=', 'sg2.to_percentage')

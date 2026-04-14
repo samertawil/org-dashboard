@@ -9,13 +9,12 @@ use App\Models\StudentDailyAttendance;
 use App\Models\StudentGroup;
 use App\Models\StudentGroupSchedule;
 use App\Models\SurveyQuestion;
-use App\Models\TeacherStudentGroup;
 use App\Reposotries\StudentRepo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Pest\Mutate\Mutators\Math\RoundToFloor;
+
 
 class SetupMap extends Component
 {
@@ -243,7 +242,7 @@ class SetupMap extends Component
 
 
 
-        return view('setup-map', [
+        return view('livewire.org-app.student.setup-map', [
             'activeGroupsData' => $activeGroupsData,
             'hasGroups' => $hasGroups,
             'activeGroupsNames' => $activeGroupsNames,

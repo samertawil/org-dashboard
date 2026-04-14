@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SurveyQuestion extends Model
 {
     protected $fillable = [
+        'survey_table_id',
         'survey_for_section',
         'question_order',
         'question_ar_text',
@@ -20,11 +21,18 @@ class SurveyQuestion extends Model
         'created_by',
         'updated_by',
         'batch_no',
+        'min_score',
+        'max_score',
     ];
 
     protected $casts = [
         'answer_options' => 'array',
     ];
+
+    public function surveyTable()
+    {
+        return $this->belongsTo(SurveyTable::class, 'survey_table_id');
+    }
 
     public function surveyForSection()
     {
