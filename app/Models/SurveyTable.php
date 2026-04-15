@@ -19,6 +19,8 @@ class SurveyTable extends Model
         'semester',
         'survey_target',
         'is_active',
+        'conditions',
+        'notes',
     ];
 
     public function targetRel()

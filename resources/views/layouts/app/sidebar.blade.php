@@ -316,15 +316,20 @@
 
                 <!-- Survey Group -->
                 @canany(['survey.index', 'survey.create', 'survey.manage', 'survey.export', 'survey-answers.create',
-                    'survey-answers.create'])
+                    'survey-answers.create','survey.grading.scale.index'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Surveys')" icon="briefcase"
                         class="grid">
 
                         @can('survey.manage')
                             <flux:sidebar.item icon="list-bullet" :href="route('survey.manage')"
                                 :current="request()->routeIs('survey.manage')" wire:navigate>
-                                {{ __('Manage Surveys') }}
+                                {{ __('Student Surveys') }}
                             </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
+                            :current="request()->routeIs('survey.index')" wire:navigate>
+                            {{ __('Manage Outer Surveys') }}
+                        </flux:sidebar.item>
 
                             <flux:sidebar.item icon="chart-bar" :href="route('survey.grading.scale.index')"
                                 :current="request()->routeIs('survey.grading.scale.index')" wire:navigate>

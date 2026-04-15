@@ -115,10 +115,10 @@
                            <flux:select label="{{ __('Answer Type') }}" wire:model.live="questions.{{ $index }}.answer_input_type">
                                 <option value="1">{{ __('Short Text (Text)') }}</option>
                                 <option value="2">{{ __('Multiple Choice') }}</option>
-                                 <option value="3">{{ __('Number') }}</option>
-                                 <option value="5">{{ __('Date') }}</option>
-                                 <option value="4">{{ __('Long Text (Textarea)') }}</option>
-                              
+                                <option value="3">{{ __('Number') }}</option>
+                                <option value="5">{{ __('Date') }}</option>
+                                <option value="4">{{ __('Long Text (Textarea)') }}</option>
+                                <option value="6">{{ __('File / Image Upload') }}</option>
                             </flux:select> 
                         </div>
                       <flux:field class="md:col-span-2">

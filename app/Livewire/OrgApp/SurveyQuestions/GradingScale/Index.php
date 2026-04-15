@@ -86,7 +86,7 @@ class Index extends Component
     #[Title('Survey Grading Scales')]
     public function render()
     {
-        if (Gate::denies('survey.manage')) 
+        if (Gate::denies('survey.grading.scale.index')) 
         { 
             abort(403, __('You do not have the necessary permissions.'));
         }

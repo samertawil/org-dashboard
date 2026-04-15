@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('survey_answers', function (Blueprint $table) {
-            $table->integer('survey_table_id')->nullable()->after('id')->index();
+            // $table->integer('survey_table_id')->nullable()->after('id')->index();
+            $table->foreignId('survey_table_id')->nullable()->constrained('survey_table')->after('id')->index();
         });
     }
 

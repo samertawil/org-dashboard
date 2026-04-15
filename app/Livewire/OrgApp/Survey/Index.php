@@ -18,6 +18,8 @@ class Index extends Component
     public $survey_for_section;
     public $semester = 1;
     public $is_active = true;
+    public $conditions = '';
+    public $notes = '';
 
     protected $rules = [
         'survey_name' => 'required|string|max:255',
@@ -38,12 +40,16 @@ class Index extends Component
             $this->survey_target = $survey->survey_target;
             $this->semester = $survey->semester;
             $this->is_active = (bool) $survey->is_active;
+            $this->conditions = $survey->conditions;
+            $this->notes = $survey->notes;
         } else {
             $this->survey_name = '';
             $this->survey_for_section = '';
             $this->survey_target = '';
             $this->semester = 1;
             $this->is_active = true;
+            $this->conditions = '';
+            $this->notes = '';
         }
 
         $this->showModal = true;
@@ -66,6 +72,8 @@ class Index extends Component
             'survey_target' => 'nullable|integer',
             'semester' => 'nullable|integer',
             'is_active' => 'boolean',
+            'conditions' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         SurveyTable::updateOrCreate(
@@ -76,6 +84,8 @@ class Index extends Component
                 'survey_target' => $this->survey_target,
                 'semester' => $this->semester,
                 'is_active' => $this->is_active,
+                'conditions' => $this->conditions,
+                'notes' => $this->notes,
             ]
         );
 

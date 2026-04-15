@@ -76,7 +76,11 @@
                                 @endif
                             </div>
                         </th>
-
+                        <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        {{ __('Region') }} /  {{ __('City') }}
+                    </th>
+                    
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Moderator') }}
@@ -89,14 +93,7 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Count/Max') }}
                         </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Region') }}
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('City') }}
-                        </th>
+                       
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Status') }}
@@ -117,6 +114,10 @@
                                 {{ $group->batch_no }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                {{ $group->region->region_name ?? '-' }}/  {{ $group->city->city_name ?? '-' }}
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->Moderator ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
@@ -136,12 +137,7 @@
                              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->students_count }} / {{ $group->max_students }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->region->region_name ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->city->city_name ?? '-' }}
-                            </td>
+                         
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php
                                     $statusEnum = \App\Enums\GlobalSystemConstant::tryFrom($group->activation);

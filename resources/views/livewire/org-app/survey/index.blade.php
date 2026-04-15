@@ -33,7 +33,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @forelse($surveys as $survey)
+                    @forelse($surveys->whereNotIn('survey_for_section',[137,138,139,140,141,142,143,144]) as $survey)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">{{ $survey->survey_name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -48,9 +48,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $survey->semester }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
+                                    {{-- @if (! in_array ($survey->survey_for_section,[137,138,139,140,141,142,143,144] )) --}}
+
                                     <flux:button wire:click="openModal({{ $survey->id }})" variant="ghost" size="sm" icon="pencil-square" />
+                                      
                                     <flux:button wire:click="delete({{ $survey->id }})" variant="ghost" size="sm" icon="trash" wire:confirm="{{ __('Are you sure?') }}" class="text-red-500 hover:text-red-600" />
+                                  
                                     <flux:button href="{{ route('survey.manage', ['survey_table_id' => $survey->id]) }}" variant="ghost" size="sm" icon="question-mark-circle" class="text-blue-500" />
+                                    {{-- @endif --}}
+                                 
                                     <flux:button href="{{ route('survey.public', ['id' => $survey->id]) }}" target="_blank" variant="ghost" size="sm" icon="link" class="text-green-500" title="{{ __('Public Link') }}" />
                                 </div>
                             </td>
@@ -72,7 +78,7 @@
     </div>
 
     {{-- Modal for Create/Edit --}}
-    <flux:modal wire:model="showModal" class="md:w-[500px]">
+    <flux:modal wire:model="showModal" class="md:w-[800px]">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">{{ $survey_id ? __('Edit Survey') : __('Create New Survey') }}</flux:heading>
@@ -98,6 +104,76 @@
 
                 <flux:input type="number" label="{{ __('Semester') }}" wire:model="semester" />
 
+                <div 
+                    x-data="{ value: @entangle('conditions') }"
+                    x-init="
+                        let interval = setInterval(() => {
+                            if (window.jQuery && window.jQuery().summernote) {
+                                clearInterval(interval);
+                                $(function() {
+                                    $($refs.summernote).summernote({
+                                        height: 120,
+                                        toolbar: [
+                                            ['style', ['bold', 'italic', 'underline', 'clear']],
+                                            ['color', ['color']],
+                                            ['para', ['ul', 'ol', 'paragraph']],
+                                        ],
+                                        callbacks: {
+                                            onChange: function(contents) {
+                                                value = contents;
+                                            }
+                                        }
+                                    });
+                                    $watch('value', function(newValue) {
+                                        if (newValue !== $($refs.summernote).summernote('code')) {
+                                            $($refs.summernote).summernote('code', newValue || '');
+                                        }
+                                    });
+                                });
+                            }
+                        }, 100);
+                    "
+                    wire:ignore
+                >
+                    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{{ __('Survey Conditions & Instructions') }}</label>
+                    <textarea x-ref="summernote"></textarea>
+                </div>
+
+                <div 
+                    x-data="{ value: @entangle('notes') }"
+                    x-init="
+                        let intervalNotes = setInterval(() => {
+                            if (window.jQuery && window.jQuery().summernote) {
+                                clearInterval(intervalNotes);
+                                $(function() {
+                                    $($refs.summernoteNotes).summernote({
+                                        height: 120,
+                                        toolbar: [
+                                            ['style', ['bold', 'italic', 'underline', 'clear']],
+                                            ['color', ['color']],
+                                            ['para', ['ul', 'ol', 'paragraph']],
+                                        ],
+                                        callbacks: {
+                                            onChange: function(contents) {
+                                                value = contents;
+                                            }
+                                        }
+                                    });
+                                    $watch('value', function(newValue) {
+                                        if (newValue !== $($refs.summernoteNotes).summernote('code')) {
+                                            $($refs.summernoteNotes).summernote('code', newValue || '');
+                                        }
+                                    });
+                                });
+                            }
+                        }, 100);
+                    "
+                    wire:ignore
+                >
+                    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{{ __('Important Notes') }}</label>
+                    <textarea x-ref="summernoteNotes"></textarea>
+                </div>
+
                 <div class="flex items-center gap-3">
                     <flux:switch wire:model="is_active" color="green" />
                     <flux:label>{{ __('Survey Active') }}</flux:label>
@@ -110,4 +186,19 @@
             </form>
         </div>
     </flux:modal>
+
+    @push('styles')
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+        <style>
+            .note-editor .note-editing-area .note-editable {
+                background: white;
+                color: black;
+            }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    @endpush
 </div>
