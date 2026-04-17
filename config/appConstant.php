@@ -22,4 +22,6 @@ return [
     'student_groups'=>124,
     'domains_of_assessment'=>145,
     'survey_target' => 161,
+    'public_links' => 164,
+    'parent_links' => 163,
 ];

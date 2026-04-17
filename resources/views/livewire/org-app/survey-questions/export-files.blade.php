@@ -43,6 +43,43 @@
             </div>
         </div>
 
+         {{-- outer Survey Answers Export Card --}}
+         <div
+         class="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col justify-between">
+         <div class="space-y-4">
+             <div class="flex items-center gap-3">
+                 <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                     <flux:icon name="document-text" class="size-6 text-blue-600 dark:text-blue-400" />
+                 </div>
+                 <flux:heading size="lg">{{ __('Public Link Submissions') }}</flux:heading>
+             </div>
+
+             <flux:text class="text-sm">
+                 {{ __('Export all Data Collected via Shared Links.') }}
+             </flux:text>
+
+             <div class="pt-2">
+                 <flux:field>
+                     <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                     <flux:select wire:model="publicSurveyNo">
+                         <option value="">{{ __('All Surveys') }}</option>
+                         @foreach ($publicSurveys as $survey)
+                             <option value="{{ $survey->id }}">{{ $survey->survey_name }}</option>
+                         @endforeach
+                     </flux:select>
+                     <flux:error name="publicSurveyNo" />
+                 </flux:field>
+             </div>
+         </div>
+
+         <div class="mt-6">
+             <flux:button wire:click="outerExportSurveyAnswers" variant="primary" icon="document-arrow-down"
+                 class="w-full">
+                 {{ __('Download Excel') }}
+             </flux:button>
+         </div>
+     </div>
+
         {{-- Survey Answers Pivot Export Card --}}
         <div
             class="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm p-6 flex flex-col justify-between">

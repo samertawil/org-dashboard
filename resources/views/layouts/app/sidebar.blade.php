@@ -75,7 +75,7 @@
 
 
                 @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
-                    'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index'])
+                    'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index','teacher-student-groups.create'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Education')" icon="book-open-text"
                         class="grid">
 
@@ -316,7 +316,7 @@
 
                 <!-- Survey Group -->
                 @canany(['survey.index', 'survey.create', 'survey.manage', 'survey.export', 'survey-answers.create',
-                    'survey-answers.create','survey.grading.scale.index'])
+                    'survey-answers.create','survey.grading.scale.index','outer.servey.list'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Surveys')" icon="briefcase"
                         class="grid">
 
@@ -325,17 +325,18 @@
                                 :current="request()->routeIs('survey.manage')" wire:navigate>
                                 {{ __('Student Surveys') }}
                             </flux:sidebar.item>
-
+                            @endcan
+                            @can('outer.servey.list')
                             <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
                             :current="request()->routeIs('survey.index')" wire:navigate>
                             {{ __('Manage Outer Surveys') }}
                         </flux:sidebar.item>
-
+                        @endcan
                             <flux:sidebar.item icon="chart-bar" :href="route('survey.grading.scale.index')"
                                 :current="request()->routeIs('survey.grading.scale.index')" wire:navigate>
                                 {{ __('Grading Scales') }}
                             </flux:sidebar.item>
-                        @endcan
+                       
                         @can('survey-answers.create')
                             <flux:sidebar.item icon="plus" :href="route('survey-answers.create')"
                                 :current="request()->routeIs('survey-answers.create')" wire:navigate>

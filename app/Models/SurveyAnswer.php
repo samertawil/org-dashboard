@@ -14,6 +14,7 @@ class SurveyAnswer extends Model
         'answer_ar_text',
         'answer_en_text',
         'created_by',
+        'updated_by',
     ];
 
     public function surveyTable()

@@ -8,11 +8,12 @@ use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Rules\GlobalValidation;
 use DateTime;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 
 class Create extends Component
 {
@@ -58,7 +59,7 @@ class Create extends Component
                 'living_parent_id' => $this->living_parent_id ?: null,
                 'notes' => $this->notes,
                 'added_type' => 1, // Manual
-                'created_by' => auth()->id(),
+                'created_by' => Auth::user()->employee->id,
             ]);
 
 
@@ -70,6 +71,8 @@ class Create extends Component
                             'question_id' => $questionId,
                             'answer_ar_text' => $answerText,
                             'survey_no' => 120,
+                            'created_by' => Auth::user()->employee->id,
+                            
                         ]);
                     }
                 }

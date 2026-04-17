@@ -4,6 +4,7 @@ namespace App\Livewire\OrgApp\Survey;
 
 use App\Models\SurveyTable;
 use App\Reposotries\StatusRepo;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -114,6 +115,12 @@ class Index extends Component
 
     public function render()
     {
+        
+        if (Gate::denies('outer.servey.list')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
+
+        
         $surveys = SurveyTable::with(['targetRel', 'sectionRel'])->orderBy('survey_for_section','desc')
         ->paginate(10);
         $targets = StatusRepo::statuses()->where('p_id_sub', config('appConstant.survey_target', 0)); // Assuming this constant exists

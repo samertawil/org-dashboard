@@ -129,11 +129,14 @@
                        
                         
                         {{-- Row 2 --}}
-                        <div class="md:col-span-3 flex items-center pt-2 md:pt-6">
-                            <flux:checkbox label="{{ __('Requires Additional Details') }}" wire:model="questions.{{ $index }}.require_detail" />
+                        <div class="md:col-span-2 flex items-center pt-2 md:pt-6">
+                            <flux:checkbox label="{{ __('Required Answer') }}" wire:model="questions.{{ $index }}.required_answer" />
                         </div>
-                        <div class="md:col-span-4">
-                            <flux:input type="text" label="{{ __('Detail Description (Visible to User)') }}" wire:model="questions.{{ $index }}.detail" placeholder="{{ __('Example: Please state the reason...') }}" />
+                        <div class="md:col-span-2 flex items-center pt-2 md:pt-6">
+                            <flux:checkbox label="{{ __('Has Details') }}" wire:model="questions.{{ $index }}.require_detail" />
+                        </div>
+                        <div class="md:col-span-3">
+                            <flux:input type="text" label="{{ __('Detail Description') }}" wire:model="questions.{{ $index }}.detail" placeholder="{{ __('Example...') }}" />
                         </div>
                         <div class="md:col-span-4">
                             <flux:input type="text" label="{{ __('Administrative Note') }}" wire:model="questions.{{ $index }}.note" placeholder="{{ __('Internal System Notes...') }}"/>

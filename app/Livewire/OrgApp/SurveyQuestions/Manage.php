@@ -25,6 +25,7 @@ class Manage extends Component
         'questions.*.answer_options.*.label' => 'nullable|string',
         'questions.*.answer_options.*.value' => 'nullable|string',
         'questions.*.require_detail' => 'nullable|boolean',
+        'questions.*.required_answer' => 'nullable|boolean',
         'questions.*.detail' => 'nullable|string',
         'questions.*.note' => 'nullable|string',
         'questions.*.domain_id' => 'nullable|integer',
@@ -81,6 +82,7 @@ class Manage extends Component
             ->map(function (SurveyQuestion $q) {
                 $qArray = $q->toArray();
                 $qArray['require_detail'] = (bool) $q->require_detail;
+                $qArray['required_answer'] = (bool) (!isset($q->required_answer) || $q->required_answer);
                 $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
                 return $qArray;
             })
@@ -106,6 +108,7 @@ class Manage extends Component
             'answer_input_type' => 1,
             'answer_options' => [],
             'require_detail' => false,
+            'required_answer' => true,
             'detail' => null,
             'note' =>null,
             'domain_id' => null,
@@ -165,6 +168,7 @@ class Manage extends Component
                     'answer_input_type' => $q['answer_input_type'] ?? 1,
                     'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
+                    'required_answer' => isset($q['required_answer']) ? (!empty($q['required_answer']) ? 1 : 0) : 1,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
                     'domain_id' => $q['domain_id'] ?? null,
@@ -190,6 +194,7 @@ class Manage extends Component
                     'answer_input_type' => $q['answer_input_type'] ?? 1,
                     'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
                     'require_detail' => !empty($q['require_detail']) ? 1 : 0,
+                    'required_answer' => isset($q['required_answer']) ? (!empty($q['required_answer']) ? 1 : 0) : 1,
                     'detail' => $q['detail'] ?? null,
                     'note' => $q['note'] ?? null,
                    

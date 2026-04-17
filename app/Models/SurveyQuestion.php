@@ -16,6 +16,7 @@ class SurveyQuestion extends Model
         'answer_input_type',
         'answer_options',
         'require_detail',
+        'required_answer',
         'detail',
         'note',
         'created_by',

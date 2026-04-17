@@ -22,7 +22,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         return SurveyAnswer::query()
-            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator'])
+            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator','surveyTable'])
             ->when($this->surveyNo, fn($q) => $q->where('survey_no', $this->surveyNo))
             ->orderBy('survey_no')
             ->orderBy('account_id')
@@ -32,6 +32,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
+            'اسم الرابط الخارجي',
             'Survey Name',
             'Student ID',
             'Student Full Name',
@@ -49,6 +50,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping
     public function map($answer): array
     {
         return [
+            $answer->surveyTable?->survey_name,
             $answer->surveyfor?->status_name ?? 'N/A',
             $answer->account_id,
             $answer->student?->full_name ?? 'N/A',

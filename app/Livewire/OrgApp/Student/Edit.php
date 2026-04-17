@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Rules\GlobalValidation;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -56,8 +57,9 @@ class Edit extends Component
 
     public function save()
     {
+        
         $this->validate();
-
+ 
         $this->student->fill([
             'identity_number' => $this->identity_number,
             'full_name' => $this->full_name,
@@ -70,7 +72,7 @@ class Edit extends Component
             'parent_phone' => $this->parent_phone,
             'living_parent_id' => $this->living_parent_id ?: null,
             'notes' => $this->notes,
-            'updated_by' => auth()->id(),
+            'updated_by' => Auth::user()->employee->id,
         ]);
 
         $isDirty = $this->student->isDirty();
@@ -81,11 +83,19 @@ class Edit extends Component
         if (is_array($this->answer)) {
             foreach ($this->answer as $questionId => $answerText) {
                 if (!empty($answerText)) {
+                  
                     $answerModel = $this->student->surveyStudentanswers()->updateOrCreate(
+                     
                         ['question_id' => $questionId, 'survey_no' => 120],
-                        ['answer_ar_text' => $answerText]
+                        [
+                            'answer_ar_text' => $answerText,
+                            'created_by' => Auth::user()->employee->id,
+                            'updated_by' => Auth::user()->employee->id
+                        ]
                     );
+                   
                     if ($answerModel->wasRecentlyCreated || $answerModel->wasChanged()) {
+                     
                         $isDirty = true;
                     }
                 }
