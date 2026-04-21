@@ -4,7 +4,8 @@ return [
     'allowDate1'=>[
          'fromDate'=>'-6 year',
          'toDate'=>'-12 year',
-      //   'plus_date'=>'-5 month',
+         'plus_date'=>'-2 month',
+         'min_date'=>'1 month',
     ],
     
     

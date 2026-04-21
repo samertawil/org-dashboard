@@ -2,11 +2,11 @@
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
-            <flux:subheading>{{ $subheading ?? __('Enter the details for the student group below.') }}</flux:subheading>
+            <flux:subheading>{{ $subheading ?? __('Enter the details for the education point below.') }}</flux:subheading>
         </div>
 
         <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="list-bullet">
-            {{ __('Group List') }}
+            {{ __('Education Points List') }}
         </flux:button>
     </div>
 
@@ -24,7 +24,7 @@
 
             <flux:field>
                 <flux:label badge="Required" badgeColor="text-red-600">{{ __('Name') }}</flux:label>
-                <flux:input type="text" wire:model="name" :placeholder="__('Enter group name')" />
+                <flux:input type="text" wire:model="name" :placeholder="__('Enter point name')"  style="height: auto" />
                 <flux:error name="name" />
             </flux:field>
 
@@ -34,6 +34,18 @@
                 <flux:input type="number" wire:model="batch_no" min="1" :placeholder="__('Enter batch number')" />
                 <flux:error name="batch_no" />
             </flux:field>
+
+
+            
+            {{-- Partner Institution --}}
+            <flux:select wire:model="partner_institutions_id" :label="__('Partner Institution')">
+                <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Partner Institution') }}</option>
+                @foreach ($partners as $partner)
+                    <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                @endforeach
+            </flux:select>
+
+            
             {{-- Dates --}}
             <flux:field>
                 <flux:label>{{ __('Start Date') }}</flux:label>
@@ -108,6 +120,7 @@
                     </option>
                 @endforeach
             </flux:select>
+
 
             {{-- Address Details --}}
             <flux:field class="md:col-span-2 lg:col-span-3">

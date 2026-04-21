@@ -51,7 +51,7 @@ class Index extends Component
     public function groups()
     {
      return  StudentGroup::query()
-            ->with(['region', 'city', 'status'])  ->withCount(['students' => function ($query) {
+            ->with(['region', 'city', 'status','partner'])  ->withCount(['students' => function ($query) {
     $query->where('activation', 1);
 }])
             ->where(function ($query) {

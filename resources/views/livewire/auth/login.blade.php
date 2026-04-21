@@ -56,7 +56,7 @@
                 </flux:button>
             </div>
          
-            <a href="{{ route('social.redirect', 'google') }}"
+            {{-- <a href="{{ route('social.redirect', 'google') }}"
                 class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 <svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                     <path fill="#4285F4"
@@ -73,7 +73,7 @@
                     </path>
                 </svg>
                 {{ __('Login with Google') }}
-            </a>
+            </a> --}}
 
             <!-- Install App Button -->
             <button type="button" id="install-button"

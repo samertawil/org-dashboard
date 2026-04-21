@@ -238,6 +238,12 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/survey-grading-scale', GradingScaleIndex::class)->name('survey.grading.scale.index');
     Route::get('/survey-grading-scale/create', GradingScaleCreate::class)->name('survey.grading.scale.create');
     Route::get('/survey-grading-scale/{scale}/edit', GradingScaleEdit::class)->name('survey.grading.scale.edit');
+
+    Route::get('/survey-comparison-scale', \App\Livewire\OrgApp\SurveyQuestions\ComparisonScale\Index::class)->name('org-app.survey-questions.comparison-scale.index');
+    Route::get('/survey-comparison-scale/create', \App\Livewire\OrgApp\SurveyQuestions\ComparisonScale\Create::class)->name('org-app.survey-questions.comparison-scale.create');
+    Route::get('/survey-comparison-scale/{id}/edit', \App\Livewire\OrgApp\SurveyQuestions\ComparisonScale\Edit::class)->name('org-app.survey-questions.comparison-scale.edit');
+
+    Route::get('/reports/survey-comparison', \App\Livewire\OrgApp\Reports\SurveyComparisonReport::class)->name('reports.survey-comparison');
     
     // Export
 

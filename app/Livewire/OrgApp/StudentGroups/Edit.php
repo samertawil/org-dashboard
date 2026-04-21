@@ -47,6 +47,7 @@ class Edit extends Component
         $this->activation = $group->activation;
         $this->status_id = $group->status_id;
         $this->subject_to_learn_id = $group->subject_to_learn_id ?? [];
+        $this->partner_institutions_id = $group->partner_institutions_id;
 
         $this->activations = GlobalSystemConstant::options()->where('type', 'status');
         $this->cities = $this->region_id ? CityRepo::cities()->where('region_id', $this->region_id) : collect();
@@ -94,6 +95,7 @@ class Edit extends Component
             'start_time' => $this->start_time?: null,
             'end_time' => $this->end_time?: null,
             'batch_no' => $this->batch_no,
+            'partner_institutions_id' => $this->partner_institutions_id ?: null,
         ]);
 
         if ($this->group->isDirty()) {  

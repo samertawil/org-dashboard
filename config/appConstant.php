@@ -24,4 +24,6 @@ return [
     'survey_target' => 161,
     'public_links' => 164,
     'parent_links' => 163,
+    'job_title' => 165,
+    
 ];

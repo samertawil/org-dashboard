@@ -1,12 +1,12 @@
 <div class="flex flex-col gap-6">
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
-            <flux:heading level="1" size="xl">{{ __('Student Groups') }}</flux:heading>
-            <flux:subheading>{{ __('Manage your student groups.') }}</flux:subheading>
+            <flux:heading level="1" size="xl">{{ __('Education Points') }}</flux:heading>
+            <flux:subheading>{{ __('Manage your education points.') }}</flux:subheading>
         </div>
         @can('student.group.create') 
         <flux:button href="{{ route('student.group.create') }}" wire:navigate variant="primary" icon="plus">
-            {{ __('Add Group') }}
+            {{ __('Add Point') }}
         </flux:button>
         @endcan
     </div>
@@ -34,7 +34,7 @@
         @endif
 
         <div class="overflow-x-auto">
-            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 ">
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
                         {{ __('Showing') }}
@@ -85,6 +85,7 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Moderator') }}
                         </th>
+                      
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Subjects') }}
@@ -102,6 +103,7 @@
                             class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Actions') }}
                         </th>
+                        
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
@@ -114,12 +116,14 @@
                                 {{ $group->batch_no }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $group->region->region_name ?? '-' }}/  {{ $group->city->city_name ?? '-' }}
+                                {{ $group->region->region_name ?? '-' }}/  {{ $group->city->city_name ?? '-' }}<br>
+                                {{-- {{ $group->partner->name ?? '-' }} --}}
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $group->Moderator ?? '-' }}
                             </td>
+                           
                             <td class="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
                                 @if (!empty($group->subject_to_learn_id) && is_array($group->subject_to_learn_id))
                                     <div class="flex items-center gap-2">
@@ -164,19 +168,19 @@
                                         target="_blank" variant="ghost" size="sm" icon="map-pin" title="{{ __('View Map') }}" />
                                     <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate
                                         variant="ghost" size="sm" icon="pencil-square" />
-                                        @can('student.group.create') 
+                                        {{-- @can('student.group.create') 
                                     <flux:button wire:click="delete({{ $group->id }})"
                                         wire:confirm="{{ __('Are you sure you want to delete this group?') }}"
                                         variant="ghost" size="sm" icon="trash"
                                         class="text-red-500 hover:text-red-600" />
-                                        @endcan
+                                        @endcan --}}
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-8 text-center text-sm text-zinc-500">
-                                {{ __('No student groups found.') }}
+                                {{ __('No Education Points found.') }}
                             </td>
                         </tr>
                     @endforelse

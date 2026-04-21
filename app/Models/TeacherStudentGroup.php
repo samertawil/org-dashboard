@@ -11,6 +11,7 @@ class TeacherStudentGroup extends Model
    protected $fillable = [
        'teacher_id',
        'student_group_id',
+       'job_title',
    ];
 
    public function teacher()
@@ -21,5 +22,10 @@ class TeacherStudentGroup extends Model
    public function studentGroup()
    {
        return $this->belongsTo(StudentGroup::class);
+   }
+
+   public function jobTitle()
+   {
+       return $this->belongsTo(Status::class,'job_title');
    }
 }

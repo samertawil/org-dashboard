@@ -333,7 +333,85 @@
                         {{ __('اجابات النماذج والتقيمات') }}</h3>
                 </div>
 
-                <div class="p-0">
+                <div class="p-6 space-y-8">
+                    {{-- Comparison Section --}}
+                    @if(!empty($comparisonResults))
+                    <div class="space-y-4">
+                        <flux:heading level="3" class="flex items-center gap-2">
+                            <flux:icon name="chart-bar" class="size-5 text-indigo-500" />
+                            {{ __('نتائج قياس الأثر والتقدم (Pre vs Post)') }}
+                        </flux:heading>
+
+                        @foreach($comparisonResults as $pair)
+                        <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+                                <thead class="bg-zinc-50 dark:bg-zinc-900/50">
+                                    <tr>
+                                        <th colspan="5" class="px-4 py-2 text-center text-xs font-bold text-zinc-600 bg-indigo-50/50 dark:bg-indigo-900/20">
+                                            {{ $pair->pre_name }} vs {{ $pair->post_name }}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col" class="px-3 py-2 text-right text-xs font-semibold text-zinc-500 uppercase">{{ __('Domain') }}</th>
+                                        <th scope="col" class="px-3 py-2 text-center text-xs font-semibold text-zinc-500 uppercase">{{ __('Pre') }}</th>
+                                        <th scope="col" class="px-3 py-2 text-center text-xs font-semibold text-zinc-500 uppercase">{{ __('Post') }}</th>
+                                        <th scope="col" class="px-3 py-2 text-center text-xs font-semibold text-zinc-500 uppercase">{{ __('Progress') }}</th>
+                                        <th scope="col" class="px-3 py-2 text-center text-xs font-semibold text-zinc-500 uppercase">{{ __('Status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+                                    @foreach($pair->domains as $domain)
+                                    <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50">
+                                        <td class="px-3 py-2 text-xs font-medium text-zinc-900 dark:text-zinc-100">{{ $domain['name'] }}</td>
+                                        <td class="px-3 py-2 text-xs text-center text-zinc-600 tracking-tighter">{{ $domain['pre'] }}</td>
+                                        <td class="px-3 py-2 text-xs text-center text-zinc-600 tracking-tighter">{{ $domain['post'] }}</td>
+                                        <td class="px-3 py-2 text-xs text-center font-bold">
+                                            @if($domain['diff'] !== null)
+                                            <span class="{{ $domain['diff'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
+                                                {{ $domain['diff'] > 0 ? '+' : '' }}{{ $domain['diff'] }}%
+                                            </span>
+                                            @else
+                                            <span class="text-zinc-400">---</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border" style="background-color: {{ $domain['color'] }}20; color: {{ $domain['color'] }}; border-color: {{ $domain['color'] }}40">
+                                                {{ $domain['evaluation'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                @if($pair->total)
+                                <tfoot class="bg-zinc-50/50 dark:bg-zinc-900/30">
+                                    <tr class="font-bold">
+                                        <td class="px-3 py-2 text-xs text-indigo-700 dark:text-indigo-400">{{ __('Total Progress') }}</td>
+                                        <td class="px-3 py-2 text-xs text-center">{{ $pair->total['pre'] }}</td>
+                                        <td class="px-3 py-2 text-xs text-center">{{ $pair->total['post'] }}</td>
+                                        <td class="px-3 py-2 text-xs text-center">
+                                            @if($pair->total['diff'] !== null)
+                                            <span class="{{ $pair->total['diff'] >= 0 ? 'text-emerald-700' : 'text-red-700' }}">
+                                                {{ $pair->total['diff'] > 0 ? '+' : '' }}{{ $pair->total['diff'] }}%
+                                            </span>
+                                            @else
+                                            <span class="text-zinc-400">---</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black" style="color: {{ $pair->total['color'] }}">
+                                                {{ $pair->total['evaluation'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                                @endif
+                            </table>
+                        </div>
+                        @endforeach
+                    </div>
+                    <flux:separator variant="subtle" />
+                    @endif
+
                     @if ($student->surveyStudentanswers->isEmpty())
                         <div class="p-6 text-center text-zinc-500 dark:text-zinc-400">
                             {{ __('No survey answers recorded for this student.') }}

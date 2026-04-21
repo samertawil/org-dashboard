@@ -95,7 +95,7 @@
                         @can('student.group.index')
                             <flux:sidebar.item icon="rectangle-group" :href="route('student.group.index')"
                                 :current="request()->routeIs('student.group.index')" wire:navigate>
-                                {{ __('Students Groups List') }}
+                                {{ __('Education Points List') }}
                             </flux:sidebar.item>
                         @endcan
 
@@ -325,18 +325,30 @@
                                 :current="request()->routeIs('survey.manage')" wire:navigate>
                                 {{ __('Student Surveys') }}
                             </flux:sidebar.item>
-                            @endcan
-                            @can('outer.servey.list')
-                            <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
-                            :current="request()->routeIs('survey.index')" wire:navigate>
-                            {{ __('Manage Outer Surveys') }}
-                        </flux:sidebar.item>
                         @endcan
-                            <flux:sidebar.item icon="chart-bar" :href="route('survey.grading.scale.index')"
-                                :current="request()->routeIs('survey.grading.scale.index')" wire:navigate>
-                                {{ __('Grading Scales') }}
+                        @can('outer.servey.list')
+                            <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
+                                :current="request()->routeIs('survey.index')" wire:navigate>
+                                {{ __('Manage Outer Surveys') }}
                             </flux:sidebar.item>
-                       
+                        @endcan
+
+                        <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.survey-comparison')"
+                            :current="request()->routeIs('reports.survey-comparison')" wire:navigate
+                            class="text-indigo-600 dark:text-indigo-400 font-bold">
+                            {{ __('Comparison Dashboard') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="chart-bar" :href="route('survey.grading.scale.index')"
+                            :current="request()->routeIs('survey.grading.scale.index')" wire:navigate>
+                            {{ __('Grading Scales') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="adjustments-horizontal" :href="route('org-app.survey-questions.comparison-scale.index')"
+                            :current="request()->routeIs('org-app.survey-questions.comparison-scale.index')" wire:navigate>
+                            {{ __('Comparison Scales') }}
+                        </flux:sidebar.item>
+
                         @can('survey-answers.create')
                             <flux:sidebar.item icon="plus" :href="route('survey-answers.create')"
                                 :current="request()->routeIs('survey-answers.create')" wire:navigate>
@@ -350,7 +362,6 @@
                                 {{ __('Export Files') }}
                             </flux:sidebar.item>
                         @endcan
-
 
                     </flux:sidebar.group>
                 @endcanany

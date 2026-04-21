@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\SurveyAnswer;
+use App\Models\SurveyQuestion;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -35,10 +36,13 @@ class OuterSurveyAnswersExport implements FromCollection, WithHeadings, WithMapp
             ->orderBy('account_id')
             ->get();
 
-        // Get all unique questions to act as headings
-        $this->questions = $answers->map(function ($item) {
-            return $item->question?->question_ar_text ?? 'N/A';
-        })->filter(fn($q) => $q !== 'N/A')->unique()->values()->toArray();
+        // Get all unique questions for this survey to act as headings, ordered by question_order
+        $this->questions = SurveyQuestion::where('survey_table_id', $this->surveyTableId)
+            ->orderBy('question_order')
+            ->pluck('question_ar_text')
+            ->unique()
+            ->values()
+            ->toArray();
 
         // Group the answers by survey and account to create rows
         $grouped = $answers->groupBy(function ($item) {
@@ -55,7 +59,7 @@ class OuterSurveyAnswersExport implements FromCollection, WithHeadings, WithMapp
                 'account_id'  => $first->account_id,
             ];
 
-            // Initialize all question columns
+            // Initialize all question columns from the master list
             foreach ($this->questions as $qText) {
                 $row[$qText] = '';
             }
@@ -63,7 +67,7 @@ class OuterSurveyAnswersExport implements FromCollection, WithHeadings, WithMapp
             // Fill in the answers
             foreach ($group as $answer) {
                 $qText = $answer->question?->question_ar_text;
-                if ($qText && $qText !== 'N/A') {
+                if ($qText && $qText !== 'N/A' && isset($row[$qText])) {
                     if ($row[$qText] !== '') {
                         $row[$qText] .= ' - ' . $answer->answer_ar_text;
                     } else {

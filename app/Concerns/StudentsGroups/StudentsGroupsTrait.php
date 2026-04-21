@@ -2,15 +2,16 @@
 
 namespace App\Concerns\StudentsGroups;
 
-use App\Reposotries\CityRepo;
-use App\Reposotries\RegionRepo;
-use App\Reposotries\StatusRepo;
-use App\Reposotries\LocationRepo;
-use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
 use App\Models\Location;
 use App\Models\StudentSubjectForLearn;
+use App\Reposotries\CityRepo;
+use App\Reposotries\LocationRepo;
 use App\Reposotries\NeighbourhoodRepo;
+use App\Reposotries\PartnersRepo;
+use App\Reposotries\RegionRepo;
+use App\Reposotries\StatusRepo;
+use Livewire\Attributes\Validate;
 
 trait StudentsGroupsTrait
 {
@@ -62,6 +63,9 @@ trait StudentsGroupsTrait
     #[Validate('nullable|exists:locations,id')]
     public $location_id = '';
 
+    #[Validate('nullable|exists:partner_institutions,id')]
+    public $partner_institutions_id = '';
+
     public $address_details = '';
 
     #[Validate('required|date')]
@@ -85,6 +89,7 @@ trait StudentsGroupsTrait
     public $locations = [];
     public $statuses = [];
     public $subjects = [];
+    public $partners = [];
 
     public function updated($property, $value)
     {
@@ -127,5 +132,6 @@ trait StudentsGroupsTrait
         $this->activations = GlobalSystemConstant::options()->where('type', 'status');
         $this->statuses = StatusRepo::statuses();
         $this->subjects = StudentSubjectForLearn::select('id', 'name')->get();
+        $this->partners = PartnersRepo::partners()->where('type_id',111);
     }
 }

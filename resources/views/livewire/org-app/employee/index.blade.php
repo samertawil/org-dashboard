@@ -77,10 +77,10 @@
                             </div>
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Department') }}
+                            {{ __('Dept / Partner') }}
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Position') }}
+                            {{ __('Pos / Job Title') }}
                         </th>
                         <th wire:click="sortBy('gender')" class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
                             <div class="flex items-center gap-1">
@@ -117,10 +117,18 @@
                                 {{ $employee->full_name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $employee->department->name ?? '-' }}
+                                @if($employee->employee_in_partner_id)
+                                    <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{ $employee->partner->name ?? '-' }}</span>
+                                @else
+                                {{ $employee->employee_in_partner_id?$employee->partner->name : 'AFSC' }}
+                                <br>
+                                    {{ $employee->department->name ?? '-' }}
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $employee->positionStatus->status_name ?? '-' }}
+                         
+                                {{ $employee->positionStatus->status_name ?? '-' }}    <br>
+                                {{ $employee->jobTitle->status_name ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 @php

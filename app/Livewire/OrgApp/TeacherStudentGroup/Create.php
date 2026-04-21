@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\TeacherStudentGroup;
 use App\Models\Employee;
 use App\Models\StudentGroup;
 use App\Models\TeacherStudentGroup;
+use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -12,12 +13,14 @@ class Create extends Component
 {
     public $teacher_id;
     public $student_group_id;
+    public $job_title;
 
     public function rules()
     {
         return [
             'teacher_id' => 'required',
             'student_group_id' => 'required',
+            'job_title' => 'required|exists:statuses,id',
         ];
     }
 
@@ -28,6 +31,7 @@ class Create extends Component
         TeacherStudentGroup::create([
             'teacher_id' => $this->teacher_id,
             'student_group_id' => $this->student_group_id,
+            'job_title' => $this->job_title,
         ]);
 
         session()->flash('message', __('Assignment created successfully.'));
@@ -46,6 +50,7 @@ class Create extends Component
             'type' => 'save',
             'employees' => Employee::whereNotNull('user_id')->with('user')->get(),
             'student_groups' => StudentGroup::all(),
+            'job_titles' => StatusRepo::statuses()->where('p_id_sub',config('appConstant.job_title')),
         ]);
     }
 }

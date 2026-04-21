@@ -18,7 +18,7 @@ class Create extends Component
     use StudentsGroupsTrait;
     
     #[Validate('required|string|unique:student_groups,name')]
-    public $name = 'Student Group #';
+    public $name = 'Education Point #';
 
 
     public function mount()
@@ -58,6 +58,7 @@ class Create extends Component
             'activation' => $this->activation,
             'status_id' => $this->status_id ?: null,
             'subject_to_learn_id' => $this->subject_to_learn_id,
+            'partner_institutions_id' => $this->partner_institutions_id ?: null,
         ]);
 
         if ($data->start_date && $data->end_date && $this->start_time && $this->end_time) {
@@ -98,7 +99,7 @@ class Create extends Component
         dd($th->getMessage());
         DB::rollback();
        }
-        session()->flash('message', __('Student Group and Schedules successfully created.'));
+        session()->flash('message', __('Education Point and Schedules successfully created.'));
 
         return $this->redirect(route('student.group.index'), navigate: true);
     }
@@ -112,7 +113,7 @@ class Create extends Component
             abort(403, 'You do not have the necessary permissions');
         }
         return view('livewire.org-app.student-groups.create', [
-            'heading' => __('Create Student Group'),
+            'heading' => __('Create Education Point'),
             'type' => 'save',
             'activations' => $this->activations,
             'regions' => $this->regions,

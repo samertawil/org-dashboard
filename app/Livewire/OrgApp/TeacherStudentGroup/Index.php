@@ -28,7 +28,7 @@ class Index extends Component
     public function mappings()
     {
         return TeacherStudentGroup::query()
-            ->with(['teacher.user', 'studentGroup'])
+            ->with(['teacher.user', 'studentGroup', 'jobTitle'])
             ->whereHas('teacher.user', function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
             })

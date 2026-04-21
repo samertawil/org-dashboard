@@ -8,6 +8,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use App\Enums\GlobalSystemConstant;
 use App\Reposotries\DepartmentRepo;
+use App\Reposotries\PartnersRepo;
 use App\Rules\GlobalValidation;
 
 trait EmployeeTrait
@@ -43,6 +44,14 @@ trait EmployeeTrait
     #[Validate('nullable|exists:users,id')]
     public $user_id = '';
 
+    #[Validate('nullable|exists:partner_institutions,id')]
+    public $employee_in_partner_id = null;
+
+    
+    #[Validate('nullable|exists:statuses,id')]
+    public $job_title = null;
+    
+    
   
     public $activation = GlobalSystemConstant::ACTIVE->value;
 
@@ -80,6 +89,12 @@ trait EmployeeTrait
     public function allStatuses()
     {
         return StatusRepo::statuses();
+    }
+
+    #[Computed()]
+    public function allPartners()
+    {
+        return PartnersRepo::partners();
     }
 
     

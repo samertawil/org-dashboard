@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\TeacherStudentGroup;
 use App\Models\Employee;
 use App\Models\StudentGroup;
 use App\Models\TeacherStudentGroup;
+use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -13,12 +14,14 @@ class Edit extends Component
     public TeacherStudentGroup $mapping;
     public $teacher_id;
     public $student_group_id;
+    public $job_title;
 
     public function rules()
     {
         return [
             'teacher_id' => 'required',
             'student_group_id' => 'required',
+            'job_title' => 'required|exists:statuses,id',
         ];
     }
 
@@ -27,6 +30,7 @@ class Edit extends Component
         $this->mapping = $teacherStudentGroup;
         $this->teacher_id = $teacherStudentGroup->teacher_id;
         $this->student_group_id = $teacherStudentGroup->student_group_id;
+        $this->job_title = $teacherStudentGroup->job_title;
     }
 
     public function edit()
@@ -36,6 +40,7 @@ class Edit extends Component
         $this->mapping->update([
             'teacher_id' => $this->teacher_id,
             'student_group_id' => $this->student_group_id,
+            'job_title' => $this->job_title,
         ]);
 
         session()->flash('message', __('Assignment updated successfully.'));
@@ -53,6 +58,7 @@ class Edit extends Component
             'type' => 'edit',
             'employees' => Employee::whereNotNull('user_id')->with('user')->get(),
             'student_groups' => StudentGroup::all(),
+          'job_titles' => StatusRepo::statuses()->where('p_id_sub',config('appConstant.job_title')),
         ]);
     }
 }

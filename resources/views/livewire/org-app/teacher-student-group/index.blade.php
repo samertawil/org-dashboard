@@ -30,6 +30,7 @@
                     <tr>
                         <th class="px-6 py-3">{{ __('Teacher') }}</th>
                         <th class="px-6 py-3">{{ __('Student Group') }}</th>
+                        <th class="px-6 py-3">{{ __('Job Title') }}</th>
                         <th class="px-6 py-3 text-right">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
@@ -41,6 +42,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 {{ $mapping->studentGroup->name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ $mapping->jobTitle->status_name ?? 'N/A' }}
                             </td>
                             
                             <td class="px-6 py-4 text-right">
@@ -77,7 +81,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                            <td colspan="4" class="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
                                 <div class="flex flex-col items-center gap-2">
                                     <p>{{ __('No assignments found.') }}</p>
                                 </div>

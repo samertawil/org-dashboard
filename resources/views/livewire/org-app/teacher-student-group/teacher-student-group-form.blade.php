@@ -45,6 +45,15 @@
             </flux:select>
              <flux:error name="student_group_id" />
 
+             {{-- Job Title --}}
+             <flux:select wire:model="job_title" :label="__('Job Title')" placeholder="{{ __('Select Job Title') }}">
+                 <option value="">{{ __('Select Job Title') }}</option>
+                 @foreach($job_titles as $title)
+                     <option value="{{ $title->id }}">{{ $title->status_name }}</option>
+                 @endforeach
+             </flux:select>
+             <flux:error name="job_title" />
+
             {{-- Submit Button --}}
             <div class="md:col-span-2 flex items-center justify-end gap-2 mt-6">
                 <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}">

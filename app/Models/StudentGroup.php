@@ -30,6 +30,7 @@ class StudentGroup extends Model
         'start_time',
         'end_time',
         'batch_no',
+        'partner_institutions_id',
     ];
 
     public function scopeActiveToday($query)
@@ -50,6 +51,11 @@ class StudentGroup extends Model
         return $this->belongsTo(Region::class);
     }
 
+    public function partner()
+    {
+        return $this->belongsTo(PartnerInstitution::class,'partner_institutions_id');
+    }
+    
     public function city()
     {
         return $this->belongsTo(City::class);

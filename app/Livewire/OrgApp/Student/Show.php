@@ -14,6 +14,7 @@ class Show extends Component
 
     public $studentData;
     public $lateSurveyStudentData;
+    public $comparisonResults = [];
     public $showGradingScale = false;
 
 
@@ -29,6 +30,7 @@ public function mount($student)
     }
 
     $this->lateSurveyStudentData = StudentRepo::studentSurveyLate($this->studentData->id);
+    $this->comparisonResults = $this->studentData->getSurveyComparisonResults();
 }
 
  
