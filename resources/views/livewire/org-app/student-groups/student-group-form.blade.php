@@ -145,15 +145,17 @@
 
             {{-- Subjects --}}
             <div class="col-span-1 md:col-span-2 lg:col-span-3" x-data="{
-                selected: @entangle('subject_to_learn_id'),
-                options: {{ json_encode($subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])) }},
+                selected: @entangle('subject_to_learn_id') || [],
+                options: {{ json_encode($subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()) }},
                 search: '',
                 open: false,
                 get filteredOptions() {
+                    if (! Array.isArray(this.options)) return [];
+                    const selectedIds = Array.isArray(this.selected) ? this.selected : [];
                     if (this.search === '') {
-                        return this.options.filter(i => !this.selected.includes(i.id));
+                        return this.options.filter(i => !selectedIds.includes(i.id));
                     }
-                    return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !this.selected.includes(i.id));
+                    return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !selectedIds.includes(i.id));
                 },
                 add(id) {
                     if (!this.selected.includes(id)) {

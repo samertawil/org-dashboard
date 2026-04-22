@@ -129,16 +129,17 @@
 
             {{-- Needs Tags --}}
             <div class="md:col-span-2 lg:col-span-3" x-data="{
-                selected: @entangle('camp_main_needs'),
-                options: {{ json_encode($this->needsList) }},
+                selected: @entangle('camp_main_needs') || [],
+                options: {{ json_encode(collect($this->needsList)->values()) }},
                 search: '',
                 open: false,
                 get filteredOptions() {
-                    if (!this.selected) this.selected = [];
+                    if (! Array.isArray(this.options)) return [];
+                    const selectedItems = Array.isArray(this.selected) ? this.selected : [];
                     if (this.search === '') {
-                        return this.options.filter(i => !this.selected.includes(i.need));
+                        return this.options.filter(i => !selectedItems.includes(i.need));
                     }
-                    return this.options.filter(i => i.need.toLowerCase().includes(this.search.toLowerCase()) && !this.selected.includes(i.need));
+                    return this.options.filter(i => i.need.toLowerCase().includes(this.search.toLowerCase()) && !selectedItems.includes(i.need));
                 },
                 add(val) {
                     if (!this.selected) this.selected = [];

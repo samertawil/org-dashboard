@@ -10,6 +10,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+use App\Exports\PurchaseRequestExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class Index extends Component
 {
     use WithPagination;
@@ -21,6 +24,31 @@ class Index extends Component
     public $search_vendor_id = ''; // For suggested_vendor_ids
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
+
+    // For Modal
+    public ?PurchaseRequisition $selectedPr = null;
+
+    public function showDetails($id)
+    {
+        $this->selectedPr = PurchaseRequisition::with(['status', 'creator', 'items.unit'])->findOrFail($id);
+        $this->dispatch('modal-show', name: 'show-pr-modal');
+    }
+
+    public function export()
+    {
+        $query = PurchaseRequisition::query()
+            ->when($this->search_number, fn($q) => $q->where('request_number', 'like', '%' . $this->search_number . '%'))
+            ->when($this->search_date, fn($q) => $q->whereDate('request_date', $this->search_date))
+            ->when($this->search_status_id, fn($q) => $q->where('status_id', $this->search_status_id))
+            ->when($this->search_vendor_id, function($q) {
+                $q->where(function ($query) {
+                    $query->whereJsonContains('suggested_vendor_ids', (string) $this->search_vendor_id)
+                          ->orWhereJsonContains('suggested_vendor_ids', (int) $this->search_vendor_id);
+                });
+            });
+
+        return Excel::download(new PurchaseRequestExport($query), 'purchase-requisitions.xlsx');
+    }
 
     public function sortBy($field): void
     {
@@ -47,8 +75,10 @@ class Index extends Component
             ->when($this->search_date, fn($q) => $q->whereDate('request_date', $this->search_date))
             ->when($this->search_status_id, fn($q) => $q->where('status_id', $this->search_status_id))
             ->when($this->search_vendor_id, function($q) {
-                 $q->whereJsonContains('suggested_vendor_ids', $this->search_vendor_id);
-               
+                $q->where(function ($query) {
+                    $query->whereJsonContains('suggested_vendor_ids', (string) $this->search_vendor_id)
+                          ->orWhereJsonContains('suggested_vendor_ids', (int) $this->search_vendor_id);
+                });
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);

@@ -84,23 +84,17 @@
 
              {{-- Estimated Total --}}
              <flux:field class="relative z-20">
-                <flux:label>{{ __('Estimated Total') }}</flux:label>
-                <flux:input type="number" step="0.01" wire:model="estimated_total" :placeholder="__('0.00')" />
-                <flux:error name="estimated_total" />
+                <flux:label>{{ __('Estimated Total Dollar') }}</flux:label>
+                <flux:input type="number" step="0.01" wire:model="estimated_total_dollar" :placeholder="__('0.00')" />
+                <flux:error name="estimated_total_dollar" />
+            </flux:field>
+
+            <flux:field class="relative z-20">
+                <flux:label>{{ __('Estimated Total Nis') }}</flux:label>
+                <flux:input type="number" step="0.01" wire:model="estimated_total_nis" :placeholder="__('0.00')" />
+                <flux:error name="estimated_total_nis" />
             </flux:field>
             
-            {{-- Estimated Total Currency --}}
-            <div class="relative z-10">
-                <flux:select wire:model="estimated_total_currency" :label="__('Currency')">
-                    <option value="">{{ __('Select Currency') }}</option>
-                       {{-- Assuming we have currency statuses or similar --}}
-                       {{-- Use generic statuses or if there's a specific currency list --}}
-                    @foreach ($this->statuses as $status)
-                         {{-- Filter for currency type if known, else show all or specific subset --}}
-                        <option value="{{ $status->id }}">{{ $status->status_name }}</option>
-                    @endforeach
-                </flux:select>
-            </div>
 
 
             {{-- Items Section --}}
@@ -170,15 +164,17 @@
             </div>
     {{-- Suggested Vendors --}}
     <div class="col-span-1 md:col-span-2 lg:col-span-3" x-data="{
-        selected: @entangle('suggested_vendor_ids'),
-        options: {{ json_encode($this->partners->map(fn($partner) => ['id' => $partner->id, 'name' => $partner->name])) }},
+        selected: @entangle('suggested_vendor_ids') || [],
+        options: {{ json_encode($this->partners->map(fn($partner) => ['id' => $partner->id, 'name' => $partner->name])->values()) }},
         search: '',
         open: false,
         get filteredOptions() {
+            if (! Array.isArray(this.options)) return [];
+            const selectedIds = Array.isArray(this.selected) ? this.selected : [];
             if (this.search === '') {
-                return this.options.filter(i => !this.selected.includes(i.id));
+                return this.options.filter(i => !selectedIds.includes(i.id));
             }
-            return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !this.selected.includes(i.id));
+            return this.options.filter(i => i.name.toLowerCase().includes(this.search.toLowerCase()) && !selectedIds.includes(i.id));
         },
         add(id) {
             if (!this.selected.includes(id)) {

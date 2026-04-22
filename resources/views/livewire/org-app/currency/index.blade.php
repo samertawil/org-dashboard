@@ -2,7 +2,9 @@
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Currency Values') }}</flux:heading>
-            <flux:subheading>{{ __('Manage your exchange rates.') }}</flux:subheading>
+            <flux:subheading>{{ __('Manage your exchange rates') }} <span style="color:blue">, Exchange rate of the US
+                    dollar against the Israeli shekel</span></flux:subheading>
+
         </div>
         @can('currency.create')
             <flux:button href="{{ route('currency.create') }}" wire:navigate variant="primary" icon="plus">
@@ -39,9 +41,11 @@
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
                         {{ __('Showing') }}
-                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->currencies->firstItem() }}</span>
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->currencies->firstItem() }}</span>
                         {{ __('to') }}
-                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->currencies->lastItem() }}</span>
+                        <span
+                            class="font-medium text-zinc-900 dark:text-white">{{ $this->currencies->lastItem() }}</span>
                         {{ __('of') }}
                         <span class="font-medium text-zinc-900 dark:text-white">{{ $this->currencies->total() }}</span>
                         {{ __('results') }}

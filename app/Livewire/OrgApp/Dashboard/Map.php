@@ -51,6 +51,7 @@ class  Map extends Component
 
     public function render()
     {
+       
         return view('livewire.org-app.dashboard.map');
     }
 }

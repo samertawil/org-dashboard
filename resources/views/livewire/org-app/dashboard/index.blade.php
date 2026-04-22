@@ -5,7 +5,7 @@
             <flux:heading size="xl" level="1">{{ __('Dashboard') }}</flux:heading>
             <flux:subheading>{{ __('Overview of organization performance and activities.') }}</flux:subheading>
         </div>
-        
+        <flux:button  href="{{route('activity.feed')}}">Timeline</flux:button>
     </div>
 
 

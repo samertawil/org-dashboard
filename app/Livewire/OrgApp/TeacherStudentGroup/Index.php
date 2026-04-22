@@ -15,9 +15,19 @@ class Index extends Component
     public int $perPage = 10;
     public string $search = '';
 
+    public $student_group_id;
+
     protected $queryString = [
         'search' => ['except' => ''],
+        'student_group_id' => ['except' => null],
     ];
+
+    public function mount($student_group_id = null)
+    {
+        if ($student_group_id) {
+            $this->student_group_id = $student_group_id;
+        }
+    }
 
     public function updatingSearch()
     {
@@ -29,11 +39,18 @@ class Index extends Component
     {
         return TeacherStudentGroup::query()
             ->with(['teacher.user', 'studentGroup', 'jobTitle'])
-            ->whereHas('teacher.user', function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+            ->when($this->student_group_id, function ($q) {
+                $q->where('student_group_id', $this->student_group_id);
             })
-            ->orWhereHas('studentGroup', function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+            ->when($this->search, function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereHas('teacher.user', function ($q) {
+                        $q->where('name', 'like', '%' . $this->search . '%');
+                    })
+                    ->orWhereHas('studentGroup', function ($q) {
+                        $q->where('name', 'like', '%' . $this->search . '%');
+                    });
+                });
             })
             ->latest()
             ->paginate($this->perPage);

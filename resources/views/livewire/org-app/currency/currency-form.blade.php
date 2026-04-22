@@ -2,6 +2,8 @@
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
+            <flux:subheading>{{ __('Manage your exchange rates') }} <span style="color:blue">, Exchange rate of the US
+                dollar against the Israeli shekel</span></flux:subheading>
         </div>
         <flux:button href="{{ route('currency.index') }}" wire:navigate variant="ghost">
             {{ __('Back to List') }}

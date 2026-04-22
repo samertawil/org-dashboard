@@ -32,8 +32,11 @@ trait PurchaseTrait
     #[Validate('nullable|string')]
     public $budget_details;
 
-    #[Validate('nullable|integer')]
-    public $estimated_total;
+    #[Validate('nullable')]
+    public $estimated_total_dollar = null;
+
+    #[Validate('nullable')]
+    public $estimated_total_nis = null;
 
     #[Validate('nullable|integer')]
     public $estimated_total_currency;

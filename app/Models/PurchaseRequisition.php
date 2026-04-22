@@ -18,8 +18,9 @@ class PurchaseRequisition extends Model
         'suggested_vendor_ids',
         'need_by_date',
         'budget_details',
-        'estimated_total',
-        'estimated_total_currency',
+        'estimated_total_dollar',
+        'estimated_total_nis',
+     
         'created_by',
         'status_id',
         'attachments'
@@ -48,15 +49,11 @@ class PurchaseRequisition extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function currency()
-    {
-         // Assuming Currency is related to Status or another model, based on 'estimated_total_currency' which is tinyInteger
-         // If it's a relation to a specific currency model or status
-         // The migration says: $table->tinyInteger('estimated_total_currency')->nullable();
-         // It might be an enum or status id.  Let's assume it might be a status for now or just an integer.
-         // If it's a relation to Status (common pattern here):
-         return $this->belongsTo(Status::class, 'estimated_total_currency');
-    }
+    // public function currency()
+    // {
+        
+    //      return $this->belongsTo(Status::class, 'estimated_total_currency');
+    // }
 
     public function getSuggestedVendorsAttribute()
     {

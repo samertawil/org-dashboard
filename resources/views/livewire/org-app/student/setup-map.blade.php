@@ -2,15 +2,17 @@
     {{-- Top Navigation --}}
     {{-- Top Navigation (Standard HTML) --}}
     <div class="fixed top-4 left-4 z-[9999] md:absolute md:top-8 md:left-8">
-        <a href="{{ route('dashboard') }}" 
-           class="flex items-center gap-2 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 shadow-lg text-slate-700 hover:bg-slate-50 transition-all duration-300 transform hover:scale-105 active:scale-95 group no-underline decoration-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 transition-transform group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        <a href="{{ route('dashboard') }}"
+            class="flex items-center gap-2 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200 shadow-lg text-slate-700 hover:bg-slate-50 transition-all duration-300 transform hover:scale-105 active:scale-95 group no-underline decoration-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 transition-transform group-hover:-translate-y-0.5"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <span class="font-bold text-sm">{{ __('الرئيسية') }}</span>
         </a>
     </div>
-    
+
     {{-- Header & Progress Hero --}}
     <div class="mb-8 pt-4">
         <flux:card
@@ -32,7 +34,8 @@
         </flux:card>
     </div>
     <div class="max-w-6xl mx-auto mt-12 mb-8 flex justify-center ">
-        <flux:button variant="filled" color="indigo" icon="home" href="{{ route('dashboard') }}" wire:navigate class="px-8">
+        <flux:button variant="filled" color="indigo" icon="home" href="{{ route('dashboard') }}" wire:navigate
+            class="px-8">
             {{ __('العودة للرئيسية') }}
         </flux:button>
     </div>
@@ -481,16 +484,125 @@
                                     <div class="text-2xl font-black text-amber-900 dark:text-white">
                                         {{ $group->subjects_count }}</div>
                                 </div>
-                                <div
-                                    class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-2xl text-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/20 transition-colors">
-                                    <flux:icon icon="academic-cap"
-                                        class="mx-auto text-emerald-600 dark:text-emerald-400 mb-2" size="sm" />
-                                    <flux:text size="xs"
-                                        class="font-bold text-emerald-900/60 dark:text-emerald-400/60 uppercase tracking-tighter">
-                                        {{ __('المعلمون') }}</flux:text>
-                                    <div class="text-2xl font-black text-emerald-900 dark:text-white">
-                                        {{ $group->teachers_count }}</div>
-                                </div>
+                                <flux:modal.trigger name="teachers-modal-{{ $group->id }}">
+                                    <div
+                                        class="cursor-pointer bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-2xl text-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/20 transition-colors">
+                                        <flux:icon icon="academic-cap"
+                                            class="mx-auto text-emerald-600 dark:text-emerald-400 mb-2"
+                                            size="sm" />
+                                        <flux:text size="xs"
+                                            class="font-bold text-emerald-900/60 dark:text-emerald-400/60 uppercase tracking-tighter">
+                                            {{ __('المعلمون') }}</flux:text>
+                                        <div class="text-2xl font-black text-emerald-900 dark:text-white">
+                                            {{ $group->teachers_count }}</div>
+                                    </div>
+                                </flux:modal.trigger>
+
+                                <flux:modal name="teachers-modal-{{ $group->id }}" class="md:w-[800px]">
+                                    <div class="space-y-6">
+                                        <div>
+                                            <flux:heading size="lg">{{ __('معلمو المجموعة') }}:
+                                                {{ $group->name }}</flux:heading>
+                                            <flux:subheading>{{ __('قائمة المعلمين الموزعين على هذه المجموعة.') }}
+                                            </flux:subheading>
+                                        </div>
+
+                                        <div
+                                            class="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-4 flex flex-wrap gap-6 items-center border border-indigo-100 dark:border-indigo-900/30">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
+                                                    <flux:icon icon="calendar" size="sm" />
+                                                </div>
+                                                <div>
+                                                    <flux:text size="xs"
+                                                        class="text-indigo-900/60 font-bold uppercase">
+                                                        {{ __('فترة المجموعة') }}</flux:text>
+                                                    <div
+                                                        class="text-sm font-black text-indigo-900 dark:text-indigo-200">
+                                                        {{ \Carbon\Carbon::parse($group->start_date)->format('Y/m/d') }}
+                                                        -
+                                                        {{ \Carbon\Carbon::parse($group->end_date)->format('Y/m/d') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600">
+                                                    <flux:icon icon="clock" size="sm" />
+                                                </div>
+                                                <div>
+                                                    <flux:text size="xs"
+                                                        class="text-emerald-900/60 font-bold uppercase">
+                                                        {{ __('التوقيت الرسمي') }}</flux:text>
+                                                    <div class="text-sm font-black text-emerald-900 dark:text-emerald-200"
+                                                        dir="ltr">
+                                                        {{ \Carbon\Carbon::parse($group->start_time)->format('h:i A') }}
+                                                        -
+                                                        {{ \Carbon\Carbon::parse($group->end_time)->format('h:i A') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600">
+                                                    <flux:icon icon="user-group" size="sm" />
+                                                </div>
+                                                <div>
+                                                    <flux:text size="xs"
+                                                        class="text-amber-900/60 font-bold uppercase">
+                                                        {{ __('سعة المجموعة') }}</flux:text>
+                                                    <div class="text-sm font-black text-amber-900 dark:text-amber-200">
+                                                        {{ $group->students_count }} / {{ $group->max_students }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <flux:separator />
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            @forelse($group->teachers as $teacher)
+                                                <div
+                                                    class="flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-900/50 group/teacher">
+                                                    <div
+                                                        class="size-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-lg border border-emerald-100 dark:border-emerald-900/30 group-hover/teacher:bg-emerald-500 group-hover/teacher:text-white transition-colors">
+                                                        {{ Str::limit($teacher->user->name ?? '?', 1, '') }}
+                                                    </div>
+
+                                                    <div class="min-w-0">
+                                                        <flux:heading size="sm" class="truncate">
+                                                            {{ $teacher->user->name ?? __('غير معروف') }}
+                                                        </flux:heading>
+                                                        <flux:text size="xs" class="text-slate-500">
+                                                            {{ $teacher->jobTitle->status_name ?? __('معلم') }}
+                                                        </flux:text>
+
+                                                        @if ($teacher->user?->phone)
+                                                            <a href="tel:{{ $teacher->user->phone }}"
+                                                                class="flex items-center gap-1 mt-1 text-slate-400 hover:text-emerald-600 transition-colors">
+                                                                <flux:icon icon="phone" size="3" />
+                                                                <flux:text size="xs">{{ $teacher->user->phone }}
+                                                                </flux:text>
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div
+                                                    class="col-span-full py-12 text-center bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                    <flux:icon icon="user-group" class="mx-auto text-slate-300 mb-2"
+                                                        size="lg" />
+                                                    <flux:text class="text-slate-500">
+                                                        {{ __('لا يوجد معلمون مضافون لهذه المجموعة بعد.') }}
+                                                    </flux:text>
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                </flux:modal>
                             </div>
 
                             <!-- Progress Monitoring -->
@@ -531,14 +643,16 @@
                                         <div class="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
                                             style="width: {{ $group->today_attendance_percentage }}%"></div>
                                     </div>
-                                    <div class="mt-3 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+                                    <div
+                                        class="mt-3 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
                                         <div>
-                                          
-                                         <p>   {{ __('البيانات مفقودة:') }}</p>
-                                         <p>   {{ $group->missing_attendance_count }} سجل لم يتم ادخال حضور او غياب</p>
-                                       
+
+                                            <p> {{ __('البيانات مفقودة:') }}</p>
+                                            <p> {{ $group->missing_attendance_count }} سجل لم يتم ادخال حضور او غياب
+                                            </p>
+
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -613,7 +727,7 @@
             </section>
         @endif
     </div>
-{{-- 
+    {{-- 
     <div id="summary">
         @foreach ($activeGroupsData as $groups)
             <li> {{ $groups->name }} ( {{ $groups->region->region_name }} -> {{ $groups->city->city_name }} )
@@ -655,21 +769,24 @@
 
     {{-- Bottom Navigation (Standard HTML) --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12  flex justify-center  ">
-        <a href="{{ route('dashboard') }}" 
-           class="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white shadow-xl hover:shadow-teal-500/20 px-10 py-5 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 no-underline font-black uppercase tracking-wide decoration-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        <a href="{{ route('dashboard') }}"
+            class="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white shadow-xl hover:shadow-teal-500/20 px-10 py-5 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 no-underline font-black uppercase tracking-wide decoration-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             {{ __('العودة للرئيسية') }}
         </a>
     </div>
 
     {{-- Scroll to Top Button (Robust Pure Native JS) --}}
-    <div id="scroll-to-top-btn" 
-         class="fixed bottom-6 right-6 z-[9999] transition-all duration-500 opacity-0 translate-y-20 pointer-events-none scale-0">
+    <div id="scroll-to-top-btn"
+        class="fixed bottom-6 right-6 z-[9999] transition-all duration-500 opacity-0 translate-y-20 pointer-events-none scale-0">
         <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-                class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl text-teal-600 dark:text-teal-400 p-5 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] border border-teal-100/50 dark:border-slate-700 transition-all duration-300 hover:scale-110 active:scale-90 focus:outline-none group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 transition-transform group-hover:-translate-y-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl text-teal-600 dark:text-teal-400 p-5 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] border border-teal-100/50 dark:border-slate-700 transition-all duration-300 hover:scale-110 active:scale-90 focus:outline-none group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 transition-transform group-hover:-translate-y-1.5"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 15l7-7 7 7" />
             </svg>
         </button>
@@ -680,9 +797,9 @@
             function updateScrollButton() {
                 const btn = document.getElementById('scroll-to-top-btn');
                 if (!btn) return;
-                
+
                 const scrollPos = window.scrollY || document.documentElement.scrollTop;
-                
+
                 if (scrollPos > 400) {
                     btn.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none', 'scale-0');
                     btn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto', 'scale-100');
@@ -695,7 +812,7 @@
             window.addEventListener('scroll', updateScrollButton);
             document.addEventListener('DOMContentLoaded', updateScrollButton);
             document.addEventListener('livewire:navigated', updateScrollButton);
-            
+
             // Re-check periodically if transition state gets stuck
             setInterval(updateScrollButton, 1000);
         })();

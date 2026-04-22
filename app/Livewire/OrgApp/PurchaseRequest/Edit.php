@@ -4,6 +4,7 @@ namespace App\Livewire\OrgApp\PurchaseRequest;
 
 use App\Concerns\PurchaseRequest\PurchaseTrait;
 use App\Models\PurchaseRequisition;
+use App\Services\ManagecurrencyServices;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -11,7 +12,7 @@ use Livewire\Component;
 class Edit extends Component
 {
     use PurchaseTrait;
-
+    public $Currenyvalue;
     public PurchaseRequisition $purchaseRequisition;
 
     public function mount(PurchaseRequisition $purchaseRequisition)
@@ -26,8 +27,9 @@ class Edit extends Component
         $this->suggested_vendor_ids = $purchaseRequisition->suggested_vendor_ids ?? [];
         $this->need_by_date = $purchaseRequisition->need_by_date ? $purchaseRequisition->need_by_date->format('Y-m-d') : null;
         $this->budget_details = $purchaseRequisition->budget_details;
-        $this->estimated_total = $purchaseRequisition->estimated_total;
-        $this->estimated_total_currency = $purchaseRequisition->estimated_total_currency;
+        $this->estimated_total_dollar = $purchaseRequisition->estimated_total_dollar;
+        $this->estimated_total_nis = $purchaseRequisition->estimated_total_nis;
+ 
         $this->status_id = $purchaseRequisition->status_id;
         
         $this->items = $purchaseRequisition->items->toArray();
@@ -36,11 +38,26 @@ class Edit extends Component
         }
     }
 
+    public function updatedEstimatedTotalDollar()
+    {
+        $value = new ManagecurrencyServices();
+        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis, $this->estimated_total_dollar);
+    }
+
+    public function updatedEstimatedTotalNis()
+    {
+        $value = new ManagecurrencyServices();
+        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis, $this->estimated_total_dollar);
+    }
+
     public function update()
     {
         $this->validate();
-
+      
         DB::transaction(function () {
+            $value = new ManagecurrencyServices();
+            $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis, $this->estimated_total_dollar);
+
             $this->purchaseRequisition->fill([
                 'request_number' => $this->request_number,
                
@@ -50,8 +67,8 @@ class Edit extends Component
                 'suggested_vendor_ids' => $this->suggested_vendor_ids,
                 'need_by_date' => $this->need_by_date,
                 'budget_details' => $this->budget_details,
-                'estimated_total' => $this->estimated_total,
-                'estimated_total_currency' => $this->estimated_total_currency,
+                'estimated_total_dollar' => $this->estimated_total_dollar ?: $this->Currenyvalue,
+                'estimated_total_nis' => $this->estimated_total_nis ?: $this->Currenyvalue,
                 'status_id' => $this->status_id,
             ]);
 

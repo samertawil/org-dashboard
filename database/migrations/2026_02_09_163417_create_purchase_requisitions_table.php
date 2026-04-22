@@ -20,8 +20,8 @@ return new class extends Migration
             $table->json('suggested_vendor_ids')->nullable();
             $table->date('need_by_date')->nullable(); //  متى نحتاج الي هذا التوريد
             $table->string('budget_details')->nullable(); //  من اين الميزانية التي سيتم بها الشراء
-            $table->integer('estimated_total')->nullable(); //  من اين الميزانية التي سيتم بها الشراء
-            $table->tinyInteger('estimated_total_currency')->nullable(); //  من اين الميزانية التي سيتم بها الشراء
+            $table->double('estimated_total_dollar')->nullable(); // السعر بالدولار
+          
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('status_id')->nullable()->constrained('statuses')->nullOnDelete(); //draft, submitted, under_review, approved, rejected,converted_to_po
             $table->json('attachments')->nullable(); //  مرفقات مثل عروض الأسعار أو الموافقات أو أي مستندات داعمة أخرى

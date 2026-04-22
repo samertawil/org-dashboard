@@ -28,7 +28,12 @@ class SetupMap extends Component
 
         // 1. Get active group IDs for today and their max_students sum
         $activeGroupsQuery = StudentGroup::activeToday();
-        $activeGroupsData = $activeGroupsQuery->withCount([
+        $activeGroupsData = $activeGroupsQuery->with([
+            'teachers.user',
+            'teachers.jobTitle',
+            'region',
+            'city'
+        ])->withCount([
             'students' => function ($query) {
                 $query->where('activation', 1);
             },
@@ -240,7 +245,7 @@ class SetupMap extends Component
         $totalAllStudentsCombined = $activeGroupsData->sum('students_count') + $overallWithdrawnCount;
         $overallWithdrawnPercentage = $totalAllStudentsCombined > 0 ?      (($overallWithdrawnCount / $totalAllStudentsCombined) * 100) : 1;
 
-
+ 
 
         return view('livewire.org-app.student.setup-map', [
             'activeGroupsData' => $activeGroupsData,

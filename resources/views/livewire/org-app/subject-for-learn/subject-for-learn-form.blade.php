@@ -11,7 +11,7 @@
         <form wire:submit="save" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <flux:field>
                 <flux:label badge="Required" badgeColor="text-red-600">{{ __('Name') }}</flux:label>
-                <flux:input wire:model="name" type="text" placeholder="Subject Name"   style="height:auto "  />
+                <flux:input wire:model="name" type="text" placeholder="Subject Name" />
                 <flux:error name="name" />
             </flux:field>
 

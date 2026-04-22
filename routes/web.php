@@ -147,6 +147,8 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/activity/{activity}/edit', ActivityEdit::class)->name('activity.edit');
     Route::get('/activity/{activity}/show', ActivityShow::class)->name('activity.show');
     Route::get('/activity/{activity}/gallery', \App\Livewire\OrgApp\Activity\Gallery::class)->name('activity.gallery');
+    Route::get('/activity-feed', \App\Livewire\OrgApp\Activity\Feed::class)->name('activity.feed');
+
     
     Route::get('/sectors', ActivitySectorIndex::class)->name('sector.show');
     

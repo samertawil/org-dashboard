@@ -37,6 +37,7 @@ class Index extends Component
     #[Title('Dashboard')]
     public function render()
     {
+        
         // 1. KPI Cards Data
         $activeActivitiesCount = ActivityRepo::activites()->count();
 

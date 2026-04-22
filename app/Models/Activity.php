@@ -204,4 +204,8 @@ class Activity extends Model
             'color' => 'indigo',
         ];
     }
+    public function comments()
+    {
+        return $this->hasMany(ActivityComments::class, 'activity_id')->orderBy('created_at', 'desc');
+    }
 }

@@ -1,14 +1,19 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-on:modal-show.window="Flux.modal($event.detail.name).show()">
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Purchase Requisitions') }}</flux:heading>
             <flux:subheading>{{ __('Manage purchase requisitions.') }}</flux:subheading>
         </div>
-        @can('purchase_request.create')
-            <flux:button href="{{ route('purchase_request.create') }}" wire:navigate variant="primary" icon="plus">
-                {{ __('New Request') }}
+        <div class="flex gap-2">
+            <flux:button wire:click="export" icon="document-arrow-down" variant="outline">
+                {{ __('Export Excel') }}
             </flux:button>
-        @endcan
+            @can('purchase_request.create')
+                <flux:button href="{{ route('purchase_request.create') }}" wire:navigate variant="primary" icon="plus">
+                    {{ __('New Request') }}
+                </flux:button>
+            @endcan
+        </div>
 
     </div>
 
@@ -111,6 +116,9 @@
                                 @endif
                             </div>
                         </th>
+                        <th class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Suggested Vendors') }}
+                        </th>
                         <th wire:click="sortBy('status_id')"
                             class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
                             <div class="flex items-center gap-1">
@@ -135,6 +143,16 @@
                             <td class="px-6 py-4 text-sm truncate max-w-xs">
                                 {{ \Illuminate\Support\Str::limit($pr->description ?? '-', 50) }}</td>
                             <td class="px-6 py-4 text-sm">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($pr->suggested_vendors as $vendor)
+                                        <flux:badge size="sm" variant="ghost">{{ $vendor->name }}</flux:badge>
+                                    @endforeach
+                                    @if($pr->suggested_vendors->isEmpty())
+                                        -
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
                                 <flux:badge size="sm">{{ $pr->status->status_name ?? '-' }}</flux:badge>
                             </td>
                             <td class="px-6 py-4 text-right text-sm">
@@ -156,18 +174,19 @@
                                         @endif
                                     </div>
                                     @can('purchase_request.create')
+                                        <flux:button wire:click="showDetails({{ $pr->id }})" variant="ghost" size="sm" icon="eye" tooltip="{{ __('View Details') }}" />
                                         <flux:button href="{{ route('purchase_request.edit', $pr->id) }}" wire:navigate
-                                            variant="ghost" size="sm" icon="pencil-square" />
+                                            variant="ghost" size="sm" icon="pencil-square" tooltip="{{ __('Edit') }}" />
                                         <flux:button wire:click="delete({{ $pr->id }})"
                                             wire:confirm="{{ __('Are you sure?') }}" variant="ghost" size="sm"
-                                            icon="trash" class="text-red-500" />
+                                            icon="trash" class="text-red-500" tooltip="{{ __('Delete') }}" />
                                     @endcan
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500">
+                            <td colspan="6" class="px-6 py-8 text-center text-sm text-zinc-500">
                                 {{ __('No purchase requisitions found.') }}</td>
                         </tr>
                     @endforelse
@@ -179,4 +198,103 @@
             {{ $this->purchaseRequisitions->links() }}
         </div>
     </div>
+
+    {{-- Details Modal --}}
+    <flux:modal name="show-pr-modal" class="md:w-[800px]">
+        <div class="flex flex-col gap-6">
+            @if($selectedPr)
+                <div class="flex justify-between items-center">
+                    <flux:heading level="2" size="lg">{{ __('Purchase Requisition') }} #{{ $selectedPr->request_number }}</flux:heading>
+                    <flux:button href="{{ route('purchase_request.show', $selectedPr->id) }}" variant="ghost" icon="printer" tooltip="{{ __('Print / Full View') }}">
+                        {{ __('Print') }}
+                    </flux:button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <flux:label>{{ __('Request Date') }}</flux:label>
+                            <div class="text-zinc-800 dark:text-zinc-200">{{ $selectedPr->request_date ? $selectedPr->request_date->format('Y-m-d') : '-' }}</div>
+                        </div>
+                        <div>
+                            <flux:label>{{ __('Status') }}</flux:label>
+                            <div><flux:badge>{{ $selectedPr->status->status_name ?? '-' }}</flux:badge></div>
+                        </div>
+                        <div>
+                            <flux:label>{{ __('Requested By') }}</flux:label>
+                            <div class="text-zinc-800 dark:text-zinc-200">{{ $selectedPr->creator->name ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <flux:label>{{ __('Estimated Total (Dollar)') }}</flux:label>
+                            <div class="text-zinc-800 dark:text-zinc-200 font-semibold">${{ number_format($selectedPr->estimated_total_dollar, 2) }}</div>
+                        </div>
+                        <div>
+                            <flux:label>{{ __('Estimated Total (NIS)') }}</flux:label>
+                            <div class="text-zinc-800 dark:text-zinc-200 font-semibold">₪{{ number_format($selectedPr->estimated_total_nis, 2) }}</div>
+                        </div>
+                        <div>
+                            <flux:label>{{ __('Need By Date') }}</flux:label>
+                            <div class="text-zinc-800 dark:text-zinc-200">{{ $selectedPr->need_by_date ? $selectedPr->need_by_date->format('Y-m-d') : '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <flux:label>{{ __('Suggested Vendors') }}</flux:label>
+                    <div class="flex flex-wrap gap-1">
+                        @foreach($selectedPr->suggested_vendors as $vendor)
+                            <flux:badge size="sm" variant="outline">{{ $vendor->name }}</flux:badge>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <flux:label>{{ __('Description') }}</flux:label>
+                    <div class="p-3 bg-zinc-50 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-700">
+                        {{ $selectedPr->description ?? '-' }}
+                    </div>
+                </div>
+
+                @if($selectedPr->justification)
+                    <div class="space-y-2">
+                        <flux:label>{{ __('Justification') }}</flux:label>
+                        <div class="p-3 bg-zinc-50 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-700 italic">
+                            {{ $selectedPr->justification }}
+                        </div>
+                    </div>
+                @endif
+
+                <div class="space-y-2">
+                    <flux:heading level="3" size="md">{{ __('Items') }}</flux:heading>
+                    <div class="overflow-hidden border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">{{ __('Item') }}</th>
+                                    <th class="px-3 py-2 text-center">{{ __('Qty') }}</th>
+                                    <th class="px-3 py-2 text-left">{{ __('Unit') }}</th>
+                                    <th class="px-3 py-2 text-right">{{ __('Price') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                @foreach($selectedPr->items as $item)
+                                    <tr>
+                                        <td class="px-3 py-2">
+                                            <div class="font-medium">{{ $item->item_name }}</div>
+                                            <div class="text-xs text-zinc-500">{{ $item->item_description }}</div>
+                                        </td>
+                                        <td class="px-3 py-2 text-center">{{ $item->quantity }}</td>
+                                        <td class="px-3 py-2 text-left">{{ $item->unit->status_name ?? '-' }}</td>
+                                        <td class="px-3 py-2 text-right font-mono">{{ number_format($item->unit_price, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </flux:modal>
 </div>

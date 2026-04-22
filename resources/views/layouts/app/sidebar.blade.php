@@ -132,6 +132,13 @@
                         icon="clipboard-document-list" class="grid">
 
                         @can('activity.index')
+                            <flux:sidebar.item icon="newspaper" :href="route('activity.feed')"
+                                :current="request()->routeIs('activity.feed')" wire:navigate>
+                                {{ __('Activity Feed') }}
+                            </flux:sidebar.item>
+                        @endcan
+
+                        @can('activity.index')
                             <flux:sidebar.item icon="list-bullet" :href="route('activity.index')"
                                 :current="request()->routeIs('activity.index')" wire:navigate>
                                 {{ __('Activities List') }}

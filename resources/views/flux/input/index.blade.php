@@ -141,7 +141,7 @@ $classes = Flux::classes()
             <input
                 type="{{ $type }}"
                 {{-- Leave file inputs unstyled... --}}
-                {{ $attributes->except('class')->class($type === 'file' ? '' : $classes) }}
+                {{ $attributes->merge(['style' => 'height:auto'])->except('class')->class($type === 'file' ? '' : $classes) }}
                 @isset ($name) name="{{ $name }}" @endisset
                 @if ($maskDynamic) x-mask:dynamic="{{ $maskDynamic }}" @elseif ($mask) x-mask="{{ $mask }}" @endif
                 @if ($invalid) aria-invalid="true" data-invalid @endif
@@ -193,7 +193,7 @@ $classes = Flux::classes()
         </div>
     </flux:with-field>
 <?php else: ?>
-    <button {{ $attributes->merge(['type' => 'button'])->class([$classes, 'w-full relative flex']) }}>
+    <button  {{ $attributes->merge(['type' => 'button', 'style' => 'height:auto'])->class([$classes, 'w-full relative flex']) }}>
         <?php if (is_string($iconLeading)): ?>
             <div class="absolute top-0 bottom-0 flex items-center justify-center text-xs text-zinc-400/75 ps-3 start-0">
                 <flux:icon :icon="$iconLeading" :variant="$iconVariant" :class="$iconClasses" />

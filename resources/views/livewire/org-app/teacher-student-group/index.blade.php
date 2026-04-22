@@ -1,19 +1,21 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-1">
-            <flux:heading level="1" size="xl">{{ __('Teacher Student Groups') }}</flux:heading>
-            <flux:subheading>{{ __('Manage the assignments between teachers and student groups.') }}</flux:subheading>
+    @if (!$student_group_id)
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col gap-1">
+                <flux:heading level="1" size="xl">{{ __('Teacher Student Groups') }}</flux:heading>
+                <flux:subheading>{{ __('Manage the assignments between teachers and student groups.') }}</flux:subheading>
+            </div>
+            
+            <flux:button 
+                href="{{ route('teacher-student-groups.create') }}" 
+                wire:navigate 
+                variant="primary"
+                icon="plus"
+            >
+                {{ __('New Assignment') }}
+            </flux:button>
         </div>
-        
-        <flux:button 
-            href="{{ route('teacher-student-groups.create') }}" 
-            wire:navigate 
-            variant="primary"
-            icon="plus"
-        >
-            {{ __('New Assignment') }}
-        </flux:button>
-    </div>
+    @endif
 
     {{-- Success and Error Messages --}}
     <x-auth-session-status class="text-center" :status="session('message')" />

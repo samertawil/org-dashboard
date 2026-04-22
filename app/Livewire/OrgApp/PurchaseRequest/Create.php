@@ -4,6 +4,7 @@ namespace App\Livewire\OrgApp\PurchaseRequest;
 
 use App\Concerns\PurchaseRequest\PurchaseTrait;
 use App\Models\PurchaseRequisition;
+use App\Services\ManagecurrencyServices;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -12,7 +13,7 @@ use Livewire\Component;
 class Create extends Component
 {
     use PurchaseTrait;
-
+    public $Currenyvalue;
     public function mount()
     {
         $this->bootPurchaseTrait(); // Load default data
@@ -34,8 +35,11 @@ class Create extends Component
     }
     public function save()
     {
+        
         $this->validate();
-
+        $value = new ManagecurrencyServices();
+        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis,$this->estimated_total_dollar);
+        
         DB::transaction(function () {
             $purchaseRequisition = PurchaseRequisition::create([
                 'request_number' => $this->request_number,
@@ -46,8 +50,9 @@ class Create extends Component
                 'suggested_vendor_ids' => $this->suggested_vendor_ids,
                 'need_by_date' => $this->need_by_date,
                 'budget_details' => $this->budget_details? : null,
-                'estimated_total' => $this->estimated_total,
-                'estimated_total_currency' => $this->estimated_total_currency,
+                'estimated_total_dollar' => $this->estimated_total_dollar ?: $this->Currenyvalue,
+                'estimated_total_nis' => $this->estimated_total_nis ?: $this->Currenyvalue,
+      
                 'status_id' => $this->status_id,
                 'created_by' => auth()->id(),
             ]);
