@@ -1,1 +1,0 @@
-vendors-container-<?php echo e(count($this->partners)); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/1fc891e28c755881b9219ed4fa0b3f52.blade.php ENDPATH**/ ?>
