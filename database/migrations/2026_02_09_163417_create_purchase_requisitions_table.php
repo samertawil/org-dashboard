@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('description')->nullable();    // وصف عام عن التوريد المطلوب
             $table->string('justification')->nullable();    // لماذا نحتاج الي هذا التوريد   اذكر مبررات
             $table->json('suggested_vendor_ids')->nullable();
-            $table->date('need_by_date')->nullable(); //  متى نحتاج الي هذا التوريد
+           
             $table->string('budget_details')->nullable(); //  من اين الميزانية التي سيتم بها الشراء
             $table->double('estimated_total_dollar')->nullable(); // السعر بالدولار
           

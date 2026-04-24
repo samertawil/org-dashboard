@@ -95,12 +95,14 @@ class Create extends Component
                             'parcels.*.parcel_type' => 'required_with:parcels.*.distributed_parcels_count,parcels.*.unit_id',
                             'parcels.*.distributed_parcels_count' => 'required_with:parcels.*.parcel_type,parcels.*.unit_id|nullable|integer|min:1',
                             'parcels.*.unit_id' => 'required_with:parcels.*.parcel_type,parcels.*.distributed_parcels_count',
+                            'parcels.*.purchase_requisition_id' => 'required',
                         ], [
                             'parcels.*.parcel_type.required_with' => 'The parcel type is required.',
                             'parcels.*.unit_id.required_with' => 'The unit type is required.',
                             'parcels.*.distributed_parcels_count.required_with' => 'The count is required.',
                             'parcels.*.distributed_parcels_count.integer' => 'The count must be an integer.',
                             'parcels.*.distributed_parcels_count.min' => 'The count must be at least 1.',
+                            'parcels.*.purchase_requisition_id.required' => 'The purchase requisition is required.',
                         ]);
                         $project->parcels()->create($parcel);
                     }

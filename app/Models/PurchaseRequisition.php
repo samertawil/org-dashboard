@@ -4,10 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PartnerInstitution;
+use Illuminate\Support\Str;
 
 class PurchaseRequisition extends Model
 {
     protected $table = 'purchase_requisitions';
+
+    protected static function booted()
+    {
+        static::creating(function ($pr) {
+            if (empty($pr->token)) {
+                $pr->token = Str::random(32);
+            }
+        });
+    }
+
+    public function getTokenAttribute($value)
+    {
+        if (empty($value)) {
+            $value = Str::random(32);
+            $this->update(['token' => $value]);
+        }
+        return $value;
+    }
+
+    public function calculateVendorPin($vendorId)
+    {
+        // معادلة رياضية ثابتة تولد 4 أرقام فريدة بناءً على المورد والتوكن
+        $seed = $this->token . $vendorId;
+        return str_pad(abs(crc32($seed)) % 10000, 4, '0', STR_PAD_LEFT);
+    }
 
     protected $fillable = [
         'request_number',
@@ -16,21 +42,23 @@ class PurchaseRequisition extends Model
         'description',
         'justification',
         'suggested_vendor_ids',
-        'need_by_date',
+        'quotation_deadline',
         'budget_details',
         'estimated_total_dollar',
         'estimated_total_nis',
-     
         'created_by',
         'status_id',
-        'attachments'
+        'order_count',
+        'attachments',
+        'token',
+        'quotation_deadline',
     ];
 
     protected $casts = [
         'suggested_vendor_ids' => 'array',
         'attachments' => 'array',
         'request_date' => 'date',
-        'need_by_date' => 'date',
+        'quotation_deadline' => 'date',
         'request_year' => 'date:Y'  
     ];
 
@@ -61,5 +89,10 @@ class PurchaseRequisition extends Model
             return collect();
         }
         return PartnerInstitution::whereIn('id', $this->suggested_vendor_ids)->get();
+    }
+
+    public function quotations()
+    {
+        return $this->hasMany(PurchaseQuotationResponse::class, 'purchase_requisition_id');
     }
 }

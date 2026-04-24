@@ -1,4 +1,5 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-on:modal-show.window="Flux.modal($event.detail.name).show()"
+    x-on:modal-close.window="Flux.modal($event.detail.name).hide()">
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
@@ -46,16 +47,28 @@
 
             {{-- Cost --}}
             <flux:field>
-                <flux:label>{{ __('Tottal Cost USD') }}</flux:label>
+                <div class="flex items-center  ">
+                    <flux:label badge="Auto-sync ({{ $exchange_rate }}) " badgeColor="text-yellow-600">
+                        {{ __('Estimated Total USD') }}</flux:label><span class="ml-2"
+                        style="color:red; font-size:12px; font-weight:bold">Required</span>
+                </div>
                 <flux:input type="number" step="0.01" wire:model.live.lazy="cost" :placeholder="0.0" />
                 <flux:error name="cost" />
             </flux:field>
 
             <flux:field>
-                <flux:label>{{ __('Tottal Cost NIS') }}</flux:label>
+                <div class="flex items-center  ">
+                    <flux:label badge="Auto-sync ({{ $exchange_rate }}) " badgeColor="text-yellow-600">
+                        {{ __('Estimated Total Nis') }}</flux:label><span class="ml-2"
+                        style="color:red; font-size:12px; font-weight:bold">Required</span>
+                </div>
                 <flux:input type="number" step="0.01" wire:model.live.lazy="cost_nis" :placeholder="0.0" />
                 <flux:error name="cost_nis" />
             </flux:field>
+
+            <flux:subheading class=" md:col-span-2 lg:col-span-3 text-sm text-zinc-500 dark:text-zinc-400">
+                To add new value for curreny or list all values <a href="{{ route('currency.index') }}"
+                    target="_blank"><span class="text-blue-500">Press Here</span></a> </flux:subheading>
 
             {{-- Start Date --}}
             <flux:field>
@@ -186,7 +199,8 @@
                                 </flux:field>
 
                                 <flux:field>
-                                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Unit Type') }} </flux:label>
+                                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Unit Type') }}
+                                    </flux:label>
                                     <flux:select wire:model="parcels.{{ $index }}.unit_id">
                                         <option value="">{{ __('Select') }}</option>
                                         @foreach ($units as $unit)
@@ -202,6 +216,19 @@
                                     <flux:input type="float" step="0.01"
                                         wire:model="parcels.{{ $index }}.cost_for_each_parcel" />
                                     <flux:error name="parcels.{{ $index }}.cost_for_each_parcel" />
+                                </flux:field>
+
+                                <flux:field>
+                                    <flux:label badge="Required" badgeColor="text-red-600">
+                                        {{ __('Purchase Requisition') }}</flux:label>
+                                    <div class="flex gap-2">
+                                        <flux:input
+                                            wire:model="parcels.{{ $index }}.purchase_requisition_number"
+                                            readonly placeholder="Select PR..." />
+                                        <flux:button type="button" variant="ghost" icon="magnifying-glass"
+                                            wire:click="openPRModal({{ $index }})" />
+                                    </div>
+                                    <flux:error name="parcels.{{ $index }}.purchase_requisition_id" />
                                 </flux:field>
 
                                 <flux:field>
@@ -314,7 +341,7 @@
                                     </flux:select>
                                 </div>
 
-                            
+
 
                                 {{-- Row 6: Notes --}}
                                 <flux:input type="text" wire:model="teaching_groups.{{ $index }}.notes"
@@ -467,4 +494,79 @@
             </div>
         </form>
     </div>
+
+    {{-- PR Selection Modal --}}
+    <flux:modal name="select-pr-modal" class="min-w-[300px] md:w-[700px]">
+        <div class="space-y-6">
+            <div class="flex items-center justify-between">
+                <flux:heading size="lg">{{ __('Select Purchase Requisition') }}</flux:heading>
+                <!-- <flux:modal.close>
+                    <flux:button variant="ghost" icon="x-mark" size="sm" />
+                </flux:modal.close> -->
+            </div>
+
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                @forelse ($this->approvedPurchaseRequisitions as $pr)
+                    <div
+                        class="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 bg-zinc-50/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                        <div class="flex-1 space-y-2">
+                            <div class="flex items-center justify-between sm:justify-start gap-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                        <flux:icon icon="document-text"
+                                            class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <span
+                                        class="text-sm font-bold text-zinc-900 dark:text-zinc-100">{{ $pr->request_number }}
+                                    </span>
+                                </div>
+                                <flux:badge size="sm" inset="top bottom" variant="subtle" color="zinc"
+                                    class="text-xs">
+                                    {{ $pr->request_date ? $pr->request_date->format('M d, Y') : '-' }}
+                                </flux:badge>
+                            </div>
+
+                            @if ($pr->suggested_vendors->count() > 0)
+                                <div class="flex flex-wrap gap-1.5 mt-1">
+                                    @foreach ($pr->suggested_vendors as $vendor)
+                                        <flux:badge size="sm" variant="ghost"
+                                            class="bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-[10px] uppercase tracking-wider">
+                                            {{ $vendor->name }}
+                                        </flux:badge>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div>
+                                <span class="text-sm text-zinc-500">{{ __('Estimated Total Dollar') }}:
+                                    {{ $pr->estimated_total_dollar }}</span>
+                            </div>
+                            <div>
+                                <span class="text-sm text-zinc-500">{{ __('Estimated Total Nis') }}:
+                                    {{ $pr->estimated_total_nis }}</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-center pt-2 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-zinc-200 dark:border-zinc-700">
+                            <flux:button size="sm" variant="primary"
+                                wire:click="selectPR({{ $pr->id }})" class="w-full sm:w-auto">
+                                {{ __('Select') }}
+                            </flux:button>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="flex flex-col items-center justify-center py-12 px-4 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700">
+                        <div class="p-4 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-4">
+                            <flux:icon icon="document-magnifying-glass" class="h-8 w-8 text-zinc-400" />
+                        </div>
+                        <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ __('No approved PRs found') }}</p>
+                        <p class="text-xs text-zinc-500 mt-1 text-center">
+                            {{ __('Only approved purchase requisitions are available for selection.') }}</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </flux:modal>
 </div>

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\PurchaseRequisition;
+ 
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -29,10 +29,11 @@ class PurchaseRequestExport implements FromCollection, WithHeadings, WithMapping
             __('Description'),
             __('Justification'),
             __('Suggested Vendors'),
-            __('Need By Date'),
+            __('Quotation Deadline'),
             __('Budget Details'),
             __('Total Dollar'),
             __('Total NIS'),
+            __('Order Count'),
             __('Status'),
             __('Created By'),
         ];
@@ -48,10 +49,11 @@ class PurchaseRequestExport implements FromCollection, WithHeadings, WithMapping
             $pr->description,
             $pr->justification,
             $vendors,
-            $pr->need_by_date ? $pr->need_by_date->format('Y-m-d') : '',
+            $pr->quotation_deadline ? $pr->quotation_deadline->format('Y-m-d') : '',
             $pr->budget_details,
             $pr->estimated_total_dollar,
             $pr->estimated_total_nis,
+            $pr->order_count,
             $pr->status->status_name ?? '',
             $pr->creator->name ?? '',
         ];

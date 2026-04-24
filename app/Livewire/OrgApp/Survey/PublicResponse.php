@@ -8,8 +8,8 @@ use App\Models\SurveyTable;
 use App\Services\CivilRegistryApiServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
+use App\Services\UploadingFilesServices;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -211,31 +211,13 @@ class PublicResponse extends Component
                 $uploadedFile = $answerData['answer'];
                 $mimeType = $uploadedFile->getMimeType();
 
-                // If it's an image, compress and resize it using Intervention Image
+                // Use service for optimized upload
                 if (str_starts_with($mimeType, 'image/')) {
-                    $manager = new ImageManager(new Driver());
-                    // Read the uploaded image
-                    $image = $manager->read($uploadedFile->getRealPath());
-
-                    // Scale down the image proportionally if it exceeds 1000px in width
-                    $image->scaleDown(width: 1000);
-
-                    // Encode as JPEG with 80% quality to heavily reduce file size (usually < 1MB)
-                    $encodedImage = $image->toJpeg(quality: 80);
-
-                    // Generate a unique path and save it to the public disk
-                    $filename = $uploadedFile->hashName();
-                    // change the extension to jpg since we converted it to Jpeg
-                    $filename = pathinfo($filename, PATHINFO_FILENAME) . '.jpg';
-                    $path = 'surveys/' . $this->survey()->id . '/' . $filename;
-
-                    Storage::disk('public')->put($path, $encodedImage->toString());
-                    $answerData['answer'] = $path;
+                    $path = UploadingFilesServices::uploadAndCompress($uploadedFile, 'surveys/' . $this->survey()->id, 'public', 1);
                 } else {
-                    // For non-images (PDF, word docs), just store them natively
-                    $path = $uploadedFile->store('surveys/' . $this->survey()->id, 'public');
-                    $answerData['answer'] = $path;
+                    $path = UploadingFilesServices::uploadSingleFile($uploadedFile, 'surveys/' . $this->survey()->id, 'public');
                 }
+                $answerData['answer'] = $path;
             }
 
             // Format answer text, optionally including detail if provided

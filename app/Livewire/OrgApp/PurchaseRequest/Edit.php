@@ -25,12 +25,13 @@ class Edit extends Component
         $this->description = $purchaseRequisition->description;
         $this->justification = $purchaseRequisition->justification;
         $this->suggested_vendor_ids = $purchaseRequisition->suggested_vendor_ids ?? [];
-        $this->need_by_date = $purchaseRequisition->need_by_date ? $purchaseRequisition->need_by_date->format('Y-m-d') : null;
+        $this->quotation_deadline = $purchaseRequisition->quotation_deadline ? $purchaseRequisition->quotation_deadline->format('Y-m-d') : null;
         $this->budget_details = $purchaseRequisition->budget_details;
         $this->estimated_total_dollar = $purchaseRequisition->estimated_total_dollar;
         $this->estimated_total_nis = $purchaseRequisition->estimated_total_nis;
  
         $this->status_id = $purchaseRequisition->status_id;
+        $this->order_count = $purchaseRequisition->order_count;
         
         $this->items = $purchaseRequisition->items->toArray();
         if(empty($this->items)) {
@@ -38,16 +39,26 @@ class Edit extends Component
         }
     }
 
-    public function updatedEstimatedTotalDollar()
-    {
-        $value = new ManagecurrencyServices();
-        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis, $this->estimated_total_dollar);
+    public function rules() {
+        return [
+            'order_count'=>['required_if:status_id,109'],
+        ];
     }
 
-    public function updatedEstimatedTotalNis()
+    public function updatedEstimatedTotalDollar($value)
     {
-        $value = new ManagecurrencyServices();
-        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis, $this->estimated_total_dollar);
+        if ($value) {
+            $service = new ManagecurrencyServices();
+            $this->estimated_total_nis = $service->convertCurrency(null, $value);
+        }
+    }
+
+    public function updatedEstimatedTotalNis($value)
+    {
+        if ($value) {
+            $service = new ManagecurrencyServices();
+            $this->estimated_total_dollar = $service->convertCurrency($value, null);
+        }
     }
 
     public function update()
@@ -65,11 +76,12 @@ class Edit extends Component
                 'description' => $this->description,
                 'justification' => $this->justification,
                 'suggested_vendor_ids' => $this->suggested_vendor_ids,
-                'need_by_date' => $this->need_by_date,
+                'quotation_deadline' => $this->quotation_deadline,
                 'budget_details' => $this->budget_details,
                 'estimated_total_dollar' => $this->estimated_total_dollar ?: $this->Currenyvalue,
                 'estimated_total_nis' => $this->estimated_total_nis ?: $this->Currenyvalue,
                 'status_id' => $this->status_id,
+                'order_count'=>$this->order_count,
             ]);
 
             if ($this->purchaseRequisition->isDirty()) {

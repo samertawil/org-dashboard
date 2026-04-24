@@ -30,7 +30,14 @@ class Index extends Component
 
     public function showDetails($id)
     {
-        $this->selectedPr = PurchaseRequisition::with(['status', 'creator', 'items.unit'])->findOrFail($id);
+        $this->selectedPr = PurchaseRequisition::with([
+            'status', 
+            'creator', 
+            'items.unit', 
+            'quotations.vendor', 
+            'quotations.currency', 
+            'quotations.prices'
+        ])->findOrFail($id);
         $this->dispatch('modal-show', name: 'show-pr-modal');
     }
 
@@ -104,6 +111,40 @@ class Index extends Component
         $record = PurchaseRequisition::findOrFail($id);
         $record->delete();
         session()->flash('message', __('Purchase Requisition deleted successfully.'));
+    }
+
+    public function acceptQuotation($quotationId)
+    {
+        $quote = \App\Models\PurchaseQuotationResponse::with('prices')->findOrFail($quotationId);
+        $pr = PurchaseRequisition::with('items')->findOrFail($quote->purchase_requisition_id);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($quote, $pr) {
+            // Update items prices
+            foreach ($quote->prices as $priceRecord) {
+                $prItem = $pr->items->where('id', $priceRecord->purchase_requisition_item_id)->first();
+                if ($prItem) {
+                    $prItem->update([
+                        'unit_price' => $priceRecord->offered_price,
+                        // We might want to update currency as well if needed
+                    ]);
+                }
+            }
+
+            // Update PR Totals (Simplified calculation, can be more complex based on currency)
+            $pr->update([
+                'estimated_total_nis' => $quote->total_amount, // Assuming unified currency for now or handling conversion
+                // 'status_id' => ... (Optionally change status)
+            ]);
+
+            // Update Quotation Statuses
+            $quote->update(['status_id' => 1]); // Example: Active/Accepted
+            \App\Models\PurchaseQuotationResponse::where('purchase_requisition_id', $pr->id)
+                ->where('id', '!=', $quote->id)
+                ->update(['status_id' => 0]); // Example: Inactive/Rejected
+        });
+
+        $this->showDetails($pr->id); // Refresh data
+        session()->flash('message', __('Quotation accepted and PR updated successfully.'));
     }
 
     public function render()

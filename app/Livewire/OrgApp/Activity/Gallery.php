@@ -9,6 +9,7 @@ use App\Models\ActivityAttchment; // Keeping the typo as per codebase
 use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use App\Services\UploadingFilesServices;
 
 class Gallery extends Component
 {
@@ -99,37 +100,21 @@ class Gallery extends Component
          if(Gate::denies('activity.create')){
             return abort(403,'You do not have the necessary permissions');
         }
-
+ 
         $this->validate([
             'uploadFiles.*' => 'required|file|max:10240', // Validate each file, increased max size for media
             // 'uploadType' => 'required', // Removed validation
         ]);
 
         foreach ($this->uploadFiles as $file) {
-            // Image Optimization Logic
-            // Check if file is image and larger than 3MB (3 * 1024 * 1024)
-            if (str_starts_with($file->getMimeType(), 'image/') && $file->getSize() > 3145728) {
-                try {
-                    // Create manager instance with desired driver (gd or imagick)
-                    $manager = new \Intervention\Image\ImageManager(
-                        new \Intervention\Image\Drivers\Gd\Driver()
-                    );
-                    
-                    $image = $manager->read($file->getRealPath());
-
-                    // Resize to max 1920px width or height, maintaining aspect ratio
-                    $image->scale(width: 1920);
-
-                    // Encode to Jpeg with 80% quality and save back to temp file
-                    $image->toJpeg(quality: 80)->save($file->getRealPath());
-                    
-                } catch (\Exception $e) {
-                    // Log error or continue with original file if optimization fails
-                    // \Log::error('Image optimization failed: ' . $e->getMessage());
-                }
+            $mimeType = $file->getMimeType();
+            
+            // Use service for optimized upload
+            if (str_starts_with($mimeType, 'image/')) {
+                $path = UploadingFilesServices::uploadAndCompress($file, 'activity-attachments', 'public', 1);
+            } else {
+                $path = UploadingFilesServices::uploadSingleFile($file, 'activity-attachments', 'public');
             }
-
-            $path = $file->store('activity-attachments', 'public');
             $extension = strtolower($file->getClientOriginalExtension());
             
             // Determine type ID

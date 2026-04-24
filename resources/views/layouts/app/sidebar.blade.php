@@ -170,6 +170,10 @@
                                 :current="request()->routeIs('purchase_request.index')" wire:navigate>
                                 {{ __('Purchase List') }}
                             </flux:sidebar.item>
+                            <flux:sidebar.item icon="chat-bubble-left-right" :href="route('quotation.index')"
+                                :current="request()->routeIs('quotation.index')" wire:navigate>
+                                {{ __('Merchant Responses') }}
+                            </flux:sidebar.item>
                         @endcan
 
                     </flux:sidebar.group>

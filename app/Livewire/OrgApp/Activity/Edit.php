@@ -42,7 +42,11 @@ class Edit extends Component
         $this->cost_nis = $activity->cost_nis;
 
 
-        $this->parcels = $activity->parcels->toArray();
+        $this->parcels = $activity->parcels->map(function($parcel) {
+            return array_merge($parcel->toArray(), [
+                'purchase_requisition_number' => $parcel->purchaseRequisition?->request_number
+            ]);
+        })->toArray();
         if (empty($this->parcels)) $this->addParcel();
 
         $this->beneficiaries = $activity->beneficiaries->toArray();
@@ -119,12 +123,14 @@ class Edit extends Component
                     'parcels.*.parcel_type' => 'required_with:parcels.*.distributed_parcels_count,parcels.*.unit_id',
                     'parcels.*.distributed_parcels_count' => 'required_with:parcels.*.parcel_type,parcels.*.unit_id|nullable|integer|min:1',
                     'parcels.*.unit_id' => 'required_with:parcels.*.parcel_type,parcels.*.distributed_parcels_count',
+                    'parcels.*.purchase_requisition_id' => 'required',
                 ], [
                     'parcels.*.parcel_type.required_with' => 'The parcel type is required.',
                     'parcels.*.unit_id.required_with' => 'The unit type is required.',
                     'parcels.*.distributed_parcels_count.required_with' => 'The count is required.',
                     'parcels.*.distributed_parcels_count.integer' => 'The count must be an integer.',
                     'parcels.*.distributed_parcels_count.min' => 'The count must be at least 1.',
+                    'parcels.*.purchase_requisition_id.required' => 'The purchase requisition is required.',
                 ]);
 
                 if (!empty($parcel['id'])) {
@@ -138,7 +144,7 @@ class Edit extends Component
                             'unit_id' => $parcel['unit_id'] ?? null,
                             'distributed_parcels_count' => $parcel['distributed_parcels_count'] ?? null,
                             'cost_for_each_parcel' => $parcel['cost_for_each_parcel'] ?? null,
-
+                            'purchase_requisition_id' => $parcel['purchase_requisition_id'] ?? null,
                         ]);
 
                         if ($existingParcel->isDirty()) {

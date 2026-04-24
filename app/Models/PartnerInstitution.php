@@ -22,4 +22,10 @@ class PartnerInstitution extends Model
     {
         return $this->belongsTo(Status::class, 'type_id');
     }
+
+    protected static function booted()
+    {
+        static::saved(fn () => \Illuminate\Support\Facades\Cache::forget('partners-all'));
+        static::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('partners-all'));
+    }
 }

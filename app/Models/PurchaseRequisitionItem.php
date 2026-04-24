@@ -40,4 +40,9 @@ class PurchaseRequisitionItem extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function quotationPrices()
+    {
+        return $this->hasMany(PurchaseQuotationPrice::class, 'purchase_requisition_item_id');
+    }
 }

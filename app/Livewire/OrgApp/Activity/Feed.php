@@ -4,6 +4,9 @@ namespace App\Livewire\OrgApp\Activity;
 
 use App\Models\Activity;
 use App\Models\ActivityComments;
+use App\Models\PurchaseRequisition;
+use App\Exports\ActivityBeneficiaryNamesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 use App\Reposotries\CityRepo;
 use App\Reposotries\RegionRepo;
@@ -24,6 +27,43 @@ class Feed extends Component
     public $region_id = '';
     public $city_id = '';
     public $newCommentText = [];
+
+    public ?PurchaseRequisition $selectedPr = null;
+
+    public function showDetails($id)
+    {
+        $this->selectedPr = PurchaseRequisition::with(['status', 'creator', 'items.unit'])->findOrFail($id);
+        $this->dispatch('modal-show', name: 'show-pr-modal');
+    }
+
+    public ?Activity $selectedActivityForBeneficiaries = null;
+    public $beneficiarySearch = '';
+
+    public function showBeneficiaries($id)
+    {
+        $this->beneficiarySearch = '';
+        $this->selectedActivityForBeneficiaries = Activity::findOrFail($id);
+        $this->dispatch('modal-show', name: 'beneficiaries-modal');
+    }
+
+    #[Computed()]
+    public function selectedActivityBeneficiaries()
+    {
+        if (!$this->selectedActivityForBeneficiaries) return collect();
+
+        return $this->selectedActivityForBeneficiaries->beneficiaryNames()
+            ->with('status')
+            ->when($this->beneficiarySearch, function($query) {
+                $query->where('full_name', 'like', '%' . $this->beneficiarySearch . '%');
+            })
+            ->get();
+    }
+
+    public function exportBeneficiaries($id)
+    {
+        $activity = Activity::findOrFail($id);
+        return Excel::download(new ActivityBeneficiaryNamesExport($id), 'beneficiaries-' . $activity->name . '.xlsx');
+    }
 
 
     protected $queryString = [
@@ -57,7 +97,7 @@ class Feed extends Component
 
             
         ])
-            ->withCount('attachments')
+            ->withCount(['attachments', 'beneficiaryNames'])
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%')
                                               ->orWhere('description', 'like', '%' . $this->search . '%'))
             ->when($this->status_id, function ($q) {

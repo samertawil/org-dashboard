@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Services\UploadingFilesServices;
 
 class Gallery extends Component
 {
@@ -41,30 +42,14 @@ class Gallery extends Component
         $newAttachmentsData = [];
 
         foreach ($this->uploadFiles as $file) {
-            // Image Optimization Logic
-            // Check if file is image and larger than 3MB (3 * 1024 * 1024)
-            if (str_starts_with($file->getMimeType(), 'image/') && $file->getSize() > 3145728) {
-                try {
-                    // Create manager instance with desired driver (gd or imagick)
-                    $manager = new \Intervention\Image\ImageManager(
-                        new \Intervention\Image\Drivers\Gd\Driver()
-                    );
-                    
-                    $image = $manager->read($file->getRealPath());
-
-                    // Resize to max 1920px width or height, maintaining aspect ratio
-                    $image->scale(width: 1920);
-
-                    // Encode to Jpeg with 80% quality and save back to temp file
-                    $image->toJpeg(quality: 80)->save($file->getRealPath());
-                    
-                } catch (\Exception $e) {
-                    // Log error or continue with original file if optimization fails
-                    // \Log::error('Image optimization failed: ' . $e->getMessage());
-                }
+            $mimeType = $file->getMimeType();
+            
+            // Use service for optimized upload
+            if (str_starts_with($mimeType, 'image/')) {
+                $path = UploadingFilesServices::uploadAndCompress($file, 'purchase-request-attachments', 'public', 1);
+            } else {
+                $path = UploadingFilesServices::uploadSingleFile($file, 'purchase-request-attachments', 'public');
             }
-
-            $path = $file->store('purchase-request-attachments', 'public');
             
             // Use the provided note/name for all files if single note, or fallback to filename
             $name = $this->uploadNotes ? $this->uploadNotes : $file->getClientOriginalName();

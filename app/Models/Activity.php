@@ -208,4 +208,9 @@ class Activity extends Model
     {
         return $this->hasMany(ActivityComments::class, 'activity_id')->orderBy('created_at', 'desc');
     }
+
+    public function beneficiaryNames()
+    {
+        return $this->hasMany(activityBeneficiaryName::class, 'activity_id');
+    }
 }

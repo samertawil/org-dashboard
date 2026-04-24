@@ -1,13 +1,10 @@
 <?php
 
 namespace App\Concerns\PurchaseRequest;
-
-use Livewire\Attributes\Validate;
-use Livewire\WithFileUploads;
-use App\Models\PartnerInstitution;
-use App\Models\Status;
-use App\Reposotries\StatusRepo;
 use App\Reposotries\PartnersRepo;
+use App\Reposotries\StatusRepo;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Validate;
 
 trait PurchaseTrait
 {
@@ -23,42 +20,51 @@ trait PurchaseTrait
     #[Validate('nullable|string')]
     public $justification;
 
-    #[Validate('nullable|array')]
+    #[Validate('required|array')]
     public $suggested_vendor_ids = [];
 
     #[Validate('nullable|date')]
-    public $need_by_date;
+    public $quotation_deadline;
 
     #[Validate('nullable|string')]
     public $budget_details;
 
-    #[Validate('nullable')]
+    #[Validate('required')]
     public $estimated_total_dollar = null;
 
-    #[Validate('nullable')]
+    #[Validate('required')]
     public $estimated_total_nis = null;
 
     #[Validate('nullable|integer')]
     public $estimated_total_currency;
 
-    #[Validate('nullable|exists:statuses,id')]
+    #[Validate('required|exists:statuses,id')]
     public $status_id;
+
+    public $order_count = null;
+    public $exchange_rate = null;
 
     public $items = [];
     
-    public $partners = [];
+    // public $partners = [];
     public $statuses = [];
     public $units = [];
     public $currencies = [];
 
     public function bootPurchaseTrait()
     {
-        $this->partners = PartnersRepo::partners()->where('type_id',112);
+
         $this->statuses = StatusRepo::statuses()->where('p_id_sub', config('appConstant.purchase_requisition_statuses'));  
         $this->units = StatusRepo::statuses()->where('p_id_sub', config('appConstant.units_statuses'));   
+        $this->exchange_rate = \App\Models\CurrancyValue::latest('exchange_date')->first()?->currency_value;
      
     }
 
+    #[Computed()]
+    public function partners() {
+ 
+       return    PartnersRepo::partners()->where('type_id',112);
+    }
     
    
     public function addPurchaseRequisitionItem()

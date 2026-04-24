@@ -16,7 +16,7 @@ class Show extends Component
 
     public function mount(Activity $activity)
     {
-        $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels', 'beneficiaries', 'workTeams', 'summary']);
+        $this->activity = $activity->load(['regions', 'cities', 'activityNeighbourhood', 'activityLocation', 'activityStatus', 'statusSpecificSector', 'creator','parcels.purchaseRequisition', 'beneficiaries', 'workTeams', 'summary']);
     }
 
     public function generateSummary()

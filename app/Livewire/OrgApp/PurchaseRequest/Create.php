@@ -13,6 +13,7 @@ use Livewire\Component;
 class Create extends Component
 {
     use PurchaseTrait;
+
     public $Currenyvalue;
     public function mount()
     {
@@ -21,6 +22,12 @@ class Create extends Component
         $this->request_date = now()->toDateString();
         $this->request_number = $this->generateRequestNumber();
        
+    }
+
+    public function rules() {
+        return [
+            'order_count'=>['required_if:status_id,109'],
+        ];
     }
 
     public function generateRequestNumber()
@@ -33,27 +40,43 @@ class Create extends Component
      
         $this->request_number = $this->generateRequestNumber();
     }
+
+    public function updatedEstimatedTotalDollar($value)
+    {
+        if ($value) {
+            $service = new ManagecurrencyServices();
+            $this->estimated_total_nis = $service->convertCurrency(null, $value);
+        }
+    }
+
+    public function updatedEstimatedTotalNis($value)
+    {
+        if ($value) {
+            $service = new ManagecurrencyServices();
+            $this->estimated_total_dollar = $service->convertCurrency($value, null);
+        }
+    }
+
     public function save()
     {
-        
+     
         $this->validate();
-        $value = new ManagecurrencyServices();
-        $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis,$this->estimated_total_dollar);
+        // $value = new ManagecurrencyServices();
+        // $this->Currenyvalue = $value->convertCurrency($this->estimated_total_nis,$this->estimated_total_dollar);
         
         DB::transaction(function () {
             $purchaseRequisition = PurchaseRequisition::create([
                 'request_number' => $this->request_number,
-
                 'request_date' => $this->request_date,
                 'description' => $this->description? : null,
                 'justification' => $this->justification? : null,
                 'suggested_vendor_ids' => $this->suggested_vendor_ids,
-                'need_by_date' => $this->need_by_date,
+                'quotation_deadline' => $this->quotation_deadline,
                 'budget_details' => $this->budget_details? : null,
-                'estimated_total_dollar' => $this->estimated_total_dollar ?: $this->Currenyvalue,
-                'estimated_total_nis' => $this->estimated_total_nis ?: $this->Currenyvalue,
-      
+                'estimated_total_dollar' => $this->estimated_total_dollar  ,
+                'estimated_total_nis' => $this->estimated_total_nis  ,
                 'status_id' => $this->status_id,
+                'order_count'=>$this->order_count,
                 'created_by' => auth()->id(),
             ]);
 

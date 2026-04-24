@@ -92,6 +92,9 @@ Route::view('/features', 'features')->name('features');
 // Public Survey Route
 Route::get('/survey/{id}', \App\Livewire\OrgApp\Survey\PublicResponse::class)->name('survey.public');
 
+// Public Quotation Route
+Route::get('/q/{token}/{vendor_id}', \App\Livewire\OrgApp\PurchaseRequest\PublicQuotation::class)->name('quotation.public');
+
 Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -204,6 +207,11 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
     Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
     Route::get('/purchase-request/{purchaseRequisition}/gallery', \App\Livewire\OrgApp\PurchaseRequest\Gallery::class)->name('purchase_request.gallery');
+    
+    // Quotation Management (Full Pages)
+    Route::get('/quotations', \App\Livewire\OrgApp\PurchaseRequest\QuotationIndex::class)->name('quotation.index');
+    Route::get('/quotations/{quotation}', \App\Livewire\OrgApp\PurchaseRequest\QuotationShow::class)->name('quotation.show');
+    Route::get('/purchase-requisitions/{id}/comparison', \App\Livewire\OrgApp\Financial\QuotationComparison::class)->name('purchase_request.comparison');
 
     // OrgApp - Displacement Camps
     Route::get('/displacement-camps',DisplacementCampsIndex::class)->name('displacement.camps.index');

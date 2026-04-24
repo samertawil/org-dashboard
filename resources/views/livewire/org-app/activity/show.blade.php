@@ -352,6 +352,7 @@
                                     <th class="px-4 py-3 rounded-l-md">{{ __('Parcel Type') }}</th>
                                     <th class="px-4 py-3">{{ __('Quantity') }}</th>
                                     <th class="px-4 py-3">{{ __('Unit') }}</th>
+                                    <th class="px-4 py-3">{{ __('PR #') }}</th>
                                     <th class="px-4 py-3">{{ __('Unit Cost') }}</th>
                                     <th class="px-4 py-3 rounded-r-md">{{ __('Total') }}</th>
                                 </tr>
@@ -369,6 +370,13 @@
                                         </td>
                                         <td class="px-4 py-3">{{ $parcel->distributed_parcels_count }}</td>
                                         <td class="px-4 py-3">{{ $parcel->unit->status_name ?? __('-')  }}</td>
+                                        <td class="px-4 py-3">
+                                            @if($parcel->purchaseRequisition)
+                                                <flux:badge size="sm" color="blue" variant="outline">{{ $parcel->purchaseRequisition->request_number }}</flux:badge>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">${{ number_format($parcel->cost_for_each_parcel, 4) }}
                                         </td>
                                         <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">

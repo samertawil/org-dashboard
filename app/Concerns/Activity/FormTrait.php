@@ -2,17 +2,18 @@
 
 namespace App\Concerns\Activity;
 
+use App\Models\CurrancyValue;
+use App\Models\PurchaseRequisition;
 use App\Models\TeachingGroup;
-use App\Reposotries\StatusRepo;
 use App\Reposotries\PartnersRepo;
+use App\Reposotries\StatusRepo;
+use App\Reposotries\StudentGroupRepo;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
-use App\Reposotries\StudentGroupRepo;
- 
- 
 
 trait FormTrait
 {
+    public $selectedParcelIndex = null;
     #[Validate('nullable|string')]
     public $description = null;
 
@@ -22,11 +23,11 @@ trait FormTrait
     #[Validate('nullable|date|after_or_equal:start_date')]
     public $end_date = '';
 
-    #[Validate('nullable|numeric|min:0')]
-    public $cost = 0;
+    #[Validate('required|numeric|min:1')]
+    public $cost = null;
 
-    #[Validate('nullable|numeric|min:0')]
-    public $cost_nis = 0;
+    #[Validate('required|numeric|min:1')]
+    public $cost_nis = null;
 
     #[Validate('nullable|exists:statuses,id')]
     public $status = null;
@@ -63,11 +64,10 @@ trait FormTrait
     public $activity_partners = [];
     public $units = [];
  
-
-
     public $parcels = [];
     public $beneficiaries = [];
     public $work_teams = [];
+    public $exchange_rate = null;
 
     #[Computed()]
     public function allStatuses()
@@ -83,7 +83,7 @@ trait FormTrait
         $this->units =  $this->allStatuses()->where('p_id_sub', config('appConstant.units_statuses')) ;
         $this->partners = PartnersRepo::partners();
         $this->studentGroups = StudentGroupRepo::studentGroups();
-        
+        $this->exchange_rate = CurrancyValue::latest('exchange_date')->first()?->currency_value;
     }
 
     public function addParcel()
@@ -95,6 +95,8 @@ trait FormTrait
             'status_id' => '',
             'notes' => '',
             'unit_id' => '',
+            'purchase_requisition_id' => null,
+            'purchase_requisition_number' => null,
         ];
     }
 
@@ -223,5 +225,27 @@ trait FormTrait
         
     }
 
-    
+    #[Computed()]
+    public function approvedPurchaseRequisitions()
+    {
+        return PurchaseRequisition::where('status_id', 109)->get();
+    }
+
+    public function openPRModal($index)
+    {
+        $this->selectedParcelIndex = $index;
+        $this->dispatch('modal-show', name: 'select-pr-modal');
+    }
+
+    public function selectPR($prId)
+    {
+        if ($this->selectedParcelIndex !== null && isset($this->parcels[$this->selectedParcelIndex])) {
+            $pr = PurchaseRequisition::find($prId);
+            if ($pr) {
+                $this->parcels[$this->selectedParcelIndex]['purchase_requisition_id'] = $pr->id;
+                $this->parcels[$this->selectedParcelIndex]['purchase_requisition_number'] = $pr->request_number;
+            }
+        }
+        $this->dispatch('modal-close', name: 'select-pr-modal');
+    }
 }

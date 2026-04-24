@@ -11,8 +11,12 @@ use Livewire\WithFileUploads;
 use App\Reposotries\RegionRepo;
 use App\Reposotries\StatusRepo;
 use App\Models\ActivityAttchment;
+use App\Models\PurchaseRequisition;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Gate;
+use App\Services\UploadingFilesServices;
+use App\Exports\ActivityBeneficiaryNamesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Index extends Component
 {
@@ -45,9 +49,46 @@ class Index extends Component
         $this->selectedactivityIdForShowModal = null;
     }
 
+    public ?PurchaseRequisition $selectedPr = null;
+
+    public function showDetails($id)
+    {
+        $this->selectedPr = PurchaseRequisition::with(['status', 'creator', 'items.unit'])->findOrFail($id);
+        $this->dispatch('modal-show', name: 'show-pr-modal');
+    }
+
     public ?Activity $selectedactivity = null;
     public $attachments = [];
     public $newAttachments = [];
+
+    public ?Activity $selectedActivityForBeneficiaries = null;
+    public $beneficiarySearch = '';
+
+    public function showBeneficiaries($id)
+    {
+        $this->beneficiarySearch = '';
+        $this->selectedActivityForBeneficiaries = Activity::findOrFail($id);
+        $this->dispatch('modal-show', name: 'beneficiaries-modal');
+    }
+
+    #[Computed()]
+    public function selectedActivityBeneficiaries()
+    {
+        if (!$this->selectedActivityForBeneficiaries) return collect();
+
+        return $this->selectedActivityForBeneficiaries->beneficiaryNames()
+            ->with('status')
+            ->when($this->beneficiarySearch, function($query) {
+                $query->where('full_name', 'like', '%' . $this->beneficiarySearch . '%');
+            })
+            ->get();
+    }
+
+    public function exportBeneficiaries($id)
+    {
+        $activity = Activity::findOrFail($id);
+        return Excel::download(new ActivityBeneficiaryNamesExport($id), 'beneficiaries-' . $activity->name . '.xlsx');
+    }
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -126,6 +167,7 @@ class Index extends Component
 
     public function saveAttachments()
     {
+       
         if(Gate::denies('activity.create')){
             return abort(403,'You do not have the necessary permissions');
         }
@@ -135,7 +177,16 @@ class Index extends Component
         ]);
 
         foreach ($this->newAttachments as $item) {
-            $path = $item['file']->store('activity-attachments', 'public');
+            $file = $item['file'];
+            $mimeType = $file->getMimeType();
+            
+            // Use compression for images, standard upload for other files
+            if (str_starts_with($mimeType, 'image/')) {
+                $path = UploadingFilesServices::uploadAndCompress($file, 'activity-attachments', 'public', 1);
+            } else {
+                $path = UploadingFilesServices::uploadSingleFile($file, 'activity-attachments', 'public');
+            }
+
             $this->selectedactivity->attachments()->create([
                 'attchment_path' => $path,
                 'attchment_type' => $item['attchment_type'],
@@ -151,8 +202,8 @@ class Index extends Component
     #[Computed()]
     public function activities()
     {
-        return Activity::with(['regions', 'cities', 'activityStatus', 'statusSpecificSector', 'attachments'])
-            ->withCount('attachments')
+        return Activity::with(['regions', 'cities', 'activityStatus', 'statusSpecificSector', 'attachments', 'parcels.purchaseRequisition'])
+            ->withCount(['attachments', 'beneficiaryNames'])
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
             ->when($this->start_date, fn($q) => $q->where('start_date', $this->start_date))
             ->when($this->status_id, function ($q) {
