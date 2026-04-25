@@ -32,6 +32,13 @@ class PurchaseQuotationResponse extends Model
         return $this->belongsTo(PartnerInstitution::class, 'vendor_id');
     }
 
+    public function getCachedVendorAttribute()
+    {
+        return \Illuminate\Support\Facades\Cache::remember("vendor_basic_{$this->vendor_id}", 86400, function() {
+            return $this->vendor;
+        });
+    }
+
     public function currency()
     {
         return $this->belongsTo(Status::class, 'currency_id');

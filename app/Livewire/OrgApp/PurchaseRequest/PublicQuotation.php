@@ -2,6 +2,7 @@
 
 namespace App\Livewire\OrgApp\PurchaseRequest;
 
+use App\Mail\SendQuotationMail;
 use App\Models\PartnerInstitution;
 use App\Models\PurchaseQuotationPrice;
 use App\Models\PurchaseQuotationResponse;
@@ -10,6 +11,7 @@ use App\Models\Status;
 use App\Reposotries\StatusRepo;
 use App\Services\UploadingFilesServices;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -158,6 +160,18 @@ class PublicQuotation extends Component
                 'offered_price' => $price,
                 'vendor_item_notes' => $this->item_notes[$item_id] ?? '',
             ]);
+        }
+        $data = [
+            'name' => $this->vendor->name,
+            'subject' =>'تم استلام عرض سعر جديد لطلب الشراء رقم ' . $this->pr->id,
+            'notes' => $response->notes,
+            'link'=> 'يمكنك الاطلاع على التفاصيل من خلال الرابط أدناه'."https://app.afscgaza.org/dashboard/quotations/$response->id"
+       ];
+      
+        try {
+            Mail::to('eng.samertawil@gmail.com')->send(new SendQuotationMail($data));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Mail sending failed: ' . $e->getMessage());
         }
 
         $this->is_submitted = true;

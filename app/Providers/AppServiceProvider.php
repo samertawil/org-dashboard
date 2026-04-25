@@ -17,6 +17,7 @@ use App\Models\Student;
 use App\Models\StudentGroup;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
+use App\Models\User;
 use App\Observers\AbilitieObserver;
 use App\Observers\ActivityObserver;
 use App\Observers\DepartmentObserver;
@@ -30,6 +31,7 @@ use App\Observers\StudentGroupObserver;
 use App\Observers\StudentObserver;
 use App\Observers\SurveyAnswerObserver;
 use App\Observers\SurveyQuestionObserver;
+use App\Observers\UserObserver;
 use App\Reposotries\ActivityBeneficiaryRepo;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
@@ -77,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         SurveyQuestion::observe(SurveyQuestionObserver::class);
         SurveyAnswer::observe(SurveyAnswerObserver::class);
         Student::observe(StudentObserver::class);
+        User::observe(UserObserver::class);
         
 
 

@@ -47,7 +47,7 @@ class QuotationComparison extends Component
                 ->update(['status_id' => null]);
 
             // Mark this one as accepted
-            $quotation->update(['status_id' => 1]); // Accepted
+            $quotation->update(['status_id' => 176]); // Accepted
             
             // تحديث أسعار الأصناف الفردية في طلب الشراء الأصلي بناءً على العرض الفائز
             foreach ($quotation->prices as $price) {

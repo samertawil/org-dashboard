@@ -16,6 +16,9 @@ beforeEach(function () {
     // Seed necessary statuses for PR status
     $this->pendingStatus = Status::create(['status_name' => 'Pending', 'p_id_sub' => 1]);
     $this->approvedStatus = Status::create(['status_name' => 'Approved', 'p_id_sub' => 2]);
+
+    // Seed Currency for PR items and total estimates calculation
+    \App\Models\CurrancyValue::create(['exchange_date' => now(), 'currency_value' => 3.5]);
 });
 
 it('renders the create purchase request page', function () {
@@ -38,7 +41,10 @@ it('creates a purchase requisition with items', function () {
     Livewire::test(Create::class)
         ->set('request_date', now()->toDateString())
         ->set('request_number', 1001)
-        ->set('suggested_vendor_ids', [])
+        ->set('suggested_vendor_ids', [1])
+        ->set('estimated_total_dollar', 1500)
+        ->set('estimated_total_nis', 5250)
+        ->set('status_id', 1)
         ->set('items', $itemData)
         ->call('save')
         ->assertHasNoErrors()
@@ -53,7 +59,9 @@ it('updates purchase requisition and syncs items smartly', function () {
     $pr = PurchaseRequisition::create([
         'request_number' => 2002,
         'request_date' => now()->toDateString(),
-        'suggested_vendor_ids' => [],
+        'suggested_vendor_ids' => [1],
+        'estimated_total_dollar' => 100,
+        'estimated_total_nis' => 350,
         'attachments' => [],
         'status_id' => $this->pendingStatus->id,
         'created_by' => $this->user->id
@@ -126,7 +134,9 @@ it('shows warning when no changes were made to PR', function () {
     $pr = PurchaseRequisition::create([
         'request_number' => 3003,
         'request_date' => now()->toDateString(),
-        'suggested_vendor_ids' => [],
+        'suggested_vendor_ids' => [1],
+        'estimated_total_dollar' => 100,
+        'estimated_total_nis' => 350,
         'attachments' => [],
         'status_id' => $this->pendingStatus->id,
         'created_by' => $this->user->id

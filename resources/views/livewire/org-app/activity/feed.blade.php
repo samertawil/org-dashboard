@@ -107,7 +107,9 @@
 
                 {{-- Activities List --}}
                 <div class="space-y-8">
-                    @forelse($this->activities as $activity)
+                    @forelse($this->feedItems as $item)
+                        @if ($item instanceof \App\Models\Activity)
+                            @php $activity = $item; @endphp
                         <article
                             class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-xl group">
                             {{-- Post Header --}}
@@ -121,7 +123,7 @@
                                     </div>
                                     <div class="flex flex-col">
                                         <span
-                                            class="font-black text-sm text-zinc-900 dark:text-zinc-100 leading-tight ">{{ $activity->creator->name ?? __('نظام المؤسسة') }}</span>
+                                            class="font-black text-sm text-zinc-900 dark:text-zinc-100 leading-tight ">{{ $activity->cached_creator->name ?? __('نظام المؤسسة') }}</span>
                                         <div class="flex items-center gap-2 text-xs text-zinc-400">
                                             <flux:icon icon="clock" size="xs" />
                                             <span>{{ $activity->created_at->diffForHumans() }}</span>
@@ -402,6 +404,212 @@
                                 </div>
                             </div>
                         </article>
+                        @elseif ($item instanceof \App\Models\PurchaseRequisition)
+                            @php $pr = $item; @endphp
+                            <article
+                                class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-xl group">
+                                {{-- Post Header --}}
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="size-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center overflow-hidden border border-blue-100 dark:border-blue-800 shadow-sm p-1">
+                                            <flux:icon icon="document-text" class="text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="font-black text-sm text-zinc-900 dark:text-zinc-100 leading-tight ">{{ $pr->cached_creator->name ?? __('نظام المؤسسة') }}</span>
+                                            <div class="flex items-center gap-2 text-xs text-zinc-400">
+                                                <flux:icon icon="clock" size="xs" />
+                                                <span>{{ $pr->created_at->diffForHumans() }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <flux:badge variant="solid"
+                                            class="rounded-full px-4 font-bold text-xs bg-blue-100 text-blue-700 border-blue-200">
+                                            {{ __('طلب شراء') }}
+                                        </flux:badge>
+                                        @if($pr->status)
+                                            <flux:badge variant="outline" class="rounded-full px-4 font-bold text-xs">
+                                                {{ $pr->status->status_name }}
+                                            </flux:badge>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- PR Content --}}
+                                <div class="space-y-6">
+                                    <h3
+                                        class="text-2xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight mb-0">
+                                        {{ __('Purchase Requisition') }} #{{ $pr->request_number }}
+                                    </h3>
+
+                                    <div
+                                        class="bg-blue-50/50 dark:bg-blue-900/10 rounded-[2rem] p-6 border border-blue-100/50 dark:border-blue-800/30">
+                                        @if ($pr->description)
+                                            <p class="text-zinc-700 dark:text-zinc-300 leading-relaxed text-xl mb-6">
+                                                {{ $pr->description }}
+                                            </p>
+                                        @endif
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                           
+
+                                            {{-- Order Count --}}
+                                            <div class="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-amber-50">
+                                                <flux:icon icon="shopping-cart" size="sm" />
+                                                <span>{{ __('Order Count:') }} {{ $pr->order_count ?? 0 }}</span>
+                                            </div>
+
+                                            {{-- Request Date --}}
+                                            <div class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-zinc-100">
+                                                <flux:icon icon="calendar" size="sm" class="text-blue-500" />
+                                                <span>{{ __('Request Date:') }} {{ $pr->request_date ? $pr->request_date->format('Y-m-d') : '-' }}</span>
+                                            </div>
+
+                                            {{-- Quotation Deadline --}}
+                                            <div class="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-rose-50">
+                                                <flux:icon icon="clock" size="sm" />
+                                                <span>{{ __('Deadline:') }} {{ $pr->quotation_deadline ? $pr->quotation_deadline->format('Y-m-d') : '-' }}</span>
+                                            </div>
+
+                                            {{-- Winning Vendor --}}
+                                            @php
+                                                $winner = $pr->quotations->where('status_id', 176)->first();
+                                            @endphp
+                                            @if($winner)
+                                                <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-emerald-50 sm:col-span-2">
+                                                    <flux:icon icon="trophy" size="sm" />
+                                                    <span>{{ __('Winning Vendor:') }} {{ $winner->cached_vendor->name ?? '-' }}</span>
+                                                </div>
+                                            @endif
+
+                                            {{-- Financial Summary --}}
+                                            <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-emerald-50 sm:col-span-2">
+                                                <flux:icon icon="currency-dollar" size="sm" />
+                                                <span>
+                                                    ${{ number_format($pr->estimated_total_dollar, 2) }}
+                                                    /
+                                                    {{ number_format($pr->estimated_total_nis, 2) }} ₪
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Suggested Vendors --}}
+                                        @if($pr->suggested_vendors->isNotEmpty())
+                                            <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-blue-100 dark:border-blue-800/50 pt-4">
+                                                <span class="text-xs font-bold text-zinc-400">
+                                                    {{ __('الموردين المقترحين:') }}</span>
+                                                @foreach ($pr->suggested_vendors as $vendor)
+                                                    <flux:badge size="sm" variant="ghost" class="rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
+                                                        {{ $vendor->name }}
+                                                    </flux:badge>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- PR Metadata / Actions --}}
+                                <div class="flex flex-wrap items-center gap-6 pt-6 border-t border-zinc-100 dark:border-zinc-800 mt-6">
+                                    <div class="flex items-center gap-2 text-sm text-zinc-500">
+                                        <flux:icon icon="tag" size="sm" />
+                                        <span class="font-bold">{{ $pr->items->count() }} {{ __('Items') }}</span>
+                                    </div>
+
+                                    <div class="flex-1 flex justify-end gap-2">
+                                        <flux:button wire:click="showDetails({{ $pr->id }})" variant="ghost" size="sm"
+                                            class="rounded-xl hover:bg-blue-50 hover:text-blue-600" icon="eye">
+                                            {{ __('View Details') }}
+                                        </flux:button>
+                                        
+                                        <flux:button href="{{ route('purchase_request.show', $pr->id) }}" variant="ghost" size="sm"
+                                            class="rounded-xl hover:bg-zinc-50" icon="printer">
+                                            {{ __('Print') }}
+                                        </flux:button>
+                                    </div>
+                                </div>
+                            </article>
+                        @elseif ($item instanceof \App\Models\PurchaseQuotationResponse)
+                            @php $quote = $item; @endphp
+                            <article
+                                class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-xl group border-l-4 border-l-amber-500">
+                                {{-- Post Header --}}
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="size-12 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center overflow-hidden border border-amber-100 dark:border-amber-800 shadow-sm p-1">
+                                            <flux:icon icon="document-currency-dollar" class="text-amber-600 dark:text-amber-400" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="font-black text-sm text-zinc-900 dark:text-zinc-100 leading-tight ">{{ $quote->cached_vendor->name ?? __('مورد خارجي') }}</span>
+                                            <div class="flex items-center gap-2 text-xs text-zinc-400">
+                                                <flux:icon icon="clock" size="xs" />
+                                                <span>{{ $quote->created_at->diffForHumans() }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <flux:badge variant="solid"
+                                            class="rounded-full px-4 font-bold text-xs bg-amber-100 text-amber-700 border-amber-200">
+                                            {{ __('تقديم عرض سعر') }}
+                                        </flux:badge>
+                                    </div>
+                                </div>
+
+                                {{-- Quote Content --}}
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                                            <flux:icon icon="building-office-2" size="sm" class="text-zinc-500" />
+                                        </div>
+                                        <h3
+                                            class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight leading-tight mb-0">
+                                            {{ __('تم تقديم عرض سعر لطلب الشراء رقم') }} #{{ $quote->purchaseRequisition->request_number ?? '-' }}
+                                        </h3>
+                                    </div>
+
+                                    <div
+                                        class="bg-zinc-50 dark:bg-zinc-800/50 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800/50">
+                                        @if ($quote->notes)
+                                            <p class="text-zinc-700 dark:text-zinc-300 italic leading-relaxed text-lg mb-6">
+                                                "{{ $quote->notes }}"
+                                            </p>
+                                        @endif
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                            {{-- Amount --}}
+                                            <div class="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-amber-50">
+                                                <flux:icon icon="banknotes" size="sm" />
+                                                <span>{{ __('قيمة العرض:') }} {{ number_format($quote->total_amount, 2) }} {{ $quote->currency->status_name ?? '' }}</span>
+                                            </div>
+
+                                            {{-- PR Link --}}
+                                            <div class="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold bg-white dark:bg-zinc-900/60 px-4 py-2 rounded-2xl shadow-sm border border-blue-50">
+                                                <flux:icon icon="document-text" size="sm" />
+                                                <span>{{ __('طلب رقم:') }} {{ $quote->purchaseRequisition->request_number ?? '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Quote Actions --}}
+                                <div class="flex justify-end gap-2 mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                                    <flux:button wire:click="showDetails({{ $quote->purchase_requisition_id }})" variant="ghost" size="sm"
+                                        class="rounded-xl hover:bg-amber-50 hover:text-amber-600" icon="eye">
+                                        {{ __('View Original PR') }}
+                                    </flux:button>
+                                    
+                                    <flux:button wire:click="showQuotationDetails({{ $quote->id }})" variant="ghost" size="sm"
+                                        class="rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100" icon="list-bullet">
+                                        {{ __('عرض الأصناف المقدمة') }}
+                                    </flux:button>
+                                </div>
+                            </article>
+                        @endif
                     @empty
                         <div
                             class="py-24 text-center bg-white dark:bg-zinc-900 rounded-[2.5rem] border-2 border-dashed border-zinc-200 dark:border-zinc-800">
@@ -414,7 +622,7 @@
 
                 {{-- Pagination --}}
                 <div class="mt-12">
-                    {{ $this->activities->links() }}
+                    {{ $this->feedItems->links() }}
                 </div>
             </main>
         </div>
@@ -576,6 +784,100 @@
                                     </tr>
                                 @endforeach
                             </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </flux:modal>
+    {{-- Quotation Details Modal --}}
+    <flux:modal name="show-quotation-modal" class="md:w-[900px]">
+        <div class="flex flex-col gap-6 text-left">
+            @if ($selectedQuotation)
+                <div class="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="size-12 rounded-2xl bg-amber-50 dark:bg-amber-900/40 flex items-center justify-center">
+                            <flux:icon icon="document-currency-dollar" class="text-amber-600" />
+                        </div>
+                        <div>
+                            <flux:heading level="2" size="lg">{{ __('تفاصيل عرض السعر') }}</flux:heading>
+                            <flux:subheading>{{ $selectedQuotation->vendor->name ?? '-' }}</flux:subheading>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <flux:badge variant="solid" color="amber" class="font-black">
+                            {{ number_format($selectedQuotation->total_amount, 2) }} {{ $selectedQuotation->currency->status_name ?? '' }}
+                        </flux:badge>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                    <div class="space-y-2">
+                        <flux:label>{{ __('مرتبط بطلب شراء رقم') }}</flux:label>
+                        <div class="font-bold text-zinc-900 dark:text-zinc-100">#{{ $selectedQuotation->purchaseRequisition->request_number ?? '-' }}</div>
+                    </div>
+                    <div class="space-y-2">
+                        <flux:label>{{ __('تاريخ التقديم') }}</flux:label>
+                        <div class="font-bold text-zinc-900 dark:text-zinc-100">{{ $selectedQuotation->created_at->format('Y-m-d H:i') }}</div>
+                    </div>
+                </div>
+
+                @if($selectedQuotation->notes)
+                    <div class="space-y-2">
+                        <flux:label>{{ __('ملاحظات المورد') }}</flux:label>
+                        <div class="p-4 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-800/50 rounded-2xl italic text-zinc-700 dark:text-zinc-300">
+                            "{{ $selectedQuotation->notes }}"
+                        </div>
+                    </div>
+                @endif
+
+                <div class="space-y-4">
+                    <flux:heading level="3" size="md" class="flex items-center gap-2">
+                        <flux:icon icon="list-bullet" variant="mini" />
+                        {{ __('الأصناف والأسعار المقدمة') }}
+                    </flux:heading>
+                    
+                    <div class="overflow-hidden border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-sm">
+                        <table class="w-full text-sm">
+                            <thead class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-black text-zinc-600 dark:text-zinc-400">{{ __('الصنف') }}</th>
+                                    <th class="px-4 py-3 text-center font-black text-zinc-600 dark:text-zinc-400">{{ __('الكمية') }}</th>
+                                    <th class="px-4 py-3 text-right font-black text-zinc-600 dark:text-zinc-400">{{ __('سعر الوحدة') }}</th>
+                                    <th class="px-4 py-3 text-right font-black text-zinc-600 dark:text-zinc-400">{{ __('الإجمالي') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700 bg-white dark:bg-zinc-900">
+                                @foreach ($selectedQuotation->prices as $price)
+                                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                        <td class="px-4 py-3">
+                                            <div class="font-bold text-zinc-900 dark:text-zinc-100">{{ $price->requisitionItem->item_name ?? '-' }}</div>
+                                            @if($price->vendor_item_notes)
+                                                <div class="text-xs text-amber-600 font-medium mt-1">{{ $price->vendor_item_notes }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
+                                                {{ $price->requisitionItem->quantity ?? 0 }} {{ $price->requisitionItem->unit->status_name ?? '' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                            {{ number_format($price->offered_price, 2) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-mono font-black text-zinc-900 dark:text-zinc-100">
+                                            {{ number_format(($price->requisitionItem->quantity ?? 0) * $price->offered_price, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3 text-right font-black text-zinc-900 dark:text-zinc-100">{{ __('المجموع الإجمالي') }}</td>
+                                    <td class="px-4 py-3 text-right font-mono font-black text-amber-600 text-lg">
+                                        {{ number_format($selectedQuotation->total_amount, 2) }} {{ $selectedQuotation->currency->status_name ?? '' }}
+                                    </td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>

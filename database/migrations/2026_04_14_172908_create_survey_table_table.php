@@ -23,7 +23,7 @@ return new class extends Migration
             
             $table->index('semester', 'idx_semester');
             $table->index('survey_for_section', 'idx_survey_for_section');
-            $table->index('survey_target', 'idx_survey_target');
+            // $table->index('survey_target', 'idx_survey_target');
         });
     }
 

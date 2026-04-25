@@ -16,6 +16,7 @@ use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Gate;
 use App\Services\UploadingFilesServices;
 use App\Exports\ActivityBeneficiaryNamesExport;
+use App\Exports\ActivitiesExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class Index extends Component
@@ -30,6 +31,9 @@ class Index extends Component
     public $city_id = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
+    public $export_from_date = '';
+    public $export_to_date = '';
+
 
     protected $listeners = [
         'refresh-data' => '$refresh',
@@ -88,6 +92,18 @@ class Index extends Component
     {
         $activity = Activity::findOrFail($id);
         return Excel::download(new ActivityBeneficiaryNamesExport($id), 'beneficiaries-' . $activity->name . '.xlsx');
+    }
+
+    public function exportActivities()
+    {
+        $this->validate([
+            'export_from_date' => 'required|date',
+            'export_to_date' => 'required|date|after_or_equal:export_from_date',
+        ]);
+
+        $this->dispatch('close-modal', name: 'export-activities-modal');
+
+        return Excel::download(new ActivitiesExport($this->export_from_date, $this->export_to_date), 'activities-' . $this->export_from_date . '-to-' . $this->export_to_date . '.xlsx');
     }
 
     protected $queryString = [

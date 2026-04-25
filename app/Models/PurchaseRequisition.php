@@ -77,6 +77,13 @@ class PurchaseRequisition extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function getCachedCreatorAttribute()
+    {
+        return \Illuminate\Support\Facades\Cache::remember("user_basic_{$this->created_by}", 86400, function() {
+            return $this->creator;
+        });
+    }
+
     // public function currency()
     // {
         
@@ -88,7 +95,16 @@ class PurchaseRequisition extends Model
         if (empty($this->suggested_vendor_ids)) {
             return collect();
         }
-        return PartnerInstitution::whereIn('id', $this->suggested_vendor_ids)->get();
+        
+        // Cache the result on the instance to prevent duplicate queries
+        if (!$this->relationLoaded('suggestedVendorsCache')) {
+            $vendors = \Illuminate\Support\Facades\Cache::remember("pr_vendors_{$this->id}", 3600, function() {
+                return PartnerInstitution::whereIn('id', $this->suggested_vendor_ids)->get();
+            });
+            $this->setRelation('suggestedVendorsCache', $vendors);
+        }
+
+        return $this->getRelation('suggestedVendorsCache');
     }
 
     public function quotations()

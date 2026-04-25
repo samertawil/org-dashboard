@@ -12,6 +12,7 @@ use App\Livewire\OrgApp\TeacherStudentGroup\Edit;
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
+    $this->partner = \App\Models\PartnerInstitution::create(['name' => 'Partner A']);
 });
 
 it('renders the teacher student group index page', function () {
@@ -32,12 +33,15 @@ it('can create a teacher student group assignment', function () {
     ]);
 
     $studentGroup = StudentGroup::forceCreate([
-        'name' => 'Group A'
+        'name' => 'Group A',
+        'batch_no' => 1,
+        'partner_institutions_id' => $this->partner->id,
     ]);
 
     Livewire::test(Create::class)
         ->set('teacher_id', $teacherUser->id)
         ->set('student_group_id', $studentGroup->id)
+        ->set('job_title', 'Teacher')
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route('teacher-student-groups.index'));
@@ -59,7 +63,9 @@ it('can edit a teacher student group assignment', function () {
     ]);
     
     $studentGroup = StudentGroup::forceCreate([
-        'name' => 'Group A'
+        'name' => 'Group A',
+        'batch_no' => 1,
+        'partner_institutions_id' => 1,
     ]);
 
     $mapping = TeacherStudentGroup::forceCreate([
@@ -68,11 +74,14 @@ it('can edit a teacher student group assignment', function () {
     ]);
 
     $newStudentGroup = StudentGroup::forceCreate([
-        'name' => 'Group B'
+        'name' => 'Group B',
+        'batch_no' => 1,
+        'partner_institutions_id' => 1,
     ]);
 
     Livewire::test(Edit::class, ['teacherStudentGroup' => $mapping])
         ->set('student_group_id', $newStudentGroup->id)
+        ->set('job_title', 'Teacher')
         ->call('edit')
         ->assertHasNoErrors()
         ->assertRedirect(route('teacher-student-groups.index'));
@@ -94,7 +103,9 @@ it('can delete a teacher student group assignment', function () {
     ]);
 
     $studentGroup = StudentGroup::forceCreate([
-        'name' => 'Group A'
+        'name' => 'Group A',
+        'batch_no' => 1,
+        'partner_institutions_id' => 1,
     ]);
 
     $mapping = TeacherStudentGroup::forceCreate([

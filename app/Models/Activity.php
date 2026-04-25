@@ -45,6 +45,13 @@ class Activity extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function getCachedCreatorAttribute()
+    {
+        return \Illuminate\Support\Facades\Cache::remember("user_basic_{$this->created_by}", 86400, function() {
+            return $this->creator;
+        });
+    }
+
     public function parcels()
     {
         return $this->hasMany(ActivityParcel::class, 'activity_id');
@@ -83,37 +90,43 @@ class Activity extends Model
 
     public function getAverageRatingAttribute()
     {
+        if (array_key_exists('feedbacks_avg_rating', $this->attributes)) {
+            return $this->attributes['feedbacks_avg_rating'] ?? 0;
+        }
         return $this->feedbacks()->avg('rating') ?? 0;
     }
 
     public function getRatingInfoAttribute()
     {
-        $avg = $this->average_rating;
+        $cacheKey = "activity_rating_info_{$this->id}_{$this->updated_at?->timestamp}";
         
-        if ($avg == 0) {
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() {
+            $avg = $this->average_rating;
+            
+            if ($avg == 0) {
+                return [
+                    'rating' => 0,
+                    'text' => __('No Feedback'),
+                    'color' => 'text-zinc-300 dark:text-zinc-600',
+                ];
+            }
+
+            $color = $avg < 2.5 ? 'text-zinc-400' : 'text-yellow-600';
+
+            $text = match (true) {
+                $avg >= 4.5 => __('Excellent'),
+                $avg >= 3.5 => __('Very Good'),
+                $avg >= 2.5 => __('Good'),
+                $avg >= 1.5 => __('Fair'),
+                default => __('Poor'),
+            };
+
             return [
-                'rating' => 0,
-                'text' => __('No Feedback'),
-                'color' => 'text-zinc-300 dark:text-zinc-600', // White/Grey look
+                'rating' => number_format($avg, 1),
+                'text' => $text,
+                'color' => $color,
             ];
-        }
- 
-       
-          $color = $avg  < 2.5 ? 'text-zinc-400' : 'text-yellow-600'; // Gold vs Yellow (adjust classes as needed)
-
-        $text = match (true) {
-            $avg >= 4.5 => __('Excellent'),
-            $avg >= 3.5 => __('Very Good'),
-            $avg >= 2.5 => __('Good'),
-            $avg >= 1.5 => __('Fair'),
-            default => __('Poor'),
-        };
-
-        return [
-            'rating' => number_format($avg, 1),
-            'text' => $text,
-            'color' => $color,
-        ];
+        });
     }
 
     public function summary()
@@ -126,83 +139,85 @@ class Activity extends Model
      */
     public function getStatusInfoAttribute(): array
     {
-        // If status is set in database, use it
-        if ($this->status !== null) {
-            $name = $this->activityStatus->status_name ?? '-';
+        $cacheKey = "activity_status_info_{$this->id}_{$this->updated_at?->timestamp}";
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() {
+            // If status is set in database, use it
+            if ($this->status !== null) {
+                $name = $this->activityStatus->status_name ?? '-';
+                return [
+                    'name' => __($name),
+                    'raw_name' => $name,
+                    'color' => match ((int) $this->status) {
+                        27 => 'green',
+                        26 => 'yellow',
+                        25 => 'blue',
+                        28 => 'red',
+                        default => 'zinc',
+                    },
+                ];
+            }
+
+            // Virtual status logic when status is NULL
+            $today = now()->toDateString();
+            $startDate = $this->start_date;
+            $endDate = $this->end_date;
+
+            if ($this->attachments->isNotEmpty()) {
+                return [
+                    'name' => __('Completed'),
+                    'raw_name' => 'Completed',
+                    'color' => 'green',
+                ];
+            }
+
+            if (($startDate > $today && $endDate > $today) && $this->attachments->isEmpty()) {
+                return [
+                    'name' => __('Planned'),
+                    'raw_name' => 'Planned',
+                    'color' => 'blue',
+                ];
+            }
+
+            if (($startDate < $today && $endDate > $today) && $this->attachments->isEmpty()) {
+                return [
+                    'name' => __('In Progress'),
+                    'raw_name' => 'In Progress',
+                    'color' => 'yellow',
+                ];
+            }
+
+            if ($startDate > $today  && $this->attachments->isEmpty()) {
+                return [
+                    'name' => __('Planned'),
+                    'raw_name' => 'Planned',
+                    'color' => 'blue',
+                ];
+            }
+
+            if ($startDate === $today && $this->attachments->isEmpty()) {
+                return [
+                    'name' => __('In Progress'),
+                    'raw_name' => 'In Progress',
+                    'color' => 'yellow',
+                ];
+            }
+
+            // For past dates
+            if ($this->attachments->isEmpty()) {
+                return [
+                    'name' => __('On Hold'),
+                    'raw_name' => 'On Hold',
+                    'color' => 'red',
+                ];
+            }
+
             return [
-                'name' => __($name),
-                'raw_name' => $name,
-                'color' => match ((int) $this->status) {
-                    27 => 'green',
-                    26 => 'yellow',
-                    25 => 'blue',
-                    28 => 'red',
-                    default => 'zinc',
-                },
+                'name' => __('Undefined'),
+                'raw_name' => 'Undefined',
+                'color' => 'indigo',
             ];
-        }
-
-        // Virtual status logic when status is NULL
-        $today = now()->toDateString();
-        $startDate = $this->start_date;
-        $endDate = $this->end_date;
-
-        if ($this->attachments->isNotEmpty()) {
-            return [
-                'name' => __('Completed'),
-                'raw_name' => 'Completed',
-                'color' => 'green',
-            ];
-        }
-
-        if (($startDate > $today && $endDate > $today) && $this->attachments->isEmpty()) {
-
-            return [
-                'name' => __('Planned'),
-                'raw_name' => 'Planned',
-                'color' => 'blue',
-            ];
-        }
-
-        if (($startDate < $today && $endDate > $today) && $this->attachments->isEmpty()) {
-
-            return [
-                'name' => __('In Progress'),
-                'raw_name' => 'In Progress',
-                'color' => 'yellow',
-            ];
-        }
-
-        if ($startDate > $today  && $this->attachments->isEmpty()) {
-            return [
-                'name' => __('Planned'),
-                'raw_name' => 'Planned',
-                'color' => 'blue',
-            ];
-        }
-
-        if ($startDate === $today && $this->attachments->isEmpty()) {
-            return [
-                'name' => __('In Progress'),
-                'raw_name' => 'In Progress',
-                'color' => 'yellow',
-            ];
-        }
-
-        // For past dates
-        if ($this->attachments->isEmpty()) {
-            return [
-                'name' => __('On Hold'),
-                'raw_name' => 'On Hold',
-                'color' => 'red',
-            ];
-        }
-
-        return [
-            'name' => __('Undefined'),
-            'raw_name' => 'Undefined',
-            'color' => 'indigo',
-        ];
+        });
     }
     public function comments()
     {

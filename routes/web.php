@@ -79,6 +79,8 @@ use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
 use App\Livewire\SocialLogin;
+use App\Mail\SendQuotationMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::view('test1', 'test')->name('test1');
@@ -99,7 +101,13 @@ Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-
+    Route::get('/send-test-email', function () {
+        $data = ['name' => 'John Doe'];
+    
+        Mail::to('eng.samertawil@gmail.com')->send(new SendQuotationMail($data));
+    
+        return "Email sent!";
+    });
 
 require __DIR__.'/settings.php';
 

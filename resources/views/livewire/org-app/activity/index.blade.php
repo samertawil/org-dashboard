@@ -4,11 +4,18 @@
             <flux:heading level="1" size="xl">{{ __('Activities') }}</flux:heading>
             <flux:subheading>{{ __('Manage and filter organization Activities.') }}</flux:subheading>
         </div>
-        @can('activity.create')
-            <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus">
-                {{ __('Add Activity') }}
-            </flux:button>
-        @endcan
+        <div class="flex gap-2">
+            <flux:modal.trigger name="export-activities-modal">
+                <flux:button variant="ghost" icon="document-arrow-down" class="text-green-600">
+                    {{ __('Export Excel') }}
+                </flux:button>
+            </flux:modal.trigger>
+            @can('activity.create')
+                <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus">
+                    {{ __('Add Activity') }}
+                </flux:button>
+            @endcan
+        </div>
     </div>
 
     {{-- Success Message --}}
@@ -443,4 +450,38 @@
             @endif
         </div>
     </flux:modal>
+    {{-- Export Activities Modal --}}
+    <flux:modal name="export-activities-modal" class="md:w-[400px]">
+        <div class="flex flex-col gap-6">
+            <div>
+                <flux:heading level="2" size="lg">{{ __('Export Activities') }}</flux:heading>
+                <flux:subheading>{{ __('Select date range for Excel export.') }}</flux:subheading>
+            </div>
+
+            <div class="space-y-4">
+                <flux:field>
+                    <flux:label>{{ __('From Date') }}</flux:label>
+                    <flux:input type="date" wire:model="export_from_date" />
+                    <flux:error name="export_from_date" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('To Date') }}</flux:label>
+                    <flux:input type="date" wire:model="export_to_date" />
+                    <flux:error name="export_to_date" />
+                </flux:field>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close name="export-activities-modal">
+                    <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                </flux:modal.close>
+                
+                <flux:button wire:click="exportActivities" variant="primary" icon="document-arrow-down">
+                    {{ __('Download Excel') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
+

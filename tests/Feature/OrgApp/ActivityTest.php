@@ -38,6 +38,15 @@ beforeEach(function () {
     // Seed Currency for cost calculation
     CurrancyValue::create(['exchange_date' => now(), 'currency_value' => 3.5]);
 
+    // Create a dummy PurchaseRequisition for parcels foreign key
+    \App\Models\PurchaseRequisition::create([
+        'id' => 1,
+        'request_number' => 'PR-1001',
+        'request_date' => now(),
+        'created_by' => $this->user->id,
+        'status_id' => 1,
+    ]);
+
 });
 
 it('renders the create activity page', function () {
@@ -69,6 +78,8 @@ it('generates activity name automatically', function () {
         ->set('sector_id', $this->sector->id)
         ->set('status', 25)
         ->set('start_date', now()->toDateString())
+        ->set('cost', 10)
+        ->set('cost_nis', 35)
         ->set('name', 'ACTIVITY #')
         ->call('save')
         ->assertHasNoErrors();
@@ -88,6 +99,7 @@ it('creates activity with parcels and beneficiaries', function () {
             'distributed_parcels_count' => 100,
             'cost_for_each_parcel' => 10,
             'unit_id' => $unitStatus->id,
+            'purchase_requisition_id' => 1,
             'status_id' => 1,
             'notes' => 'Test Parcel'
         ]
@@ -98,6 +110,8 @@ it('creates activity with parcels and beneficiaries', function () {
         ->set('sector_id', $this->sector->id)
         ->set('status', 25) // Typical status ID
         ->set('start_date', now()->toDateString())
+        ->set('cost', 10)
+        ->set('cost_nis', 35)
         ->set('parcels', $parcelData)
         ->call('save');
 
@@ -128,6 +142,8 @@ it('creates activity with teaching groups for education sector', function () {
         ->set('status', 25)
         ->set('start_date', now()->toDateString())
         ->set('end_date', now()->addDays(5)->toDateString())
+        ->set('cost', 10)
+        ->set('cost_nis', 35)
         ->set('teaching_groups', $teachingGroupData)
         ->call('save');
 
@@ -148,8 +164,8 @@ it('updates activity and syncs relationships', function () {
         'sector_id' => $this->sector->id,
         'status' => 25,
         'activation' => 1,
-        'cost' => 0,
-        'cost_nis' => 0,
+        'cost' => 10,
+        'cost_nis' => 35,
         'created_by' => $this->user->id
     ]);
 
@@ -169,8 +185,8 @@ it('verifies smart sync for parcels and beneficiaries on update', function () {
         'sector_id' => $this->sector->id,
         'status' => 25,
         'activation' => 1,
-        'cost' => 0,
-        'cost_nis' => 0,
+        'cost' => 10,
+        'cost_nis' => 35,
         'created_by' => $this->user->id
     ]);
 
@@ -179,13 +195,15 @@ it('verifies smart sync for parcels and beneficiaries on update', function () {
         'parcel_type' => $this->sector->id,
         'distributed_parcels_count' => 10,
         'cost_for_each_parcel' => 10,
-        'unit_id' => 1
+        'unit_id' => 1,
+        'purchase_requisition_id' => 1
     ]);
     $parcel2 = $activity->parcels()->create([
         'parcel_type' => $this->sector->id,
         'distributed_parcels_count' => 20,
         'cost_for_each_parcel' => 10,
-        'unit_id' => 1
+        'unit_id' => 1,
+        'purchase_requisition_id' => 1
     ]);
 
     // Test Smart Sync: Update P1, Delete P2, Add P3
@@ -195,13 +213,15 @@ it('verifies smart sync for parcels and beneficiaries on update', function () {
             'parcel_type' => $this->sector->id,
             'distributed_parcels_count' => 50, // Updated
             'cost_for_each_parcel' => 10,
-            'unit_id' => 1
+            'unit_id' => 1,
+            'purchase_requisition_id' => 1
         ],
         [
             'parcel_type' => $this->sector->id,
             'distributed_parcels_count' => 100, // New
             'cost_for_each_parcel' => 10,
-            'unit_id' => 1
+            'unit_id' => 1,
+            'purchase_requisition_id' => 1
         ]
     ];
 
@@ -234,8 +254,8 @@ it('shows warning when no changes are made to activity', function () {
         'sector_id' => $this->sector->id,
         'status' => 25,
         'activation' => 1,
-        'cost' => 0,
-        'cost_nis' => 0,
+        'cost' => 10,
+        'cost_nis' => 35,
         'created_by' => $this->user->id
     ]);
 
