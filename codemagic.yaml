@@ -15,6 +15,10 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: Initialize Flutter project
+        script: |
+          cd mobile
+          flutter create . --platforms android
       - name: Get Flutter packages
         script: |
           cd mobile
