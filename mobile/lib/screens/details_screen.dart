@@ -24,6 +24,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSending = false;
   late List<dynamic> _comments;
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
@@ -74,45 +75,72 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 children: [
                   // Gallery
                   if (attachments.isNotEmpty)
-                    SizedBox(
-                      height: 250,
-                      child: PageView.builder(
-                        itemCount: attachments.length,
-                        itemBuilder: (context, index) {
-                          final item = attachments[index];
-                          final String rawPath = item['attchment_path'] ?? item['path'] ?? '';
-                          if (rawPath.isEmpty) return const SizedBox.shrink();
-                          
-                          final path = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
-                          final url = 'https://app.afscgaza.org/storage/$path';
-                          
-                          final ext = path.split('.').last.toLowerCase();
-                          final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].contains(ext);
+                    Stack(
+                      children: [
+                        SizedBox(
+                          height: 300,
+                          child: PageView.builder(
+                            itemCount: attachments.length,
+                            onPageChanged: (index) => setState(() => _currentImageIndex = index),
+                            itemBuilder: (context, index) {
+                              final item = attachments[index];
+                              final String rawPath = item['attchment_path'] ?? item['path'] ?? '';
+                              if (rawPath.isEmpty) return const SizedBox.shrink();
+                              
+                              final path = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+                              final url = 'https://app.afscgaza.org/storage/$path';
+                              
+                              final ext = path.split('.').last.toLowerCase();
+                              final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].contains(ext);
 
-                          if (!isImage) {
-                            return Container(
-                              color: Colors.grey.shade100,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.insert_drive_file, size: 50, color: Colors.blue),
-                                  const SizedBox(height: 8),
-                                  Text(ext.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                                ],
+                              if (!isImage) {
+                                return Container(
+                                  color: Colors.grey.shade100,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.insert_drive_file, size: 80, color: Colors.blue),
+                                      const SizedBox(height: 16),
+                                      Text(ext.toUpperCase(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              return InteractiveViewer(
+                                child: Image.network(
+                                  url,
+                                  fit: BoxFit.contain, // Contain for details to see whole image
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(child: CircularProgressIndicator());
+                                  },
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    color: Colors.grey.shade200,
+                                    child: const Icon(Icons.image_not_supported, size: 50),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        if (attachments.length > 1)
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                            );
-                          }
-
-                          return Image.network(
-                            url,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.image_not_supported, size: 50),
+                              child: Text(
+                                '${_currentImageIndex + 1} / ${attachments.length}',
+                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                      ],
                     ),
 
                   Padding(
