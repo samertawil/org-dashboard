@@ -51,9 +51,22 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Color _getStatusColor(dynamic status) {
     if (status == null) return Colors.grey;
-    final String name = (status['status_name'] ?? status['name'] ?? '').toString().toLowerCase();
-    if (name.contains('approved') || name.contains('تم') || name.contains('مكتمل')) return Colors.green;
-    if (name.contains('pending') || name.contains('قيد')) return Colors.orange;
+    
+    String name = '';
+    if (status is Map) {
+      name = (status['status_name'] ?? status['name'] ?? '').toString().toLowerCase();
+    } else {
+      // If it's an ID (int)
+      final id = status.toString();
+      if (id == '27') return Colors.green; // Completed
+      if (id == '26') return Colors.orange; // In Progress
+      if (id == '25') return Colors.blue; // Planned
+      if (id == '28') return Colors.red; // On Hold
+      return Colors.blue;
+    }
+
+    if (name.contains('approved') || name.contains('تم') || name.contains('مكتمل') || name.contains('completed')) return Colors.green;
+    if (name.contains('pending') || name.contains('قيد') || name.contains('progress')) return Colors.orange;
     return Colors.blue;
   }
 
@@ -106,8 +119,17 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildSocialCard(String type, dynamic data, String createdAt) {
-    final status = data['status'] ?? data['activity_status'];
-    final statusName = status?['status_name'] ?? status?['name'] ?? 'غير محدد';
+    // Fix: status might be an int or a Map. Let's be careful.
+    dynamic statusObj = data['activity_status'] ?? data['status'];
+    String statusName = 'غير محدد';
+    
+    if (statusObj is Map) {
+      statusName = statusObj['status_name'] ?? statusObj['name'] ?? 'غير محدد';
+    } else if (data['status_info'] != null && data['status_info'] is Map) {
+      // In web app, we have status_info attribute
+      statusName = data['status_info']['name'] ?? 'غير محدد';
+    }
+
     final creatorName = data['creator']?['name'] ?? 'نظام المؤسسة';
 
     return Container(
