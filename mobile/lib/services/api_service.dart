@@ -28,7 +28,7 @@ class ApiService {
         return data;
       } else {
         final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? error['error'] ?? 'Failed to login');
+        throw Exception(error['message'] ?? error['details'] ?? error['error'] ?? 'Failed to login');
       }
     } catch (e) {
       throw Exception('Connection error: $e');
