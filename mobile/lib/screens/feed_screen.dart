@@ -178,15 +178,15 @@ class _FeedScreenState extends State<FeedScreen> {
               spacing: 12,
               runSpacing: 8,
               children: [
-                if (type == 'activity' && (data['cost'] ?? 0) > 0)
+                if (type == 'activity' && data['cost'] != null && double.tryParse(data['cost'].toString())! > 0)
                   _buildMiniBadge(Icons.monetization_on, '\$${data['cost']}', Colors.green),
                 
-                if (data['beneficiaries'] != null)
+                if (data['beneficiaries'] != null && data['beneficiaries'] is List)
                   ...(data['beneficiaries'] as List).map((b) => 
                     _buildMiniBadge(Icons.people, '${b['beneficiaries_count']} مستفيد', Colors.indigo)
                   ),
 
-                if (data['parcels'] != null)
+                if (data['parcels'] != null && data['parcels'] is List)
                   ...(data['parcels'] as List).map((p) => 
                     _buildMiniBadge(Icons.inventory_2, '${p['distributed_parcels_count']} طرد', Colors.amber)
                   ),
