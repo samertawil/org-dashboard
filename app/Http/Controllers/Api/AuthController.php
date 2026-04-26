@@ -7,57 +7,36 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Exception;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-       
-        // $appKey=request()->header('email');
-        // dd($appKey);
-
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'device_name' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => [__('auth.failed')],
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+                'device_name' => 'required',
             ]);
-        }
 
-        if ($user->activation == 0) {
-             throw ValidationException::withMessages([
-                'email' => [__('Your account is inactive.')],
+            $user = User::where('email', $request->email)->first();
+
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                return response()->json(['message' => 'بيانات الدخول غير صحيحة'], 401);
+            }
+
+            $token = $user->createToken($request->device_name)->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user' => $user
             ]);
+        } catch (Exception $e) {
+            // هذا السطر سيمنع التحويل وسيظهر لك الخطأ الحقيقي
+            return response()->json([
+                'message' => 'خطأ بالسيرفر: ' . $e->getMessage()
+            ], 500);
         }
-
-        $token = $user->createToken($request->device_name)->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar' => $user->avatar,
-            ]
-        ]);
-    }
-
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Logged out successfully']);
-    }
-
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
     }
 }
