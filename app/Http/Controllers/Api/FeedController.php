@@ -74,11 +74,9 @@ class FeedController extends Controller
             // Quotations don't have these filters directly
             ;
 
-        $combined = DB::table(function ($query) use ($activityQuery, $prQuery, $quotationQuery) {
-            $query->from($activityQuery->union($prQuery)->union($quotationQuery), 'combined_feed');
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
+        $combined = $activityQuery->unionAll($prQuery)->unionAll($quotationQuery)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         $grouped = $combined->getCollection()->groupBy('feed_type');
         $activities = collect();
@@ -114,12 +112,14 @@ class FeedController extends Controller
 
         $items = $combined->getCollection()->map(function ($item) use ($activities, $allPrs, $quotations) {
             $data = null;
+            $id = $item->id;
+            
             if ($item->feed_type === 'activity') {
-                $data = $activities->get($item->id);
+                $data = $activities->first(fn($a) => $a->id == $id);
             } elseif ($item->feed_type === 'pr') {
-                $data = $allPrs->get($item->id);
+                $data = $allPrs->first(fn($p) => $p->id == $id);
             } else {
-                $data = $quotations->get($item->id);
+                $data = $quotations->first(fn($q) => $q->id == $id);
             }
             
             if ($data) {

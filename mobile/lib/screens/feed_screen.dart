@@ -75,7 +75,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5), // لون خلفية الفيسبوك
       appBar: AppBar(
-        title: Text('Timeline (${_items.length})', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: const Text('Timeline', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
         backgroundColor: Colors.white,
         elevation: 0.5,
         centerTitle: false,
