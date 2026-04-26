@@ -19,6 +19,9 @@ workflows:
         script: |
           cd mobile
           flutter create . --platforms android
+      - name: Add Internet Permission
+        script: |
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/g' mobile/android/app/src/main/AndroidManifest.xml
       - name: Get Flutter packages
         script: |
           cd mobile
