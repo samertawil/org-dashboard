@@ -62,11 +62,15 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5), // لون خلفية الفيسبوك
       appBar: AppBar(
-        title: const Text('Timeline', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: Text('Timeline (${_items.length})', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
         backgroundColor: Colors.white,
         elevation: 0.5,
         centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.blue),
+            onPressed: _loadFeed,
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.grey),
             onPressed: () => _logout(),
@@ -80,11 +84,21 @@ class _FeedScreenState extends State<FeedScreen> {
               child: ListView.builder(
                 itemCount: _items.length,
                 itemBuilder: (context, index) {
-                  final item = _items[index];
-                  final type = item['feed_type'];
-                  final data = item['data'];
-                  
-                  return _buildSocialCard(type, data, item['created_at']);
+                  try {
+                    final item = _items[index];
+                    final type = item['feed_type'];
+                    final data = item['data'];
+                    
+                    if (data == null) return const SizedBox.shrink();
+                    
+                    return _buildSocialCard(type, data, item['created_at']);
+                  } catch (e) {
+                    return ListTile(
+                      title: const Text('خطأ في عرض هذا المنشور'),
+                      subtitle: Text(e.toString()),
+                      tileColor: Colors.red.shade50,
+                    );
+                  }
                 },
               ),
             ),
