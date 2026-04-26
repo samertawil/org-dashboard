@@ -84,7 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ),
-                    const Icon(Icons.account_balance, size: 80, color: Colors.blue),
+                    Image.network(
+                      'https://app.afscgaza.org/logo2.png',
+                      height: 100,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_balance, size: 80, color: Colors.blue),
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       'AFSC Dashboard',
