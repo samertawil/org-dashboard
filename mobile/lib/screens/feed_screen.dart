@@ -104,7 +104,15 @@ class _FeedScreenState extends State<FeedScreen> {
                     
                     if (data == null) return const SizedBox.shrink();
                     
-                    return _buildSocialCard(type, data, item['created_at']);
+                    return InkWell(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailsScreen(type: type, data: data, createdAt: item['created_at']),
+                        ),
+                      ),
+                      child: _buildSocialCard(type, data, item['created_at']),
+                    );
                   } catch (e) {
                     return ListTile(
                       title: const Text('خطأ في عرض هذا المنشور'),
