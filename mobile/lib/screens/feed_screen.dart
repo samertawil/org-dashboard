@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
+import 'details_screen.dart';
 import 'package:intl/intl.dart';
 
 class FeedScreen extends StatefulWidget {

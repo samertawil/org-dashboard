@@ -262,7 +262,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.mainAxisAlignment,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       const Spacer(),
