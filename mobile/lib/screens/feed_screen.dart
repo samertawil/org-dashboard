@@ -179,7 +179,7 @@ class _FeedScreenState extends State<FeedScreen> {
               runSpacing: 8,
               children: [
                 if (type == 'activity' && (data['cost'] ?? 0) > 0)
-                  _buildMiniBadge(Icons.monetization_on, '\$${data['cost']}', Colors.emerald),
+                  _buildMiniBadge(Icons.monetization_on, '\$${data['cost']}', Colors.green),
                 
                 if (data['beneficiaries'] != null)
                   ...(data['beneficiaries'] as List).map((b) => 
