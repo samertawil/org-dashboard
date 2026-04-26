@@ -1,4 +1,7 @@
-import 'services/translations.dart';
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import 'package:intl/intl.dart';
+import '../services/translations.dart';
 
 class DetailsScreen extends StatefulWidget {
   final String type;
