@@ -236,6 +236,7 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
           
+          // Content Title & Description
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Column(
@@ -245,18 +246,25 @@ class _FeedScreenState extends State<FeedScreen> {
                   type == 'activity' ? (data['name'] ?? '') : '${t.translate('purchase_request')} #${data['request_number']}',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
-                if (data['description'] != null)
+                if (data['description'] != null && data['description'].toString().isNotEmpty) ...[
+                  const SizedBox(height: 8),
                   Text(
                     data['description'],
                     style: const TextStyle(fontSize: 15, height: 1.4),
                   ),
+                ],
               ],
             ),
           ),
 
           const SizedBox(height: 12),
 
+          // Image Preview (Social Media Style)
+          _buildImagePreview(type, data),
+
+          const SizedBox(height: 12),
+
+          // Summary Box (Grey Box like web)
           Container(
             width: double.infinity,
             margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -289,6 +297,7 @@ class _FeedScreenState extends State<FeedScreen> {
           const SizedBox(height: 12),
           Divider(height: 1, color: Colors.grey.shade200),
 
+          // Action Buttons
           Row(
             children: [
               _buildActionButton(Icons.remove_red_eye_outlined, t.translate('view'), onTap: () {
@@ -304,6 +313,50 @@ class _FeedScreenState extends State<FeedScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildImagePreview(String type, dynamic data) {
+    final attachments = data['attachments'] as List? ?? [];
+    if (attachments.isEmpty) return const SizedBox.shrink();
+
+    // Get the first image attachment
+    String? imageUrl;
+    for (var attr in attachments) {
+      final String rawPath = attr['attchment_path'] ?? attr['path'] ?? '';
+      if (rawPath.isEmpty) continue;
+      
+      final ext = rawPath.split('.').last.toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) {
+        final path = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+        imageUrl = 'https://app.afscgaza.org/storage/$path';
+        break;
+      }
+    }
+
+    if (imageUrl == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      height: 250,
+      margin: const EdgeInsets.symmetric(horizontal: 0), // Full width
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          height: 250,
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+        ),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 250,
+            color: Colors.grey.shade100,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
     );
   }
