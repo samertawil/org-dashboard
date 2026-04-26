@@ -19,10 +19,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ORG Dashboard',
+      title: 'AFSC Dashboard',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue.shade900,
+          primary: Colors.blue.shade800,
+        ),
         useMaterial3: true,
+        fontFamily: 'Roboto', // Default but consistent
       ),
       home: isLoggedIn ? const FeedScreen() : const LoginScreen(),
     );
