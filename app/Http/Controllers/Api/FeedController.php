@@ -20,8 +20,12 @@ class FeedController extends Controller
         $city_id = $request->query('city_id', '');
 
         $activityQuery = Activity::select('id', DB::raw("'activity' as feed_type"), 'created_at')
-            ->when($search, fn($q) => $q->where('name', 'like', '%' . $search . '%')
-                                              ->orWhere('description', 'like', '%' . $search . '%'))
+            ->when($search, function($q) use ($search) {
+                $q->where(function($sq) use ($search) {
+                    $sq->where('name', 'like', '%' . $search . '%')
+                       ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            })
             ->when($status_id, function ($q) use ($status_id) {
                 $today = now()->toDateString();
                 $q->where(function ($query) use ($today, $status_id) {
@@ -52,16 +56,23 @@ class FeedController extends Controller
             ->when($city_id, fn($q) => $q->where('city', $city_id));
 
         $prQuery = PurchaseRequisition::select('id', DB::raw("'pr' as feed_type"), 'created_at')
-            ->when($search, fn($q) => $q->where('request_number', 'like', '%' . $search . '%')
-                                               ->orWhere('description', 'like', '%' . $search . '%'))
-            ->when($status_id || $region_id || $city_id, fn($q) => $q->whereRaw('1=0'));
+            ->when($search, function($q) use ($search) {
+                $q->where(function($sq) use ($search) {
+                    $sq->where('request_number', 'like', '%' . $search . '%')
+                       ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            })
+            ->when($status_id, fn($q) => $q->where('status_id', $status_id))
+            // PRs don't have region/city usually, so we don't filter them by these unless needed
+            ;
 
         $quotationQuery = PurchaseQuotationResponse::select('id', DB::raw("'quotation' as feed_type"), 'created_at')
             ->when($search, function($q) use ($search) {
                 $q->whereHas('vendor', fn($vq) => $vq->where('name', 'like', '%' . $search . '%'))
                   ->orWhereHas('purchaseRequisition', fn($pq) => $pq->where('request_number', 'like', '%' . $search . '%'));
             })
-            ->when($status_id || $region_id || $city_id, fn($q) => $q->whereRaw('1=0'));
+            // Quotations don't have these filters directly
+            ;
 
         $combined = $activityQuery->union($prQuery)->union($quotationQuery)
             ->orderBy('created_at', 'desc')
