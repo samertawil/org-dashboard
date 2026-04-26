@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/language_provider.dart';
+import '../services/translations.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'details_screen.dart';
@@ -15,39 +17,77 @@ class _FeedScreenState extends State<FeedScreen> {
   final ApiService _apiService = ApiService();
   List<dynamic> _items = [];
   bool _isLoading = true;
+  bool _isLoadMore = false;
+  int _currentPage = 1;
+  int _lastPage = 1;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadFeed();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_isLoading && !_isLoadMore && _currentPage < _lastPage) {
+        _loadMore();
+      }
+    }
   }
 
   Future<void> _loadFeed() async {
+    setState(() => _isLoading = true);
     try {
-      final items = await _apiService.fetchFeed();
+      final response = await _apiService.fetchFeed(page: 1);
       setState(() {
-        _items = items;
+        _items = response['items'];
+        _currentPage = response['meta']['current_page'];
+        _lastPage = response['meta']['last_page'];
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        final t = AppTranslations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في تحميل البيانات: $e')),
+          SnackBar(content: Text('${t.translate('error_loading')}: $e')),
         );
       }
     }
   }
 
-  String _getTimeAgo(String dateString) {
+  Future<void> _loadMore() async {
+    setState(() => _isLoadMore = true);
+    try {
+      final response = await _apiService.fetchFeed(page: _currentPage + 1);
+      setState(() {
+        _items.addAll(response['items']);
+        _currentPage = response['meta']['current_page'];
+        _lastPage = response['meta']['last_page'];
+        _isLoadMore = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadMore = false);
+    }
+  }
+
+  String _getTimeAgo(String dateString, AppTranslations t) {
     DateTime dateTime = DateTime.parse(dateString);
     Duration diff = DateTime.now().difference(dateTime);
     
     if (diff.inDays > 7) return DateFormat('yyyy-MM-dd').format(dateTime);
-    if (diff.inDays > 0) return 'منذ ${diff.inDays} يوم';
-    if (diff.inHours > 0) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inMinutes > 0) return 'منذ ${diff.inMinutes} دقيقة';
-    return 'الآن';
+    if (diff.inDays > 0) return '${t.translate('ago')} ${diff.inDays} ${t.translate('days')}';
+    if (diff.inHours > 0) return '${t.translate('ago')} ${diff.inHours} ${t.translate('hours')}';
+    if (diff.inMinutes > 0) return '${t.translate('ago')} ${diff.inMinutes} ${t.translate('minutes')}';
+    return t.translate('now');
   }
 
   Color _getStatusColor(dynamic status) {
@@ -73,10 +113,12 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppTranslations.of(context)!;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5), // لون خلفية الفيسبوك
+      backgroundColor: const Color(0xFFF0F2F5),
       appBar: AppBar(
-        title: const Text('Timeline', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: Text(t.translate('timeline'), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
         backgroundColor: Colors.white,
         elevation: 0.5,
         centerTitle: false,
@@ -96,8 +138,15 @@ class _FeedScreenState extends State<FeedScreen> {
           : RefreshIndicator(
               onRefresh: _loadFeed,
               child: ListView.builder(
-                itemCount: _items.length,
+                controller: _scrollController,
+                itemCount: _items.length + (_isLoadMore ? 1 : 0),
                 itemBuilder: (context, index) {
+                  if (index == _items.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
                   try {
                     final item = _items[index];
                     final type = item['feed_type'];
@@ -116,7 +165,7 @@ class _FeedScreenState extends State<FeedScreen> {
                     );
                   } catch (e) {
                     return ListTile(
-                      title: const Text('خطأ في عرض هذا المنشور'),
+                      title: Text(t.translate('error_loading')),
                       subtitle: Text(e.toString()),
                       tileColor: Colors.red.shade50,
                     );
@@ -128,18 +177,17 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildSocialCard(String type, dynamic data, String createdAt) {
-    // Fix: status might be an int or a Map. Let's be careful.
+    final t = AppTranslations.of(context)!;
     dynamic status = data['activity_status'] ?? data['status'];
-    String statusName = 'غير محدد';
+    String statusName = '...';
     
     if (status is Map) {
-      statusName = status['status_name'] ?? status['name'] ?? 'غير محدد';
+      statusName = status['status_name'] ?? status['name'] ?? '...';
     } else if (data['status_info'] != null && data['status_info'] is Map) {
-      // In web app, we have status_info attribute
-      statusName = data['status_info']['name'] ?? 'غير محدد';
+      statusName = data['status_info']['name'] ?? '...';
     }
 
-    final creatorName = data['creator']?['name'] ?? 'نظام المؤسسة';
+    final creatorName = data['creator']?['name'] ?? '...';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -154,7 +202,7 @@ class _FeedScreenState extends State<FeedScreen> {
               children: [
                 CircleAvatar(
                   backgroundColor: Colors.blue.shade100,
-                  child: Text(creatorName[0].toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(creatorName.isNotEmpty ? creatorName[0].toUpperCase() : '?', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -164,7 +212,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       Text(creatorName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                       Row(
                         children: [
-                          Text(_getTimeAgo(createdAt), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                          Text(_getTimeAgo(createdAt, t), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                           const SizedBox(width: 4),
                           const Icon(Icons.public, size: 12, color: Colors.grey),
                         ],
@@ -187,14 +235,13 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
           
-          // Content Title & Description
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  type == 'activity' ? (data['name'] ?? '') : 'طلب شراء #${data['request_number']}',
+                  type == 'activity' ? (data['name'] ?? '') : '${t.translate('purchase_request')} #${data['request_number']}',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -209,7 +256,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
           const SizedBox(height: 12),
 
-          // Summary Box (Grey Box like web)
           Container(
             width: double.infinity,
             margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -228,31 +274,32 @@ class _FeedScreenState extends State<FeedScreen> {
                 
                 if (data['beneficiaries'] != null && data['beneficiaries'] is List)
                   ...(data['beneficiaries'] as List).map((b) => 
-                    _buildMiniBadge(Icons.people, '${b['beneficiaries_count']} مستفيد', Colors.indigo)
+                    _buildMiniBadge(Icons.people, '${b['beneficiaries_count']} ${t.translate('beneficiaries')}', Colors.indigo)
                   ),
 
                 if (data['parcels'] != null && data['parcels'] is List)
                   ...(data['parcels'] as List).map((p) => 
-                    _buildMiniBadge(Icons.inventory_2, '${p['distributed_parcels_count']} طرد', Colors.amber)
+                    _buildMiniBadge(Icons.inventory_2, '${p['distributed_parcels_count']} ${t.translate('parcels')}', Colors.amber)
                   ),
-                  
-                if (type == 'pr')
-                  _buildMiniBadge(Icons.calendar_today, 'الموعد: ${data['request_date'] ?? '-'}', Colors.blue),
               ],
             ),
           ),
 
           const SizedBox(height: 12),
-
-          // Divider
           Divider(height: 1, color: Colors.grey.shade200),
 
-          // Action Buttons
           Row(
             children: [
-              _buildActionButton(Icons.remove_red_eye_outlined, 'عرض'),
-              _buildActionButton(Icons.chat_bubble_outline, 'تعليق'),
-              _buildActionButton(Icons.share_outlined, 'مشاركة'),
+              _buildActionButton(Icons.remove_red_eye_outlined, t.translate('view'), onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailsScreen(type: type, data: data, createdAt: createdAt),
+                  ),
+                );
+              }),
+              _buildActionButton(Icons.chat_bubble_outline, t.translate('comment')),
+              _buildActionButton(Icons.share_outlined, t.translate('share')),
             ],
           ),
         ],
@@ -279,10 +326,10 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label) {
+  Widget _buildActionButton(IconData icon, String label, {VoidCallback? onTap}) {
     return Expanded(
       child: InkWell(
-        onTap: () {},
+        onTap: onTap ?? () {},
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
@@ -299,14 +346,14 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Future<void> _logout() async {
-    // Confirmation Dialog
+    final t = AppTranslations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تسجيل الخروج'),
-        content: const Text('هل أنت متأكد؟'),
+        title: Text(t.translate('logout')),
+        content: Text(t.translate('are_you_sure')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(t.translate('cancel'))),
           TextButton(
             onPressed: () async {
               await _apiService.logout();
@@ -318,7 +365,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 );
               }
             },
-            child: const Text('نعم'),
+            child: Text(t.translate('yes')),
           ),
         ],
       ),

@@ -35,12 +35,12 @@ class ApiService {
     }
   }
 
-  Future<List<dynamic>> fetchFeed() async {
+  Future<Map<String, dynamic>> fetchFeed({int page = 1}) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/feed'),
+      Uri.parse('$baseUrl/feed?page=$page'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -49,7 +49,7 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body)['items'];
+      return jsonDecode(response.body);
     } else {
       throw Exception('Failed to load feed');
     }

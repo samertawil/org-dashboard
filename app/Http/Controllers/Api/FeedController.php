@@ -76,7 +76,7 @@ class FeedController extends Controller
 
         $combined = $activityQuery->unionAll($prQuery)->unionAll($quotationQuery)
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(100);
 
         $grouped = $combined->getCollection()->groupBy('feed_type');
         $activities = collect();

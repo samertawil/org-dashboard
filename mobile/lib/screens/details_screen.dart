@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import 'package:intl/intl.dart';
+import 'services/translations.dart';
 
 class DetailsScreen extends StatefulWidget {
   final String type;
@@ -31,6 +29,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _sendComment() async {
+    final t = AppTranslations.of(context)!;
     if (_commentController.text.trim().isEmpty) return;
 
     setState(() => _isSending = true);
@@ -44,20 +43,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
     } catch (e) {
       setState(() => _isSending = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطأ في إرسال التعليق: $e')),
+        SnackBar(content: Text('${t.translate('error_sending')}: $e')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final creatorName = widget.data['creator']?['name'] ?? 'نظام المؤسسة';
+    final t = AppTranslations.of(context)!;
+    final creatorName = widget.data['creator']?['name'] ?? '...';
     final attachments = widget.data['attachments'] as List? ?? [];
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('تفاصيل النشاط', style: TextStyle(color: Colors.black)),
+        title: Text(t.translate('details'), style: const TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -76,9 +76,32 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       child: PageView.builder(
                         itemCount: attachments.length,
                         itemBuilder: (context, index) {
-                          final path = attachments[index]['attchment_path'];
+                          final item = attachments[index];
+                          final String rawPath = item['attchment_path'] ?? item['path'] ?? '';
+                          if (rawPath.isEmpty) return const SizedBox.shrink();
+                          
+                          final path = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+                          final url = 'https://app.afscgaza.org/storage/$path';
+                          
+                          final ext = path.split('.').last.toLowerCase();
+                          final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].contains(ext);
+
+                          if (!isImage) {
+                            return Container(
+                              color: Colors.grey.shade100,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.insert_drive_file, size: 50, color: Colors.blue),
+                                  const SizedBox(height: 8),
+                                  Text(ext.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            );
+                          }
+
                           return Image.network(
-                            'https://app.afscgaza.org/storage/$path',
+                            url,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Container(
                               color: Colors.grey.shade200,
@@ -95,7 +118,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.type == 'activity' ? (widget.data['name'] ?? '') : 'طلب شراء #${widget.data['request_number']}',
+                          widget.type == 'activity' ? (widget.data['name'] ?? '') : '${t.translate('purchase_request')} #${widget.data['request_number']}',
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -103,7 +126,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 15,
-                              child: Text(creatorName[0].toUpperCase()),
+                              child: Text(creatorName.isNotEmpty ? creatorName[0].toUpperCase() : '?'),
                             ),
                             const SizedBox(width: 8),
                             Text(creatorName, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -112,24 +135,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ],
                         ),
                         const Divider(height: 32),
-                        const Text('الوصف', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(t.translate('description'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         Text(
-                          widget.data['description'] ?? 'لا يوجد وصف متاح لهذا النشاط.',
+                          widget.data['description'] ?? t.translate('no_description'),
                           style: const TextStyle(fontSize: 16, color: Colors.black87, height: 1.5),
                         ),
                         const SizedBox(height: 24),
                         
-                        // Details Grid
-                        _buildSectionTitle('المستفيدين والطرود'),
+                        _buildSectionTitle(t.translate('beneficiaries')),
                         const SizedBox(height: 12),
-                        _buildInfoGrid(),
+                        _buildInfoGrid(t),
                         
                         const Divider(height: 48),
-                        _buildSectionTitle('التعليقات (${_comments.length})'),
+                        _buildSectionTitle('${t.translate('comments')} (${_comments.length})'),
                         const SizedBox(height: 16),
                         
-                        // Comments List
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -147,7 +168,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ),
           ),
           
-          // Comment Input Field
           Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom + 8,
@@ -165,7 +185,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   child: TextField(
                     controller: _commentController,
                     decoration: InputDecoration(
-                      hintText: 'اكتب تعليقاً...',
+                      hintText: t.translate('write_comment'),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
                       filled: true,
                       fillColor: Colors.grey.shade100,
@@ -192,7 +212,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
   }
 
-  Widget _buildInfoGrid() {
+  Widget _buildInfoGrid(AppTranslations t) {
     final beneficiaries = widget.data['beneficiaries'] as List? ?? [];
     final parcels = widget.data['parcels'] as List? ?? [];
 
@@ -201,11 +221,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
       runSpacing: 16,
       children: [
         for (var b in beneficiaries)
-          _buildInfoItem(Icons.people, 'مستفيدين', '${b['beneficiaries_count']}', Colors.indigo),
+          _buildInfoItem(Icons.people, t.translate('beneficiaries'), '${b['beneficiaries_count']}', Colors.indigo),
         for (var p in parcels)
-          _buildInfoItem(Icons.inventory_2, 'طرود', '${p['distributed_parcels_count']}', Colors.amber),
-        if (widget.data['cost'] != null)
-          _buildInfoItem(Icons.monetization_on, 'التكلفة', '\$${widget.data['cost']}', Colors.green),
+          _buildInfoItem(Icons.inventory_2, t.translate('parcels'), '${p['distributed_parcels_count']}', Colors.amber),
+        if (widget.data['cost'] != null && (double.tryParse(widget.data['cost'].toString()) ?? 0) > 0)
+          _buildInfoItem(Icons.monetization_on, t.translate('cost'), '\$${widget.data['cost']}', Colors.green),
       ],
     );
   }
@@ -223,12 +243,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
         children: [
           Icon(icon, color: color, size: 24),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600), overflow: TextOverflow.ellipsis),
+                Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ],
       ),
@@ -236,7 +258,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Widget _buildCommentItem(dynamic comment) {
-    final name = comment['creator']?['name'] ?? 'مستخدم';
+    final name = comment['creator']?['name'] ?? '...';
     final text = comment['comment'] ?? '';
     final time = comment['created_at'] != null ? DateFormat('MM-dd HH:mm').format(DateTime.parse(comment['created_at'])) : '';
 
@@ -248,7 +270,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           CircleAvatar(
             radius: 18,
             backgroundColor: Colors.blue.shade50,
-            child: Text(name[0].toUpperCase(), style: const TextStyle(fontSize: 14)),
+            child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(fontSize: 14)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -265,7 +287,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const Spacer(),
                       Text(time, style: const TextStyle(color: Colors.grey, fontSize: 10)),
                     ],
                   ),

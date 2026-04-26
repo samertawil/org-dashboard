@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/api_service.dart';
+import '../services/language_provider.dart';
+import '../services/translations.dart';
 import 'feed_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,9 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final ApiService _apiService = ApiService();
 
   Future<void> _login() async {
+    final t = AppTranslations.of(context)!;
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء إدخال البريد الإلكتروني وكلمة المرور')),
+        SnackBar(content: Text(t.translate('enter_email'))),
       );
       return;
     }
@@ -49,6 +52,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppTranslations.of(context)!;
+    final lp = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -65,10 +71,19 @@ class _LoginScreenState extends State<LoginScreen> {
               elevation: 8,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => lp.changeLanguage(lp.locale.languageCode == 'ar' ? 'en' : 'ar'),
+                          child: Text(lp.locale.languageCode == 'ar' ? 'English' : 'العربية'),
+                        ),
+                      ],
+                    ),
                     const Icon(Icons.account_balance, size: 80, color: Colors.blue),
                     const SizedBox(height: 16),
                     const Text(
@@ -79,16 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.blueGrey,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'مرحباً بك، سجل دخولك للمتابعة',
-                      style: TextStyle(color: Colors.grey),
-                    ),
                     const SizedBox(height: 40),
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'البريد الإلكتروني',
+                        labelText: t.translate('email'),
                         prefixIcon: const Icon(Icons.email_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -100,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        labelText: 'كلمة المرور',
+                        labelText: t.translate('password'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
@@ -128,9 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text(
-                                'تسجيل الدخول',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            : Text(
+                                t.translate('login'),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
