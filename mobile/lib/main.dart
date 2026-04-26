@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'ORG Dashboard',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial_design: true,
+        useMaterial3: true,
       ),
       home: isLoggedIn ? const FeedScreen() : const LoginScreen(),
     );
