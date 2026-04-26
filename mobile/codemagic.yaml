@@ -1,0 +1,27 @@
+workflows:
+  android-workflow:
+    name: Android APK Workflow
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - google_play_credentials # Optional
+      flutter: stable
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          cd mobile
+          flutter pub get
+      - name: Build Android APK
+        script: |
+          cd mobile
+          flutter build apk --release
+    artifacts:
+      - mobile/build/app/outputs/flutter-apk/*.apk
