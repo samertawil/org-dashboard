@@ -10,7 +10,10 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: jsonEncode({
           'email': email,
           'password': password,
@@ -40,6 +43,7 @@ class ApiService {
       Uri.parse('$baseUrl/feed'),
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
@@ -59,6 +63,7 @@ class ApiService {
       Uri.parse('$baseUrl/logout'),
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
