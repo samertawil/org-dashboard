@@ -178,7 +178,7 @@ class _FeedScreenState extends State<FeedScreen> {
               spacing: 12,
               runSpacing: 8,
               children: [
-                if (type == 'activity' && data['cost'] != null && double.tryParse(data['cost'].toString())! > 0)
+                if (type == 'activity' && data['cost'] != null && (double.tryParse(data['cost'].toString()) ?? 0) > 0)
                   _buildMiniBadge(Icons.monetization_on, '\$${data['cost']}', Colors.green),
                 
                 if (data['beneficiaries'] != null && data['beneficiaries'] is List)
