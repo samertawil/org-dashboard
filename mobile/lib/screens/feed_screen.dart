@@ -120,11 +120,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Widget _buildSocialCard(String type, dynamic data, String createdAt) {
     // Fix: status might be an int or a Map. Let's be careful.
-    dynamic statusObj = data['activity_status'] ?? data['status'];
+    dynamic status = data['activity_status'] ?? data['status'];
     String statusName = 'غير محدد';
     
-    if (statusObj is Map) {
-      statusName = statusObj['status_name'] ?? statusObj['name'] ?? 'غير محدد';
+    if (status is Map) {
+      statusName = status['status_name'] ?? status['name'] ?? 'غير محدد';
     } else if (data['status_info'] != null && data['status_info'] is Map) {
       // In web app, we have status_info attribute
       statusName = data['status_info']['name'] ?? 'غير محدد';
