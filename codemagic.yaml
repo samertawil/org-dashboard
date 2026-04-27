@@ -34,6 +34,7 @@ workflows:
           }" >> android/build.gradle
       - name: Add Internet Permission
         script: |
+          cd mobile
           sed -i '' 's/<application/<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/g' android/app/src/main/AndroidManifest.xml
       - name: Get Flutter packages
         script: |
