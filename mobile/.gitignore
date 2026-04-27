@@ -1,0 +1,65 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configurations and tasks you actually want to
+# commit. In that case, you can ignore the whole folder and luminous files
+# (if you are using any)
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Android related
+**/android/**/gradle-wrapper.jar
+.gradle/
+captures/
+gradlew
+gradlew.bat
+local.properties
+**/google-services.json
+
+# iOS/Objective-C/Swift related
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_settings.json
+**/ios/Runner/GeneratedPluginRegistrant.[mh]
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+!default.mode1v3
+!default.mode2v3
+!default.perspectivev3
+xcuserdata/
+
+# Symbols and settings for Xcode
+derivedData/
+**/ios/*.xcworkspace/xcuserdata/
+
+# Coverage
+coverage/
+
+# Exceptions to above rules
+!**/android/gradle-wrapper.jar
+!**/android/gradle/wrapper/gradle-wrapper.jar

@@ -18,7 +18,7 @@ workflows:
       - name: Initialize Flutter project
         script: |
           cd mobile
-          flutter create . --platforms android
+          flutter create . --platforms android,ios
       - name: Add Internet Permission
         script: |
           sed -i '' 's/<application/<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/g' mobile/android/app/src/main/AndroidManifest.xml
@@ -32,3 +32,33 @@ workflows:
           flutter build apk --release
     artifacts:
       - mobile/build/app/outputs/flutter-apk/*.apk
+
+  ios-workflow:
+    name: iOS Build Workflow
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+    scripts:
+      - name: Initialize Flutter project
+        script: |
+          cd mobile
+          flutter create . --platforms ios
+      - name: Get Flutter packages
+        script: |
+          cd mobile
+          flutter pub get
+      - name: Build iOS
+        script: |
+          cd mobile
+          # Building without signing for now to ensure it compiles
+          flutter build ios --release --no-codesign
+    artifacts:
+      - mobile/build/ios/iphoneos/*.app
