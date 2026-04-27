@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'details_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -477,7 +478,11 @@ class _FeedScreenState extends State<FeedScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  type == 'activity' ? (data['name'] ?? '') : '${t.translate('purchase_request')} #${data['request_number']}',
+                  type == 'activity' 
+                      ? (data['name'] ?? '') 
+                      : (type == 'quotation' 
+                          ? '${t.translate('vendor')}: ${data['vendor']?['name'] ?? '...'} (PR #${data['purchase_requisition']?['request_number'] ?? '...'})'
+                          : '${t.translate('purchase_request')} #${data['request_number']}'),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 if (data['description'] != null && data['description'].toString().isNotEmpty) ...[
@@ -543,7 +548,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 );
               }),
               _buildActionButton(Icons.chat_bubble_outline, t.translate('comment')),
-              _buildActionButton(Icons.share_outlined, t.translate('share')),
+              _buildActionButton(Icons.share_outlined, t.translate('share'), onTap: () => _shareItem(type, data)),
             ],
           ),
         ],
@@ -631,6 +636,29 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
     );
+  }
+
+  void _shareItem(String type, dynamic data) {
+    final t = AppTranslations.of(context)!;
+    String text = '';
+    
+    if (type == 'activity') {
+      final status = data['activity_status']?['status_name'] ?? data['status_info']?['name'] ?? '...';
+      text = '📌 ${t.translate('activity')}: ${data['name']}\n'
+             '📊 ${t.translate('status')}: $status\n'
+             '💰 ${t.translate('cost')}: \$${data['cost'] ?? 0}\n'
+             '🔗 https://app.afscgaza.org/activities/${data['id']}';
+    } else if (type == 'pr') {
+      text = '📦 ${t.translate('purchase_request')} #${data['request_number']}\n'
+             '📝 ${t.translate('description')}: ${data['description'] ?? '...'}\n'
+             '🔗 https://app.afscgaza.org/purchase-requisitions/${data['id']}';
+    } else if (type == 'quotation') {
+      text = '🧾 ${t.translate('vendor')}: ${data['vendor']?['name'] ?? '...'}\n'
+             '💰 ${t.translate('total_amount')}: ${data['total_amount']} ${data['currency']?['name'] ?? ''}\n'
+             '🔗 https://app.afscgaza.org/purchase-requisitions/${data['purchase_requisition_id']}';
+    }
+
+    Share.share(text);
   }
 
   Future<void> _logout() async {

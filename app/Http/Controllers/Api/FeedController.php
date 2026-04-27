@@ -165,6 +165,16 @@ class FeedController extends Controller
         ]);
     }
 
+    public function getComments($activityId)
+    {
+        $comments = ActivityComments::with('creator')
+            ->where('activity_id', $activityId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($comments);
+    }
+
     public function addComment(Request $request, $activityId)
     {
         $request->validate([

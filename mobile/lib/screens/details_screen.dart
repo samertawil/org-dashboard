@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'package:intl/intl.dart';
 import '../services/translations.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DetailsScreen extends StatefulWidget {
   final String type;
@@ -30,6 +31,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
   void initState() {
     super.initState();
     _comments = List.from(widget.data['comments'] ?? []);
+    if (widget.type == 'activity') {
+      _loadComments();
+    }
+  }
+
+  Future<void> _loadComments() async {
+    try {
+      final comments = await _apiService.fetchComments(widget.data['id']);
+      if (mounted) {
+        setState(() {
+          _comments = comments;
+        });
+      }
+    } catch (e) {
+      print('Error loading comments: $e');
+    }
   }
 
   Future<void> _sendComment() async {
@@ -65,6 +82,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: _shareItem,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -149,7 +172,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.type == 'activity' ? (widget.data['name'] ?? '') : '${t.translate('purchase_request')} #${widget.data['request_number']}',
+                          widget.type == 'activity' 
+                              ? (widget.data['name'] ?? '') 
+                              : (widget.type == 'quotation'
+                                  ? '${t.translate('vendor')}: ${widget.data['vendor']?['name'] ?? '...'} (PR #${widget.data['purchase_requisition']?['request_number'] ?? '...'})'
+                                  : '${t.translate('purchase_request')} #${widget.data['request_number']}'),
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -178,19 +205,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         const SizedBox(height: 12),
                         _buildInfoGrid(t),
                         
-                        const Divider(height: 48),
-                        _buildSectionTitle('${t.translate('comments')} (${_comments.length})'),
-                        const SizedBox(height: 16),
-                        
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _comments.length,
-                          itemBuilder: (context, index) {
-                            final comment = _comments[index];
-                            return _buildCommentItem(comment);
-                          },
-                        ),
+                        if (widget.type == 'activity') ...[
+                          const Divider(height: 48),
+                          _buildSectionTitle('${t.translate('comments')} (${_comments.length})'),
+                          const SizedBox(height: 16),
+                          
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _comments.length,
+                            itemBuilder: (context, index) {
+                              final comment = _comments[index];
+                              return _buildCommentItem(comment);
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -199,7 +228,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ),
           ),
           
-          Container(
+          if (widget.type == 'activity')
+            Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom + 8,
               left: 16,
@@ -239,24 +269,156 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
+  void _shareItem() {
+    final t = AppTranslations.of(context)!;
+    final type = widget.type;
+    final data = widget.data;
+    String text = '';
+    
+    if (type == 'activity') {
+      final status = data['activity_status']?['status_name'] ?? data['status_info']?['name'] ?? '...';
+      text = '📌 ${t.translate('activity')}: ${data['name']}\n'
+             '📊 ${t.translate('status')}: $status\n'
+             '💰 ${t.translate('cost')}: \$${data['cost'] ?? 0}\n'
+             '🔗 https://app.afscgaza.org/activities/${data['id']}';
+    } else if (type == 'pr') {
+      text = '📦 ${t.translate('purchase_request')} #${data['request_number']}\n'
+             '📝 ${t.translate('description')}: ${data['description'] ?? '...'}\n'
+             '🔗 https://app.afscgaza.org/purchase-requisitions/${data['id']}';
+    } else if (type == 'quotation') {
+      text = '🧾 ${t.translate('vendor')}: ${data['vendor']?['name'] ?? '...'}\n'
+             '💰 ${t.translate('total_amount')}: ${data['total_amount']} ${data['currency']?['name'] ?? ''}\n'
+             '🔗 https://app.afscgaza.org/purchase-requisitions/${data['purchase_requisition_id']}';
+    }
+
+    Share.share(text);
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
   }
 
   Widget _buildInfoGrid(AppTranslations t) {
+    if (widget.type == 'activity') {
+      return _buildActivitySpecifics(t);
+    } else if (widget.type == 'pr') {
+      return _buildPRSpecifics(t);
+    } else if (widget.type == 'quotation') {
+      return _buildQuotationSpecifics(t);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildActivitySpecifics(AppTranslations t) {
     final beneficiaries = widget.data['beneficiaries'] as List? ?? [];
     final parcels = widget.data['parcels'] as List? ?? [];
+    final workTeam = widget.data['work_teams'] as List? ?? [];
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var b in beneficiaries)
-          _buildInfoItem(Icons.people, t.translate('beneficiaries'), '${b['beneficiaries_count']}', Colors.indigo),
-        for (var p in parcels)
-          _buildInfoItem(Icons.inventory_2, t.translate('parcels'), '${p['distributed_parcels_count']}', Colors.amber),
-        if (widget.data['cost'] != null && (double.tryParse(widget.data['cost'].toString()) ?? 0) > 0)
-          _buildInfoItem(Icons.monetization_on, t.translate('cost'), '\$${widget.data['cost']}', Colors.green),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            for (var b in beneficiaries)
+              _buildInfoItem(Icons.people, t.translate('beneficiaries'), '${b['beneficiaries_count']}', Colors.indigo),
+            for (var p in parcels)
+              _buildInfoItem(Icons.inventory_2, t.translate('parcels'), '${p['distributed_parcels_count']}', Colors.amber),
+            if (widget.data['cost'] != null && (double.tryParse(widget.data['cost'].toString()) ?? 0) > 0)
+              _buildInfoItem(Icons.monetization_on, t.translate('cost'), '\$${widget.data['cost']}', Colors.green),
+          ],
+        ),
+        if (workTeam.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _buildSectionTitle(t.translate('work_team')),
+          const SizedBox(height: 12),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: workTeam.length,
+            itemBuilder: (context, index) {
+              final member = workTeam[index];
+              final name = member['employee_rel']?['user']?['name'] ?? '...';
+              final role = member['mission_title']?['name'] ?? '...';
+              return ListTile(
+                leading: CircleAvatar(child: Text(name.isNotEmpty ? name[0] : '?')),
+                title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(role),
+                dense: true,
+              );
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPRSpecifics(AppTranslations t) {
+    final items = widget.data['items'] as List? ?? [];
+    final deadline = widget.data['quotation_deadline'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (deadline != null)
+          _buildInfoItem(Icons.timer, t.translate('deadline'), DateFormat('yyyy-MM-dd').format(DateTime.parse(deadline)), Colors.red),
+        const SizedBox(height: 24),
+        _buildSectionTitle(t.translate('items')),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                color: Colors.grey.shade50,
+                child: Row(
+                  children: [
+                    Expanded(child: Text(t.translate('description'), style: const TextStyle(fontWeight: FontWeight.bold))),
+                    SizedBox(width: 60, child: Text(t.translate('quantity'), style: const TextStyle(fontWeight: FontWeight.bold))),
+                    SizedBox(width: 60, child: Text(t.translate('unit'), style: const TextStyle(fontWeight: FontWeight.bold))),
+                  ],
+                ),
+              ),
+              for (var item in items)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(item['item_description'] ?? '...')),
+                      SizedBox(width: 60, child: Text('${item['quantity']}')),
+                      SizedBox(width: 60, child: Text(item['unit']?['name'] ?? '...')),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuotationSpecifics(AppTranslations t) {
+    final vendor = widget.data['vendor']?['name'] ?? '...';
+    final amount = widget.data['total_amount'];
+    final currency = widget.data['currency']?['name'] ?? '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildInfoItem(Icons.business, t.translate('vendor'), vendor, Colors.blue),
+        const SizedBox(height: 16),
+        _buildInfoItem(Icons.monetization_on, t.translate('total_amount'), '$amount $currency', Colors.green),
+        if (widget.data['notes'] != null) ...[
+          const SizedBox(height: 24),
+          _buildSectionTitle(t.translate('notes')),
+          const SizedBox(height: 8),
+          Text(widget.data['notes'], style: const TextStyle(color: Colors.black87)),
+        ],
       ],
     );
   }
