@@ -33,7 +33,7 @@ workflows:
                               targetCompatibility JavaVersion.VERSION_17
                           }
                           defaultConfig {
-                              minSdkVersion 21
+                              minSdkVersion 23
                               targetSdkVersion 34
                           }
                       }
