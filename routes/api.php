@@ -10,5 +10,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/feed', [FeedController::class, 'index']);
+    Route::get('/feed/metadata', [FeedController::class, 'metadata']);
     Route::post('/activities/{activity}/comments', [FeedController::class, 'addComment']);
 });

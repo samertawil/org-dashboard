@@ -18,14 +18,20 @@ class FeedController extends Controller
         $status_id = $request->query('status_id', '');
         $region_id = $request->query('region_id', '');
         $city_id = $request->query('city_id', '');
+        $from_date = $request->query('from_date');
+        $to_date = $request->query('to_date');
+        $type = $request->query('type'); // 'activity', 'pr', 'quotation'
 
-        $activityQuery = Activity::select('id', DB::raw("'activity' as feed_type"), 'created_at')
+        $activityQuery = Activity::select('id', DB::raw("'activity' as feed_type"), 'start_date as feed_date')
+            ->when($type && $type !== 'activity', fn($q) => $q->whereRaw('1=0'))
             ->when($search, function($q) use ($search) {
                 $q->where(function($sq) use ($search) {
                     $sq->where('name', 'like', '%' . $search . '%')
                        ->orWhere('description', 'like', '%' . $search . '%');
                 });
             })
+            ->when($from_date, fn($q) => $q->where('start_date', '>=', $from_date))
+            ->when($to_date, fn($q) => $q->where('start_date', '<=', $to_date))
             ->when($status_id, function ($q) use ($status_id) {
                 $today = now()->toDateString();
                 $q->where(function ($query) use ($today, $status_id) {
@@ -55,28 +61,31 @@ class FeedController extends Controller
             ->when($region_id, fn($q) => $q->where('region', $region_id))
             ->when($city_id, fn($q) => $q->where('city', $city_id));
 
-        $prQuery = PurchaseRequisition::select('id', DB::raw("'pr' as feed_type"), 'created_at')
+        $prQuery = PurchaseRequisition::select('id', DB::raw("'pr' as feed_type"), 'request_date as feed_date')
+            ->when($type && $type !== 'pr', fn($q) => $q->whereRaw('1=0'))
             ->when($search, function($q) use ($search) {
                 $q->where(function($sq) use ($search) {
                     $sq->where('request_number', 'like', '%' . $search . '%')
                        ->orWhere('description', 'like', '%' . $search . '%');
                 });
             })
-            ->when($status_id, fn($q) => $q->where('status_id', $status_id))
-            // PRs don't have region/city usually, so we don't filter them by these unless needed
-            ;
+            ->when($from_date, fn($q) => $q->where('request_date', '>=', $from_date))
+            ->when($to_date, fn($q) => $q->where('request_date', '<=', $to_date))
+            ->when($status_id, fn($q) => $q->where('status_id', $status_id));
 
-        $quotationQuery = PurchaseQuotationResponse::select('id', DB::raw("'quotation' as feed_type"), 'created_at')
+        $quotationQuery = PurchaseQuotationResponse::select('id', DB::raw("'quotation' as feed_type"), 'submitted_at as feed_date')
+            ->when($type && $type !== 'quotation', fn($q) => $q->whereRaw('1=0'))
             ->when($search, function($q) use ($search) {
                 $q->whereHas('vendor', fn($vq) => $vq->where('name', 'like', '%' . $search . '%'))
                   ->orWhereHas('purchaseRequisition', fn($pq) => $pq->where('request_number', 'like', '%' . $search . '%'));
             })
-            // Quotations don't have these filters directly
-            ;
+            ->when($from_date, fn($q) => $q->where('submitted_at', '>=', $from_date))
+            ->when($to_date, fn($q) => $q->where('submitted_at', '<=', $to_date))
+            ->when($status_id, fn($q) => $q->where('status_id', $status_id));
 
         $combined = $activityQuery->unionAll($prQuery)->unionAll($quotationQuery)
-            ->orderBy('created_at', 'desc')
-            ->paginate(100);
+            ->orderBy('feed_date', 'desc')
+            ->paginate(15); // Reduced for better mobile performance
 
         $grouped = $combined->getCollection()->groupBy('feed_type');
         $activities = collect();
@@ -115,17 +124,17 @@ class FeedController extends Controller
             $id = $item->id;
             
             if ($item->feed_type === 'activity') {
-                $data = $activities->first(fn($a) => $a->id == $id);
+                $data = $activities->get($id);
             } elseif ($item->feed_type === 'pr') {
-                $data = $allPrs->first(fn($p) => $p->id == $id);
+                $data = $allPrs->get($id);
             } else {
-                $data = $quotations->first(fn($q) => $q->id == $id);
+                $data = $quotations->get($id);
             }
             
             if ($data) {
                 return [
                     'feed_type' => $item->feed_type,
-                    'created_at' => $item->created_at,
+                    'feed_date' => $item->feed_date,
                     'data' => $data
                 ];
             }
@@ -138,6 +147,20 @@ class FeedController extends Controller
                 'current_page' => $combined->currentPage(),
                 'last_page' => $combined->lastPage(),
                 'total' => $combined->total(),
+            ]
+        ]);
+    }
+
+    public function metadata()
+    {
+        return response()->json([
+            'regions' => \App\Models\Region::all(),
+            'cities' => \App\Models\City::all(),
+            'statuses' => \App\Models\Status::whereIn('id', [25, 26, 27, 28, 1, 2, 3, 4, 5, 6, 7, 8])->get(), // Expanded statuses
+            'types' => [
+                ['id' => 'activity', 'name' => 'Activity'],
+                ['id' => 'pr', 'name' => 'Purchase Request'],
+                ['id' => 'quotation', 'name' => 'Quotation'],
             ]
         ]);
     }

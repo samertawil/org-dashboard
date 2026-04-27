@@ -22,12 +22,43 @@ class _FeedScreenState extends State<FeedScreen> {
   int _currentPage = 1;
   int _lastPage = 1;
   final ScrollController _scrollController = ScrollController();
+  
+  // Filter states
+  String _search = '';
+  String? _selectedStatus;
+  String? _selectedRegion;
+  String? _selectedCity;
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  String? _selectedType;
+  
+  List<dynamic> _statuses = [];
+  List<dynamic> _regions = [];
+  List<dynamic> _cities = [];
+  List<dynamic> _types = [];
+  
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadFeed();
+    _loadMetadata();
     _scrollController.addListener(_scrollListener);
+  }
+
+  Future<void> _loadMetadata() async {
+    try {
+      final data = await _apiService.fetchMetadata();
+      setState(() {
+        _statuses = data['statuses'];
+        _regions = data['regions'];
+        _cities = data['cities'];
+        _types = data['types'];
+      });
+    } catch (e) {
+      print('Error loading metadata: $e');
+    }
   }
 
   @override
@@ -47,7 +78,16 @@ class _FeedScreenState extends State<FeedScreen> {
   Future<void> _loadFeed() async {
     setState(() => _isLoading = true);
     try {
-      final response = await _apiService.fetchFeed(page: 1);
+      final response = await _apiService.fetchFeed(
+        page: 1,
+        search: _search,
+        statusId: _selectedStatus,
+        regionId: _selectedRegion,
+        cityId: _selectedCity,
+        fromDate: _fromDate != null ? DateFormat('yyyy-MM-dd').format(_fromDate!) : null,
+        toDate: _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null,
+        type: _selectedType,
+      );
       setState(() {
         _items = response['items'];
         _currentPage = response['meta']['current_page'];
@@ -68,7 +108,16 @@ class _FeedScreenState extends State<FeedScreen> {
   Future<void> _loadMore() async {
     setState(() => _isLoadMore = true);
     try {
-      final response = await _apiService.fetchFeed(page: _currentPage + 1);
+      final response = await _apiService.fetchFeed(
+        page: _currentPage + 1,
+        search: _search,
+        statusId: _selectedStatus,
+        regionId: _selectedRegion,
+        cityId: _selectedCity,
+        fromDate: _fromDate != null ? DateFormat('yyyy-MM-dd').format(_fromDate!) : null,
+        toDate: _toDate != null ? DateFormat('yyyy-MM-dd').format(_toDate!) : null,
+        type: _selectedType,
+      );
       setState(() {
         _items.addAll(response['items']);
         _currentPage = response['meta']['current_page'];
@@ -119,14 +168,13 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5),
       appBar: AppBar(
-        title: Text(t.translate('timeline'), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: _buildSearchField(t),
         backgroundColor: Colors.white,
         elevation: 0.5,
-        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.blue),
-            onPressed: _loadFeed,
+            icon: Icon(Icons.filter_list, color: (_selectedStatus != null || _selectedRegion != null || _fromDate != null || _selectedType != null) ? Colors.blue : Colors.grey),
+            onPressed: () => _showFilterSheet(t),
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.grey),
@@ -134,46 +182,232 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadFeed,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _items.length + (_isLoadMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _items.length) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  try {
-                    final item = _items[index];
-                    final type = item['feed_type'];
-                    final data = item['data'];
-                    
-                    if (data == null) return const SizedBox.shrink();
-                    
-                    return InkWell(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailsScreen(type: type, data: data, createdAt: item['created_at']),
+      body: Column(
+        children: [
+          if (_selectedStatus != null || _selectedRegion != null || _fromDate != null || _selectedType != null)
+            _buildActiveFiltersBar(t),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: _loadFeed,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _items.length + (_isLoadMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _items.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        try {
+                          final item = _items[index];
+                          final type = item['feed_type'];
+                          final data = item['data'];
+                          final feedDate = item['feed_date'];
+                          
+                          if (data == null) return const SizedBox.shrink();
+                          
+                          return InkWell(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailsScreen(type: type, data: data, createdAt: feedDate),
+                              ),
+                            ),
+                            child: _buildSocialCard(type, data, feedDate),
+                          );
+                        } catch (e) {
+                          return ListTile(
+                            title: Text(t.translate('error_loading')),
+                            subtitle: Text(e.toString()),
+                            tileColor: Colors.red.shade50,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField(AppTranslations t) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: t.translate('search'),
+          prefixIcon: const Icon(Icons.search, size: 20),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          suffixIcon: _search.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 16),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _search = '');
+                    _loadFeed();
+                  },
+                )
+              : null,
+        ),
+        onSubmitted: (value) {
+          setState(() => _search = value);
+          _loadFeed();
+        },
+      ),
+    );
+  }
+
+  Widget _buildActiveFiltersBar(AppTranslations t) {
+    return Container(
+      height: 50,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          if (_selectedType != null) _buildFilterChip(_selectedType!, () => setState(() => _selectedType = null)),
+          if (_selectedStatus != null) _buildFilterChip('Status ID: $_selectedStatus', () => setState(() => _selectedStatus = null)),
+          if (_selectedRegion != null) _buildFilterChip('Region ID: $_selectedRegion', () => setState(() => _selectedRegion = null)),
+          if (_fromDate != null) _buildFilterChip(DateFormat('MM-dd').format(_fromDate!), () => setState(() => _fromDate = null)),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _selectedStatus = null;
+                _selectedRegion = null;
+                _selectedCity = null;
+                _fromDate = null;
+                _toDate = null;
+                _selectedType = null;
+              });
+              _loadFeed();
+            },
+            child: const Text('Clear All', style: TextStyle(fontSize: 12, color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, VoidCallback onDeleted) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+      child: InputChip(
+        label: Text(label, style: const TextStyle(fontSize: 12)),
+        onDeleted: () {
+          onDeleted();
+          _loadFeed();
+        },
+        deleteIcon: const Icon(Icons.close, size: 14),
+        backgroundColor: Colors.blue.shade50,
+      ),
+    );
+  }
+
+  void _showFilterSheet(AppTranslations t) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(t.translate('filter'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Date Range
+                  const Text('Date Range', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.calendar_today, size: 16),
+                          label: Text(_fromDate == null ? 'From' : DateFormat('yyyy-MM-dd').format(_fromDate!)),
+                          onPressed: () async {
+                            final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2030));
+                            if (date != null) setModalState(() => _fromDate = date);
+                          },
                         ),
                       ),
-                      child: _buildSocialCard(type, data, item['created_at']),
-                    );
-                  } catch (e) {
-                    return ListTile(
-                      title: Text(t.translate('error_loading')),
-                      subtitle: Text(e.toString()),
-                      tileColor: Colors.red.shade50,
-                    );
-                  }
-                },
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.calendar_today, size: 16),
+                          label: Text(_toDate == null ? 'To' : DateFormat('yyyy-MM-dd').format(_toDate!)),
+                          onPressed: () async {
+                            final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2020), lastDate: DateTime(2030));
+                            if (date != null) setModalState(() => _toDate = date);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Type
+                  const Text('Type', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Wrap(
+                    spacing: 8,
+                    children: _types.map((type) {
+                      return ChoiceChip(
+                        label: Text(type['name']),
+                        selected: _selectedType == type['id'],
+                        onSelected: (val) => setModalState(() => _selectedType = val ? type['id'] : null),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Region
+                  const Text('Region', style: TextStyle(fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    isExpanded: true,
+                    value: _selectedRegion,
+                    hint: const Text('Select Region'),
+                    items: _regions.map((r) => DropdownMenuItem(value: r['id'].toString(), child: Text(r['name'] ?? ''))).toList(),
+                    onChanged: (val) => setModalState(() => _selectedRegion = val),
+                  ),
+                  
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 15)),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _loadFeed();
+                      },
+                      child: const Text('Apply Filters'),
+                    ),
+                  ),
+                ],
               ),
-            ),
+            );
+          },
+        );
+      },
     );
   }
 

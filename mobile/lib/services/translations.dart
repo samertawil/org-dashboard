@@ -42,6 +42,7 @@ class AppTranslations {
       'days': 'days',
       'hours': 'hours',
       'minutes': 'minutes',
+      'filter': 'Filter',
     },
     'ar': {
       'login': 'تسجيل الدخول',
@@ -76,6 +77,7 @@ class AppTranslations {
       'days': 'يوم',
       'hours': 'ساعة',
       'minutes': 'دقيقة',
+      'filter': 'فلترة',
     },
   };
 

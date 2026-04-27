@@ -35,12 +35,30 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchFeed({int page = 1}) async {
+  Future<Map<String, dynamic>> fetchFeed({
+    int page = 1,
+    String? search,
+    String? statusId,
+    String? regionId,
+    String? cityId,
+    String? fromDate,
+    String? toDate,
+    String? type,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
+    String url = '$baseUrl/feed?page=$page';
+    if (search != null && search.isNotEmpty) url += '&search=$search';
+    if (statusId != null && statusId.isNotEmpty) url += '&status_id=$statusId';
+    if (regionId != null && regionId.isNotEmpty) url += '&region_id=$regionId';
+    if (cityId != null && cityId.isNotEmpty) url += '&city_id=$cityId';
+    if (fromDate != null && fromDate.isNotEmpty) url += '&from_date=$fromDate';
+    if (toDate != null && toDate.isNotEmpty) url += '&to_date=$toDate';
+    if (type != null && type.isNotEmpty) url += '&type=$type';
+
     final response = await http.get(
-      Uri.parse('$baseUrl/feed?page=$page'),
+      Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -52,6 +70,26 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to load feed');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchMetadata() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/feed/metadata'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load metadata');
     }
   }
 
