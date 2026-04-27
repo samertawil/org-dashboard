@@ -20,5 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+dependency_overrides:
+  win32: ^5.5.0
+
 flutter:
   uses-material-design: true
