@@ -19,9 +19,22 @@ workflows:
         script: |
           cd mobile
           flutter create . --platforms android,ios
+          # Hotfix: Inject namespace for plugins that lack it (Fixes AGP 8.0+ issues)
+          echo "
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          if (namespace == null) {
+                              namespace = project.group
+                          }
+                      }
+                  }
+              }
+          }" >> android/build.gradle
       - name: Add Internet Permission
         script: |
-          sed -i '' 's/<application/<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/g' mobile/android/app/src/main/AndroidManifest.xml
+          sed -i '' 's/<application/<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/g' android/app/src/main/AndroidManifest.xml
       - name: Get Flutter packages
         script: |
           cd mobile
