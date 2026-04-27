@@ -56,10 +56,12 @@ workflows:
       - name: Build Android APK
         script: |
           cd mobile
-          flutter build apk --release
-          find build -name "*.apk"
+          flutter build apk --release --verbose
+          echo "Listing all files in build directory:"
+          ls -R build | grep .apk || echo "No APK found in build directory"
+          find . -name "*.apk"
     artifacts:
-      - mobile/build/**/*.apk
+      - "**/build/**/*.apk"
 
   ios-workflow:
     name: iOS Build Workflow
