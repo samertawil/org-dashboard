@@ -21,7 +21,7 @@ class Index extends Component
     public $sortDirection = 'desc';
 
     // Pagination
-    public int $perPage = 10;
+    public int $perPage = 20;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -57,7 +57,7 @@ class Index extends Component
     #[Computed()]
     public function gradingScales()
     {
-        return SurveyGradingScaleTable::query()
+        return SurveyGradingScaleTable::query()->with('typeRel', 'surveyForSection' )
             ->when($this->searchBatch, function ($query) {
                 $query->where('batch_no', $this->searchBatch);
             })

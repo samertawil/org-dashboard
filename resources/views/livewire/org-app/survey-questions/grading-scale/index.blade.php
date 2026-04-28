@@ -72,6 +72,12 @@
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Batch') }}
                         </th>
+
+                        <th
+                        class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        {{ __('Grading Type') }}
+                    </th>
+
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Section') }}
@@ -97,8 +103,12 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $scale->batch_no }}
                             </td>
+
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $scale->survey_for_section ? \App\Models\Status::find($scale->survey_for_section)->status_name ?? '-' : '-' }}
+                                {{ $scale->typeRel->status_name ?? '-' }}
+                            </td>
+                            <td class="px-6 py-4  whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300" style="width: 10px !important;" >
+                                {{ $scale->surveyForSection->status_name ?? '-'  }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">

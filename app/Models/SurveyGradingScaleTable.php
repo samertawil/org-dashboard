@@ -23,7 +23,7 @@ class SurveyGradingScaleTable extends Model
         'updated_by',
     ];
 
-    public function type()
+    public function typeRel()
     {
         return $this->belongsTo(Status::class, 'type');
     }

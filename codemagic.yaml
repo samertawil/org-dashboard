@@ -90,5 +90,11 @@ workflows:
           cd mobile
           # Building without signing for now to ensure it compiles
           flutter build ios --release --no-codesign
+          
+          # Package the .app into an unsigned .ipa file
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -qr app_unsigned.ipa Payload
     artifacts:
-      - mobile/build/ios/iphoneos/*.app
+      - "mobile/build/ios/iphoneos/*.ipa"
