@@ -161,6 +161,20 @@
                         <flux:error name="address_details" />
                     </flux:field>
                 </div>
+
+                {{-- Coordinates --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2 lg:col-span-3 mt-2">
+                    <flux:field>
+                        <flux:label>{{ __('Latitude') }}</flux:label>
+                        <flux:input type="text" wire:model="latitude" placeholder="e.g. 31.3547" />
+                        <flux:error name="latitude" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('Longitude') }}</flux:label>
+                        <flux:input type="text" wire:model="longitudes" placeholder="e.g. 34.3088" />
+                        <flux:error name="longitudes" />
+                    </flux:field>
+                </div>
             @endif
 
             {{-- Parcels Section --}}

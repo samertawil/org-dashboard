@@ -80,6 +80,8 @@ class Create extends Component
                 'neighbourhood' => $this->neighbourhood ?: null,
                 'location' => $this->location ?: null,
                 'address_details' => $this->address_details ?: null,
+                'latitude' => $this->latitude ?: null,
+                'longitudes' => $this->longitudes ?: null,
                 'created_by' => auth()->id(),
                 'sector_id' => $this->sector_id,
                 'activation' => GlobalSystemConstant::ACTIVE->value,

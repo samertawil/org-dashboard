@@ -176,4 +176,5 @@
     </div>
 
     @livewire('org-app.dashboard.a-i-chatbot')
+    @livewire('org-app.maps.operations-map', ['isDashboard' => true])
 </div>

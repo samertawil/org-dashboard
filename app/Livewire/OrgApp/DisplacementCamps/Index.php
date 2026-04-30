@@ -61,6 +61,21 @@ class Index extends Component
             ->paginate(10);
     }
 
+    #[Computed]
+    public function allCampsForMap()
+    {
+        return DisplacementCamp::query()
+            ->when($this->search_name, fn($q) => $q->where('name', 'like', '%' . $this->search_name . '%'))
+            ->when($this->search_moderator, fn($q) => $q->where('Moderator', 'like', '%' . $this->search_moderator . '%'))
+            ->when($this->search_region_id, fn($q) => $q->where('region_id', $this->search_region_id))
+            ->when($this->search_city_id, fn($q) => $q->where('city_id', $this->search_city_id))
+            ->when($this->search_address_details, fn($q) => $q->where('address_details', 'like', '%' . $this->search_address_details . '%'))
+            ->when($this->search_camp_main_needs, fn($q) => $q->whereJsonContains('camp_main_needs', $this->search_camp_main_needs))
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitudes')
+            ->get(['id', 'name', 'latitude', 'longitudes', 'address_details']);
+    }
+
     
     #[Computed]
     public function needsList()

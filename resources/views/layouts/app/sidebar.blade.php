@@ -33,6 +33,10 @@
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="map" :href="route('operations.map')" :current="request()->routeIs('operations.map')" wire:navigate
+                        class="text-indigo-600 dark:text-indigo-400 font-bold">
+                        {{ __('Operations Map ✨') }}
+                    </flux:sidebar.item>
                 @endauth
 
                 @canany(['activity.index'])

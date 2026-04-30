@@ -267,5 +267,6 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');
     Route::get('map',Map::class);
+    Route::get('/operations-map', \App\Livewire\OrgApp\Maps\OperationsMap::class)->name('operations.map');
     });
     

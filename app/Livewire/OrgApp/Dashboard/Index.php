@@ -54,7 +54,7 @@ class Index extends Component
 
         // 4. My Tasks
         $myTasks = EventAssigneeRepo::eventAssignees();
-
+ 
         return view('livewire.org-app.dashboard.index', [
             'activeActivitiesCount' => $activeActivitiesCount,
             'totalBeneficiaries' => $totalBeneficiaries,

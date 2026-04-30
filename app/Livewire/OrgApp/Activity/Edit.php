@@ -40,6 +40,8 @@ class Edit extends Component
         $this->address_details = $activity->address_details;
         $this->sector_id = $activity->sector_id;
         $this->cost_nis = $activity->cost_nis;
+        $this->latitude = $activity->latitude;
+        $this->longitudes = $activity->longitudes;
 
 
         $this->parcels = $activity->parcels->map(function($parcel) {
@@ -92,6 +94,8 @@ class Edit extends Component
             'location' => $this->location ?: null,
             'address_details' => $this->address_details,
             'sector_id' => $this->sector_id,
+            'latitude' => $this->latitude,
+            'longitudes' => $this->longitudes,
 
         ]);
 

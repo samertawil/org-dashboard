@@ -4,11 +4,19 @@
             <flux:heading level="1" size="xl">{{ __('Displacement Camps') }}</flux:heading>
             <flux:subheading>{{ __('Manage displacement camps parameters and data.') }}</flux:subheading>
         </div>
-        @can('displacement.camps.create')
-            <flux:button href="{{ route('displacement.camps.create') }}" wire:navigate variant="primary" icon="plus">
-                {{ __('New Camp') }}
-            </flux:button>
-        @endcan
+        <div class="flex gap-2">
+            <flux:modal.trigger name="camps-map-modal">
+                <flux:button variant="ghost" icon="map" x-on:click="$dispatch('init-camps-map')">
+                    {{ __('Show All on Map') }}
+                </flux:button>
+            </flux:modal.trigger>
+
+            @can('displacement.camps.create')
+                <flux:button href="{{ route('displacement.camps.create') }}" wire:navigate variant="primary" icon="plus">
+                    {{ __('New Camp') }}
+                </flux:button>
+            @endcan
+        </div>
     </div>
 
     {{-- Success Message --}}
@@ -201,4 +209,111 @@
             {{ $this->displacementCamps->links() }}
         </div>
     </div>
+
+    {{-- Camps Map Modal --}}
+    <flux:modal name="camps-map-modal" class="md:w-[90%] md:h-[90%]">
+        <div class="h-full flex flex-col min-h-[600px] p-2">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <flux:heading size="lg">{{ __('Camps Distribution Map') }}</flux:heading>
+                    <flux:subheading>{{ __('Gaza Strip - Interactive View') }}</flux:subheading>
+                </div>
+                <flux:modal.close>
+                    <flux:button variant="ghost" icon="x-mark" />
+                </flux:modal.close>
+            </div>
+
+            {{-- The Map Container --}}
+            <div id="leaf-map-container" 
+                 class="flex-1 rounded-xl border-2 border-zinc-200 shadow-inner bg-zinc-50" 
+                 wire:ignore
+                 style="min-height: 600px; height: 600px; width: 100%; position: relative; z-index: 1;">
+                 <div class="absolute inset-0 flex items-center justify-center text-zinc-400 italic" id="map-loader-text">
+                    {{ __('Loading Map Assets...') }}
+                 </div>
+            </div>
+        </div>
+    </flux:modal>
+
+    @push('scripts')
+    {{-- Assets loaded directly --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        (function() {
+            var mapInstance = null;
+            var campsData = @js($this->allCampsForMap);
+
+            function initMapNow() {
+                var container = document.getElementById('leaf-map-container');
+                
+                // If container not found or map already initialized, skip
+                if (!container || container.dataset.loaded === 'true') return;
+                
+                // Ensure Leaflet is loaded
+                if (typeof L === 'undefined') return;
+
+                console.log('Initializing Bulletproof Map...');
+                
+                try {
+                    // Mark as loaded to prevent multiple initializations
+                    container.dataset.loaded = 'true';
+                    
+                    // Remove loader text
+                    var loader = document.getElementById('map-loader-text');
+                    if (loader) loader.remove();
+
+                    // Create Map centered on Gaza
+                    mapInstance = L.map(container).setView([31.3547, 34.3088], 11);
+
+                    // Add Tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(mapInstance);
+
+                    // Add Markers
+                    var markerGroup = L.featureGroup();
+                    var count = 0;
+
+                    campsData.forEach(function(camp) {
+                        if (camp.latitude && camp.longitudes) {
+                            var lat = parseFloat(camp.latitude);
+                            var lng = parseFloat(camp.longitudes);
+                            
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                var popup = '<div class="p-2 text-right rtl" dir="rtl">' +
+                                            '<h3 class="font-bold text-sm">' + camp.name + '</h3>' +
+                                            '<p class="text-xs">' + (camp.address_details || '') + '</p>' +
+                                            '<a href="/org-app/displacement-camps/' + camp.id + '/edit" class="text-blue-600 text-[10px] font-bold">تعديل</a>' +
+                                            '</div>';
+                                
+                                L.marker([lat, lng]).bindPopup(popup).addTo(markerGroup);
+                                count++;
+                            }
+                        }
+                    });
+
+                    if (count > 0) {
+                        markerGroup.addTo(mapInstance);
+                        mapInstance.fitBounds(markerGroup.getBounds(), { padding: [30, 30] });
+                    }
+                    
+                    // Fix grey tiles issue in modals
+                    setTimeout(function() {
+                        mapInstance.invalidateSize();
+                    }, 500);
+
+                } catch (e) {
+                    console.error('Map Init Error:', e);
+                    container.dataset.loaded = 'false';
+                }
+            }
+
+            // Check every 1 second if the map container has appeared in the DOM
+            // This is the most reliable way for Livewire/Flux modals
+            setInterval(initMapNow, 1000);
+        })();
+    </script>
+    @endpush
 </div>
