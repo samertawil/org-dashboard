@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\Maps;
 use App\Models\DisplacementCamp;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Gate;
 
 class OperationsMap extends Component
 {
@@ -14,6 +15,9 @@ class OperationsMap extends Component
     #[Computed]
     public function allCamps()
     {
+         if(Gate::denies('displacement.camps.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         if ($this->filterType === 'activities') {
             return collect();
         }
@@ -58,6 +62,9 @@ class OperationsMap extends Component
 
     public function updateActivityCoordinates($activityId, $lat, $lng)
     {
+         if (Gate::denies('activity.create')) {
+            return abort(403, 'You do not have the necessary permissions');
+        }
         $activity = \App\Models\Activity::find($activityId);
         if ($activity) {
             $activity->update([
@@ -78,6 +85,10 @@ class OperationsMap extends Component
 
     public function render()
     {
+
+    if(Gate::denies('activity.index')){
+            return abort(403,'You do not have the necessary permissions');
+        }
         return view('livewire.org-app.maps.operations-map')
             ->layout('layouts.app.land', ['title' => __('Operations Map')]);
     }

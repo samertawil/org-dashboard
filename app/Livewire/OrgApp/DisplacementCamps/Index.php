@@ -102,6 +102,9 @@ class Index extends Component
 
     public function render()
     {
+        if(Gate::denies('displacement.camps.index')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         return view('livewire.org-app.displacement-camps.index', [
             'regions' => RegionRepo::regions(),
             'cities' => CityRepo::cities()->where('region_id', $this->search_region_id),

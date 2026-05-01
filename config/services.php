@@ -50,4 +50,12 @@ return [
         'beneficiary' => env('CIVIL_REGISTRY_API_BENEFICIARY'),
         'appkey' => env('CIVIL_REGISTRY_API_APPKEY'),
     ],
+
+    'whatsapp' => [
+        'instance_id' => env('WHATSAPP_INSTANCE_ID'),
+        'token' => env('WHATSAPP_TOKEN'),
+        'manager_phone' => env('WHATSAPP_MANAGER_PHONE'), // Manager's WhatsApp number with country code
+        'api_url' => env('WHATSAPP_API_URL', 'https://api.ultramsg.com/'),
+    ],
 ];
+

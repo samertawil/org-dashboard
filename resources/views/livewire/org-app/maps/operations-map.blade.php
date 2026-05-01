@@ -128,10 +128,10 @@
                     switch(parseInt(sectorId)) {
                         case 1: icon = '🍎'; color = '#ef4444'; break;
                         case 2: icon = '💊'; color = '#10b981'; break;
-                        case 3: icon = '💧'; color = '#0ea5e9'; break;
-                        case 4: icon = '🏠'; color = '#f59e0b'; break;
-                        case 5: icon = '🛡️'; color = '#8b5cf6'; break;
-                        case 6: icon = '📚'; color = '#ec4899'; break;
+                        case 31: icon = '💧'; color = '#0ea5e9'; break;
+                        case 70: icon = '🏠'; color = '#f59e0b'; break;
+                        case 67: icon = '🛡️'; color = '#8b5cf6'; break;
+                        case 55: icon = '📚'; color = '#ec4899'; break;
                     }
                     return L.divIcon({
                         className: '',

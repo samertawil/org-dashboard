@@ -33,17 +33,18 @@
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="map" :href="route('operations.map')" :current="request()->routeIs('operations.map')" wire:navigate
-                        class="text-indigo-600 dark:text-indigo-400 font-bold">
-                        {{ __('Operations Map ✨') }}
-                    </flux:sidebar.item>
-                @endauth
-
-                @canany(['activity.index'])
-                    <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
+                      <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
                         :current="request()->routeIs('calendar.index')" wire:navigate>
                         {{ __('Calendar') }}
+                    </flux:sidebar.item> 
+                @endauth
+
+                @canany(['activity.index', 'displacement.camps.index'])
+                <flux:sidebar.item icon="map" :href="route('operations.map')" :current="request()->routeIs('operations.map')" wire:navigate
+                        class="text-indigo-600 dark:text-indigo-400 font-bold">
+                        {{ __('Operations Map') }}
                     </flux:sidebar.item>
+                 
                 @endcanany
 
                 @canany([
@@ -68,7 +69,20 @@
                         {{ __('AI Copilot ✨') }}
                     </flux:sidebar.item>
                 @endcan
-
+                @can('manager.reports.all')
+                    <flux:sidebar.item icon="document-chart-bar" :href="route('reports.monthly.manager.report')"
+                    :current="request()->routeIs('reports.monthly.manager.report')" wire:navigate
+                    class="text-emerald-600 dark:text-emerald-400 font-bold">
+                    {{ __('Monthly Manager Report') }}
+                </flux:sidebar.item>
+ @endcan
+ @canany(['activity.index','activity.show','student.index','student.show','manager.reports.all'])
+                <flux:sidebar.item icon="list-bullet" :href="route('reports.daily.log.report')"
+                    :current="request()->routeIs('reports.daily.log.report')" wire:navigate
+                    class="text-indigo-600 dark:text-indigo-400 font-bold">
+                    {{ __('Daily Entries Log') }}
+                </flux:sidebar.item>
+                 @endcanany
             </flux:sidebar.group>
 
         </flux:sidebar.nav>
@@ -240,6 +254,8 @@
                             :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
                             {{ __('Feedback Reports') }}
                         </flux:sidebar.item>
+
+                     
                     </flux:sidebar.group>
                 @endcanany
             </flux:sidebar.group>

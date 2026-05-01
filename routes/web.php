@@ -262,6 +262,8 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/survey-comparison-scale/{id}/edit', \App\Livewire\OrgApp\SurveyQuestions\ComparisonScale\Edit::class)->name('org-app.survey-questions.comparison-scale.edit');
 
     Route::get('/reports/survey-comparison', \App\Livewire\OrgApp\Reports\SurveyComparisonReport::class)->name('reports.survey-comparison');
+    Route::get('/reports/monthly-manager-report', \App\Livewire\OrgApp\Reports\MonthlyManagerReport::class)->name('reports.monthly.manager.report');
+    Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
     
     // Export
 

@@ -1,3 +1,42 @@
+<style>
+    @keyframes vapi-pulse {
+        0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+        50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .pulse-container {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 25%; /* ارتفاع محدد وواضح في الأسفل */
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        gap: 2px;
+        padding: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 5; /* رفعه قليلاً ليكون فوق خلفية البطاقة */
+        opacity: 0.8;
+    }
+
+    .pulse-bar {
+        width: 5px; /* زيادة العرض قليلاً */
+        border-radius: 2px 2px 0 0;
+        transform-origin: bottom;
+        animation: vapi-pulse var(--duration) ease-in-out infinite;
+        animation-delay: var(--delay);
+        height: 100%;
+    }
+
+    .card-content-overlay {
+        position: relative;
+        z-index: 10;
+        background: transparent;
+    }
+</style>
+
 <div class="flex flex-col gap-8">
     {{-- Header --}}
     <div class="flex items-center justify-between">
@@ -10,38 +49,60 @@
 
 
 
-    {{-- KPI Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <flux:card class="flex flex-col gap-2 !bg-sky-50 dark:!bg-sky-900/10 !border-sky-200 dark:!border-sky-800/30">
-            <span class="text-sm font-medium text-sky-600 dark:text-sky-400">{{ __('Total Activities') }}</span>
-            <div class="flex items-end justify-between">
-                <span class="text-3xl font-bold text-sky-700 dark:text-sky-300">{{ $activeActivitiesCount }}</span>
-                <flux:icon icon="chart-bar" class="text-sky-600 bg-sky-100 dark:bg-sky-500/20 p-2 rounded-lg size-10" />
+        {{-- Total Activities --}}
+        <flux:card class="relative overflow-hidden flex flex-col gap-2 !bg-sky-50 dark:!bg-sky-900/10 !border-sky-200 dark:!border-sky-800/30">
+            <div class="card-content-overlay flex flex-col gap-2">
+                <span class="text-sm font-medium text-sky-600 dark:text-sky-400">{{ __('Total Activities') }}</span>
+                <div class="flex items-end justify-between">
+                    <span class="text-3xl font-bold text-sky-700 dark:text-sky-300">{{ $activeActivitiesCount }}</span>
+                    <flux:icon icon="chart-bar" class="text-sky-600 bg-sky-100 dark:bg-sky-500/20 p-2 rounded-lg size-10" />
+                </div>
+            </div>
+            <div class="pulse-container">
+                @foreach(range(1, 20) as $i)
+                    <div class="pulse-bar bg-sky-500" style="--duration: {{ 0.8 + (rand(0, 10) / 10) }}s; --delay: {{ rand(0, 10) / 10 }}s;"></div>
+                @endforeach
             </div>
         </flux:card>
 
-        <flux:card class="flex flex-col gap-2 !bg-emerald-50 dark:!bg-emerald-900/10 !border-emerald-200 dark:!border-emerald-800/30">
-            <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">{{ __('Total Beneficiaries') }}</span>
-            <div class="flex items-end justify-between">
-                <span class="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{{ number_format($totalBeneficiaries) }}</span>
-                <flux:icon icon="users" class="text-emerald-600 bg-emerald-100 dark:bg-emerald-500/20 p-2 rounded-lg size-10" />
-            </div>
-        </flux:card>
-
-        <flux:card class="flex flex-col gap-2 !bg-violet-50 dark:!bg-violet-900/10 !border-violet-200 dark:!border-violet-800/30">
-            <span class="text-sm font-medium text-violet-600 dark:text-violet-400">{{ __('Total Budget') }}</span>
-            <div class="flex flex-col items-start justify-between">
-                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300">{{ number_format($totalBudget) }}&nbsp;$</span>
-                <span class="text-2xl font-bold text-violet-700 dark:text-violet-300"> {{ number_format($totalBudgetNis) }}&nbsp;nis</span>
+        {{-- Total Beneficiaries --}}
+        <flux:card class="relative overflow-hidden flex flex-col gap-2 !bg-emerald-50 dark:!bg-emerald-900/10 !border-emerald-200 dark:!border-emerald-800/30">
+            <div class="card-content-overlay flex flex-col gap-2">
+                <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">{{ __('Total Beneficiaries') }}</span>
+                <div class="flex items-end justify-between">
+                    <span class="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{{ number_format($totalBeneficiaries) }}</span>
+                    <flux:icon icon="users" class="text-emerald-600 bg-emerald-100 dark:bg-emerald-500/20 p-2 rounded-lg size-10" />
+                </div>
             </div>
            
         </flux:card>
 
-        <flux:card class="flex flex-col gap-2 !bg-amber-50 dark:!bg-amber-900/10 !border-amber-200 dark:!border-amber-800/30">
-            <span class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ __('Purchase Requests') }}</span>
-            <div class="flex items-end justify-between">
-                <span class="text-3xl font-bold text-amber-700 dark:text-amber-300">{{ $pendingRequests }}</span>
-                <flux:icon icon="shopping-cart" class="text-amber-600 bg-amber-100 dark:bg-amber-500/20 p-2 rounded-lg size-10" />
+        {{-- Total Budget --}}
+        <flux:card class="relative overflow-hidden flex flex-col gap-2 !bg-violet-50 dark:!bg-violet-900/10 !border-violet-200 dark:!border-violet-800/30">
+            <div class="card-content-overlay flex flex-col gap-2">
+                <span class="text-sm font-medium text-violet-600 dark:text-violet-400">{{ __('Total Budget') }}</span>
+                <div class="flex flex-col items-start justify-between">
+                    <span class="text-2xl font-bold text-violet-700 dark:text-violet-300">{{ number_format($totalBudget) }}&nbsp;$</span>
+                    <span class="text-2xl font-bold text-violet-700 dark:text-violet-300"> {{ number_format($totalBudgetNis) }}&nbsp;nis</span>
+                </div>
+            </div>
+           
+        </flux:card>
+
+        {{-- Purchase Requests --}}
+        <flux:card class="relative overflow-hidden flex flex-col gap-2 !bg-amber-50 dark:!bg-amber-900/10 !border-amber-200 dark:!border-amber-800/30">
+            <div class="card-content-overlay flex flex-col gap-2">
+                <span class="text-sm font-medium text-amber-600 dark:text-amber-400">{{ __('Purchase Requests') }}</span>
+                <div class="flex items-end justify-between">
+                    <span class="text-3xl font-bold text-amber-700 dark:text-amber-300">{{ $pendingRequests }}</span>
+                    <flux:icon icon="shopping-cart" class="text-amber-600 bg-amber-100 dark:bg-amber-500/20 p-2 rounded-lg size-10" />
+                </div>
+            </div>
+            <div class="pulse-container">
+                @foreach(range(1, 20) as $i)
+                    <div class="pulse-bar bg-amber-500" style="--duration: {{ 1.0 + (rand(0, 10) / 10) }}s; --delay: {{ rand(0, 10) / 10 }}s;"></div>
+                @endforeach
             </div>
         </flux:card>
     </div>
@@ -176,5 +237,7 @@
     </div>
 
     @livewire('org-app.dashboard.a-i-chatbot')
-    @livewire('org-app.maps.operations-map', ['isDashboard' => true])
+    @canany(['activity.index', 'displacement.camps.index'])
+      @livewire('org-app.maps.operations-map', ['isDashboard' => true])
+      @endcanany
 </div>
