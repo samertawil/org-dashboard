@@ -45,10 +45,10 @@ trait FormTrait
     #[Validate('nullable|exists:locations,id')]
     public  $location = '';
 
-    #[Validate('nullable|string|max:50')]
+    #[Validate('nullable|numeric')]
     public $latitude = null;
 
-    #[Validate('nullable|string|max:50')]
+    #[Validate('nullable|numeric')]
     public $longitudes = null;
     // #[Validate('required|integer')]
     // public $activation =  GlobalSystemConstant::ACTIVE->value;

@@ -6,17 +6,26 @@
         </div>
         <div class="flex gap-2">
             <flux:modal.trigger name="export-activities-modal">
-                <flux:button variant="ghost" icon="document-arrow-down" class="text-green-600">
+                <flux:button variant="ghost" icon="document-arrow-down" class="text-green-600 hidden sm:flex">
                     {{ __('Export Excel') }}
                 </flux:button>
             </flux:modal.trigger>
             @can('activity.create')
-                <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus">
+                <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus" class="hidden sm:flex">
                     {{ __('Add Activity') }}
                 </flux:button>
             @endcan
         </div>
     </div>
+
+    {{-- Floating Action Button for Mobile --}}
+    @can('activity.create')
+    <div class="fixed bottom-24 left-6 z-50 sm:hidden">
+        <flux:button href="{{ route('activity.create') }}" wire:navigate variant="primary" icon="plus" 
+            class="!rounded-full size-14 shadow-2xl !p-0 flex items-center justify-center animate-bounce-subtle">
+        </flux:button>
+    </div>
+    @endcan
 
     {{-- Success Message --}}
     <x-auth-session-status class="text-center" :status="session('message')" />
@@ -35,10 +44,16 @@
                 </div>
             </flux:field>
 
-            {{-- Start Date --}}
+            {{-- From Date --}}
             <flux:field>
-                <flux:label>{{ __('Start Date') }}</flux:label>
-                <flux:input type="date" wire:model.live="start_date" />
+                <flux:label>{{ __('From Date') }}</flux:label>
+                <flux:input type="date" wire:model.live="from_date" />
+            </flux:field>
+
+            {{-- To Date --}}
+            <flux:field>
+                <flux:label>{{ __('To Date') }}</flux:label>
+                <flux:input type="date" wire:model.live="to_date" />
             </flux:field>
 
             {{-- Status --}}
@@ -46,6 +61,22 @@
                 <option value="">{{ __('All Statuses') }}</option>
                 @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.activity_status')) as $status)
                     <option value="{{ $status->id }}">{{ $status->status_name }}</option>
+                @endforeach
+            </flux:select>
+
+            {{-- Sector --}}
+            <flux:select wire:model.live="sector_id" :label="__('Sector')">
+                <option value="">{{ __('All Sectors') }}</option>
+                @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.sectors')) as $status)
+                    <option value="{{ $status->id }}">{{ $status->status_name }}</option>
+                @endforeach
+            </flux:select>
+
+             {{-- Parcel Type --}}
+             <flux:select wire:model.live="parcel_type" :label="__('Parcel Type')">
+                <option value="">{{ __('All Parcel Types') }}</option>
+                @foreach ($this->parcelTypes as $type)
+                    <option value="{{ $type->id }}">{{ $type->status_name }}</option>
                 @endforeach
             </flux:select>
 
@@ -68,10 +99,10 @@
 
 
             {{-- Clear Filters --}}
-            @if ($search || $start_date || $status_id || $region_id || $city_id)
-                <div class="mt-4 flex items-center justify-end">
+            @if ($search || $start_date || $from_date || $to_date || $status_id || $sector_id || $parcel_type || $region_id || $city_id)
+                <div class="mt-4 flex items-center justify-end col-span-full">
                     <flux:button
-                        wire:click="$set('search', ''); $set('start_date', ''); $set('status_id', ''); $set('region_id', ''); $set('city_id', '')"
+                        wire:click="$set('search', ''); $set('start_date', ''); $set('from_date', ''); $set('to_date', ''); $set('status_id', ''); $set('sector_id', ''); $set('parcel_type', ''); $set('region_id', ''); $set('city_id', '')"
                         variant="ghost" size="sm" icon="x-mark">
                         {{ __('Clear Filters') }}
                     </flux:button>
@@ -96,6 +127,52 @@
                     </p>
                 </div>
             </div>
+        {{-- Mobile Cards View (Visible on small screens only) --}}
+        <div class="block md:hidden divide-y divide-zinc-100 dark:divide-zinc-700">
+            @forelse($this->activities as $activity)
+                <div class="p-4 space-y-3" wire:key="mobile-activity-{{ $activity->id }}">
+                    <div class="flex justify-between items-start">
+                        <a href="{{ route('activity.show', $activity) }}" wire:navigate class="text-sm font-black text-indigo-600 dark:text-indigo-400">
+                            {{ $activity->name }}
+                        </a>
+                        <flux:badge :color="$activity->status_info['color']" size="sm">
+                            {{ $activity->status_info['name'] }}
+                        </flux:badge>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-xs text-zinc-500">
+                        <div class="flex items-center gap-1">
+                            <flux:icon icon="calendar" size="xs" />
+                            <span>{{ $activity->start_date }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <flux:icon icon="map-pin" size="xs" />
+                            <span>{{ $activity->cities->city_name ?? '-' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                            {{ $activity->statusSpecificSector->status_name ?? '-' }}
+                        </span>
+                        
+                        <div class="flex items-center gap-2">
+                             <flux:button href="{{ route('activity.show', $activity) }}" wire:navigate variant="ghost" size="xs" icon="eye" />
+                             @can('activity.create')
+                                <flux:button href="{{ route('activity.edit', $activity) }}" wire:navigate variant="ghost" size="xs" icon="pencil-square" />
+                             @endcan
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-zinc-500">
+                    {{ __('No activities found.') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop Table View (Hidden on small screens) --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
@@ -288,6 +365,7 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
 
 

@@ -29,6 +29,26 @@ class Feed extends Component
     public $city_id = '';
     public $newCommentText = [];
 
+    /** Populated in mount() — passed to Alpine for @mention */
+    public array $mentionableUsers = [];
+
+    public function mount(): void
+    {
+        $this->mentionableUsers = \App\Models\Employee::query()
+            ->whereNotNull('user_id')
+            ->where('activation', \App\Enums\GlobalSystemConstant::ACTIVE->value)
+            ->where('user_id', '!=', auth()->id())
+            ->with('user:id,name')
+            ->get()
+            ->filter(fn($e) => $e->user !== null)
+            ->map(fn($e) => [
+                'id'   => $e->user->id,
+                'name' => $e->full_name ?? $e->user->name,
+            ])
+            ->values()
+            ->toArray();
+    }
+
     public ?PurchaseRequisition $selectedPr = null;
     public ?\App\Models\PurchaseQuotationResponse $selectedQuotation = null;
 
@@ -216,13 +236,54 @@ class Feed extends Component
             'newCommentText.' . $activityId . '.required' => __('The comment cannot be empty.'),
         ]);
 
-        ActivityComments::create([
+        $activity = Activity::findOrFail($activityId);
+
+        $comment = ActivityComments::create([
             'activity_id' => $activityId,
             'comment' => $this->newCommentText[$activityId],
             'created_by' => auth()->id(),
         ]);
 
+        $this->processMentions($activity, $comment);
+
         $this->newCommentText[$activityId] = '';
+    }
+
+    private function processMentions(Activity $activity, ActivityComments $comment): void
+    {
+        $text = $comment->comment;
+
+        $employeeNames = \App\Models\Employee::whereNotNull('user_id')
+            ->where('activation', \App\Enums\GlobalSystemConstant::ACTIVE->value)
+            ->pluck('full_name')
+            ->filter()
+            ->toArray();
+
+        $userNames = \App\Models\User::pluck('name')->filter()->toArray();
+        $allPossibleNames = array_unique(array_merge($employeeNames, $userNames));
+
+        usort($allPossibleNames, fn($a, $b) => mb_strlen($b) <=> mb_strlen($a));
+
+        $notifiedUserIds = [];
+
+        foreach ($allPossibleNames as $name) {
+            $mention = '@' . $name;
+            if (mb_strpos($text, $mention) !== false) {
+                $userIds = \App\Models\Employee::where('full_name', $name)->whereNotNull('user_id')->pluck('user_id')->toArray();
+                if (empty($userIds)) $userIds = \App\Models\User::where('name', $name)->pluck('id')->toArray();
+
+                foreach ($userIds as $userId) {
+                    if ($userId && $userId != auth()->id() && !in_array($userId, $notifiedUserIds)) {
+                        $user = \App\Models\User::find($userId);
+                        if ($user) {
+                            $user->notify(new \App\Notifications\MentionInCommentNotification($activity, $comment, auth()->user()));
+                            $notifiedUserIds[] = $userId;
+                        }
+                    }
+                }
+                $text = str_replace($mention, ' ___MENTIONED___ ', $text);
+            }
+        }
     }
 
     public function deleteComment($commentId)

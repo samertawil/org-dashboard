@@ -39,12 +39,14 @@
 
 <div class="flex flex-col gap-8">
     {{-- Header --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <flux:heading size="xl" level="1">{{ __('Dashboard') }}</flux:heading>
-            <flux:subheading>{{ __('Overview of organization performance and activities.') }}</flux:subheading>
+            <flux:subheading class="hidden sm:block">{{ __('Overview of organization performance and activities.') }}</flux:subheading>
         </div>
-        <flux:button  href="{{route('activity.feed')}}">Timeline</flux:button>
+        <flux:button href="{{route('activity.feed')}}" variant="primary" icon="clock" class="w-full sm:w-auto shadow-lg shadow-indigo-100">
+            {{ __('Timeline Feed') }}
+        </flux:button>
     </div>
 
 

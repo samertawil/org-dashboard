@@ -3,9 +3,7 @@
 namespace App\Livewire\OrgApp\Reports;
 
 use App\Models\Activity;
-use App\Models\Status;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -30,7 +28,7 @@ class MonthlyManagerReport extends Component
 
         // Group by Month
         return $activities->groupBy(fn($a) => Carbon::parse($a->start_date)->format('m'))
-            ->sortKeys()
+            ->sortKeysDesc()
             ->map(function ($activitiesInMonth, $monthNum) {
                 $monthName = Carbon::create()->month((int)$monthNum)->translatedFormat('F');
                 

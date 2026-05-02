@@ -12,6 +12,12 @@ class OperationsMap extends Component
     public $filterType = 'all'; // all, camps, activities
     public $isDashboard = false;
 
+    public function updatedFilterType()
+    {
+        $this->dispatch('refreshMarkers');
+    }
+
+
     #[Computed]
     public function allCamps()
     {
@@ -23,7 +29,9 @@ class OperationsMap extends Component
         }
         
         return DisplacementCamp::whereNotNull('latitude')
+            ->where('latitude', '!=', '')
             ->whereNotNull('longitudes')
+            ->where('longitudes', '!=', '')
             ->get(['id', 'name', 'latitude', 'longitudes', 'address_details', 'Moderator', 'Moderator_phone']);
     }
 
@@ -35,7 +43,9 @@ class OperationsMap extends Component
         }
 
         return \App\Models\Activity::whereNotNull('latitude')
+            ->where('latitude', '!=', '')
             ->whereNotNull('longitudes')
+            ->where('longitudes', '!=', '')
             ->get(['id', 'name', 'latitude', 'longitudes', 'address_details', 'start_date', 'sector_id']);
     }
 
@@ -64,6 +74,10 @@ class OperationsMap extends Component
     {
          if (Gate::denies('activity.create')) {
             return abort(403, 'You do not have the necessary permissions');
+        }
+        
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return;
         }
         $activity = \App\Models\Activity::find($activityId);
         if ($activity) {

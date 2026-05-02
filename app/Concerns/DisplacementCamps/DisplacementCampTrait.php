@@ -28,10 +28,10 @@ trait DisplacementCampTrait
     #[Validate('nullable|string|max:255')]
     public $address_details;
 
-    #[Validate('nullable|string')]
+    #[Validate('nullable|numeric')]
     public $longitudes;
 
-    #[Validate('nullable|string')]
+    #[Validate('nullable|numeric')]
     public $latitude;
 
     #[Validate('nullable|integer|min:0')]

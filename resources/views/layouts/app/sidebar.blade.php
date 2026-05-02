@@ -16,10 +16,15 @@
 <body class="min-h-screen bg-white dark:bg-zinc-800">
     <flux:sidebar sticky stashable="false" :collapsible="true"
         class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-        <flux:sidebar.header>
+        <flux:sidebar.header class="flex items-center justify-between gap-2">
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
-            <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
+            <div class="flex items-center gap-1 ml-auto">
+                @auth
+                <livewire:notification-bell />
+                @endauth
+                <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+                <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
+            </div>
         </flux:sidebar.header>
 
 
@@ -42,7 +47,7 @@
                 @canany(['activity.index', 'displacement.camps.index'])
                 <flux:sidebar.item icon="map" :href="route('operations.map')" :current="request()->routeIs('operations.map')" wire:navigate
                         class="text-indigo-600 dark:text-indigo-400 font-bold">
-                        {{ __('Operations Map') }}
+                        {{ __('Operations Map') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
                     </flux:sidebar.item>
                  
                 @endcanany
@@ -73,14 +78,14 @@
                     <flux:sidebar.item icon="document-chart-bar" :href="route('reports.monthly.manager.report')"
                     :current="request()->routeIs('reports.monthly.manager.report')" wire:navigate
                     class="text-emerald-600 dark:text-emerald-400 font-bold">
-                    {{ __('Monthly Manager Report') }}
+                    {{ __('Monthly Manager Report') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
                 </flux:sidebar.item>
  @endcan
  @canany(['activity.index','activity.show','student.index','student.show','manager.reports.all'])
                 <flux:sidebar.item icon="list-bullet" :href="route('reports.daily.log.report')"
                     :current="request()->routeIs('reports.daily.log.report')" wire:navigate
                     class="text-indigo-600 dark:text-indigo-400 font-bold">
-                    {{ __('Daily Entries Log') }}
+                    {{ __('Daily Entries Log') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
                 </flux:sidebar.item>
                  @endcanany
             </flux:sidebar.group>

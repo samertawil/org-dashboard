@@ -1,11 +1,12 @@
-<div class="min-h-screen bg-slate-50" x-data x-on:modal-show.window="Flux.modal($event.detail.name).show()">
+<div class="min-h-screen bg-slate-50" x-data="{ mentionableUsers: @js($this->mentionableUsers) }" x-on:modal-show.window="Flux.modal($event.detail.name).show()">
     <!-- Top Navigation Custom Header (Since no sidebar) -->
     <header class="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30 mb-8">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <flux:button href="{{ route('dashboard') }}" variant="ghost" icon="arrow-right" size="sm"
                     class="rounded-xl" wire:navigate>
-                    {{ __('Back To Dashboard') }}
+                    <span class="hidden sm:inline">{{ __('Back To Dashboard') }}</span>
+                    <span class="sm:hidden">{{ __('Back') }}</span>
                 </flux:button>
                 <div class="h-6 w-px bg-zinc-200 dark:bg-zinc-800"></div>
                 <flux:heading size="lg" class="font-black text-indigo-600 tracking-tight  hidden md:block" >
@@ -106,15 +107,15 @@
                 </div>
 
                 {{-- Activities List --}}
-                <div class="space-y-8">
+                <div class="space-y-6 sm:space-y-8">
                     @forelse($this->feedItems as $item)
                         @if ($item instanceof \App\Models\Activity)
                             @php $activity = $item; @endphp
                         <article
-                            class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-xl group">
+                            class="bg-white dark:bg-zinc-900 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-xl group">
                             {{-- Post Header --}}
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                                <div class="flex items-center gap-3 sm:gap-4">
                                     <!-- Organization Logo as Avatar -->
                                     <div
                                         class="size-12 rounded-xl bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm p-1">
@@ -170,9 +171,9 @@
 
 
                                 <div
-                                    class="bg-zinc-50 dark:bg-zinc-800/50 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800/50">
+                                    class="bg-zinc-50 dark:bg-zinc-800/50 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 border border-zinc-100 dark:border-zinc-800/50">
                                     @if ($activity->description)
-                                        <p class="text-zinc-700 dark:text-zinc-300 leading-relaxed text-xl mb-6">
+                                        <p class="text-zinc-700 dark:text-zinc-300 leading-relaxed text-lg sm:text-xl mb-6">
                                             {{ $activity->description }}
                                         </p>
                                     @endif
@@ -381,7 +382,7 @@
                                 </div>
 
                                 {{-- New Comment Input --}}
-                                <div class="flex gap-3 items-start">
+                                <div class="flex gap-3 items-start" x-data="activityComments({{ $activity->id }})">
                                     <div class="size-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] font-black text-indigo-600 shrink-0 border border-indigo-100 dark:border-indigo-900/30">
                                         {{ Str::limit(auth()->user()->name, 1, '') }}
                                     </div>
@@ -390,6 +391,8 @@
                                             <input 
                                                 type="text" 
                                                 wire:model="newCommentText.{{ $activity->id }}"
+                                                x-ref="commentInput"
+                                                x-on:input="onInput($event)"
                                                 placeholder="{{ __('Write a comment...') }}"
                                                 class="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-2xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 dark:text-zinc-200 transition-all placeholder:text-zinc-400"
                                             />
@@ -400,6 +403,45 @@
                                         @error('newCommentText.' . $activity->id)
                                             <span class="text-[10px] font-bold text-rose-500 mt-1 block px-2">{{ $message }}</span>
                                         @enderror
+
+                                        {{-- @Mention Modal (Centered) --}}
+                                        <div x-show="showDropdown"
+                                             class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                                             style="display:none"
+                                             @click.self="showDropdown = false"
+                                             @keydown.escape.window="showDropdown = false">
+                                            
+                                            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+                                            <div x-show="showDropdown"
+                                                 x-transition:enter="transition ease-out duration-200"
+                                                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                                 class="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
+                                                
+                                                <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
+                                                    <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{{ __('Select a team member') }}</span>
+                                                    <button @click="showDropdown = false" type="button" class="text-zinc-400 hover:text-zinc-600 transition">✕</button>
+                                                </div>
+
+                                                <div class="max-h-[40vh] overflow-y-auto py-2">
+                                                    <template x-for="user in filteredUsers" :key="user.id">
+                                                        <button type="button"
+                                                            x-on:mousedown.prevent="selectUser(user)"
+                                                            class="w-full flex items-center gap-3 px-5 py-3 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition text-left border-b border-zinc-50 dark:border-zinc-800/50 last:border-0">
+                                                            <span class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 text-sm font-bold flex items-center justify-center flex-shrink-0"
+                                                                x-text="user.name.charAt(0).toUpperCase()"></span>
+                                                            <span x-text="user.name" class="font-medium truncate"></span>
+                                                        </button>
+                                                    </template>
+                                                    
+                                                    <div x-show="filteredUsers.length === 0" class="px-5 py-8 text-center flex flex-col items-center gap-2">
+                                                        <p class="text-sm text-zinc-500">{{ __('No users found matching:') }}</p>
+                                                        <span class="text-xs font-semibold px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md" x-text="mentionQuery"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -886,5 +928,72 @@
     </flux:modal>
     </div>
 </div>
+
+@script
+<script>
+Alpine.data('activityComments', (activityId) => ({
+    activityId: activityId,
+    showDropdown: false,
+    mentionStart: -1,
+    mentionQuery: '',
+    filteredUsers: [],
+
+    onInput(event) {
+        const textarea   = event.target;
+        const val        = textarea.value;
+        const pos        = textarea.selectionStart;
+        const textBefore = val.slice(0, pos);
+        const lastAt     = textBefore.lastIndexOf('@');
+
+        if (lastAt === -1) {
+            this.showDropdown = false;
+            return;
+        }
+
+        const query = textBefore.slice(lastAt + 1);
+
+        if (query.includes(' ')) {
+            this.showDropdown = false;
+            return;
+        }
+
+        this.mentionStart = lastAt;
+        this.mentionQuery = query;
+
+        // Use mentionableUsers from parent scope
+        const allUsers = this.mentionableUsers || [];
+
+        this.filteredUsers = query.length === 0
+            ? allUsers.slice(0, 8)
+            : allUsers
+                .filter(u => u.name.toLowerCase().includes(query.toLowerCase()))
+                .slice(0, 8);
+
+        this.showDropdown = true;
+    },
+
+    selectUser(user) {
+        const input    = this.$refs.commentInput;
+        const before   = input.value.slice(0, this.mentionStart);
+        const after    = input.value.slice(input.selectionStart);
+        const inserted = '@' + user.name + ' ';
+        
+        const newValue = before + inserted + after;
+        
+        // Update Livewire model
+        this.$wire.set('newCommentText.' + this.activityId, newValue);
+        
+        this.showDropdown = false;
+        
+        // Return focus
+        this.$nextTick(() => {
+            input.focus();
+            const newPos = before.length + inserted.length;
+            input.setSelectionRange(newPos, newPos);
+        });
+    }
+}));
+</script>
+@endscript
 
 

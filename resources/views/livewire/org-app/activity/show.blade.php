@@ -6,17 +6,15 @@
             <flux:subheading>{{ __('Detailed information for Activity:') }} {{ $activity->name }}</flux:subheading>
         </div>
 
-        <div class="flex items-center gap-2 mt-3">
-            <flux:button wire:click="downloadPdf" variant="outline" icon="document-arrow-down">
+        <div class="flex flex-wrap items-center gap-2 mt-3 w-full">
+            <flux:button wire:click="downloadPdf" variant="outline" icon="document-arrow-down" class="flex-1 sm:flex-none">
                 {{ __('Export PDF') }}
             </flux:button>
-            <flux:button onclick="window.print()" variant="ghost"   icon="printer">
+            <flux:button onclick="window.print()" variant="ghost" icon="printer" class="flex-1 sm:flex-none">
                 {{ __('Print') }}
             </flux:button>
 
-         
-
-            <flux:button wire:click="generateSummary" variant="outline" icon="sparkles" wire:loading.attr="disabled">
+            <flux:button wire:click="generateSummary" variant="outline" icon="sparkles" wire:loading.attr="disabled" class="w-full sm:w-auto">
                 <flux:icon icon="sparkles" class="mr-1 h-3.5 w-3.5 text-blue-600 dark:text-blue-400" wire:loading.remove />
                 <flux:icon icon="arrow-path" class="mr-1 h-3.5 w-3.5 animate-spin" wire:loading />
                 {{ __('Update AI Summary') }}
@@ -62,8 +60,8 @@
     </div>
 
     {{-- Tabs Navigation (Hidden on Print) --}}
-    <div class="border-b border-zinc-200 dark:border-zinc-700 print:hidden text-left">
-        <nav class="-mb-px flex flex-col md:flex-row md:space-x-8" aria-label="Tabs">
+    <div class="border-b border-zinc-200 dark:border-zinc-700 print:hidden text-left overflow-x-auto no-scrollbar">
+        <nav class="-mb-px flex space-x-6 min-w-max px-1" aria-label="Tabs">
             <button @click="activeTab = 'overview'"
                 :class="activeTab === 'overview' ? 'border-blue-600 text-blue-600 dark:text-blue-400' :
                     'border-transparent text-blue-400 hover:text-blue-600 hover:border-blue-300 dark:text-blue-400 dark:hover:text-blue-300'"
@@ -107,6 +105,20 @@
                 <flux:icon icon="chat-bubble-left-right" class="mr-2 h-5 w-5"
                     x-bind:class="activeTab === 'feedback' ? 'text-blue-600' : 'text-blue-400 group-hover:text-blue-600'" />
                 {{ __('Feed Back') }}
+            </button>
+
+            <button @click="activeTab = 'comments'"
+                :class="activeTab === 'comments' ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400' :
+                    'border-transparent text-zinc-500 hover:text-indigo-600 hover:border-indigo-300 dark:text-zinc-400 dark:hover:text-indigo-300'"
+                class="group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer">
+                <flux:icon icon="chat-bubble-oval-left-ellipsis" class="mr-2 h-5 w-5"
+                    x-bind:class="activeTab === 'comments' ? 'text-indigo-600' : 'text-zinc-400 group-hover:text-indigo-600'" />
+                {{ __('Internal Comments') }}
+                @if($activity->comments->count() > 0)
+                    <span class="ml-1.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        {{ $activity->comments->count() }}
+                    </span>
+                @endif
             </button>
         </nav>
     </div>
@@ -558,9 +570,23 @@
             </flux:card>
         </div>
 
+        {{-- Comments Tab --}}
+        <div x-show="activeTab === 'comments'" style="display: none;" class="print:hidden">
+            <flux:card>
+                <div class="flex items-center gap-2 mb-4 border-b border-zinc-100 dark:border-zinc-700 pb-3">
+                    <flux:icon icon="chat-bubble-oval-left-ellipsis" class="size-5 text-indigo-500" />
+                    <div>
+                        <flux:heading size="md">{{ __('Internal Team Comments') }}</flux:heading>
+                        <flux:subheading>{{ __('Visible only to authorized team members. Type @ to mention someone.') }}</flux:subheading>
+                    </div>
+                </div>
+                <livewire:org-app.activity.comments :activity="$activity" wire:key="comments-{{ $activity->id }}" />
+            </flux:card>
+        </div>
+
     </div>
 
-    {{-- Footer/Signature Section (Visible only on Print) --}}
+
     <div class="hidden print:block mt-8">
         <div class="grid grid-cols-2 gap-8">
             <div class="text-center">

@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\Activity;
 
 use App\Concerns\Activity\FormTrait;
 use App\Models\Activity;
+use App\Models\CurrancyValue;
 use App\Reposotries\CityRepo;
 use App\Reposotries\employeeRepo;
 use App\Reposotries\LocationRepo;
@@ -75,6 +76,19 @@ class Edit extends Component
         ];
     }
 
+    public function updatedCost()
+    {
+        $currencyValue = CurrancyValue::latest('exchange_date')->first();
+        $this->cost_nis = $this->cost * $currencyValue->currency_value;
+    }
+
+    public function updatedCostNis()
+    {
+        $currencyValue = CurrancyValue::latest('exchange_date')->first();
+        $this->cost = $this->cost_nis / $currencyValue->currency_value;
+        $this->cost = round($this->cost, 2);
+    }
+    
     public function update()
     {
         $this->validate();

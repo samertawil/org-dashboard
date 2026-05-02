@@ -31,6 +31,10 @@ class Index extends Component
     public $city_id = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
+    public $sector_id = '';
+    public $parcel_type = '';
+    public $from_date = '';
+    public $to_date = '';
     public $export_from_date = '';
     public $export_to_date = '';
 
@@ -109,7 +113,11 @@ class Index extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'start_date' => ['except' => ''],
+        'from_date' => ['except' => ''],
+        'to_date' => ['except' => ''],
         'status_id' => ['except' => ''],
+        'sector_id' => ['except' => ''],
+        'parcel_type' => ['except' => ''],
         'region_id' => ['except' => ''],
         'city_id' => ['except' => ''],
     ];
@@ -222,6 +230,8 @@ class Index extends Component
             ->withCount(['attachments', 'beneficiaryNames'])
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
             ->when($this->start_date, fn($q) => $q->where('start_date', $this->start_date))
+            ->when($this->from_date, fn($q) => $q->whereDate('start_date', '>=', $this->from_date))
+            ->when($this->to_date, fn($q) => $q->whereDate('start_date', '<=', $this->to_date))
             ->when($this->status_id, function ($q) {
                 $today = now()->toDateString();
 
@@ -257,6 +267,8 @@ class Index extends Component
                     });
                 });
             })
+            ->when($this->sector_id, fn($q) => $q->where('sector_id', $this->sector_id))
+            ->when($this->parcel_type, fn($q) => $q->whereHas('parcels', fn($sq) => $sq->where('parcel_type', $this->parcel_type)))
             ->when($this->region_id, fn($q) => $q->where('region', $this->region_id))
             ->when($this->city_id, fn($q) => $q->where('city', $this->city_id))
             ->orderBy($this->sortField, $this->sortDirection)
@@ -271,6 +283,20 @@ class Index extends Component
         return StatusRepo::statuses();
     }
 
+
+    #[Computed()]
+    public function parcelTypes()
+    {
+        return \App\Models\ActivityParcel::query()
+            ->whereHas('activity')
+            ->with('parcelType')
+            ->select('parcel_type')
+            ->distinct()
+            ->get()
+            ->map(fn($p) => $p->parcelType)
+            ->filter()
+            ->unique('id');
+    }
 
     public function render()
     {
