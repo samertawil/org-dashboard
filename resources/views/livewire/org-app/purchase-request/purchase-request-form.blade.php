@@ -1,14 +1,16 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
             <flux:subheading>{{ $subheading ?? __('Enter the details for the Purchase Requisition below.') }}
             </flux:subheading>
         </div>
 
-        <flux:button href="{{ route('purchase_request.index') }}" wire:navigate variant="ghost" icon="list-bullet">
-            {{ __('Purchase List') }}
-        </flux:button>
+        <span title="{{ __('Return to the purchase requisitions list') }}" class="w-full sm:w-auto">
+            <flux:button href="{{ route('purchase_request.index') }}" wire:navigate variant="ghost" icon="list-bullet" class="w-full">
+                {{ __('Purchase List') }}
+            </flux:button>
+        </span>
     </div>
 
     {{-- Success Message --}}
@@ -111,9 +113,11 @@
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg" class="text-blue-600 dark:text-blue-400">{{ __('Items') }}
                     </flux:heading>
-                    <flux:button wire:click="addPurchaseRequisitionItem" variant="ghost" icon="plus" size="sm">
-                        {{ __('Add Item') }}
-                    </flux:button>
+                    <span title="{{ __('Add a new item to this requisition') }}">
+                        <flux:button wire:click="addPurchaseRequisitionItem" variant="ghost" icon="plus" size="sm">
+                            {{ __('Add Item') }}
+                        </flux:button>
+                    </span>
                 </div>
 
                 <div class="space-y-4">
@@ -172,9 +176,11 @@
                                 </div>
 
                                 {{-- Action --}}
-                                <div class=" ">
-                                    <flux:button wire:click="removePurchaseRequisitionItem({{ $index }})"
-                                        variant="ghost" icon="trash" class="text-red-500 hover:text-red-600" />
+                                <div class="flex items-end sm:justify-end h-full">
+                                    <span title="{{ __('Remove this item') }}">
+                                        <flux:button wire:click="removePurchaseRequisitionItem({{ $index }})"
+                                            variant="ghost" icon="trash" class="text-red-500 hover:text-red-600" />
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -308,12 +314,14 @@
             @endif
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6 relative z-0">
-                <flux:button type="submit" variant="primary"
-                    icon="{{ isset($type) && $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="save">{{ $heading ?? 'Submit' }}</span>
-                    <span wire:loading
-                        wire:target="save">{{ isset($type) && $type === 'save' ? __('Saving...') : __('Updating...') }}</span>
-                </flux:button>
+                <span title="{{ isset($type) && $type === 'save' ? __('Create new purchase requisition') : __('Update purchase requisition details') }}">
+                    <flux:button type="submit" variant="primary"
+                        icon="{{ isset($type) && $type === 'save' ? 'plus' : 'check' }}" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="save">{{ $heading ?? 'Submit' }}</span>
+                        <span wire:loading
+                            wire:target="save">{{ isset($type) && $type === 'save' ? __('Saving...') : __('Updating...') }}</span>
+                    </flux:button>
+                </span>
             </div>
             <div class="md:col-span-2 lg:col-span-3 flex justify-end w-full text-end">
                 <div class="flex flex-col items-end gap-2">

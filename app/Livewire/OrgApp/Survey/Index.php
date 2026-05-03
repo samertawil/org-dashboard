@@ -21,6 +21,16 @@ class Index extends Component
     public $is_active = true;
     public $conditions = '';
     public $notes = '';
+    public $search = '';
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+    ];
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     protected $rules = [
         'survey_name' => 'required|string|max:255',
@@ -121,8 +131,12 @@ class Index extends Component
         }
 
         
-        $surveys = SurveyTable::with(['targetRel', 'sectionRel'])->orderBy('survey_for_section','desc')
-        ->paginate(10);
+        $surveys = SurveyTable::with(['targetRel', 'sectionRel'])
+            ->when($this->search, function ($query) {
+                $query->where('survey_name', 'like', '%' . $this->search . '%');
+            })
+            ->orderBy('survey_for_section', 'desc')
+            ->paginate(10);
         $targets = StatusRepo::statuses()->where('p_id_sub', config('appConstant.survey_target', 0)); // Assuming this constant exists
         $sections = StatusRepo::statuses()->where('p_id_sub', config('appConstant.survey_for', 0));
 
@@ -130,6 +144,6 @@ class Index extends Component
             'surveys' => $surveys,
             'targets' => $targets,
             'sections' => $sections,
-        ])->layout('layouts.app');
+        ]);
     }
 }

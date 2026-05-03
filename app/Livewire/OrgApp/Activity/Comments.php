@@ -8,6 +8,7 @@ use App\Models\ActivityComments;
 use App\Models\Employee;
 use App\Models\User;
 use App\Notifications\MentionInCommentNotification;
+use App\Reposotries\employeeRepo;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -23,19 +24,7 @@ class Comments extends Component
     public function mount(Activity $activity): void
     {
         $this->activity = $activity;
-        $this->mentionableUsers = Employee::query()
-            ->whereNotNull('user_id')
-            ->where('activation', GlobalSystemConstant::ACTIVE->value)
-            ->where('user_id', '!=', Auth::id())
-            ->with('user:id,name')
-            ->get()
-            ->filter(fn($e) => $e->user !== null)
-            ->map(fn($e) => [
-                'id'   => $e->user->id,
-                'name' => $e->full_name ?? $e->user->name,
-            ])
-            ->values()
-            ->toArray();
+        $this->mentionableUsers = employeeRepo::mentionEmp();
     }
 
     /** All comments for this activity */
@@ -68,58 +57,29 @@ class Comments extends Component
     private function processMentions(ActivityComments $comment): void
     {
         $text = $comment->comment;
-
-        // 1. Get all potential mentionable names from the database
-        $employeeNames = Employee::whereNotNull('user_id')
-            ->where('activation', GlobalSystemConstant::ACTIVE->value)
-            ->pluck('full_name')
-            ->filter()
-            ->toArray();
-
-        $userNames = User::pluck('name')
-            ->filter()
-            ->toArray();
-
-        $allPossibleNames = array_unique(array_merge($employeeNames, $userNames));
-
-        // 2. Sort names by length descending (longest first) to correctly handle names with spaces
-        // and avoid partial matches (e.g., matching "@Samer" inside "@Samer Al-Tawil")
-        usort($allPossibleNames, function($a, $b) {
-            return mb_strlen($b) <=> mb_strlen($a);
-        });
-
         $notifiedUserIds = [];
 
-        foreach ($allPossibleNames as $name) {
+        // Sort by length descending to match full names before partial names
+        $employees = collect($this->mentionableUsers)->sortByDesc(fn($e) => mb_strlen($e['name']));
+
+        foreach ($employees as $employee) {
+            $name = $employee['name'];
             $mention = '@' . $name;
 
-            if (mb_strpos($text, $mention) !== false) {
-                // Find associated User IDs
-                $userIds = Employee::where('full_name', $name)
-                    ->whereNotNull('user_id')
-                    ->pluck('user_id')
-                    ->toArray();
+            if (mb_strpos($text, $mention) !== false || mb_strpos($text, $name) !== false) {
+                $userId = $employee['id'];
 
-                if (empty($userIds)) {
-                    $userIds = User::where('name', $name)->pluck('id')->toArray();
-                }
-
-                foreach ($userIds as $userId) {
-                    if ($userId && $userId != Auth::id() && !in_array($userId, $notifiedUserIds)) {
-                        $user = User::find($userId);
-                        if ($user) {
-                            $user->notify(new MentionInCommentNotification(
-                                $this->activity,
-                                $comment,
-                                Auth::user()
-                            ));
-                            $notifiedUserIds[] = $userId;
-                        }
+                if ($userId && $userId != Auth::id() && !in_array($userId, $notifiedUserIds)) {
+                    $user = User::find($userId);
+                    if ($user) {
+                        $user->notify(new MentionInCommentNotification(
+                            $this->activity,
+                            $comment,
+                            Auth::user()
+                        ));
+                        $notifiedUserIds[] = $userId;
                     }
                 }
-
-                // Replace the found mention with a placeholder to avoid re-matching
-                $text = str_replace($mention, ' ___MENTIONED___ ', $text);
             }
         }
     }

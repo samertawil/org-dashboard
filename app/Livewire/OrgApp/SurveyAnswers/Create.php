@@ -14,6 +14,12 @@ use Livewire\Component;
 class Create extends Component
 {
     use SurveyAnswersTrait;
+    
+    public function mount()
+    {
+        $this->account_id = request()->query('account_id', $this->account_id);
+        $this->loadAnswers();
+    }
 
     #[Validate('required|integer')]
     public $surveyForSection = '';

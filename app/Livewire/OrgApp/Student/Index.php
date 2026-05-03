@@ -229,6 +229,11 @@ class Index extends Component
         session()->flash('feedback_success', __('Feedback added successfully.'));
     }
 
+    public function takeSurveyAnswer($identityNumber)
+    {
+        return $this->redirect(route('survey-answers.create', ['account_id' => $identityNumber]), navigate: true);
+    }
+
     #[Computed()]
     public function feedbackTypes()
     {

@@ -1,31 +1,40 @@
 <div class="flex flex-col gap-6">
     {{-- Header Section --}}
-    <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-1 hidden md:block">
-            <flux:heading level="1" size="xl">{{ __('Student Details') }}: {{ $student->full_name }}
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col gap-1">
+            <flux:heading level="1" size="xl">{{ __('Student Details') }}
             </flux:heading>
-            <flux:subheading>{{ __('View comprehensive information and survey answers for this student.') }}
+            <flux:subheading class="hidden sm:block">{{ __('View comprehensive information and survey answers for this student.') }}
             </flux:subheading>
         </div>
-        <div class="flex gap-2">
-            <flux:button href="{{ route('student.index') }}" wire:navigate variant="ghost" icon="arrow-left"
-                class="print:hidden">
-                {{ __('Back to List') }}
-            </flux:button>
-             <flux:button wire:click="$set('showGradingScale', true)" variant="ghost" icon="chart-bar" class="print:hidden">
-                {{ __('Grading Scale') }}
-            </flux:button>
-            <flux:button onclick="printWithDynamicName()" variant="ghost" icon="printer" class="print:hidden">
-                {{ __('Print') }}
-            </flux:button>
-            @can('student.create')
-                <flux:button href="{{ route('student.edit', $student) }}" wire:navigate variant="primary" icon="pencil"
-                    class="print:hidden">
-                    {{ __('Edit Student') }}
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <span title="{{ __('Go back to student list') }}">
+                <flux:button href="{{ route('student.index') }}" wire:navigate variant="ghost" icon="arrow-left"
+                    class="flex-1 sm:flex-none print:hidden">
+                    {{ __('Back') }}
                 </flux:button>
+            </span>
+            <span title="{{ __('View grading scale results') }}">
+                <flux:button wire:click="$set('showGradingScale', true)" variant="ghost" icon="chart-bar" class="flex-1 sm:flex-none print:hidden">
+                    {{ __('Scale') }}
+                </flux:button>
+            </span>
+            <span title="{{ __('Print student report') }}">
+                <flux:button onclick="printWithDynamicName()" variant="ghost" icon="printer" class="flex-1 sm:flex-none print:hidden">
+                    {{ __('Print') }}
+                </flux:button>
+            </span>
+            @can('student.create')
+                <span title="{{ __('Edit student details') }}">
+                    <flux:button href="{{ route('student.edit', $student) }}" wire:navigate variant="primary" icon="pencil"
+                        class="flex-1 sm:flex-none print:hidden">
+                        {{ __('Edit') }}
+                    </flux:button>
+                </span>
             @endcan
         </div>
     </div>
+
 
     <script>
         function printWithDynamicName() {
@@ -207,9 +216,9 @@
         <div class="md:col-span-1 flex flex-col gap-6">
             <div
                 class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden p-6 print:p-2">
-                <div class="flex items-center gap-4 mb-6 print:mb-2">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6 print:mb-2 text-center sm:text-start">
                     <div
-                        class="h-16 w-16 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center text-zinc-500 dark:text-zinc-400 text-2xl font-bold print:hidden">
+                        class="h-16 w-16 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold shrink-0 print:hidden">
                         {{ strtoupper(substr($student->full_name, 0, 1)) }}
                     </div>
                     <div>
@@ -343,7 +352,7 @@
                         </flux:heading>
 
                         @foreach($comparisonResults as $pair)
-                        <div class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+                        <div class="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
                             <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                                 <thead class="bg-zinc-50 dark:bg-zinc-900/50">
                                     <tr>
@@ -418,7 +427,84 @@
                         </div>
                     @else
                         @forelse ($student->surveyStudentanswers->unique('survey_no')->values() as $survey)
-                            <div class="overflow-x-auto">
+                            {{-- Mobile Cards View --}}
+                            <div class="md:hidden space-y-4 mb-8 print:hidden">
+                                <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700">
+                                    <h4 class="text-base font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                        <flux:icon name="clipboard-document-list" size="sm" />
+                                        {{ $survey->surveyfor->status_name }}
+                                    </h4>
+                                </div>
+
+                                <div class="space-y-3">
+                                    @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no) as $answer)
+                                        @php
+                                            $displayAnswerAr = $answer->answer_ar_text;
+                                            if (!empty($answer->answer_ar_text) && !empty($answer->question?->answer_options)) {
+                                                $decodedAr = json_decode($answer->answer_ar_text, true);
+                                                $valuesAr = json_last_error() === JSON_ERROR_NONE && is_array($decodedAr) ? $decodedAr : [$answer->answer_ar_text];
+                                                $labelsAr = [];
+                                                foreach ($valuesAr as $val) {
+                                                    $found = $val;
+                                                    $options = is_string($answer->question->answer_options) ? json_decode($answer->question->answer_options, true) : $answer->question->answer_options;
+                                                    if (is_array($options)) {
+                                                        foreach ($options as $option) {
+                                                            if (is_array($option) && isset($option['value']) && isset($option['label'])) {
+                                                                if ((string) $option['value'] === (string) $val) { $found = $option['label']; break; }
+                                                            } elseif (is_string($option)) {
+                                                                if ((string) $option === (string) $val) { $found = $option; break; }
+                                                            }
+                                                        }
+                                                    }
+                                                    $labelsAr[] = $found;
+                                                }
+                                                $displayAnswerAr = implode('، ', $labelsAr);
+                                            } else {
+                                                $decodedAr = json_decode($answer->answer_ar_text, true);
+                                                if (json_last_error() === JSON_ERROR_NONE && is_array($decodedAr)) {
+                                                    $displayAnswerAr = implode('، ', $decodedAr);
+                                                }
+                                            }
+                                        @endphp
+
+                                        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm space-y-3">
+                                            <div class="flex items-start gap-3">
+                                                <span class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-700 text-xs font-bold text-zinc-500">
+                                                    {{ $answer->question?->question_order }}
+                                                </span>
+                                                <div class="text-sm font-bold text-zinc-900 dark:text-white leading-relaxed">
+                                                    {{ $answer->question?->question_ar_text }}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="bg-emerald-50/50 dark:bg-emerald-900/10 p-3 rounded-lg border border-emerald-100/50 dark:border-emerald-800/30">
+                                                <div class="text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold mb-1">{{ __('الإجابة') }}</div>
+                                                <div class="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">
+                                                    {{ $displayAnswerAr ?? '-' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <div class="p-4 bg-zinc-50 dark:bg-zinc-900/30 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 text-[10px] text-zinc-500 space-y-1">
+                                    @php
+                                        $creators = $student->surveyStudentanswers->where('survey_no', $survey->survey_no)->map(fn($ans) => $ans->creator?->full_name ?? $ans->created_by)->filter()->unique()->implode('، ');
+                                        $created = $student->surveyStudentanswers->where('survey_no', $survey->survey_no)->map(fn($ans) => $ans->created_at ? \Carbon\Carbon::parse($ans->created_at)->format('Y-m-d') : null)->filter()->unique()->implode('، ');
+                                    @endphp
+                                    <div class="flex items-center gap-2">
+                                        <flux:icon name="user" size="xs" />
+                                        <span>{{ __('بواسطة') }}: {{ $creators ?: '-' }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <flux:icon name="calendar" size="xs" />
+                                        <span dir="ltr">{{ $created }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Desktop Table View --}}
+                            <div class="hidden md:block overflow-x-auto mb-8 print:block">
                                 <table class="w-full survey-table border-collapse">
                                     <thead class="bg-zinc-50 dark:bg-zinc-900/50 print:bg-white">
                                         <tr>
@@ -431,23 +517,18 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-
-
                                         @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no) as $answer)
                                             <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
                                                 <td class="px-4 py-2 border text-sm">
                                                     <div class="font-medium text-zinc-900 dark:text-zinc-100"
                                                         style="width: 10px;">
                                                         {{ $answer->question?->question_order ?? __('Unknown Question') }}
-
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-2 border text-sm">
-                                                    
                                                     <div class="font-medium text-zinc-900 dark:text-zinc-100"
                                                         style="width: 350px;">
                                                         {{ $answer->question?->question_ar_text ?? __('Unknown Question') }}
-
                                                     </div>
                                                     @if ($answer->question?->question_en_text)
                                                         <div class="text-xs text-zinc-500 print:hidden">
@@ -459,44 +540,19 @@
                                                     style="width: 200px;">
                                                     @php
                                                         $displayAnswerAr = $answer->answer_ar_text;
-                                                        if (
-                                                            !empty($answer->answer_ar_text) &&
-                                                            !empty($answer->question?->answer_options)
-                                                        ) {
+                                                        if (!empty($answer->answer_ar_text) && !empty($answer->question?->answer_options)) {
                                                             $decodedAr = json_decode($answer->answer_ar_text, true);
-                                                            $valuesAr =
-                                                                json_last_error() === JSON_ERROR_NONE &&
-                                                                is_array($decodedAr)
-                                                                    ? $decodedAr
-                                                                    : [$answer->answer_ar_text];
+                                                            $valuesAr = json_last_error() === JSON_ERROR_NONE && is_array($decodedAr) ? $decodedAr : [$answer->answer_ar_text];
                                                             $labelsAr = [];
                                                             foreach ($valuesAr as $val) {
                                                                 $found = $val;
-                                                                $options = is_string($answer->question->answer_options)
-                                                                    ? json_decode(
-                                                                        $answer->question->answer_options,
-                                                                        true,
-                                                                    )
-                                                                    : $answer->question->answer_options;
+                                                                $options = is_string($answer->question->answer_options) ? json_decode($answer->question->answer_options, true) : $answer->question->answer_options;
                                                                 if (is_array($options)) {
                                                                     foreach ($options as $option) {
-                                                                        if (
-                                                                            is_array($option) &&
-                                                                            isset($option['value']) &&
-                                                                            isset($option['label'])
-                                                                        ) {
-                                                                            if (
-                                                                                (string) $option['value'] ===
-                                                                                (string) $val
-                                                                            ) {
-                                                                                $found = $option['label'];
-                                                                                break;
-                                                                            }
+                                                                        if (is_array($option) && isset($option['value']) && isset($option['label'])) {
+                                                                            if ((string) $option['value'] === (string) $val) { $found = $option['label']; break; }
                                                                         } elseif (is_string($option)) {
-                                                                            if ((string) $option === (string) $val) {
-                                                                                $found = $option;
-                                                                                break;
-                                                                            }
+                                                                            if ((string) $option === (string) $val) { $found = $option; break; }
                                                                         }
                                                                     }
                                                                 }
@@ -505,31 +561,15 @@
                                                             $displayAnswerAr = implode('، ', $labelsAr);
                                                         } else {
                                                             $decodedAr = json_decode($answer->answer_ar_text, true);
-                                                            if (
-                                                                json_last_error() === JSON_ERROR_NONE &&
-                                                                is_array($decodedAr)
-                                                            ) {
+                                                            if (json_last_error() === JSON_ERROR_NONE && is_array($decodedAr)) {
                                                                 $displayAnswerAr = implode('، ', $decodedAr);
                                                             }
                                                         }
                                                     @endphp
                                                     {{ $displayAnswerAr ?? '-' }}
                                                     @if ($answer->answer_en_text)
-                                                        @php
-                                                            $displayAnswerEn = $answer->answer_en_text;
-                                                            if (!empty($answer->answer_en_text)) {
-                                                                $decodedEn = json_decode($answer->answer_en_text, true);
-                                                                if (
-                                                                    json_last_error() === JSON_ERROR_NONE &&
-                                                                    is_array($decodedEn)
-                                                                ) {
-                                                                    $displayAnswerEn = implode(', ', $decodedEn);
-                                                                }
-                                                            }
-                                                        @endphp
-                                                        <div
-                                                            class="text-xs text-zinc-500 mt-1 border-t border-zinc-100 pt-1 print:hidden">
-                                                            {{ $displayAnswerEn }}
+                                                        <div class="text-xs text-zinc-500 mt-1 border-t border-zinc-100 pt-1 print:hidden">
+                                                            {{ $answer->answer_en_text }}
                                                         </div>
                                                     @endif
                                                 </td>
@@ -538,58 +578,31 @@
                                     </tbody>
                                     <tfoot class="bg-zinc-50 dark:bg-zinc-900/50 print:bg-white">
                                         <tr>
-                                            <td colspan="2"
-                                                class="px-4 py-2 border text-sm text-zinc-500 dark:text-zinc-400 text-center font-medium">
+                                            <td colspan="3" class="px-4 py-2 border text-sm text-zinc-500 dark:text-zinc-400 text-center font-medium">
                                                 @php
-                                                    $creators = $student->surveyStudentanswers
-                                                        ->where('survey_no', $survey->survey_no)
-                                                        ->map(fn($ans) => $ans->creator?->full_name ?? $ans->created_by)
-                                                        ->filter()
-                                                        ->unique()
-                                                        ->implode('، ');
+                                                    $creators = $student->surveyStudentanswers->where('survey_no', $survey->survey_no)->map(fn($ans) => $ans->creator?->full_name ?? $ans->created_by)->filter()->unique()->implode('، ');
+                                                    $created = $student->surveyStudentanswers->where('survey_no', $survey->survey_no)->map(fn($ans) => $ans->created_at ? \Carbon\Carbon::parse($ans->created_at)->format('Y-m-d') : null)->filter()->unique()->implode('، ');
                                                 @endphp
                                                 <div class="flex items-center justify-center gap-6">
                                                     <div class="flex items-center gap-1">
                                                         <flux:icon name="user" class="size-4" />
                                                         <span>{{ __('بواسطة') }}: {{ $creators ?: '-' }}</span>
                                                     </div>
-
-                                                    @php
-                                                        $created = $student->surveyStudentanswers
-                                                            ->where('survey_no', $survey->survey_no)
-                                                            ->map(function ($ans) {
-                                                             
-                                                                if (!$ans->created_at) {
-                                                                  
-                                                                    return null;
-                                                                }
-                                                                return \Carbon\Carbon::parse($ans->created_at)->format(
-                                                                    'Y-m-d',
-                                                                );
-                                                            })
-                                                            ->filter()
-                                                            ->unique()
-                                                            ->implode('، ');
-                                                    @endphp
-
                                                     <div class="flex items-center gap-1">
                                                         <flux:icon name="calendar" class="size-4" />
                                                         <span dir="ltr">{{ $created }}</span>
                                                     </div>
-
                                                 </div>
-
                                             </td>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
                         @empty
-                            <li>No surveys found</li>
+                            <div class="text-center text-zinc-500 py-4">{{ __('No surveys found') }}</div>
                         @endforelse
-
-
                     @endif
+
                 </div>
             </div>
         </div>

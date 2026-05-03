@@ -1,13 +1,15 @@
 <div class="flex flex-col gap-6">
-    <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Survey Management') }}</flux:heading>
             <flux:subheading>{{ __('Create and manage survey definitions and their target audience.') }}</flux:subheading>
         </div>
-        <div class="flex space-x-2 space-x-reverse">
-            <flux:button wire:click="openModal()" variant="primary" icon="plus">
-                {{ __('Create New Survey') }}
-            </flux:button>
+        <div class="flex w-full sm:w-auto">
+            <span title="{{ __('Define a new survey with target audience and sections') }}" class="w-full sm:w-auto">
+                <flux:button wire:click="openModal()" variant="primary" icon="plus" class="w-full">
+                    {{ __('Create New Survey') }}
+                </flux:button>
+            </span>
         </div>
     </div>
 
@@ -20,7 +22,84 @@
     @endif
 
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="p-4 border-b border-zinc-200 dark:border-zinc-700 flex flex-col md:flex-row gap-4 md:items-center">
+            <div class="flex-1 w-full">
+                <flux:input wire:model.live="search" :placeholder="__('Search by survey name...')"
+                    icon="magnifying-glass" class="w-full" />
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto shrink-0 justify-end">
+                @if ($search)
+                    <span title="{{ __('Clear search') }}">
+                        <flux:button wire:click="$set('search', '')" variant="ghost" size="sm" icon="x-mark">
+                            {{ __('Clear') }}
+                        </flux:button>
+                    </span>
+                @endif
+                <div wire:loading wire:target="search" class="shrink-0">
+                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+                    {{ __('Showing') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $surveys->firstItem() }}</span>
+                    {{ __('to') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $surveys->lastItem() }}</span>
+                    {{ __('of') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $surveys->total() }}</span>
+                    {{ __('results') }}
+                </p>
+            </div>
+        </div>
+
+        {{-- Mobile Cards View --}}
+        <div class="md:hidden divide-y divide-zinc-200 dark:divide-zinc-700">
+            @forelse($surveys->whereNotIn('survey_for_section',[137,138,139,140,141,142,143,144]) as $survey)
+                <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $survey->survey_name }}</span>
+                            <span class="text-xs text-zinc-500">{{ $survey->sectionRel->status_name ?? __('N/A') }}</span>
+                        </div>
+                        <span title="{{ __('Toggle survey availability') }}">
+                            <flux:switch wire:click="toggleStatus({{ $survey->id }})" :checked="$survey->is_active" color="green" size="sm" />
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">
+                            {{ $survey->targetRel->status_name ?? __('N/A') }}
+                        </span>
+                        <span class="text-xs text-zinc-500">{{ __('Semester') }}: {{ $survey->semester }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-700">
+                        <span title="{{ __('Edit survey details') }}">
+                            <flux:button wire:click="openModal({{ $survey->id }})" variant="ghost" size="xs" icon="pencil-square" />
+                        </span>
+                        <span title="{{ __('Manage questions and responses') }}">
+                            <flux:button href="{{ route('survey.manage', ['survey_table_id' => $survey->id]) }}" variant="ghost" size="xs" icon="question-mark-circle" class="text-blue-500" />
+                        </span>
+                        <span title="{{ __('Get public response link') }}">
+                            <flux:button href="{{ route('survey.public', ['id' => $survey->id]) }}" target="_blank" variant="ghost" size="xs" icon="link" class="text-green-500" />
+                        </span>
+                        <span title="{{ __('Delete survey') }}">
+                            <flux:button wire:click="delete({{ $survey->id }})" variant="ghost" size="xs" icon="trash" wire:confirm="{{ __('Are you sure?') }}" class="text-red-500" />
+                        </span>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-sm text-zinc-500 italic">
+                    {{ __('No surveys found. Create your first survey now.') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop Table View --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
@@ -42,28 +121,35 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <flux:switch wire:click="toggleStatus({{ $survey->id }})" :checked="$survey->is_active" color="green" />
+                                <span title="{{ __('Toggle Status') }}">
+                                    <flux:switch wire:click="toggleStatus({{ $survey->id }})" :checked="$survey->is_active" color="green" />
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $survey->sectionRel->status_name ?? __('N/A') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">{{ $survey->semester }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
-                                    {{-- @if (! in_array ($survey->survey_for_section,[137,138,139,140,141,142,143,144] )) --}}
-
-                                    <flux:button wire:click="openModal({{ $survey->id }})" variant="ghost" size="sm" icon="pencil-square" />
+                                    <span title="{{ __('Edit') }}">
+                                        <flux:button wire:click="openModal({{ $survey->id }})" variant="ghost" size="sm" icon="pencil-square" />
+                                    </span>
                                       
-                                    <flux:button wire:click="delete({{ $survey->id }})" variant="ghost" size="sm" icon="trash" wire:confirm="{{ __('Are you sure?') }}" class="text-red-500 hover:text-red-600" />
-                                  
-                                    <flux:button href="{{ route('survey.manage', ['survey_table_id' => $survey->id]) }}" variant="ghost" size="sm" icon="question-mark-circle" class="text-blue-500" />
-                                    {{-- @endif --}}
+                                    <span title="{{ __('Manage Questions') }}">
+                                        <flux:button href="{{ route('survey.manage', ['survey_table_id' => $survey->id]) }}" variant="ghost" size="sm" icon="question-mark-circle" class="text-blue-500" />
+                                    </span>
                                  
-                                    <flux:button href="{{ route('survey.public', ['id' => $survey->id]) }}" target="_blank" variant="ghost" size="sm" icon="link" class="text-green-500" title="{{ __('Public Link') }}" />
+                                    <span title="{{ __('Public Link') }}">
+                                        <flux:button href="{{ route('survey.public', ['id' => $survey->id]) }}" target="_blank" variant="ghost" size="sm" icon="link" class="text-green-500" />
+                                    </span>
+
+                                    <span title="{{ __('Delete') }}">
+                                        <flux:button wire:click="delete({{ $survey->id }})" variant="ghost" size="sm" icon="trash" wire:confirm="{{ __('Are you sure?') }}" class="text-red-500 hover:text-red-600" />
+                                    </span>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500">
+                            <td colspan="6" class="px-6 py-8 text-center text-sm text-zinc-500">
                                 {{ __('No surveys found. Create your first survey now.') }}
                             </td>
                         </tr>

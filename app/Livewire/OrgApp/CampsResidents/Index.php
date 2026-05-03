@@ -114,6 +114,8 @@ class Index extends Component
         if(Gate::denies('displacement.camps.index')) {
             abort(403, 'You do not have the necessary permissions.');
         }
-        return view('livewire.org-app.camps-residents.index');
+        return view('livewire.org-app.camps-residents.index', [
+            'residents' => $this->residents
+        ]);
     }
 }

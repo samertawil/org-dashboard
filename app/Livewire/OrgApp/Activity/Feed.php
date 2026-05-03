@@ -2,14 +2,13 @@
 
 namespace App\Livewire\OrgApp\Activity;
 
+use App\Exports\ActivityBeneficiaryNamesExport;
 use App\Models\Activity;
 use App\Models\ActivityComments;
-use App\Models\PurchaseRequisition;
 use App\Models\PurchaseQuotationResponse;
-use App\Exports\ActivityBeneficiaryNamesExport;
-use Maatwebsite\Excel\Facades\Excel;
-
+use App\Models\PurchaseRequisition;
 use App\Reposotries\CityRepo;
+use App\Reposotries\employeeRepo;
 use App\Reposotries\RegionRepo;
 use App\Reposotries\StatusRepo;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +17,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Feed extends Component
 {
@@ -252,36 +252,26 @@ class Feed extends Component
     private function processMentions(Activity $activity, ActivityComments $comment): void
     {
         $text = $comment->comment;
-
-        $employeeNames = \App\Models\Employee::whereNotNull('user_id')
-            ->where('activation', \App\Enums\GlobalSystemConstant::ACTIVE->value)
-            ->pluck('full_name')
-            ->filter()
-            ->toArray();
-
-        $userNames = \App\Models\User::pluck('name')->filter()->toArray();
-        $allPossibleNames = array_unique(array_merge($employeeNames, $userNames));
-
-        usort($allPossibleNames, fn($a, $b) => mb_strlen($b) <=> mb_strlen($a));
-
+        $mentionableUsers = employeeRepo::mentionEmp();
         $notifiedUserIds = [];
 
-        foreach ($allPossibleNames as $name) {
-            $mention = '@' . $name;
-            if (mb_strpos($text, $mention) !== false) {
-                $userIds = \App\Models\Employee::where('full_name', $name)->whereNotNull('user_id')->pluck('user_id')->toArray();
-                if (empty($userIds)) $userIds = \App\Models\User::where('name', $name)->pluck('id')->toArray();
+        // Sort by length descending to match full names before partial names
+        $employees = collect($mentionableUsers)->sortByDesc(fn($e) => mb_strlen($e['name']));
 
-                foreach ($userIds as $userId) {
-                    if ($userId && $userId != auth()->id() && !in_array($userId, $notifiedUserIds)) {
-                        $user = \App\Models\User::find($userId);
-                        if ($user) {
-                            $user->notify(new \App\Notifications\MentionInCommentNotification($activity, $comment, auth()->user()));
-                            $notifiedUserIds[] = $userId;
-                        }
+        foreach ($employees as $employee) {
+            $name = $employee['name'];
+            $mention = '@' . $name;
+            
+            if (mb_strpos($text, $mention) !== false || mb_strpos($text, $name) !== false) {
+                $userId = $employee['id'];
+                
+                if ($userId && $userId != auth()->id() && !in_array($userId, $notifiedUserIds)) {
+                    $user = \App\Models\User::find($userId);
+                    if ($user) {
+                        $user->notify(new \App\Notifications\MentionInCommentNotification($activity, $comment, auth()->user()));
+                        $notifiedUserIds[] = $userId;
                     }
                 }
-                $text = str_replace($mention, ' ___MENTIONED___ ', $text);
             }
         }
     }

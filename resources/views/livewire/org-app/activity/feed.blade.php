@@ -351,98 +351,121 @@
                                 </div>
                             </div>
 
-                            {{-- Comments Section (Facebook Style) --}}
-                            <div class="mt-1 pt-1 border-t border-zinc-50 dark:border-zinc-800/50">
-                                {{-- Existing Comments --}}
-                                <div class="space-y-4 mb-6">
+                            {{-- Comments Section (Unified Premium Style) --}}
+                            <div class="mt-4 pt-4 border-t border-zinc-50 dark:border-zinc-800/50">
+                                {{-- Comment List --}}
+                                <div class="space-y-3 mb-6 max-h-80 overflow-y-auto pr-1">
                                     @foreach ($activity->comments as $comment)
-                                        <div class="flex gap-3 group/comment">
-                                            <div class="size-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-zinc-400 shrink-0 border border-zinc-200 dark:border-zinc-700">
-                                                {{ Str::limit($comment->creator->name ?? '?', 1, '') }}
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl px-4 py-2 inline-block max-w-full">
-                                                    <div class="flex items-center gap-2 mb-1">
-                                                        <span class="text-xs font-black text-zinc-900 dark:text-zinc-100">{{ $comment->creator->name ?? '-' }}</span>
-                                                        <span class="text-[10px] text-zinc-400 font-medium">{{ $comment->created_at->diffForHumans() }}</span>
+                                        <div wire:key="comment-{{ $comment->id }}" class="flex gap-3 group/comment">
+                                            <div class="flex-shrink-0">
+                                                @if($comment->creator?->google_id && $comment->creator?->avatar)
+                                                    <img src="{{ $comment->creator->avatar }}" class="w-8 h-8 rounded-full object-cover" alt="{{ $comment->creator->name }}">
+                                                @else
+                                                    <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-300">
+                                                        {{ $comment->creator?->initials() ?? '?' }}
                                                     </div>
-                                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-normal">
-                                                        {{ $comment->comment }}
-                                                    </p>
-                                                </div>
-                                                
-                                                @if($comment->created_by === auth()->id() || auth()->user()->can('activity.create'))
-                                                    <button wire:click="deleteComment({{ $comment->id }})" wire:confirm="{{ __('Are you sure?') }}" class="block mt-1 text-[10px] font-bold text-rose-500 opacity-0 group-hover/comment:opacity-100 transition-opacity px-2">
-                                                        {{ __('Delete') }}
-                                                    </button>
                                                 @endif
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="bg-zinc-50 dark:bg-zinc-800/40 rounded-xl rounded-tl-none px-4 py-2 relative">
+                                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                                                            {{ $comment->creator->name ?? '-' }}
+                                                        </span>
+                                                        <span class="text-[10px] text-zinc-400">
+                                                            {{ $comment->created_at->diffForHumans() }}
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed break-words">
+                                                        {!! preg_replace('/@([\w\x{0600}-\x{06FF}\s]+?)(?=\s|$|@)/u', '<span class="text-indigo-600 dark:text-indigo-400 font-bold">@$1</span>', e($comment->comment)) !!}
+                                                    </p>
+                                                    
+                                                    @if($comment->created_by === auth()->id() || auth()->user()->can('activity.create'))
+                                                        <button wire:click="deleteComment({{ $comment->id }})" 
+                                                            wire:confirm="{{ __('Are you sure?') }}"
+                                                            class="absolute -top-2 -right-2 hidden group-hover/comment:flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white shadow text-[10px] hover:bg-rose-600 transition">
+                                                            ✕
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
 
                                 {{-- New Comment Input --}}
-                                <div class="flex gap-3 items-start" x-data="activityComments({{ $activity->id }})">
-                                    <div class="size-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] font-black text-indigo-600 shrink-0 border border-indigo-100 dark:border-indigo-900/30">
-                                        {{ Str::limit(auth()->user()->name, 1, '') }}
-                                    </div>
-                                    <div class="flex-1 relative">
-                                        <form wire:submit.prevent="addComment({{ $activity->id }})">
-                                            <input 
-                                                type="text" 
-                                                wire:model="newCommentText.{{ $activity->id }}"
+                                <div class="relative" x-data="activityComments({{ $activity->id }}, mentionableUsers)">
+                                    <div class="flex gap-2 items-end">
+                                        <div class="flex-shrink-0 mb-1">
+                                            @if(auth()->user()->google_id && auth()->user()->avatar)
+                                                <img src="{{ auth()->user()->avatar }}" class="w-8 h-8 rounded-full object-cover" alt="">
+                                            @else
+                                                <div class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-300">
+                                                    {{ auth()->user()->initials() }}
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="flex-1 relative">
+                                            <textarea
                                                 x-ref="commentInput"
                                                 x-on:input="onInput($event)"
-                                                placeholder="{{ __('Write a comment...') }}"
-                                                class="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-2xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 dark:text-zinc-200 transition-all placeholder:text-zinc-400"
-                                            />
-                                            <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-700 transition-colors">
-                                                <flux:icon icon="paper-airplane" size="xs" variant="mini" />
-                                            </button>
-                                        </form>
-                                        @error('newCommentText.' . $activity->id)
-                                            <span class="text-[10px] font-bold text-rose-500 mt-1 block px-2">{{ $message }}</span>
-                                        @enderror
-
-                                        {{-- @Mention Modal (Centered) --}}
-                                        <div x-show="showDropdown"
-                                             class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-                                             style="display:none"
-                                             @click.self="showDropdown = false"
-                                             @keydown.escape.window="showDropdown = false">
+                                                wire:model="newCommentText.{{ $activity->id }}"
+                                                rows="1"
+                                                placeholder="{{ __('Write a comment… type @ to mention') }}"
+                                                class="w-full text-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none transition"
+                                                x-on:keydown.enter.prevent="if(!$event.shiftKey && !showDropdown) { $wire.addComment({{ $activity->id }}); showDropdown = false; }"
+                                            ></textarea>
                                             
-                                            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-
+                                            {{-- @Mention Modal (Centered) --}}
                                             <div x-show="showDropdown"
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                                                 class="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
+                                                 class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                                                 style="display:none"
+                                                 @click.self="showDropdown = false"
+                                                 @keydown.escape.window="showDropdown = false">
                                                 
-                                                <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
-                                                    <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{{ __('Select a team member') }}</span>
-                                                    <button @click="showDropdown = false" type="button" class="text-zinc-400 hover:text-zinc-600 transition">✕</button>
-                                                </div>
+                                                <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-                                                <div class="max-h-[40vh] overflow-y-auto py-2">
-                                                    <template x-for="user in filteredUsers" :key="user.id">
-                                                        <button type="button"
-                                                            x-on:mousedown.prevent="selectUser(user)"
-                                                            class="w-full flex items-center gap-3 px-5 py-3 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition text-left border-b border-zinc-50 dark:border-zinc-800/50 last:border-0">
-                                                            <span class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 text-sm font-bold flex items-center justify-center flex-shrink-0"
-                                                                x-text="user.name.charAt(0).toUpperCase()"></span>
-                                                            <span x-text="user.name" class="font-medium truncate"></span>
-                                                        </button>
-                                                    </template>
+                                                <div x-show="showDropdown"
+                                                     x-transition:enter="transition ease-out duration-200"
+                                                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                                                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                                     class="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
                                                     
-                                                    <div x-show="filteredUsers.length === 0" class="px-5 py-8 text-center flex flex-col items-center gap-2">
-                                                        <p class="text-sm text-zinc-500">{{ __('No users found matching:') }}</p>
-                                                        <span class="text-xs font-semibold px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md" x-text="mentionQuery"></span>
+                                                    <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
+                                                        <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{{ __('Select a team member') }}</span>
+                                                        <button @click="showDropdown = false" type="button" class="text-zinc-400 hover:text-zinc-600 transition">✕</button>
+                                                    </div>
+
+                                                    <div class="max-h-[40vh] overflow-y-auto py-2">
+                                                        <template x-for="user in filteredUsers" :key="user.id">
+                                                            <button type="button"
+                                                                x-on:mousedown.prevent="selectUser(user)"
+                                                                class="w-full flex items-center gap-3 px-5 py-3 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition text-left border-b border-zinc-50 dark:border-zinc-800/50 last:border-0">
+                                                                <span class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 text-sm font-bold flex items-center justify-center flex-shrink-0"
+                                                                    x-text="user.name.charAt(0).toUpperCase()"></span>
+                                                                <span x-text="user.name" class="font-medium truncate"></span>
+                                                            </button>
+                                                        </template>
+                                                        
+                                                        <div x-show="filteredUsers.length === 0" class="px-5 py-8 text-center flex flex-col items-center gap-2">
+                                                            <p class="text-sm text-zinc-500">{{ __('No users found matching:') }}</p>
+                                                            <span class="text-xs font-semibold px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md" x-text="mentionQuery"></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <button wire:click="addComment({{ $activity->id }})"
+                                            class="flex-shrink-0 mb-1 p-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow transition"
+                                            wire:loading.attr="disabled">
+                                            <flux:icon icon="paper-airplane" size="xs" variant="mini" />
+                                        </button>
                                     </div>
+                                    @error('newCommentText.' . $activity->id)
+                                        <p class="text-rose-500 text-[10px] font-bold mt-1 px-10">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
                         </article>

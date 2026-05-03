@@ -103,6 +103,9 @@ class Index extends Component
         if (Gate::denies('user.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
-        return view('livewire.app-setting.users.index');
+
+        return view('livewire.app-setting.users.index', [
+            'users' => $this->users(),
+        ]);
     }
 }

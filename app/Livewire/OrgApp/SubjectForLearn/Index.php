@@ -146,6 +146,8 @@ class Index extends Component
         if(Gate::denies('subject.index')) {
             abort(403, 'You do not have the necessary permissions.');
         }
-        return view('livewire.org-app.subject-for-learn.index');
+        return view('livewire.org-app.subject-for-learn.index', [
+            'subjects' => $this->subjects
+        ]);
     }
 }

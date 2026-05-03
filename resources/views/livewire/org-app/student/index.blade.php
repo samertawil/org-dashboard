@@ -1,31 +1,32 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Students') }}</flux:heading>
             <flux:subheading>{{ __('Manage your students and their details.') }}</flux:subheading>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             @can('student.create')
-                <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box">
-                    {{ __('Archived Imports') }}
-                </flux:button>
+                <span title="{{ __('Archived Imports') }}">
+                    <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box" class="flex-1 sm:flex-none">
+                        {{ __('Archived Imports') }}
+                    </flux:button>
+                </span>
             @endcan
             @can('student.create')
-                <flux:modal.trigger name="import-modal">
-                    <flux:button variant="ghost" icon="document-arrow-up">{{ __('Import Excel') }}</flux:button>
+                <flux:modal.trigger name="import-modal" class="flex-1 sm:flex-none">
+                    <span title="{{ __('Import Excel') }}">
+                        <flux:button variant="ghost" icon="document-arrow-up" class="w-full">{{ __('Import Excel') }}</flux:button>
+                    </span>
                 </flux:modal.trigger>
-                <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus">
-                    {{ __('Add Student') }}
-                </flux:button>
+                <span title="{{ __('Add New Student') }}">
+                    <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus" class="flex-1 sm:flex-none">
+                        {{ __('Add Student') }}
+                    </flux:button>
+                </span>
             @endcan
         </div>
     </div>
-<div>
-
- 
-    
-</div>
     {{-- Success Message --}}
     <x-auth-session-status class="text-center" :status="session('message')" />
 
@@ -316,36 +317,125 @@
 
        
 
-        <div class="px-4 pb-4 flex items-center justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
-            <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass">
-                {{ __('Find Data') }}
-            </flux:button>
-            <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}" variant="ghost" size="sm" icon="document-arrow-down">
-                {{ __('Export Excel') }}
-            </flux:button>
-            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $searchBatchNo || $searchActivation || $searchRegionId || $searchCityId || $readyToLoad)
-                <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">
-                    {{ __('Clear Filters') }}
+        <div class="px-4 pb-4 flex flex-wrap items-center justify-center sm:justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
+            <span title="{{ __('Search for students based on filters') }}">
+                <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass" class="flex-1 sm:flex-none">
+                    {{ __('Find Data') }}
                 </flux:button>
+            </span>
+            <span title="{{ __('Export filtered results to Excel') }}">
+                <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}" variant="ghost" size="sm" icon="document-arrow-down" class="flex-1 sm:flex-none">
+                    {{ __('Export Excel') }}
+                </flux:button>
+            </span>
+            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $searchBatchNo || $searchActivation || $searchRegionId || $searchCityId || $readyToLoad)
+                <span title="{{ __('Clear all filters and search fields') }}">
+                    <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark" class="flex-1 sm:flex-none">
+                        {{ __('Clear Filters') }}
+                    </flux:button>
+                </span>
             @endif
         </div>
 
-        <div class="overflow-x-auto">
-            <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
-                <div class="flex items-center justify-between">
-                    <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
-                        {{ __('Showing') }}
-                        <span
-                            class="font-medium text-zinc-900 dark:text-white">{{ $this->students->firstItem() }}</span>
-                        {{ __('to') }}
-                        <span
-                            class="font-medium text-zinc-900 dark:text-white">{{ $this->students->lastItem() }}</span>
-                        {{ __('of') }}
-                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->students->total() }}</span>
-                        {{ __('results') }}
-                    </p>
-                </div>
+        <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ __('Showing') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $this->students->firstItem() }}</span>
+                    {{ __('to') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $this->students->lastItem() }}</span>
+                    {{ __('of') }}
+                    <span class="font-medium text-zinc-900 dark:text-white">{{ $this->students->total() }}</span>
+                    {{ __('results') }}
+                </p>
             </div>
+        </div>
+
+        <div class="block md:hidden">
+            <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                @forelse($this->students as $student)
+                    <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $student->full_name }}</span>
+                                <span class="text-xs text-zinc-500">{{ $student->identity_number }}</span>
+                            </div>
+                            @php
+                                $statusEnum = \App\Enums\GlobalSystemConstant::tryFrom($student->activation);
+                            @endphp
+                            @if ($statusEnum)
+                                <span @class([
+                                    'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium',
+                                    'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' => $student->activation == 1,
+                                    'bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-400' => $student->activation != 1,
+                                ])>
+                                    {{ $statusEnum->label() }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Education Point') }}</span>
+                                <div class="text-xs text-zinc-600 dark:text-zinc-300 leading-tight">
+                                    {{ $student->studentGroup?->name ?? '-' }}
+                                    <div class="text-indigo-600 dark:text-indigo-400 mt-0.5">
+                                        {{ $student->studentGroup?->region->region_name ?? '-' }}/{{ $student->studentGroup?->city->city_name ?? '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Enrollment') }}</span>
+                                <div class="text-xs text-zinc-600 dark:text-zinc-300">
+                                    @if ($student->enrollment_type === 'full_week') {{ __('Full Week') }}
+                                    @elseif($student->enrollment_type === 'sat_mon_wed') {{ __('Sat/Mon/Wed') }}
+                                    @elseif($student->enrollment_type === 'sun_tue_thu') {{ __('Sun/Mon/Thu') }}
+                                    @else - @endif
+                                    <div class="text-emerald-600 font-medium mt-0.5">{{ $student->status->status_name ?? '' }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+                            <div class="text-xs text-zinc-500">
+                                <span class="font-medium text-zinc-700 dark:text-zinc-400">{{ __('Batch') }}:</span> 
+                                {{ $student->studentGroup?->batch_no ?? '-' }}
+                            </div>
+                             <div class="flex items-center gap-1">
+                                <span title="{{ __('View Details') }}">
+                                    <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate variant="ghost" size="xs" icon="eye" />
+                                </span>
+                                <span title="{{ __('Edit Student') }}">
+                                    <flux:button href="{{ route('student.edit', $student) }}" wire:navigate variant="ghost" size="xs" icon="pencil-square" />
+                                </span>
+                                <flux:modal.trigger name="feedback-modal">
+                                    <div class="relative">
+                                        <span title="{{ __('Feedback & Mentoring') }}">
+                                            <flux:button wire:click="manageFeedback({{ $student->id }})" variant="ghost" size="xs" icon="chat-bubble-left-right" style="{{ $student->feedbacks_count > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                        </span>
+                                        @if ($student->feedbacks_count > 0)
+                                            <span class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                        @endif
+                                    </div>
+                                </flux:modal.trigger>
+                                <span title="{{ __('Take Survey') }}">
+                                    <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})" variant="ghost" size="xs" icon="clipboard-document-check" />
+                                </span>
+                                <span title="{{ __('Delete Student') }}">
+                                    <flux:button wire:click="delete({{ $student->identity_number }})" wire:confirm="{{ __('Are you sure?') }}" variant="ghost" size="xs" icon="trash" class="text-red-500" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-sm text-zinc-500 italic">
+                        {{ __('No students found.') }}
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-900">
                     <tr>
@@ -445,28 +535,38 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-2">
-                                    <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate
-                                        variant="ghost" size="sm" icon="eye" />
-                                    <flux:button href="{{ route('student.edit', $student) }}" wire:navigate
-                                        variant="ghost" size="sm" icon="pencil-square" />
+                                 <div class="flex items-center justify-end gap-2">
+                                    <span title="{{ __('View Details') }}">
+                                        <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate
+                                            variant="ghost" size="sm" icon="eye" />
+                                    </span>
+                                    <span title="{{ __('Edit Student') }}">
+                                        <flux:button href="{{ route('student.edit', $student) }}" wire:navigate
+                                            variant="ghost" size="sm" icon="pencil-square" />
+                                    </span>
                                     <flux:modal.trigger name="feedback-modal">
                                         <div class="relative">
-                                            <flux:button wire:click="manageFeedback({{ $student->id }})"
-                                                variant="ghost" size="sm" icon="chat-bubble-left-right"
-                                                style="{{ $student->feedbacks_count > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                            <span title="{{ __('Feedback & Mentoring') }}">
+                                                <flux:button wire:click="manageFeedback({{ $student->id }})"
+                                                    variant="ghost" size="sm" icon="chat-bubble-left-right"
+                                                    style="{{ $student->feedbacks_count > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                            </span>
                                             @if ($student->feedbacks_count > 0)
                                                 <span
                                                     class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
                                             @endif
                                         </div>
                                     </flux:modal.trigger>
-                                    <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})"
-                                        variant="ghost" size="sm" icon="clipboard-document-check" />
-                                    <flux:button wire:click="delete({{ $student->identity_number }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this student?') }}"
-                                        variant="ghost" size="sm" icon="trash"
-                                        class="text-red-500 hover:text-red-600" />
+                                    <span title="{{ __('Take Survey') }}">
+                                        <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})"
+                                            variant="ghost" size="sm" icon="clipboard-document-check" />
+                                    </span>
+                                    <span title="{{ __('Delete Student') }}">
+                                        <flux:button wire:click="delete({{ $student->identity_number }})"
+                                            wire:confirm="{{ __('Are you sure you want to delete this student?') }}"
+                                            variant="ghost" size="sm" icon="trash"
+                                            class="text-red-500 hover:text-red-600" />
+                                    </span>
                                 </div>
                             </td>
                         </tr>

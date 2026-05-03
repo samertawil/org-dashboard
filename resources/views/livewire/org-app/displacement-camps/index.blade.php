@@ -1,20 +1,24 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Displacement Camps') }}</flux:heading>
             <flux:subheading>{{ __('Manage displacement camps parameters and data.') }}</flux:subheading>
         </div>
-        <div class="flex gap-2">
-            <flux:modal.trigger name="camps-map-modal">
-                <flux:button variant="ghost" icon="map" x-on:click="$dispatch('init-camps-map')">
-                    {{ __('Show All on Map') }}
-                </flux:button>
-            </flux:modal.trigger>
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <span title="{{ __('Visualize all camps on an interactive map') }}" class="w-full sm:w-auto">
+                <flux:modal.trigger name="camps-map-modal">
+                    <flux:button variant="ghost" icon="map" x-on:click="$dispatch('init-camps-map')" class="w-full">
+                        {{ __('Show All on Map') }}
+                    </flux:button>
+                </flux:modal.trigger>
+            </span>
 
             @can('displacement.camps.create')
-                <flux:button href="{{ route('displacement.camps.create') }}" wire:navigate variant="primary" icon="plus">
-                    {{ __('New Camp') }}
-                </flux:button>
+                <span title="{{ __('Add a new displacement camp to the system') }}" class="w-full sm:w-auto">
+                    <flux:button href="{{ route('displacement.camps.create') }}" wire:navigate variant="primary" icon="plus" class="w-full">
+                        {{ __('New Camp') }}
+                    </flux:button>
+                </span>
             @endcan
         </div>
     </div>
@@ -61,7 +65,6 @@
 
         </div>
         <div class="mb-4">
-
             @if (
                 $search_name ||
                     $search_moderator ||
@@ -70,12 +73,14 @@
                     $search_address_details ||
                     $search_camp_main_needs)
                 <div class="mt-4 flex items-center justify-end">
-                    <flux:button
-                        wire:click="$set('search_name', ''); $set('search_moderator', ''); $set('search_region_id', ''); $set('search_city_id', ''); 
-                    $set('search_address_details', '');  $set('search_camp_main_needs', '')"
-                        variant="ghost" size="sm" icon="x-mark">
-                        {{ __('Clear Filters') }}
-                    </flux:button>
+                    <span title="{{ __('Reset all search filters') }}">
+                        <flux:button
+                            wire:click="$set('search_name', ''); $set('search_moderator', ''); $set('search_region_id', ''); $set('search_city_id', ''); 
+                        $set('search_address_details', '');  $set('search_camp_main_needs', '')"
+                            variant="ghost" size="sm" icon="x-mark">
+                            {{ __('Clear Filters') }}
+                        </flux:button>
+                    </span>
                 </div>
             @endif
         </div>
@@ -85,128 +90,204 @@
                     <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
                         {{ __('Showing') }}
                         <span
-                            class="font-medium text-zinc-900 dark:text-white">{{ $this->displacementCamps->firstItem() }}</span>
+                            class="font-medium text-zinc-900 dark:text-white">{{ $displacementCamps->firstItem() }}</span>
                         {{ __('to') }}
                         <span
-                            class="font-medium text-zinc-900 dark:text-white">{{ $this->displacementCamps->lastItem() }}</span>
+                            class="font-medium text-zinc-900 dark:text-white">{{ $displacementCamps->lastItem() }}</span>
                         {{ __('of') }}
-                        <span class="font-medium text-zinc-900 dark:text-white">{{ $this->displacementCamps->total() }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-white">{{ $displacementCamps->total() }}</span>
                         {{ __('results') }}
                     </p>
                 </div>
             </div>
-            <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                <thead class="bg-zinc-50 dark:bg-zinc-900">
-                    <tr>
-                        <th wire:click="sortBy('name')"
-                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-                            <div class="flex items-center gap-1">
-                                {{ __('Camp Name') }}
-                                @if ($sortField === 'name')
-                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
-                                        class="size-3" />
-                                @else
-                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
-                                @endif
-                            </div>
-                        </th>
-                        <th wire:click="sortBy('region_id')"
-                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-                            <div class="flex items-center gap-1">
-                                {{ __('Location') }}
-                                @if ($sortField === 'region_id')
-                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
-                                        class="size-3" />
-                                @else
-                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
-                                @endif
-                            </div>
-                        </th>
-                        <th wire:click="sortBy('Moderator')"
-                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
-                            <div class="flex items-center gap-1">
-                                {{ __('Moderator') }}
-                                @if ($sortField === 'Moderator')
-                                    <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
-                                        class="size-3" />
-                                @else
-                                    <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
-                                @endif
-                            </div>
-                        </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Families / Ind.') }}
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @forelse($this->displacementCamps as $camp)
-                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
-                            <td class="px-6 py-4 text-sm font-medium">{{ $camp->name }}</td>
-                            <td class="px-6 py-4 text-sm truncate max-w-[200px]">
-                                {{ $camp->region?->name ?? ($camp->region?->region_name ?? ($camp->region?->ar_name ?? '')) }}
-                                {{ $camp->city ? ' - ' . ($camp->city?->name ?? ($camp->city?->city_name ?? $camp->city?->ar_name)) : '' }}
-                                <br />
-                                <span class="text-xs text-zinc-500">{{ $camp->address_details }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm truncate max-w-[150px]">
-                                {{ $camp->Moderator ?? '-' }}<br />
-                                <span class="text-xs text-zinc-500">{{ $camp->Moderator_phone }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-center">
-                                <flux:badge size="sm">{{ $camp->number_of_families ?? 0 }} /
-                                    {{ $camp->number_of_individuals ?? 0 }}</flux:badge>
-                            </td>
-                            <td class="px-6 py-4 text-right text-sm">
-                               
-                                  
-                             
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="https://www.google.com/maps/search/?api=1&query={{ $camp->latitude }},{{ $camp->longitudes }}"
-                                        target="_blank" title="{{ __('View Map') }}" 
-                                        class="inline-flex items-center justify-center size-8 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
-                                        <svg viewBox="0 0 24 24" class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335"/>
-                                        </svg>
-                                    </a>
-                                    @php
-                                        // User request: count attachments and show blue badge dot
-                                        $attachmentCount = count($camp->attchments ?? []);
-                                    @endphp
 
-                                    <div class="relative">
-                                        <flux:button href="{{ route('displacement.camps.gallery', $camp->id) }}"
-                                            wire:navigate icon="paper-clip" variant="ghost" size="sm"
-                                            tooltip="{{ __('Attachments') }}"
-                                            style="{{ $attachmentCount > 0 ? 'color: #3b82f6 !important;' : '' }}">
-                                        </flux:button>
-                                        @if ($attachmentCount > 0)
-                                            <span
-                                                class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
-                                        @endif
-                                    </div>
-                                    @can('displacement.camps.create')
-                                        <flux:button href="{{ route('displacement.camps.edit', $camp->id) }}" wire:navigate
-                                            variant="ghost" size="sm" icon="pencil-square" />
-                                        <flux:button wire:click="delete({{ $camp->id }})"
-                                            wire:confirm="{{ __('Are you sure you want to delete this camp?') }}"
-                                            variant="ghost" size="sm" icon="trash" class="text-red-500" />
-                                    @endcan
+            {{-- Mobile Cards View --}}
+            <div class="md:hidden divide-y divide-zinc-200 dark:divide-zinc-700">
+                @forelse($displacementCamps as $camp)
+                    <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $camp->name }}</span>
+                                <span class="text-xs text-zinc-500">
+                                    {{ $camp->region?->name ?? ($camp->region?->region_name ?? ($camp->region?->ar_name ?? '')) }}
+                                    {{ $camp->city ? ' - ' . ($camp->city?->name ?? ($camp->city?->city_name ?? $camp->city?->ar_name)) : '' }}
+                                </span>
+                            </div>
+                            <flux:badge size="sm" variant="outline" color="zinc">
+                                {{ $camp->number_of_families ?? 0 }} / {{ $camp->number_of_individuals ?? 0 }}
+                            </flux:badge>
+                        </div>
+                        
+                        <div class="text-xs text-zinc-600 dark:text-zinc-300">
+                            <span class="font-medium">{{ __('Moderator') }}:</span> {{ $camp->Moderator ?? '-' }}
+                            @if($camp->Moderator_phone)
+                                <span class="text-zinc-400">({{ $camp->Moderator_phone }})</span>
+                            @endif
+                        </div>
+
+                        @if($camp->address_details)
+                            <div class="text-xs text-zinc-500 italic line-clamp-1">
+                                {{ $camp->address_details }}
+                            </div>
+                        @endif
+
+                        <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-700">
+                            <span title="{{ __('View location on Google Maps') }}">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ $camp->latitude }},{{ $camp->longitudes }}"
+                                    target="_blank"
+                                    class="inline-flex items-center justify-center size-8 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+                                    <svg viewBox="0 0 24 24" class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335"/>
+                                    </svg>
+                                </a>
+                            </span>
+
+                            @php $attachmentCount = count($camp->attchments ?? []); @endphp
+                            <span title="{{ __('Manage camp attachments and images') }}">
+                                <div class="relative">
+                                    <flux:button href="{{ route('displacement.camps.gallery', $camp->id) }}"
+                                        wire:navigate icon="paper-clip" variant="ghost" size="xs"
+                                        style="{{ $attachmentCount > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                    @if ($attachmentCount > 0)
+                                        <span class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                    @endif
                                 </div>
-                            </td>
-                        </tr>
-                    @empty
+                            </span>
+
+                            @can('displacement.camps.create')
+                                <span title="{{ __('Edit camp details') }}">
+                                    <flux:button href="{{ route('displacement.camps.edit', $camp->id) }}" wire:navigate
+                                        variant="ghost" size="xs" icon="pencil-square" />
+                                </span>
+                                <span title="{{ __('Delete camp') }}">
+                                    <flux:button wire:click="delete({{ $camp->id }})"
+                                        wire:confirm="{{ __('Are you sure you want to delete this camp?') }}"
+                                        variant="ghost" size="xs" icon="trash" class="text-red-500" />
+                                </span>
+                            @endcan
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-sm text-zinc-500 italic">
+                        {{ __('No displacement camps found.') }}
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- Desktop Table View --}}
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+                    <thead class="bg-zinc-50 dark:bg-zinc-900">
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500">
-                                {{ __('No displacement camps found.') }}</td>
+                            <th wire:click="sortBy('name')"
+                                class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                                <div class="flex items-center gap-1">
+                                    {{ __('Camp Name') }}
+                                    @if ($sortField === 'name')
+                                        <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                            class="size-3" />
+                                    @else
+                                        <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                    @endif
+                                </div>
+                            </th>
+                            <th wire:click="sortBy('region_id')"
+                                class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                                <div class="flex items-center gap-1">
+                                    {{ __('Location') }}
+                                    @if ($sortField === 'region_id')
+                                        <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                            class="size-3" />
+                                    @else
+                                        <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                    @endif
+                                </div>
+                            </th>
+                            <th wire:click="sortBy('Moderator')"
+                                class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                                <div class="flex items-center gap-1">
+                                    {{ __('Moderator') }}
+                                    @if ($sortField === 'Moderator')
+                                        <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
+                                            class="size-3" />
+                                    @else
+                                        <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                                    @endif
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Families / Ind.') }}
+                            </th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+                        @forelse($displacementCamps as $camp)
+                            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                                <td class="px-6 py-4 text-sm font-medium">{{ $camp->name }}</td>
+                                <td class="px-6 py-4 text-sm truncate max-w-[200px]">
+                                    {{ $camp->region?->name ?? ($camp->region?->region_name ?? ($camp->region?->ar_name ?? '')) }}
+                                    {{ $camp->city ? ' - ' . ($camp->city?->name ?? ($camp->city?->city_name ?? $camp->city?->ar_name)) : '' }}
+                                    <br />
+                                    <span class="text-xs text-zinc-500">{{ $camp->address_details }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm truncate max-w-[150px]">
+                                    {{ $camp->Moderator ?? '-' }}<br />
+                                    <span class="text-xs text-zinc-500">{{ $camp->Moderator_phone }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-center">
+                                    <flux:badge size="sm">{{ $camp->number_of_families ?? 0 }} /
+                                        {{ $camp->number_of_individuals ?? 0 }}</flux:badge>
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <span title="{{ __('View on Map') }}">
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ $camp->latitude }},{{ $camp->longitudes }}"
+                                                target="_blank"
+                                                class="inline-flex items-center justify-center size-8 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+                                                <svg viewBox="0 0 24 24" class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335"/>
+                                                </svg>
+                                            </a>
+                                        </span>
+                                        @php $attachmentCount = count($camp->attchments ?? []); @endphp
+
+                                        <span title="{{ __('Gallery & Attachments') }}">
+                                            <div class="relative">
+                                                <flux:button href="{{ route('displacement.camps.gallery', $camp->id) }}"
+                                                    wire:navigate icon="paper-clip" variant="ghost" size="sm"
+                                                    style="{{ $attachmentCount > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                                @if ($attachmentCount > 0)
+                                                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                                @endif
+                                            </div>
+                                        </span>
+                                        @can('displacement.camps.create')
+                                            <span title="{{ __('Edit') }}">
+                                                <flux:button href="{{ route('displacement.camps.edit', $camp->id) }}" wire:navigate
+                                                    variant="ghost" size="sm" icon="pencil-square" />
+                                            </span>
+                                            <span title="{{ __('Delete') }}">
+                                                <flux:button wire:click="delete({{ $camp->id }})"
+                                                    wire:confirm="{{ __('Are you sure you want to delete this camp?') }}"
+                                                    variant="ghost" size="sm" icon="trash" class="text-red-500" />
+                                            </span>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500">
+                                    {{ __('No displacement camps found.') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="mt-4">
-            {{ $this->displacementCamps->links() }}
+            {{ $displacementCamps->links() }}
         </div>
     </div>
 

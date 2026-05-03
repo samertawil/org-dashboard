@@ -108,6 +108,7 @@ class Index extends Component
         return view('livewire.org-app.displacement-camps.index', [
             'regions' => RegionRepo::regions(),
             'cities' => CityRepo::cities()->where('region_id', $this->search_region_id),
+            'displacementCamps' => $this->displacementCamps
         ]);
     }
 }

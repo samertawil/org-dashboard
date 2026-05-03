@@ -149,6 +149,8 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.org-app.purchase-request.index');
+        return view('livewire.org-app.purchase-request.index', [
+            'purchaseRequisitions' => $this->purchaseRequisitions
+        ]);
     }
 }

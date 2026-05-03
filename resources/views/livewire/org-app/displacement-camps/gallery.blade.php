@@ -1,27 +1,44 @@
 <div class="h-full flex flex-col gap-6">
     {{-- Header Section --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    {{-- Header Section --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 text-zinc-500">
+            <div class="flex items-center gap-2 text-zinc-500 text-sm">
                 <a href="{{ route('displacement.camps.index') }}" wire:navigate
                     class="hover:text-zinc-900 dark:hover:text-white transition-colors">
                     {{ __('Displacement Camps') }}
                 </a>
                 <flux:icon icon="chevron-right" size="xs" />
-                <span class="text-zinc-900 dark:text-white font-medium">{{ $displacementCamp->name }}</span>
+                <span class="text-zinc-900 dark:text-white font-medium truncate max-w-[150px] sm:max-w-none">{{ $displacementCamp->name }}</span>
             </div>
             <flux:heading level="1" size="xl">{{ __('Attachments Gallery') }}</flux:heading>
         </div>
 
-        <div class="flex items-center gap-3">
-            <flux:input wire:model.live.debounce.300ms="search" placeholder="Search files..." icon="magnifying-glass"
-                class="w-full md:w-64" />
-                @can('displacement.camps.create')
-            <flux:modal.trigger name="upload-modal">
-                <flux:button variant="primary" icon="plus">{{ __('Upload File') }}</flux:button>
-            </flux:modal.trigger>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search files...')" icon="magnifying-glass"
+                class="w-full sm:w-64" />
+            @can('displacement.camps.create')
+                <span title="{{ __('Upload new images or documents for this camp') }}" class="w-full sm:w-auto">
+                    <flux:modal.trigger name="upload-modal">
+                        <flux:button variant="primary" icon="plus" class="w-full">{{ __('Upload File') }}</flux:button>
+                    </flux:modal.trigger>
+                </span>
             @endcan
         </div>
+    </div>
+
+    {{-- Mobile Filter Bar (Visible on mobile, hidden on LG) --}}
+    <div class="lg:hidden flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
+        <flux:button wire:click="$set('filterType', '')" 
+            :variant="$filterType === '' ? 'primary' : 'ghost'" size="sm" class="flex-shrink-0">
+            {{ __('All Files') }}
+        </flux:button>
+        @foreach ($this->allStatuses as $status)
+            <flux:button wire:click="$set('filterType', '{{ $status->id }}')"
+                :variant="$filterType == $status->id ? 'primary' : 'ghost'" size="sm" class="flex-shrink-0">
+                {{ $status->status_name }}
+            </flux:button>
+        @endforeach
     </div>
 
     {{-- Main Content Area --}}
@@ -31,6 +48,7 @@
             <flux:heading level="3" size="sm" class="mb-2 px-2">{{ __('Filters') }}</flux:heading>
 
             <button wire:click="$set('filterType', '')"
+                title="{{ __('Show all attachments') }}"
                 class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterType === '' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
                 <div class="flex items-center gap-2">
                     <flux:icon icon="squares-2x2" size="sm" />
@@ -40,6 +58,7 @@
 
             @foreach ($this->allStatuses as $status)
                 <button wire:click="$set('filterType', '{{ $status->id }}')"
+                    title="{{ __('Filter by') }}: {{ $status->status_name }}"
                     class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterType == $status->id ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
                     <div class="flex items-center gap-2">
                         @if (\Illuminate\Support\Str::contains(strtolower($status->status_name), ['image', 'photo', 'picture']))

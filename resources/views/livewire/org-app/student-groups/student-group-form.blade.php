@@ -1,13 +1,15 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
             <flux:subheading>{{ $subheading ?? __('Enter the details for the education point below.') }}</flux:subheading>
         </div>
 
-        <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="list-bullet">
-            {{ __('Education Points List') }}
-        </flux:button>
+        <span title="{{ __('Return to the list of all education points') }}" class="w-full sm:w-auto">
+            <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="list-bullet" class="w-full">
+                {{ __('Education Points List') }}
+            </flux:button>
+        </span>
     </div>
 
     {{-- Success Message --}}
@@ -283,11 +285,13 @@
 
             {{-- Submit Button --}}
             <div class="md:col-span-2 lg:col-span-3 flex items-center justify-end gap-2 mt-6">
-                <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}"
-                    wire:loading.attr="disabled">
-                    <span wire:loading.remove>{{ $heading }}</span>
-                    <span wire:loading>{{ __('Saving...') }}</span>
-                </flux:button>
+                <span title="{{ $type === 'save' ? __('Create new education point') : __('Update education point details') }}">
+                    <flux:button type="submit" variant="primary" icon="{{ $type === 'save' ? 'plus' : 'check' }}"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove>{{ $heading }}</span>
+                        <span wire:loading>{{ __('Saving...') }}</span>
+                    </flux:button>
+                </span>
             </div>
             @include('layouts._show_all_input_error')
         </form>

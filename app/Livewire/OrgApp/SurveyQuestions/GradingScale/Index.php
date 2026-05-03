@@ -99,6 +99,7 @@ class Index extends Component
             'subheading' => __('Manage the evaluation scales for surveys.'),
             'batches' => $batches,
             'surveySections' => $surveySections,
+            'gradingScales' => $this->gradingScales,
         ]);
     }
 }

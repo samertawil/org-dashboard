@@ -1,35 +1,35 @@
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <flux:heading size="xl" level="1">{{ __('Monthly Manager Report') }}</flux:heading>
             <flux:subheading>{{ __('Detailed overview of activities, sectors, and distributed parcels by month.') }}</flux:subheading>
         </div>
-        <div class="flex gap-2">
-            <flux:select wire:model.live="selectedYear" class="w-32">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <flux:select wire:model.live="selectedYear" class="flex-1 sm:w-32">
                 @foreach(range(date('Y'), date('Y') - 5) as $year)
                     <flux:select.option value="{{ $year }}">{{ $year }}</flux:select.option>
                 @endforeach
             </flux:select>
-            <flux:button icon="printer" onclick="window.print()">{{ __('Print') }}</flux:button>
+            <flux:button icon="printer" onclick="window.print()" class="flex-1 sm:flex-none">{{ __('Print') }}</flux:button>
         </div>
     </div>
 
     <div class="space-y-8">
         @forelse($reportData as $month => $data)
-            <flux:card class="p-6">
-                <div class="flex items-center justify-between border-b pb-4 mb-4 dark:border-zinc-800">
+            <flux:card class="p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 mb-4 dark:border-zinc-800 gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="size-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
+                        <div class="size-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
                             {{ $month }}
                         </div>
                         <flux:heading size="lg">{{ $data['month_name'] }} {{ $selectedYear }}</flux:heading>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
+                    <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                        <div class="text-left sm:text-right">
                              <div class="text-sm font-bold text-zinc-800 dark:text-zinc-100">{{ number_format($data['total_cost'], 2) }} $</div>
                              <div class="text-xs text-zinc-500">{{ number_format($data['total_cost_nis'], 2) }} nis</div>
                         </div>
-                        <flux:badge color="indigo" size="lg">{{ $data['total_activities'] }} {{ __('Activities') }}</flux:badge>
+                        <flux:badge color="indigo" size="lg" class="whitespace-nowrap">{{ $data['total_activities'] }} {{ __('Activities') }}</flux:badge>
                     </div>
                 </div>
 

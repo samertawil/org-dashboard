@@ -4,30 +4,38 @@
 
 
 <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Group Schedule') }}: {{ $group->name }}</flux:heading>
             <flux:subheading>{{ __('View schedule for this group.') }}</flux:subheading>
         </div>
-        <div class="flex gap-2">
-            <flux:button href="{{ route('student.group.report', $group) }}" wire:navigate variant="ghost" icon="document-text">
-                {{ __('View Report') }}
-            </flux:button>
-            <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="arrow-left">
-                {{ __('Back to Groups') }}
-            </flux:button>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <span title="{{ __('View the full attendance report for this group') }}" class="flex-1 sm:flex-none">
+                <flux:button href="{{ route('student.group.report', $group) }}" wire:navigate variant="ghost" icon="document-text" class="w-full">
+                    {{ __('View Report') }}
+                </flux:button>
+            </span>
+            <span title="{{ __('Return to education points list') }}" class="flex-1 sm:flex-none">
+                <flux:button href="{{ route('student.group.index') }}" wire:navigate variant="ghost" icon="arrow-left" class="w-full">
+                    {{ __('Back to Groups') }}
+                </flux:button>
+            </span>
         </div>
     </div>
  
     <!-- Calendar Navigation -->
     <div class="flex items-center justify-between bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm">
-        <button wire:click="previousMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
+        <span title="{{ __('Previous Month') }}">
+            <button wire:click="previousMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+        </span>
         <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">{{ $currentMonthName }}</h2>
-        <button wire:click="nextMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+        <span title="{{ __('Next Month') }}">
+            <button wire:click="nextMonth" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </span>
     </div>
 
     <!-- Calendar Container with Horizontal Scroll -->

@@ -113,7 +113,8 @@ class Index extends Component
         }
         return view('livewire.org-app.survey-answers.index', [
             'employees' => Employee::all(),
-             'students' => Student::get(),
+            'students' => Student::get(),
+            'answers' => $this->answers,
         ]);
     }
 }

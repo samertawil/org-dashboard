@@ -3,25 +3,31 @@
 namespace App\Livewire\OrgApp\Reports;
 
 use App\Models\Activity;
+use App\Models\ActivityComments;
 use App\Models\CurrancyValue;
-use App\Models\SurveyAnswer;
 use App\Models\StudentDailyAttendance;
+use App\Models\SurveyAnswer;
+use App\Notifications\MentionInCommentNotification;
+use App\Reposotries\employeeRepo;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
-use App\Services\WhatsAppService;
-use App\Console\Commands\SendDailyLogReport;
-use Illuminate\Support\Facades\Artisan;
 
 
 
 class DailyLogReport extends Component
 {
     public $reportDate;
+    public $newComments = [];
+    public $showComments = [];
+    public $mentionableUsers = [];
 
     public function mount()
     {
         $this->reportDate = date('Y-m-d');
+        $this->mentionableUsers =  employeeRepo::mentionEmp();
+        // dd($this->mentionableUsers);
     }
 
     public function getActivitiesProperty()
@@ -36,7 +42,8 @@ class DailyLogReport extends Component
                 'parcels.unit',
                 'workTeams.employeeRel',
                 'beneficiaries.beneficiaryType',
-                'attachments'
+                'attachments',
+                'comments.creator'
             ])
             ->latest()
             ->get();
@@ -78,19 +85,77 @@ class DailyLogReport extends Component
         // We can call the command logic directly or via Artisan
         // For simplicity and consistency, we'll use Artisan
         Artisan::call('report:send-daily-whatsapp');
-        
-        $this->dispatch('flux-toast', 
-            variant: 'success', 
-            title: __('Report Sent'), 
+
+        $this->dispatch(
+            'flux-toast',
+            variant: 'success',
+            title: __('Report Sent'),
             description: __('The daily report has been sent to the manager via WhatsApp.')
         );
+    }
+
+    public function addComment($activityId)
+    {
+        $content = $this->newComments[$activityId] ?? '';
+
+        if (empty(trim($content))) return;
+
+        $comment = ActivityComments::create([
+            'activity_id' => $activityId,
+            'created_by' => auth()->id(),
+            'comment' => $content,
+        ]);
+
+        $this->processMentions($comment);
+
+        $this->newComments[$activityId] = '';
+
+        $this->dispatch(
+            'flux-toast',
+            variant: 'success',
+            title: __('Comment Added'),
+            description: __('Your comment has been added successfully.')
+        );
+    }
+
+    protected function processMentions($comment)
+    {
+        $content = $comment->comment;
+        $mentionedUserIds = [];
+
+        // Sort by length descending to match full names before partial names
+        $employees = collect($this->mentionableUsers)->sortByDesc(fn($e) => mb_strlen($e['name']));
+
+        foreach ($employees as $employee) {
+            $name = $employee['name'];
+            // Match the name with or without @ prefix
+            if (mb_strpos($content, '@' . $name) !== false || mb_strpos($content, $name) !== false) {
+                if (!in_array($employee['id'], $mentionedUserIds)) {
+                    $mentionedUserIds[] = $employee['id'];
+                }
+            }
+        }
+
+        foreach ($mentionedUserIds as $userId) {
+            if ($userId != auth()->id()) {
+                $user = \App\Models\User::find($userId);
+                if ($user) {
+                    $user->notify(new MentionInCommentNotification($comment->activity, $comment, auth()->user()));
+                }
+            }
+        }
+    }
+
+    public function toggleComments($activityId)
+    {
+        $this->showComments[$activityId] = !($this->showComments[$activityId] ?? false);
     }
 
     public function render()
 
     {
-        if(Gate::denies('manager.reports.all')||Gate::denies('activity.index')||Gate::denies('student.index')){
-          abort(403, 'You do not have the necessary permissions.');
+        if (Gate::denies('manager.reports.all') || Gate::denies('activity.index') || Gate::denies('student.index')) {
+            abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.org-app.reports.daily-log-report', [
             'activities' => $this->activities,
