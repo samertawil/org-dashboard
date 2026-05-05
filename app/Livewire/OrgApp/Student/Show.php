@@ -41,7 +41,7 @@ public function mount($student)
 
     public function render()
     {
-
+ 
 //     dd(StudentRepo::studentGradingScaleTablesAll(43725788));
 //    dd(StudentRepo::studentGradingScaleTablesAll(43239543));
  

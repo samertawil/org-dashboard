@@ -15,12 +15,14 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
 
     protected $surveyNo;
     protected $groupIdPivot;
+    protected $batchNoPivot;
     protected $questions;
 
-    public function __construct($surveyNo,$groupIdPivot)
+    public function __construct($surveyNo, $groupIdPivot, $batchNoPivot)
     {
         $this->surveyNo = $surveyNo;
         $this->groupIdPivot = $groupIdPivot;
+        $this->batchNoPivot = $batchNoPivot;
         // Fetch questions for this survey to define columns
         $this->questions = SurveyQuestion::where('survey_for_section', $surveyNo)
             ->orderBy('question_order')
@@ -33,10 +35,11 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
         return SurveyAnswer::query()
             ->with(['student.studentGroup', 'creator'])
             ->where('survey_no', $this->surveyNo)
-            ->when($this->groupIdPivot, function ($query) {
-                return $query->whereHas('student', function ($studentQuery) {
-                    $studentQuery->where('student_groups_id', $this->groupIdPivot);
-                });
+            ->whereHas('student', function ($studentQuery) {
+                $studentQuery->where('student_groups_id', $this->groupIdPivot)
+                    ->whereHas('studentGroup', function ($g) {
+                        $g->where('batch_no', $this->batchNoPivot);
+                    });
             })
             ->get()
             ->groupBy('account_id');
@@ -47,6 +50,7 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
         $headings = [
             'Student ID',
             'Full Name',
+            'Batch No',
             'Group Name',
             'Created By',
         ];
@@ -69,8 +73,9 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
         $row = [
             $firstAnswer->account_id,
             $student?->full_name ?? 'N/A',
+            $student?->studentGroup?->batch_no ?? 'N/A',
             $student?->studentGroup?->name ?? 'N/A',
-            $firstAnswer->creator?->full_name ?? 'N/A',
+            $firstAnswer->creator?->name ?? 'N/A',
         ];
 
         // Map answers back to each question column

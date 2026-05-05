@@ -23,7 +23,32 @@ class ExportFiles extends Component
     public $groupIdLate = '';
     public $surveyNoResults = '';
     public $groupIdResults = '';
+    public $groupId = '';
     public $publicSurveyNo = '';
+    public $batchNo = '';
+    public $batchNoPivot = '';
+    public $batchNoLate = '';
+    public $batchNoResults = '';
+
+    public function updatedBatchNo($value)
+    {
+        $this->groupId = '';
+    }
+
+    public function updatedBatchNoPivot($value)
+    {
+        $this->groupIdPivot = '';
+    }
+
+    public function updatedBatchNoLate($value)
+    {
+        $this->groupIdLate = '';
+    }
+
+    public function updatedBatchNoResults($value)
+    {
+        $this->groupIdResults = '';
+    }
 
 
     public function outerExportSurveyAnswers()
@@ -45,47 +70,58 @@ class ExportFiles extends Component
 
     public function exportSurveyAnswers()
     {
-        $surveyName = $this->surveyNo 
-            ? Status::find($this->surveyNo)?->status_name 
-            : __('All Surveys');
+        $this->validate([
+            'surveyNo' => 'required|exists:statuses,id',
+            'batchNo' => 'required',
+            'groupId' => 'required|exists:student_groups,id',
+        ]);
 
-        $filename = "Survey_Answers_List_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
+        $surveyName = Status::find($this->surveyNo)?->status_name;
+        $filename = "Survey_Answers_List_{$surveyName}_Batch_{$this->batchNo}_" . now()->format('Y-m-d_H-i') . ".xlsx";
 
-        return (new SurveyAnswersExport($this->surveyNo))->download($filename);
+        return (new SurveyAnswersExport($this->surveyNo, $this->batchNo, $this->groupId))->download($filename);
     }
 
     public function exportSurveyAnswersPivot()
     {
         $this->validate([
             'surveyNoPivot' => 'required|exists:statuses,id',
+            'batchNoPivot' => 'required',
+            'groupIdPivot' => 'required|exists:student_groups,id',
         ]);
 
         $surveyName = Status::find($this->surveyNoPivot)?->status_name;
-        $filename = "Survey_Answers_Pivot_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
+        $filename = "Survey_Answers_Pivot_{$surveyName}_Batch_{$this->batchNoPivot}_" . now()->format('Y-m-d_H-i') . ".xlsx";
 
-        return (new SurveyAnswersPivotExport($this->surveyNoPivot,$this->groupIdPivot))->download($filename);
+        return (new SurveyAnswersPivotExport($this->surveyNoPivot, $this->groupIdPivot, $this->batchNoPivot))->download($filename);
     }
 
     public function exportSurveyLate()
     {
-        $surveyName = $this->surveyLate 
-            ? Status::find($this->surveyLate)?->status_name 
-            : __('All Late Surveys');
+        $this->validate([
+            'surveyLate' => 'required|exists:statuses,id',
+            'batchNoLate' => 'required',
+            'groupIdLate' => 'required|exists:student_groups,id',
+        ]);
 
-        $filename = "Survey_Late_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
+        $surveyName = Status::find($this->surveyLate)?->status_name;
+        $filename = "Survey_Late_{$surveyName}_Batch_{$this->batchNoLate}_" . now()->format('Y-m-d_H-i') . ".xlsx";
 
-        return (new SurveyLate($this->surveyLate, $this->groupIdLate))->download($filename);
+        return (new SurveyLate($this->surveyLate, $this->groupIdLate, $this->batchNoLate))->download($filename);
     }
 
     public function exportSurveyResults()
     {
-        $surveyName = $this->surveyNoResults 
-            ? Status::find($this->surveyNoResults)?->status_name 
-            : __('All Surveys');
+        $this->validate([
+            'surveyNoResults' => 'required|exists:statuses,id',
+            'batchNoResults' => 'required',
+            'groupIdResults' => 'required|exists:student_groups,id',
+        ]);
 
-        $filename = "Survey_Results_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
+        $surveyName = Status::find($this->surveyNoResults)?->status_name;
+        $filename = "Survey_Results_{$surveyName}_Batch_{$this->batchNoResults}_" . now()->format('Y-m-d_H-i') . ".xlsx";
 
-        return (new SurveyResultsExport($this->surveyNoResults, $this->groupIdResults))->download($filename);
+        return (new SurveyResultsExport($this->surveyNoResults, $this->groupIdResults, $this->batchNoResults))->download($filename);
     }
 
     public function render()
@@ -104,11 +140,47 @@ class ExportFiles extends Component
     ->get();
         
         $groupNames = StudentGroupRepo::studentGroups();
+        $groupNamesPivot = $groupNames;
+        $groupNamesLate = $groupNames;
+        $groupNamesResults = $groupNames;
+
+        if ($this->batchNo) {
+            $groupNames = StudentGroup::where('batch_no', $this->batchNo)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        if ($this->batchNoPivot) {
+            $groupNamesPivot = StudentGroup::where('batch_no', $this->batchNoPivot)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        if ($this->batchNoLate) {
+            $groupNamesLate = StudentGroup::where('batch_no', $this->batchNoLate)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        if ($this->batchNoResults) {
+            $groupNamesResults = StudentGroup::where('batch_no', $this->batchNoResults)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
+        $batchNumbers = StudentGroup::whereNotNull('batch_no')
+            ->distinct()
+            ->orderBy('batch_no')
+            ->pluck('batch_no');
 
         return view('livewire.org-app.survey-questions.export-files', [
             'surveys' => $surveys,
             'groupNames' => $groupNames,
-            'publicSurveys'=>$publicSurveys,
+            'groupNamesPivot' => $groupNamesPivot,
+            'groupNamesLate' => $groupNamesLate,
+            'groupNamesResults' => $groupNamesResults,
+            'publicSurveys' => $publicSurveys,
+            'batchNumbers' => $batchNumbers,
         ]);
     }
 }

@@ -109,6 +109,11 @@
                             <flux:button href="https://www.google.com/maps/search/?api=1&query={{ $group->region->region_name ?? '' }} {{ $group->city->city_name ?? '' }} {{ $group->neighbourhood->name ?? '' }} Gaza Strip" 
                                 target="_blank" variant="ghost" size="xs" icon="map-pin" />
                         </span>
+                        <span title="{{ __('Generate Schedule') }}">
+                            <flux:button wire:click="generateSchedule({{ $group->id }})" 
+                                wire:confirm="{{ __('Are you sure you want to generate the schedule for this group? This will only work if no schedule exists.') }}"
+                                variant="ghost" size="xs" icon="clock" />
+                        </span>
                         <span title="{{ __('Edit Education Point') }}">
                             <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate variant="ghost" size="xs" icon="pencil-square" />
                         </span>
@@ -122,12 +127,13 @@
         </div>
 
         {{-- Desktop Table View --}}
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                <thead class="bg-zinc-50 dark:bg-zinc-900">
+        {{-- Desktop Table View --}}
+        <div class="hidden md:block overflow-auto custom-scrollbar" style="max-height: 70vh;">
+            <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700 border-separate border-spacing-0">
+                <thead class="bg-zinc-50 dark:bg-zinc-900 sticky top-0 z-20">
                     <tr>
                         <th wire:click="sortBy('name')"
-                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            class="sticky left-0 bg-zinc-50 dark:bg-zinc-900 z-30 px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors border-b border-zinc-200 dark:border-zinc-700">
                             <div class="flex items-center gap-1">
                                 {{ __('Name') }}
                                 @if ($sortField === 'name')
@@ -138,7 +144,7 @@
                         </th>
 
                         <th wire:click="sortBy('batch_no')"
-                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+                            class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors border-b border-zinc-200 dark:border-zinc-700">
                             <div class="flex items-center gap-1">
                                 {{ __('Batch No') }}
                                 @if ($sortField === 'batch_no')
@@ -150,30 +156,30 @@
                             </div>
                         </th>
                         <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                         {{ __('Region') }} /  {{ __('City') }}
                     </th>
                     
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                             {{ __('Moderator') }}
                         </th>
                       
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                             {{ __('Subjects') }}
                         </th>
                          <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                             {{ __('Count/Max') }}
                         </th>
                        
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                             {{ __('Status') }}
                         </th>
                         <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            class="sticky right-0 bg-zinc-50 dark:bg-zinc-900 z-30 px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
                             {{ __('Actions') }}
                         </th>
                     </tr>
@@ -181,7 +187,7 @@
                 <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
                     @forelse($this->groups as $group)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
+                            <td class="sticky left-0 bg-white dark:bg-zinc-800 z-10 px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-700/50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
                                 {{ $group->name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 text-center">
@@ -229,7 +235,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="sticky right-0 bg-white dark:bg-zinc-800 z-10 px-6 py-4 whitespace-nowrap text-right text-sm font-medium border-b border-zinc-100 dark:border-zinc-700/50 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.3)]">
                                 <div class="flex items-center justify-end gap-2">
                                     <span title="{{ __('Weekly Schedule') }}">
                                         <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate
@@ -238,6 +244,11 @@
                                     <span title="{{ __('Open in Google Maps') }}">
                                         <flux:button href="https://www.google.com/maps/search/?api=1&query={{ $group->region->region_name ?? '' }} {{ $group->city->city_name ?? '' }} {{ $group->neighbourhood->name ?? '' }} Gaza Strip" 
                                             target="_blank" variant="ghost" size="sm" icon="map-pin" />
+                                    </span>
+                                    <span title="{{ __('Generate Schedule') }}">
+                                        <flux:button wire:click="generateSchedule({{ $group->id }})" 
+                                            wire:confirm="{{ __('Are you sure you want to generate the schedule for this group? This will only work if no schedule exists.') }}"
+                                            variant="ghost" size="sm" icon="clock" />
                                     </span>
                                     <span title="{{ __('Edit Education Point') }}">
                                         <flux:button href="{{ route('student.group.edit', $group) }}" wire:navigate

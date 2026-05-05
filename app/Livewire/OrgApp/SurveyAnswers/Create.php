@@ -187,7 +187,7 @@ class Create extends Component
     }
     public function render()
     {
-        
+       
         $surceyFor = StatusRepo::statuses()->where('p_id_sub',config('appConstant.survey_for')) ;
 
         if (Gate::denies('survey-answers.create')) {

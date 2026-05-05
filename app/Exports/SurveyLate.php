@@ -15,19 +15,21 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
 
     protected $surveyNo;
     protected $groupId;
+    protected $batchNo;
     private $rowNumber = 0;
 
-    public function __construct($surveyNo = null,$groupId = null)
+    public function __construct($surveyNo, $groupId, $batchNo)
     {
         $this->surveyNo = $surveyNo;
         $this->groupId = $groupId;
+        $this->batchNo = $batchNo;
     }
 
     public function collection()
     {
         $results = DB::select("
         SELECT DISTINCT
-            s.id, s.identity_number, s.full_name, sg.name as group_name,
+            s.id, s.identity_number, s.full_name, sg.name as group_name, sg.batch_no,
              stat.status_name as survey_name,   s.activation
         FROM survey_table st
         JOIN students s ON s.student_groups_id IS NOT NULL
@@ -46,13 +48,13 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
                     AND CURDATE() <= sg.end_date)
               )
           AND sa.account_id IS NULL
-          AND (:surveyNo IS NULL OR st.survey_for_section = :surveyNo2)
-          AND (:groupId IS NULL OR s.student_groups_id = :groupId2)
+          AND st.survey_for_section = :surveyNo
+          AND s.student_groups_id = :groupId
+          AND sg.batch_no = :batchNo
         ", [
-            'surveyNo'  => $this->surveyNo ?: null,
-            'surveyNo2' => $this->surveyNo ?: null,
-            'groupId'   => $this->groupId ?: null,
-            'groupId2'  => $this->groupId ?: null,
+            'surveyNo'  => $this->surveyNo,
+            'groupId'   => $this->groupId,
+            'batchNo'   => $this->batchNo,
         ]);
 
         return collect($results);
@@ -64,6 +66,7 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
             'Sequence',
             'Identity Number',
             'Full Name',
+            'Batch No',
             'Group Name',
             'Survey Section',
             'Status',
@@ -82,6 +85,7 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
             $this->rowNumber,
             $row->identity_number,
             $row->full_name,
+            $row->batch_no,
             $row->group_name,
             $row->survey_name,
             $row->activation == 1 ? 'Active' : 'Inactive',

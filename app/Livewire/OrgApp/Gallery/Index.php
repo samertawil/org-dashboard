@@ -133,7 +133,7 @@ class Index extends Component
         }
 
         // 3. Merge and Sort
-        $all = $genericAttachments->merge($prAttachments)->sortByDesc('uploaded_at');
+        $all = collect($genericAttachments)->merge(collect($prAttachments))->sortByDesc('uploaded_at');
 
         // 4. Apply Filters (Search & Type)
         // Search

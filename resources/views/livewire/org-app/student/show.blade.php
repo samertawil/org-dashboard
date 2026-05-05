@@ -437,7 +437,7 @@
                                 </div>
 
                                 <div class="space-y-3">
-                                    @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no) as $answer)
+                                    @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no)->sortBy('question.question_order') as $answer)
                                         @php
                                             $displayAnswerAr = $answer->answer_ar_text;
                                             if (!empty($answer->answer_ar_text) && !empty($answer->question?->answer_options)) {
@@ -517,7 +517,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no) as $answer)
+                                        @foreach ($student->surveyStudentanswers->where('survey_no', $survey->survey_no)->sortBy('question.question_order') as $answer)
                                             <tr class="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
                                                 <td class="px-4 py-2 border text-sm">
                                                     <div class="font-medium text-zinc-900 dark:text-zinc-100"

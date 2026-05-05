@@ -4,8 +4,6 @@ namespace App\Livewire\OrgApp\Student;
 
 use App\Concerns\Student\StudentTrait;
 use App\Models\Student;
-use App\Models\SurveyAnswer;
-use App\Models\SurveyQuestion;
 use App\Rules\GlobalValidation;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +15,6 @@ use Livewire\Component;
 
 class Create extends Component
 {
-    public $answer = [];
 
     use StudentTrait;
 
@@ -63,20 +60,6 @@ class Create extends Component
             ]);
 
 
-            if (is_array($this->answer)) {
-                foreach ($this->answer as $questionId => $answerText) {
-                    if (!empty($answerText)) {
-                        SurveyAnswer::create([
-                            'account_id' => $this->identity_number,
-                            'question_id' => $questionId,
-                            'answer_ar_text' => $answerText,
-                            'survey_no' => 120,
-                            'created_by' => Auth::user()->employee->id,
-                            
-                        ]);
-                    }
-                }
-            }
             DB::commit();
             session()->flash('message', __('Student successfully Created.'));
             return $this->redirect(route('student.index'), navigate: true);
@@ -87,11 +70,6 @@ class Create extends Component
         }
     }
 
-    #[Computed()]
-    public function surveyquestions()
-    {
-        return  SurveyQuestion::where('survey_for_section', 120)->orderBy('question_order')->get();
-    }
 
 
     public function render()

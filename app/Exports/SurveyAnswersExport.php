@@ -13,17 +13,27 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping
     use Exportable;
 
     protected $surveyNo;
+    protected $batchNo;
+    protected $groupId;
 
-    public function __construct($surveyNo = null)
+    public function __construct($surveyNo, $batchNo, $groupId)
     {
         $this->surveyNo = $surveyNo;
+        $this->batchNo = $batchNo;
+        $this->groupId = $groupId;
     }
 
     public function collection()
     {
         return SurveyAnswer::query()
-            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator','surveyTable'])
-            ->when($this->surveyNo, fn($q) => $q->where('survey_no', $this->surveyNo))
+            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator', 'surveyTable'])
+            ->where('survey_no', $this->surveyNo)
+            ->whereHas('student', function ($q) {
+                $q->where('student_groups_id', $this->groupId)
+                  ->whereHas('studentGroup', function ($sq) {
+                      $sq->where('batch_no', $this->batchNo);
+                  });
+            })
             ->orderBy('survey_no')
             ->orderBy('account_id')
             ->get();

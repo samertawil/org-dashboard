@@ -26,7 +26,7 @@ class Index extends Component
     public $showSubjectsModal = false;
 
     // Pagination
-    public int $perPage = 10;
+    public int $perPage = 5;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -89,11 +89,58 @@ class Index extends Component
         }
     }
     
-    public function closeSubjectsModal()
+    public function generateSchedule($groupId)
     {
-        $this->showSubjectsModal = false;
-        $this->viewingSubjects = [];
-        $this->viewingGroupName = '';
+        if (Gate::denies('student.group.create')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
+
+        $group = StudentGroup::findOrFail($groupId);
+
+        // Check if schedule already exists
+        if (\App\Models\StudentGroupSchedule::where('student_group_id', $groupId)->exists()) {
+            session()->flash('message', __('Schedule already exists for this group.'));
+            return;
+        }
+
+        if ($group->start_date && $group->end_date && $group->start_time && $group->end_time) {
+            DB::beginTransaction();
+            try {
+                $startDate = \Carbon\Carbon::parse($group->start_date);
+                $endDate = \Carbon\Carbon::parse($group->end_date);
+
+                while ($startDate->lte($endDate)) {
+                    $hours = 0;
+                    $s = \Carbon\Carbon::parse($group->start_time);
+                    $e = \Carbon\Carbon::parse($group->end_time);
+                    $hours = $s->diffInHours($e);
+
+                    $dayName = $startDate->format('l');
+                    $isOffDay = in_array($dayName, ['Friday']);
+
+                    \App\Models\StudentGroupSchedule::create([
+                        'student_group_id' => $group->id,
+                        'schedule_date' => $startDate->format('Y-m-d'),
+                        'day' => $dayName,
+                        'start_time' => $group->start_time->format('H:i'),
+                        'end_time' => $group->end_time->format('H:i'),
+                        'hours' => $hours,
+                        'name' => $group->name,
+                        'activation' => 1,
+                        'is_off_day' => $isOffDay,
+                    ]);
+                    
+                    $startDate->addDay();
+                }
+                DB::commit();
+                session()->flash('message', __('Schedule successfully generated for :name', ['name' => $group->name]));
+            } catch (\Exception $e) {
+                DB::rollBack();
+                session()->flash('message', __('Error generating schedule: ') . $e->getMessage());
+            }
+        } else {
+            session()->flash('message', __('Please ensure start date, end date, and times are set for this group.'));
+        }
     }
 
     public function render()

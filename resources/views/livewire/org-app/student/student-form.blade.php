@@ -103,56 +103,6 @@
                 </flux:select>
                 <flux:error name="activation" />
             </flux:field>
-            {{-- Survey Questions Header --}}
-            @if (count($this->surveyquestions) > 0)
-                <div class="md:col-span-2 lg:col-span-3 border-b border-zinc-100 dark:border-zinc-700 pb-2 mt-4 mb-2">
-                    <flux:heading size="md">{{ __('Survey Questions') }}</flux:heading>
-                </div>
-
-                @if($this->identity_number && !empty($relations_data))
-                    <div class="md:col-span-2 lg:col-span-3 mb-4 mt-2 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700">
-                        <flux:radio.group wire:model.live="selected_relation" label="{{ __('Select Relation for Answers') }}">
-                            <div class="flex flex-col gap-2 mt-2">
-                                @foreach ($relations_data as $index => $relation)
-                                    <flux:radio value="{{ $index }}" label="{{ $relation['fullNameArabic'] ?? '' }} - {{ $relation['relationTypeName'] ?? '' }} ({{ $relation['relationIdentityNumber'] ?? '' }})" />
-                                @endforeach
-                            </div>
-                        </flux:radio.group>
-                    </div>
-                @endif
-
-                @foreach ($this->surveyquestions as $index => $q)
-                    <flux:field class="col-span-full">
-
-                        <flux:label>{{ $index + 1 }} - {{ $q->question_ar_text }}</flux:label>
-                        @if ($q->answer_input_type == 2)
-                            @if ($q->answer_options && count($q->answer_options) > 0)
-                                <flux:select wire:model="answer.{{ $q->id }}">
-                                    <option value="" class="text-gray-500 placeholder-gray-500">
-                                        {{ __('Select answer') }}</option>
-                                    @foreach ($q->answer_options as $option)
-                                        @if (is_array($option) && isset($option['value']) && isset($option['label']))
-                                            <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
-                                        @elseif(!is_array($option))
-                                            <option value="{{ $option }}">{{ $option }}</option>
-                                        @endif
-                                    @endforeach
-                                </flux:select>
-                            @else
-                                <flux:input type="text" wire:model="answer.{{ $q->id }}"
-                                    :placeholder="__('Enter answer')" />
-                                <flux:error name="answer.{{ $q->id }}" />
-                            @endif
-                        @else
-                            <flux:input type="text" wire:model="answer.{{ $q->id }}"
-                                :placeholder="__('Enter answer')" />
-                            <flux:error name="answer.{{ $q->id }}" />
-                        @endif
-
-
-                    </flux:field>
-                @endforeach
-            @endif
 
             {{-- Submit Button --}}
 

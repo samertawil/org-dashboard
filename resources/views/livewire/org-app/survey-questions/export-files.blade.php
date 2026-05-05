@@ -20,17 +20,43 @@
 
                 <flux:text class="text-sm">
                     {{ __('Export all student answers for a specific survey group. Includes student names, group names, and creator details.') }}
+                    <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 font-arabic">
+                        قائمة بسيطة بجميع الإجابات المسجلة للطلاب داخل النظام.
+                    </div>
                 </flux:text>
 
-                <div class="pt-2">
+                <div class="pt-2 space-y-4">
                     <flux:field>
-                        <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Survey Group') }}</flux:label>
                         <flux:select wire:model="surveyNo">
-                            <option value="">{{ __('All Surveys') }}</option>
+                            <option value="">{{ __('Select Survey...') }}</option>
                             @foreach ($surveys as $survey)
                                 <option value="{{ $survey->id }}">{{ $survey->status_name }}</option>
                             @endforeach
                         </flux:select>
+                        <flux:error name="surveyNo" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Batch Number') }}</flux:label>
+                        <flux:select wire:model.live="batchNo">
+                            <option value="">{{ __('Select Batch...') }}</option>
+                            @foreach ($batchNumbers as $batch)
+                                <option value="{{ $batch }}">{{ __('Batch') }} {{ $batch }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="batchNo" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Education Point Name') }}</flux:label>
+                        <flux:select wire:model="groupId">
+                            <option value="">{{ __('Select Point...') }}</option>
+                            @foreach ($groupNames as $groupName)
+                                <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="groupId" />
                     </flux:field>
                 </div>
             </div>
@@ -56,11 +82,15 @@
 
              <flux:text class="text-sm">
                  {{ __('Export all Data Collected via Shared Links.') }}
+                 <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 font-arabic">
+                     تصدير البيانات التي تم جمعها عبر الروابط العامة التي نُشرت خارج النظام.
+                 </div>
              </flux:text>
 
              <div class="pt-2">
                  <flux:field>
-                     <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                    
+                     <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Survey Group') }}</flux:label>
                      <flux:select wire:model="publicSurveyNo">
                          <option value="">{{ __('All Surveys') }}</option>
                          @foreach ($publicSurveys as $survey)
@@ -93,11 +123,14 @@
 
                 <flux:text class="text-sm">
                     {{ __('Export student records where each question is a separate column. Best for statistical analysis and overview.') }}
+                    <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 font-arabic">
+                        تنسيق متقدم يضع الأسئلة كأعمدة، وهو الأفضل للتحليل الإحصائي والمقارنة.
+                    </div>
                 </flux:text>
 
-                <div class="pt-2">
+                <div class="pt-2 space-y-4">
                     <flux:field>
-                        <flux:label badge="Required" badgeColor="text-red-600">{{ __('Select Survey Group') }}
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Survey Group') }}
                         </flux:label>
                         <flux:select wire:model="surveyNoPivot">
                             <option value="">{{ __('Select Survey...') }}</option>
@@ -107,15 +140,23 @@
                         </flux:select>
                         <flux:error name="surveyNoPivot" />
                     </flux:field>
-                </div>
 
-
-                <div class="pt-2">
                     <flux:field>
-                        <flux:label>{{ __('Select Education Point Name') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Batch Number') }}</flux:label>
+                        <flux:select wire:model.live="batchNoPivot">
+                            <option value="">{{ __('Select Batch...') }}</option>
+                            @foreach ($batchNumbers as $batch)
+                                <option value="{{ $batch }}">{{ __('Batch') }} {{ $batch }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="batchNoPivot" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Education Point Name') }}</flux:label>
                         <flux:select wire:model="groupIdPivot">
                             <option value="">{{ __('Select Point...') }}</option>
-                            @foreach ($groupNames as $groupName)
+                            @foreach ($groupNamesPivot as $groupName)
                                 <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
                             @endforeach
                         </flux:select>
@@ -145,11 +186,14 @@
 
                 <flux:text class="text-sm">
                     {{ __('Export student records where are they late to provided.') }}
+                    <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 font-arabic">
+                        كشف بالطلاب الذين لم يقوموا بتعبئة الاستبيان المطلوب منهم حتى الآن.
+                    </div>
                 </flux:text>
 
-                <div class="pt-2">
+                <div class="pt-2 space-y-4">
                     <flux:field>
-                        <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Survey Group') }}</flux:label>
                         <flux:select wire:model="surveyLate">
                             <option value="">{{ __('Select Survey...') }}</option>
                             @foreach ($surveys as $survey)
@@ -158,15 +202,23 @@
                         </flux:select>
                         <flux:error name="surveyLate" />
                     </flux:field>
-                </div>
 
-
-                <div class="pt-2">
                     <flux:field>
-                        <flux:label>{{ __('Select Education Point Name') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Batch Number') }}</flux:label>
+                        <flux:select wire:model.live="batchNoLate">
+                            <option value="">{{ __('Select Batch...') }}</option>
+                            @foreach ($batchNumbers as $batch)
+                                <option value="{{ $batch }}">{{ __('Batch') }} {{ $batch }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="batchNoLate" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Education Point Name') }}</flux:label>
                         <flux:select wire:model="groupIdLate">
                             <option value="">{{ __('Select Point...') }}</option>
-                            @foreach ($groupNames as $groupName)
+                            @foreach ($groupNamesLate as $groupName)
                                 <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
                             @endforeach
                         </flux:select>
@@ -194,28 +246,39 @@
 
                 <flux:text class="text-sm">
                     {{ __('Export detailed survey results with scores and evaluations for each domain.') }}
+                    <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400 font-arabic">
+                        تصدير الدرجات النهائية والتقييمات المحسوبة لكل مجال من مجالات الاستبيان.
+                    </div>
                 </flux:text>
 
-                <div class="pt-2">
+                <div class="pt-2 space-y-4">
                     <flux:field>
-                        <flux:label>{{ __('Select Survey Group') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Survey Group') }}</flux:label>
                         <flux:select wire:model="surveyNoResults">
-                            <option value="">{{ __('All Surveys') }}</option>
+                            <option value="">{{ __('Select Survey...') }}</option>
                             @foreach ($surveys as $survey)
                                 <option value="{{ $survey->id }}">{{ $survey->status_name }}</option>
                             @endforeach
                         </flux:select>
                         <flux:error name="surveyNoResults" />
                     </flux:field>
-                </div>
 
-
-                <div class="pt-2">
                     <flux:field>
-                        <flux:label>{{ __('Select Education Point Name') }}</flux:label>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Batch Number') }}</flux:label>
+                        <flux:select wire:model.live="batchNoResults">
+                            <option value="">{{ __('Select Batch...') }}</option>
+                            @foreach ($batchNumbers as $batch)
+                                <option value="{{ $batch }}">{{ __('Batch') }} {{ $batch }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="batchNoResults" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">{{ __('Select Education Point Name') }}</flux:label>
                         <flux:select wire:model="groupIdResults">
                             <option value="">{{ __('Select Point...') }}</option>
-                            @foreach ($groupNames as $groupName)
+                            @foreach ($groupNamesResults as $groupName)
                                 <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
                             @endforeach
                         </flux:select>
