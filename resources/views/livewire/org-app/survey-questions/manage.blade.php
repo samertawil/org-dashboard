@@ -95,7 +95,7 @@
 
         <div class="space-y-6">
             @forelse($questions as $index => $question)
-                <div class="p-5 border rounded-2xl {{ empty($question['id']) ? 'bg-green-50/50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-1 ring-green-100 dark:ring-green-900/30' : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-900/30' }} transition-all hover:shadow-lg relative group">
+                <div wire:key="{{ $question['key'] }}" class="p-5 border rounded-2xl {{ empty($question['id']) ? 'bg-green-50/50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-1 ring-green-100 dark:ring-green-900/30' : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-900/30' }} transition-all hover:shadow-lg relative group">
                     
                     @if(empty($question['id']))
                         <div class="absolute -top-3 left-6 px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm z-10">
@@ -159,7 +159,7 @@
                             </div>
                         </div>
 
-                        {{-- Row 3: Scoring --}}
+                        {{-- Row 3: Scoring & Age Filter --}}
                         <div class="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-zinc-100 dark:border-zinc-800 pt-4">
                             <div>
                                 <flux:input type="number" label="{{ __('Min Score') }}" wire:model="questions.{{ $index }}.min_score" />
@@ -169,7 +169,34 @@
                                 <flux:input type="number" label="{{ __('Max Score') }}" wire:model="questions.{{ $index }}.max_score" />
                                 @error('questions.'.$index.'.max_score') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
+                            <div>
+                                <flux:input type="number" label="{{ __('Age From (Years)') }}" 
+                                    wire:model="questions.{{ $index }}.question_from_age"
+                                    placeholder="{{ __('e.g. 6') }}" min="0" />
+                                @error('questions.'.$index.'.question_from_age') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <flux:input type="number" label="{{ __('Age To (Years)') }}" 
+                                    wire:model="questions.{{ $index }}.question_to_age"
+                                    placeholder="{{ __('e.g. 18') }}" min="0" />
+                                @error('questions.'.$index.'.question_to_age') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
                         </div>
+                        {{-- Age Filter Note --}}
+                        @if(!empty($question['question_from_age']) || !empty($question['question_to_age']))
+                        <div class="md:col-span-12">
+                            <div class="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
+                                <flux:icon name="user-circle" class="size-4 shrink-0" />
+                                <span>
+                                    {{ __('This question will only appear for students aged') }}
+                                    @if(!empty($question['question_from_age'])) <strong>{{ $question['question_from_age'] }}</strong> @endif
+                                    @if(!empty($question['question_from_age']) && !empty($question['question_to_age'])) {{ __('to') }} @endif
+                                    @if(!empty($question['question_to_age'])) <strong>{{ $question['question_to_age'] }}</strong> @endif
+                                    {{ __('years when they joined.') }}
+                                </span>
+                            </div>
+                        </div>
+                        @endif
     
                         {{-- Row 4: Multiple Choice Options --}}
                         @if((isset($question['answer_input_type']) && $question['answer_input_type'] == 2))

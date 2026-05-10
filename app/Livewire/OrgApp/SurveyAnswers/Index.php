@@ -107,7 +107,7 @@ class Index extends Component
 
     public function render()
     {
- 
+        dd('index');
         if (Gate::denies('survey.index')) {
             abort(403, 'You do not have the necessary permissions');
         }

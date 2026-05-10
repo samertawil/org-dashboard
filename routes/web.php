@@ -71,6 +71,7 @@ use App\Livewire\OrgApp\SurveyQuestions\ExportFiles;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Create as GradingScaleCreate;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Edit as GradingScaleEdit;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Index as GradingScaleIndex;
+use App\Livewire\OrgApp\SurveyQuestions\GradingScale\ManageDescriptions as GradingScaleManageDescriptions;
 use App\Livewire\OrgApp\SurveyQuestions\Manage as SurveyQuestionsManage;
 use App\Livewire\OrgApp\TeacherStudentGroup\Create as TeacherStudentGroupCreate;
 use App\Livewire\OrgApp\TeacherStudentGroup\Edit as TeacherStudentGroupEdit;
@@ -255,6 +256,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     
     Route::get('/survey-grading-scale', GradingScaleIndex::class)->name('survey.grading.scale.index');
     Route::get('/survey-grading-scale/create', GradingScaleCreate::class)->name('survey.grading.scale.create');
+    Route::get('/survey-grading-scale/manage-descriptions', GradingScaleManageDescriptions::class)->name('survey.grading.scale.manage-descriptions');
     Route::get('/survey-grading-scale/{scale}/edit', GradingScaleEdit::class)->name('survey.grading.scale.edit');
 
     Route::get('/survey-comparison-scale', \App\Livewire\OrgApp\SurveyQuestions\ComparisonScale\Index::class)->name('org-app.survey-questions.comparison-scale.index');

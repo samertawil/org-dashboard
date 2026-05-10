@@ -606,7 +606,7 @@
                 </div>
             </div>
         </div>
-        <flux:modal wire:model="showGradingScale" class="md:w-[800px]">
+        <flux:modal wire:model="showGradingScale" class="md:w-[1000px]">
         @if ($showGradingScale)
             <div class="space-y-6">
                 <div class="flex items-center justify-between">
@@ -627,7 +627,8 @@
                
                 <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Grade %') }}</th>
                 <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Evaluation') }}</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Description') }}</th>
+                <th class="px-4 py-3 text-start text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Analytical Description') }}</th>
+                <th class="px-4 py-3 text-start text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Intervention') }}</th>
             </tr>
         </thead>
         <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
@@ -655,10 +656,20 @@
                             {{ $grade->evaluation }}
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm text-center">
-                        <span class="inline-flex items-center px-2.5 py-0.5  text-xs font-medium ">
+                    <td class="px-4 py-3 text-xs text-start max-w-xs">
+                        <div class="text-zinc-700 dark:text-zinc-300 leading-relaxed">
                             {{ $grade->description }}
-                        </span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-start max-w-xs">
+                        @if(isset($grade->need_processing) && $grade->need_processing)
+                            <div class="flex items-start gap-2 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-lg text-orange-800 dark:text-orange-300">
+                                <flux:icon name="exclamation-circle" class="size-4 shrink-0 mt-0.5" />
+                                <span class="leading-tight">{{ $grade->need_processing }}</span>
+                            </div>
+                        @else
+                            <span class="text-zinc-400 italic">{{ __('No specific intervention') }}</span>
+                        @endif
                     </td>
                 </tr>
             @empty

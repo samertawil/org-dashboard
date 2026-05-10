@@ -442,7 +442,7 @@
                                     <flux:icon icon="map-pin" size="3.5" class="text-slate-400" />
                                     <span class="text-xs font-semibold">{{ $group->region->region_name }}</span>
                                     <flux:icon icon="chevron-left" size="3" class="text-slate-300" />
-                                    <span class="text-xs font-semibold">{{ $group->city->city_name }}</span>
+                                    <span class="text-xs font-semibold">{{ $group->city->city_name??'-' }}</span>
                                 </div>
                             </div>
                             <div class="flex flex-col items-end gap-2">

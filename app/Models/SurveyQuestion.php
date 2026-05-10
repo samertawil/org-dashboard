@@ -24,10 +24,20 @@ class SurveyQuestion extends Model
         'batch_no',
         'min_score',
         'max_score',
+        'question_from_age',
+        'question_to_age',
     ];
 
     protected $casts = [
         'answer_options' => 'array',
+        'question_order' => 'integer',
+        'domain_id' => 'integer',
+        'require_detail' => 'boolean',
+        'required_answer' => 'boolean',
+        'min_score' => 'decimal:2',
+        'max_score' => 'decimal:2',
+        'question_from_age' => 'integer',
+        'question_to_age' => 'integer',
     ];
 
     public function surveyTable()

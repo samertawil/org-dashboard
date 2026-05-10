@@ -3,9 +3,11 @@
 namespace App\Livewire\OrgApp\SurveyAnswers;
 
 use App\Concerns\SurveyAnswers\SurveyAnswersTrait;
+use App\Models\Student;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Reposotries\StatusRepo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
@@ -14,7 +16,7 @@ use Livewire\Component;
 class Create extends Component
 {
     use SurveyAnswersTrait;
-    
+
     public function mount()
     {
         $this->account_id = request()->query('account_id', $this->account_id);
@@ -52,11 +54,41 @@ class Create extends Component
             return collect();
         }
 
+        // Get student age when joining
+        $studentAge = $student ? $student->student_age_when_join : null;
+
         return SurveyQuestion::with('domainRel')
             ->where('survey_for_section', $this->surveyForSection)
             ->where('batch_no', $batch_no)
             ->orderBy('question_order', 'asc')
-            ->get();
+            ->get()
+            ->filter(function (SurveyQuestion $question) use ($studentAge) {
+                $fromAge = $question->question_from_age;
+                $toAge   = $question->question_to_age;
+
+                // If no age restriction is set, show the question always
+                if (is_null($fromAge) && is_null($toAge)) {
+                    return true;
+                }
+
+                // If student age is unknown, skip age-restricted questions
+                if (is_null($studentAge) || $studentAge === 0) {
+                    return false;
+                }
+
+                // Check lower bound
+                if (!is_null($fromAge) && $studentAge < $fromAge) {
+                    return false;
+                }
+
+                // Check upper bound
+                if (!is_null($toAge) && $studentAge > $toAge) {
+                    return false;
+                }
+
+                return true;
+            })
+            ->values();
     }
 
     #[Computed()]
@@ -65,7 +97,16 @@ class Create extends Component
         if (!$this->account_id) {
             return null;
         }
-        return \App\Models\Student::where('identity_number', $this->account_id)->first();
+
+        return  Student::where('identity_number', $this->account_id)->first();
+    }
+
+    #[Computed()]
+    public function surveyFor()
+    {
+        if ($this->account_id  && $this->student()) {
+            return StatusRepo::studentBySurveyByAge($this->student());
+        }
     }
 
     // Triggered automatically by Livewire when surveyForSection is changed
@@ -96,7 +137,7 @@ class Create extends Component
         // Populate the $answers array so the blade form inputs show the previously saved answers
         foreach ($existingAnswers as $answer) {
             $arText = $answer->answer_ar_text;
-            
+
             // Check if what is saved is a JSON array (like for checked checkboxes)
             $decoded = json_decode($arText, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -111,11 +152,11 @@ class Create extends Component
     {
         $this->validate([
             'surveyForSection' => 'required|integer',
-            'account_id' => 'required|integer', 
+            'account_id' => 'required|integer',
         ]);
 
         $questions = $this->questionsBySurveyForSection;
-        
+
         // Eager load all existing answers for this section and account to avoid N+1 in the loop
         $existingAnswers = SurveyAnswer::where('survey_no', $this->surveyForSection)
             ->where('account_id', $this->account_id)
@@ -143,7 +184,7 @@ class Create extends Component
                     'answer_ar_text' => $arText,
                     'answer_en_text' => null,
                     'created_by' => $employeeId,
-                    
+
                 ]);
 
                 if ($surveyAnswer->isDirty()) {
@@ -170,14 +211,15 @@ class Create extends Component
     }
 
     #[Computed()]
-    public function calcAnswers() {
-       if( ($this->surveyForSection) &&  ($this->account_id)) {
-         $answersCount = SurveyAnswer::calculateAnswer($this->surveyForSection, $this->account_id );
-         $questionsCount = count($this->questionsBySurveyForSection);
-          return [
-              'answersCount' => $answersCount,
-              'questionsCount' => $questionsCount
-          ];
+    public function calcAnswers()
+    {
+        if (($this->surveyForSection) &&  ($this->account_id)) {
+            $answersCount = SurveyAnswer::calculateAnswer($this->surveyForSection, $this->account_id);
+            $questionsCount = count($this->questionsBySurveyForSection);
+            return [
+                'answersCount' => $answersCount,
+                'questionsCount' => $questionsCount
+            ];
         } else {
             return [
                 'answersCount' => 0,
@@ -187,8 +229,6 @@ class Create extends Component
     }
     public function render()
     {
-       
-        $surceyFor = StatusRepo::statuses()->where('p_id_sub',config('appConstant.survey_for')) ;
 
         if (Gate::denies('survey-answers.create')) {
             abort(403, 'You do not have the necessary permissions');
@@ -197,7 +237,7 @@ class Create extends Component
         return view('livewire.org-app.survey-answers.create', [
             'heading' => __('Create Survey Answer'),
             'type' => 'save',
-            'surveyFor' => $surceyFor,
+
         ]);
     }
 }

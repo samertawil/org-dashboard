@@ -5,13 +5,20 @@
             <flux:subheading>{{ __('Manage the evaluation scales for surveys based on score percentages.') }}
             </flux:subheading>
         </div>
-        @can('survey.manage')
-            <span title="{{ __('Add a new evaluation scale entry') }}" class="w-full sm:w-auto">
-                <flux:button href="{{ route('survey.grading.scale.create') }}" wire:navigate variant="primary" icon="plus" class="w-full">
-                    {{ __('Add Grading Scale') }}
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <span title="{{ __('Manage domain-specific descriptions') }}" class="w-full sm:w-auto">
+                <flux:button href="{{ route('survey.grading.scale.manage-descriptions') }}" wire:navigate variant="ghost" icon="chat-bubble-bottom-center-text" class="w-full">
+                    {{ __('Domain Descriptions') }}
                 </flux:button>
             </span>
-        @endcan
+            @can('survey.manage')
+                <span title="{{ __('Add a new evaluation scale entry') }}" class="w-full sm:w-auto">
+                    <flux:button href="{{ route('survey.grading.scale.create') }}" wire:navigate variant="primary" icon="plus" class="w-full">
+                        {{ __('Add Grading Scale') }}
+                    </flux:button>
+                </span>
+            @endcan
+        </div>
     </div>
 
     {{-- Success Message --}}

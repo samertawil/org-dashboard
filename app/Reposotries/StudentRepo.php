@@ -104,15 +104,19 @@ class StudentRepo
         $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
           ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage');
       })
+      ->leftJoin('survey_grading_scale_descriptions as gd', function ($join) {
+        $join->on('gd.domain_id', '=', 'grades.domain_id')
+          ->on('gd.survey_grading_scale_id', '=', 'g.id');
+      })
       ->select(
         'grades.account_id',
         'grades.total_marks',
         'grades.max_total_score',
         'grades.grade',
         'grades.domain_id',
-        'grades.survey_no',
         'g.evaluation',
-        'g.description'
+        DB::raw("COALESCE(NULLIF(gd.description, ''), g.description) as description"),
+        'gd.need_processing'
       )
 
       ->orderBy('grades.account_id')
@@ -148,6 +152,10 @@ class StudentRepo
         $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
           ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage');
       })
+      ->leftJoin('survey_grading_scale_descriptions as gd', function ($join) {
+        $join->on('gd.domain_id', '=', 'grades.domain_id')
+          ->on('gd.survey_grading_scale_id', '=', 'g.id');
+      })
       ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
       ->select(
         'grades.account_id',
@@ -157,7 +165,8 @@ class StudentRepo
         'grades.domain_id',
         'grades.survey_no',
         'g.evaluation',
-        'g.description',
+        DB::raw("COALESCE(NULLIF(gd.description, ''), g.description) as description"),
+        'gd.need_processing',
         's.status_name as survey_name'
       )
       ->orderBy('grades.account_id')
@@ -212,6 +221,10 @@ class StudentRepo
                    ->whereColumn('g.batch_no', 'grades.batch_no')
                    ->whereColumn('g.survey_for_section', 'grades.survey_for_section');
           })
+          ->leftJoin('survey_grading_scale_descriptions as gd', function ($join) {
+              $join->on('gd.domain_id', '=', 'grades.domain_id')
+                   ->on('gd.survey_grading_scale_id', '=', 'g.id');
+          })
           ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
           ->selectRaw('
               grades.account_id,
@@ -221,7 +234,8 @@ class StudentRepo
               grades.domain_id,
               grades.survey_no,
               g.evaluation,
-              g.description,
+              COALESCE(NULLIF(gd.description, \'\'), g.description) as description,
+              gd.need_processing,
               s.status_name
           ');
   
@@ -262,6 +276,7 @@ class StudentRepo
               grades.survey_no,
               g.evaluation,
               g.description,
+              NULL as need_processing,
               s.status_name
           ');
   

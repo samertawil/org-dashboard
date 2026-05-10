@@ -35,7 +35,8 @@
                         <flux:label>{{ __('Select Section') }} <span class="text-red-500">*</span></flux:label>
                         <flux:select wire:model.live='surveyForSection'>
                             <option value="" class="text-gray-500">{{ __('Choose Section...') }}</option>
-                            @foreach ($surveyFor as $section)
+                            @foreach ($this->surveyFor as $section)
+                          
                                 @php
                                     $isFilled = in_array($section->id, $this->filledSurveys);
                                 @endphp
@@ -48,11 +49,15 @@
                         </flux:select>
                         <flux:error name="surveyForSection" />
                     </flux:field>
+                   
                 @endif
 
             </div>
-
-
+            @if ($this->student)
+            <flux:subheading class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+               هذه التقيمات خاصة بهذا العمر , في حال عدم وجود تقيم معين يرجى اضافته من خلال جدول survery_table
+            </flux:subheading>
+            @endif
         </div>
         <div wire:loading wire:target="surveyForSection" class="text-blue-500 animate-pulse bg-white/50 dark:bg-zinc-800/50 flex items-center justify-center z-10">
             <flux:icon name="arrow-path" class="size-8 animate-spin text-indigo-500" />

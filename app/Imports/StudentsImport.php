@@ -36,12 +36,9 @@ class StudentsImport implements ToModel, WithHeadingRow, WithValidation
         // Handle Status
         $status = null;
         if (isset($row['status'])) {
-            if (is_numeric($row['status'])) {
-                 $status = Status::find($row['status']);
-            } else {
                  // Assuming Status model has a 'status_name' or similar field. 
                  $status = Status::where('status_name', $row['status'])->first();
-            }
+            
         }
         
          // Parse birth date

@@ -29,8 +29,10 @@ class Manage extends Component
         'questions.*.detail' => 'nullable|string',
         'questions.*.note' => 'nullable|string',
         'questions.*.domain_id' => 'nullable|integer',
-        'questions.*.min_score' => 'nullable|integer',
-        'questions.*.max_score' => 'nullable|integer',
+        'questions.*.min_score' => 'nullable|numeric',
+        'questions.*.max_score' => 'nullable|numeric',
+        'questions.*.question_from_age' => 'nullable|integer|min:0',
+        'questions.*.question_to_age' => 'nullable|integer|min:0',
     ];
 
     public function mount($survey_table_id = null)
@@ -81,6 +83,7 @@ class Manage extends Component
             ->get()
             ->map(function (SurveyQuestion $q) {
                 $qArray = $q->toArray();
+                $qArray['key'] = 'q_' . $q->id; // Unique key for Livewire tracking
                 $qArray['require_detail'] = (bool) $q->require_detail;
                 $qArray['required_answer'] = (bool) (!isset($q->required_answer) || $q->required_answer);
                 $qArray['answer_options'] = is_array($q->answer_options) ? $q->answer_options : [];
@@ -97,8 +100,9 @@ class Manage extends Component
 
         $maxOrder = empty($this->questions) ? 0 : max(array_column($this->questions, 'question_order'));
 
-        array_unshift($this->questions, [
+        $this->questions[] = [
             'id' => null,
+            'key' => 'new_' . microtime(true), // Unique key for new questions
             'survey_table_id' => $this->survey_table_id,
             'survey_for_section' => $this->surveyForSection,
             'batch_no' => $this->batch_no,
@@ -112,9 +116,11 @@ class Manage extends Component
             'detail' => null,
             'note' =>null,
             'domain_id' => null,
-            'min_score' => 0,
-            'max_score' => 0,
-        ]);
+            'min_score' => null, // Default to null to avoid unwanted 0s
+            'max_score' => null,
+            'question_from_age' => null,
+            'question_to_age' => null,
+        ];
     }
 
     public function removeQuestion($index)
@@ -158,55 +164,43 @@ class Manage extends Component
         $anyCreated = false;
 
         foreach ($this->questions as $index => $q) {
+            // Prepare common data array
+            $data = [
+                'survey_table_id' => $this->survey_table_id,
+                'question_order' => $q['question_order'] ?? null,
+                'question_ar_text' => $q['question_ar_text'] ?? '',
+                'question_en_text' => !empty($q['question_en_text']) ? $q['question_en_text'] : null,
+                'answer_input_type' => $q['answer_input_type'] ?? 1,
+                'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
+                'require_detail' => !empty($q['require_detail']),
+                'required_answer' => isset($q['required_answer']) ? (bool) $q['required_answer'] : true,
+                'detail' => !empty($q['detail']) ? $q['detail'] : null,
+                'note' => !empty($q['note']) ? $q['note'] : null,
+                'domain_id' => (isset($q['domain_id']) && $q['domain_id'] !== '') ? $q['domain_id'] : null,
+                'min_score' => (isset($q['min_score']) && $q['min_score'] !== '') ? $q['min_score'] : null,
+                'max_score' => (isset($q['max_score']) && $q['max_score'] !== '') ? $q['max_score'] : null,
+                'question_from_age' => (isset($q['question_from_age']) && $q['question_from_age'] !== '') ? (int)$q['question_from_age'] : null,
+                'question_to_age' => (isset($q['question_to_age']) && $q['question_to_age'] !== '') ? (int)$q['question_to_age'] : null,
+                'batch_no' => $this->batch_no,
+            ];
+
             if (!empty($q['id'])) {
                 $question = SurveyQuestion::findOrFail($q['id']);
-                $question->fill([
-                    'survey_table_id' => $this->survey_table_id,
-                    'question_order' => $q['question_order'] ?? null,
-                    'question_ar_text' => $q['question_ar_text'] ?? '',
-                    'question_en_text' => $q['question_en_text'] ?? null,
-                    'answer_input_type' => $q['answer_input_type'] ?? 1,
-                    'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
-                    'require_detail' => !empty($q['require_detail']) ? 1 : 0,
-                    'required_answer' => isset($q['required_answer']) ? (!empty($q['required_answer']) ? 1 : 0) : 1,
-                    'detail' => $q['detail'] ?? null,
-                    'note' => $q['note'] ?? null,
-                    'domain_id' => $q['domain_id'] ?? null,
-                    'min_score' => $q['min_score'] ?? null,
-                    'max_score' => $q['max_score'] ?? null,
-                    'batch_no' => $this->batch_no,
-                    'updated_by'=>Auth::user()->id,
-                   
-                ]);
+                $question->fill($data);
                
                 if ($question->isDirty()) {
+                    $question->updated_by = Auth::id();
                     $question->save();
                     $anyUpdated = true;
                 }
             } else {
-             
-                $created = SurveyQuestion::create([
-                    'survey_table_id' => $this->survey_table_id,
-                    'survey_for_section' => $this->surveyForSection,
-                    'question_order' => $q['question_order'] ?? null,
-                    'question_ar_text' => $q['question_ar_text'] ?? '',
-                    'question_en_text' => $q['question_en_text'] ?? null,
-                    'answer_input_type' => $q['answer_input_type'] ?? 1,
-                    'answer_options' => ($q['answer_input_type'] == 2 && !empty($q['answer_options'])) ? $q['answer_options'] : null,
-                    'require_detail' => !empty($q['require_detail']) ? 1 : 0,
-                    'required_answer' => isset($q['required_answer']) ? (!empty($q['required_answer']) ? 1 : 0) : 1,
-                    'detail' => $q['detail'] ?? null,
-                    'note' => $q['note'] ?? null,
-                   
-                    'domain_id' => empty($q['domain_id']) ? null : $q['domain_id'],
-                    'min_score' => $q['min_score'] ?? null,
-                    'max_score' => $q['max_score'] ?? null,
-                    'batch_no' => $this->batch_no,
-                    'created_by'=>Auth::user()->id,
-                   
-                ]);
+                $data['survey_for_section'] = $this->surveyForSection;
+                $data['created_by'] = Auth::id();
+                
+                $created = SurveyQuestion::create($data);
 
                 $this->questions[$index]['id'] = $created->id;
+                $this->questions[$index]['key'] = 'q_' . $created->id; // Update key to database ID
                 $anyCreated = true;
             }
         }
