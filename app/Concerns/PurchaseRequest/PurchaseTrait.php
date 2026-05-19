@@ -56,6 +56,7 @@ trait PurchaseTrait
 
         $this->statuses = StatusRepo::statuses()->where('p_id_sub', config('appConstant.purchase_requisition_statuses'));  
         $this->units = StatusRepo::statuses()->where('p_id_sub', config('appConstant.units_statuses'));   
+        $this->currencies = StatusRepo::statuses()->where('p_id_sub', config('appConstant.currencies'));   
         $this->exchange_rate = \App\Models\CurrancyValue::latest('exchange_date')->first()?->currency_value;
      
     }

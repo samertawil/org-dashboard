@@ -163,6 +163,7 @@ class Edit extends Component
                             'distributed_parcels_count' => $parcel['distributed_parcels_count'] ?? null,
                             'cost_for_each_parcel' => $parcel['cost_for_each_parcel'] ?? null,
                             'purchase_requisition_id' => $parcel['purchase_requisition_id'] ?? null,
+                            'notes' => $parcel['notes'] ?? null,
                         ]);
 
                         if ($existingParcel->isDirty()) {
@@ -204,8 +205,9 @@ class Edit extends Component
                         $existingBeneficiary->fill([
                             'beneficiary_type' => $beneficiary['beneficiary_type'],
                             'beneficiaries_count' => $beneficiary['beneficiaries_count'] ?? null,
-                            'total_cost_nis' => $beneficiary['total_cost_nis'] ?? null,
-                            'total_cost_usd' => $beneficiary['total_cost_usd'] ?? null,
+                            'cost_for_each_beneficiary' => $beneficiary['cost_for_each_beneficiary'] ?? null,
+                            'status_id' => $beneficiary['status_id'] ?? null,
+                            'notes' => $beneficiary['notes'] ?? null,
                         ]);
                         
                         if ($existingBeneficiary->isDirty()) {
@@ -239,7 +241,10 @@ class Edit extends Component
                     $existingTeam = $this->activity->workTeams()->where('id', $team['id'])->first();
                     if ($existingTeam) {
                         $existingTeam->fill([
-                            'employee_id' => $team['employee_id']
+                            'employee_mission_title' => $team['employee_mission_title'] ?? null,
+                            'employee_id' => $team['employee_id'],
+                            'status_id' => $team['status_id'] ?? null,
+                            'notes' => $team['notes'] ?? null,
                         ]);
 
                         if ($existingTeam->isDirty()) {
@@ -272,7 +277,8 @@ class Edit extends Component
                     $existingPartner = $this->activity->activityPartners()->where('id', $partner['id'])->first();
                     if ($existingPartner) {
                         $existingPartner->fill([
-                            'partner_id' => $partner['partner_id']
+                            'partner_id' => $partner['partner_id'],
+                            'notes' => $partner['notes'] ?? null,
                         ]);
 
                         if ($existingPartner->isDirty()) {
@@ -356,7 +362,8 @@ class Edit extends Component
                     if ($existingFeedback) {
                         $existingFeedback->fill([
                             'rating' => $feedback['rating'],
-                            'comment' => $feedback['comment']
+                            'comment' => $feedback['comment'],
+                            'client_name' => $feedback['client_name'] ?? null,
                         ]);
 
                         if ($existingFeedback->isDirty()) {

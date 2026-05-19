@@ -160,7 +160,7 @@
                                 {{-- Currency --}}
                                 <flux:select wire:model="items.{{ $index }}.currency" :label="__('Currency')">
                                     <option value="">{{ __('Select Currency') }}</option>
-                                    @foreach ($this->statuses as $s)
+                                    @foreach ($this->currencies as $s)
                                         <option value="{{ $s->id }}">{{ $s->status_name }}</option>
                                     @endforeach
                                 </flux:select>

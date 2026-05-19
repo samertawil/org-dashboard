@@ -196,7 +196,7 @@
                         <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-1 lg:gap-0">
                             <span class="text-xs text-zinc-500">{{ __('Total Cost Shikal') }}</span>
                             <span class="text-xs text-zinc-700 dark:text-zinc-300"> NIS &nbsp;
-                                {{ number_format($activity->cost_nis, 2) }} </span>
+                             {{ number_format($activity->cost_nis, 2) }} </span>
                         </div>
 
 
@@ -349,9 +349,9 @@
                                     <div class="text-xs text-zinc-500 italic">{{ $parcel->notes }}</div>
                                 @endif
                                 <div class="flex justify-between items-center text-xs text-zinc-500 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                    <span>{{ __('Unit Cost') }}: ${{ number_format($parcel->cost_for_each_parcel, 4) }}</span>
+                                    <span>{{ __('Unit Cost') }}: ₪{{ number_format($parcel->cost_for_each_parcel, 2) }}</span>
                                     <span class="font-bold text-zinc-700 dark:text-zinc-300">
-                                        ${{ number_format($parcel->distributed_parcels_count * $parcel->cost_for_each_parcel, 4) }}
+                                        ₪{{ number_format($parcel->distributed_parcels_count * $parcel->cost_for_each_parcel, 2) }}
                                     </span>
                                 </div>
                             </div>
@@ -389,10 +389,10 @@
                                                 -
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3">${{ number_format($parcel->cost_for_each_parcel, 4) }}
+                                        <td class="px-4 py-3">₪{{ number_format($parcel->cost_for_each_parcel, 2) }}
                                         </td>
                                         <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                                            ${{ number_format($parcel->distributed_parcels_count * $parcel->cost_for_each_parcel, 4) }}
+                                           ₪{{ number_format($parcel->distributed_parcels_count * $parcel->cost_for_each_parcel, 2) }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -426,9 +426,9 @@
                                     <div class="text-xs text-zinc-500 italic">{{ $beneficiary->notes }}</div>
                                 @endif
                                 <div class="flex justify-between items-center text-xs text-zinc-500 mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                                    <span>{{ __('Cost/Person') }}: ${{ number_format($beneficiary->cost_for_each_beneficiary, 2) }}</span>
+                                    <span>{{ __('Cost/Person') }}: ₪{{ number_format($beneficiary->cost_for_each_beneficiary, 2) }}</span>
                                     <span class="font-bold text-zinc-700 dark:text-zinc-300">
-                                        ${{ number_format($beneficiary->beneficiaries_count * $beneficiary->cost_for_each_beneficiary, 2) }}
+                                        ₪{{ number_format($beneficiary->beneficiaries_count * $beneficiary->cost_for_each_beneficiary, 2) }}
                                     </span>
                                 </div>
                             </div>
@@ -457,9 +457,9 @@
                                         </td>
                                         <td class="px-4 py-3">{{ $beneficiary->beneficiaries_count }}</td>
                                         <td class="px-4 py-3">
-                                            ${{ number_format($beneficiary->cost_for_each_beneficiary, 2) }}</td>
+                                            ₪{{ number_format($beneficiary->cost_for_each_beneficiary, 2) }}</td>
                                         <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                                            ${{ number_format($beneficiary->beneficiaries_count * $beneficiary->cost_for_each_beneficiary, 2) }}
+                                            ₪{{ number_format($beneficiary->beneficiaries_count * $beneficiary->cost_for_each_beneficiary, 2) }}
                                         </td>
                                     </tr>
                                 @endforeach

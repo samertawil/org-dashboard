@@ -224,9 +224,9 @@
                                     <flux:error name="parcels.{{ $index }}.unit_id" />
                                 </flux:field>
 
-
                                 <flux:field>
-                                    <flux:label>{{ __('Cost Per Parcel') }}</flux:label>
+                                    <flux:label badge="(NIS)" badgeColor="text-red-600">{{ __('Cost Per Parcel') }} </flux:label>
+                                      
                                     <flux:input type="float" step="0.01"
                                         wire:model="parcels.{{ $index }}.cost_for_each_parcel" />
                                     <flux:error name="parcels.{{ $index }}.cost_for_each_parcel" />
@@ -285,10 +285,15 @@
                                 <flux:input type="number"
                                     wire:model="beneficiaries.{{ $index }}.beneficiaries_count"
                                     :label="__('Count')" />
-                                <flux:input type="number" step="0.01"
+                                    <flux:field>
+                                        <flux:label badge="(NIS)" badgeColor="text-red-600">
+                                        {{ __('Cost Per Beneficiary') }}</flux:label>
+                                          <flux:input type="number" step="0.01"
                                     wire:model="beneficiaries.{{ $index }}.cost_for_each_beneficiary"
-                                    :label="__('Cost Per Beneficiary')" />
+                                    />
 
+                                    </flux:field>
+                              
                                 <flux:input type="text" wire:model="beneficiaries.{{ $index }}.notes"
                                     :label="__('Notes')" placeholder="Optional" />
                                 <div class="flex items-center mt-5   ">
