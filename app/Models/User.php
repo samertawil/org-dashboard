@@ -106,4 +106,10 @@ class User extends Authenticatable
     {
         return $this->id === 1; // Or check based on specific Role ID
     }
+
+    public function teacher()
+    {
+        // teacher_id in teacher_student_group stores the user id
+        return $this->hasMany(TeacherStudentGroup::class, 'teacher_id', 'id');
+    }
 }

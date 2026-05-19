@@ -147,7 +147,39 @@
                 @endcanany
 
 
-                <!-- Activities Group -->
+                {{-- Educational Activity Schedules Group --}}
+                @canany(['educational-activity-schedules.index', 'educational-activity-schedules.create'])
+                    <flux:sidebar.group expandable :expanded="false"
+                        icon="calendar-days"
+                        class="grid">
+                        <x-slot:heading>
+                            {{ __('Educational Plane') }}
+                         
+                        </x-slot:heading>
+
+                        @can('educational-activity-schedules.index')
+                            <flux:sidebar.item icon="list-bullet"
+                                :href="route('educational-activity-schedules.index')"
+                                :current="request()->routeIs('educational-activity-schedules.index', 'educational-activity-schedules.show')"
+                                wire:navigate>
+                                {{ __('Schedules List') }} 
+                            </flux:sidebar.item>
+                         
+                        @endcan
+
+                        @can('educational-activity-schedules.create')
+                            <flux:sidebar.item icon="plus"
+                                :href="route('educational-activity-schedules.create')"
+                                :current="request()->routeIs('educational-activity-schedules.create', 'educational-activity-schedules.edit')"
+                                wire:navigate>
+                                {{ __('Add Schedule') }}
+                            </flux:sidebar.item>
+                        @endcan
+
+                    </flux:sidebar.group>
+                @endcanany
+
+
 
 
                 @canany(['activity.index', 'activity.create', 'sector.show'])

@@ -79,6 +79,10 @@ use App\Livewire\OrgApp\TeacherStudentGroup\Index as TeacherStudentGroupIndex;
 use App\Livewire\OrgApp\TeachingGroup\Create as TeachingGroupCreate;
 use App\Livewire\OrgApp\TeachingGroup\Edit as TeachingGroupEdit;
 use App\Livewire\OrgApp\TeachingGroup\Index as TeachingGroupIndex;
+use App\Livewire\OrgApp\EducationalActivitySchedules\Create as EASCreate;
+use App\Livewire\OrgApp\EducationalActivitySchedules\Edit as EASEdit;
+use App\Livewire\OrgApp\EducationalActivitySchedules\Index as EASIndex;
+use App\Livewire\OrgApp\EducationalActivitySchedules\Show as EASShow;
 use App\Livewire\SocialLogin;
 use App\Mail\SendQuotationMail;
 use Illuminate\Support\Facades\Mail;
@@ -267,6 +271,12 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/reports/monthly-manager-report', \App\Livewire\OrgApp\Reports\MonthlyManagerReport::class)->name('reports.monthly.manager.report');
     Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
     
+    // OrgApp - Educational Activity Schedules
+    Route::get('/educational-activity-schedules', EASIndex::class)->name('educational-activity-schedules.index');
+    Route::get('/educational-activity-schedules/create', EASCreate::class)->name('educational-activity-schedules.create');
+    Route::get('/educational-activity-schedules/{schedule}/edit', EASEdit::class)->name('educational-activity-schedules.edit');
+    Route::get('/educational-activity-schedules/{schedule}/show', EASShow::class)->name('educational-activity-schedules.show');
+
     // Export
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');

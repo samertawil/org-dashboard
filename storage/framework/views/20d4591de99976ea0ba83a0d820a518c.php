@@ -1,0 +1,1 @@
+mobile-activity-<?php echo e($activity->id); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/c5e10638fa3256efb24f2d027ef79ba9.blade.php ENDPATH**/ ?>

@@ -13,6 +13,7 @@ class ActivityObserver
     public function created(Activity $activity): void
     {
       Cache::forget('activites-all');
+      Cache::forget('lastEducationalActivity');
     }
 
     /**
@@ -21,6 +22,7 @@ class ActivityObserver
     public function updated(Activity $activity): void
     {
         Cache::forget('activites-all');
+        Cache::forget('lastEducationalActivity');
     }
 
     /**
@@ -29,6 +31,7 @@ class ActivityObserver
     public function deleted(Activity $activity): void
     {
         Cache::forget('activites-all');
+        Cache::forget('lastEducationalActivity');
     }
 
     /**

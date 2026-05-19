@@ -378,7 +378,16 @@
                             <div>
                                 <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Education Point') }}</span>
                                 <div class="text-xs text-zinc-600 dark:text-zinc-300 leading-tight">
-                                    {{ $student->studentGroup?->name ?? '-' }}
+                                    @php
+                                        $fullGroupName = $student->studentGroup?->name ?? '';
+                                        if ($fullGroupName) {
+                                            $parts = array_map('trim', explode(' - ', $fullGroupName));
+                                            $shortGroupName = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                                        } else {
+                                            $shortGroupName = '-';
+                                        }
+                                    @endphp
+                                    {{ $shortGroupName }}
                                     <div class="text-indigo-600 dark:text-indigo-400 mt-0.5">
                                         {{ $student->studentGroup?->region->region_name ?? '-' }}/{{ $student->studentGroup?->city->city_name ?? '-' }}
                                     </div>
@@ -451,10 +460,7 @@
                                 @endif
                             </div>
                         </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Identity Number') }}
-                        </th>
+                       
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Education Point') }}
@@ -485,13 +491,21 @@
                     @forelse($this->students as $student)
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
-                                {{ $student->full_name }}
+                                {{ $student->full_name }}<br>
+                                 <span  class="py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">   {{ $student->identity_number }}</span>
                             </td>
+                             
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $student->identity_number }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                {{ $student->studentGroup?->name ?? '-' }}  <br>
+                                @php
+                                    $fullGroupName = $student->studentGroup?->name ?? '';
+                                    if ($fullGroupName) {
+                                        $parts = array_map('trim', explode(' - ', $fullGroupName));
+                                        $shortGroupName = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                                    } else {
+                                        $shortGroupName = '-';
+                                    }
+                                @endphp
+                                {{ $shortGroupName }}  <br>
                                 <span class = "text-blue-600"> {{ $student->studentGroup?->region->region_name ?? '-' }}/ {{ $student->studentGroup?->city->city_name ?? '-' }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">

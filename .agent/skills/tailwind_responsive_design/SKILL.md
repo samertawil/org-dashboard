@@ -195,10 +195,11 @@ public function save()
 
 ### Responsive & Interactive Tables
 
-When building data tables (e.g., Index views), wrap tables in a container to allow horizontal scrolling on small screens (`overflow-x-auto`) without breaking the layout.
+When building data tables (e.g., Index views), design a dual-view responsive layout:
+1. **Mobile Card View (`block md:hidden`)**: Stacks information inside vertical cards for small screens so users don't have to scroll horizontally.
+2. **Desktop Sticky Table (`hidden md:block overflow-auto custom-scrollbar`)**: Renders a standard table with sticky headers (`sticky top-0 z-20`), sticky left-most column (usually the name/title: `sticky left-0 bg-white dark:bg-zinc-800 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]`), and sticky right-most column (actions: `sticky right-0 bg-white dark:bg-zinc-800 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]`).
 
 Additionally, standard tables should implement:
-
 1. **Clear Filters Button**: Display a ghost button positioned to the right to reset applied search properties.
 2. **Pagination Summary Block**: Display the "Showing X to Y of Z results" text block directly above the `<table/>`.
 3. **Sortable Column Headers**: Add clickable `<th wire:click="sortBy('field')">` headers paired with dynamic Flux chevron icons.
@@ -222,63 +223,121 @@ Additionally, standard tables should implement:
     @endif
 </div>
 
-<div class="overflow-x-auto -mx-6">
-    <!-- 2. Pagination Summary Block -->
-    <div
-        class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900"
-    >
-        <div class="flex items-center justify-between">
-            <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
-                {{ __('Showing') }}
-                <span class="font-medium text-zinc-900 dark:text-white"
-                    >{{ $this->records->firstItem() }}</span
-                >
-                {{ __('to') }}
-                <span class="font-medium text-zinc-900 dark:text-white"
-                    >{{ $this->records->lastItem() }}</span
-                >
-                {{ __('of') }}
-                <span class="font-medium text-zinc-900 dark:text-white"
-                    >{{ $this->records->total() }}</span
-                >
-                {{ __('results') }}
-            </p>
-        </div>
+<!-- Pagination Summary Block -->
+<div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-zinc-600 dark:text-zinc-400 py-2">
+            {{ __('Showing') }}
+            <span class="font-medium text-zinc-900 dark:text-white">{{ $records->firstItem() }}</span>
+            {{ __('to') }}
+            <span class="font-medium text-zinc-900 dark:text-white">{{ $records->lastItem() }}</span>
+            {{ __('of') }}
+            <span class="font-medium text-zinc-900 dark:text-white">{{ $records->total() }}</span>
+            {{ __('results') }}
+        </p>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
+    
+    {{-- A. Mobile Card View --}}
+    <div class="block md:hidden divide-y divide-zinc-200 dark:divide-zinc-700">
+        @forelse($records as $record)
+            <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $record->name }}</span>
+                        <span class="text-xs text-zinc-500">{{ $record->secondary_attribute }}</span>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400">
+                        {{ $record->status_label }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Attribute 1') }}</span>
+                        <div class="text-xs text-zinc-600 dark:text-zinc-300 leading-tight">
+                            {{ $record->attribute_val_1 }}
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Attribute 2') }}</span>
+                        <div class="text-xs text-zinc-600 dark:text-zinc-300">
+                            {{ $record->attribute_val_2 }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+                    <div class="text-xs text-zinc-500">
+                        <span class="font-medium text-zinc-700 dark:text-zinc-400">Extra:</span> 
+                        {{ $record->extra_details }}
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <flux:button href="{{ route('record.show', $record) }}" wire:navigate variant="ghost" size="xs" icon="eye" />
+                        <flux:button href="{{ route('record.edit', $record) }}" wire:navigate variant="ghost" size="xs" icon="pencil-square" />
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="p-8 text-center text-sm text-zinc-500 italic">
+                {{ __('No records found.') }}
+            </div>
+        @endforelse
     </div>
 
-    <!-- 3. The Responsive Table -->
-    <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-        <thead class="bg-zinc-50 dark:bg-zinc-900">
-            <tr>
-                <th
-                    wire:click="sortBy('name')"
-                    class="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-                >
-                    <div class="flex items-center gap-1">
-                        {{ __('Name') }} @if ($sortField === 'name')
-                        <flux:icon
-                            name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}"
-                            class="size-3"
-                        />
-                        @else
-                        <flux:icon
-                            name="chevron-up-down"
-                            class="size-3 text-zinc-300"
-                        />
-                        @endif
-                    </div>
-                </th>
-                <th
-                    class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
-                >
-                    {{ __('Actions') }}
-                </th>
-            </tr>
-        </thead>
-        <!-- Table Body ... -->
-    </table>
+    {{-- B. Desktop Sticky Table View --}}
+    <div class="hidden md:block overflow-auto custom-scrollbar" style="max-height: 70vh;">
+        <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700 border-separate border-spacing-0">
+            <thead class="bg-zinc-50 dark:bg-zinc-900 sticky top-0 z-20">
+                <tr>
+                    <th wire:click="sortBy('name')"
+                        class="sticky left-0 bg-zinc-50 dark:bg-zinc-900 z-30 px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors border-b border-zinc-200 dark:border-zinc-700">
+                        <div class="flex items-center gap-1">
+                            {{ __('Name') }}
+                            @if ($sortField === 'name')
+                                <flux:icon name="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="size-3" />
+                            @else
+                                <flux:icon name="chevron-up-down" class="size-3 text-zinc-300" />
+                            @endif
+                        </div>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
+                        {{ __('Attribute 1') }}
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
+                        {{ __('Attribute 2') }}
+                    </th>
+                    <th scope="col"
+                        class="sticky right-0 bg-zinc-50 dark:bg-zinc-900 z-30 px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700">
+                        {{ __('Actions') }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+                @forelse($records as $record)
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
+                        <td class="sticky left-0 bg-white dark:bg-zinc-800 z-10 px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-700/50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
+                            {{ $record->name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                            {{ $record->attribute_val_1 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                            {{ $record->attribute_val_2 }}
+                        </td>
+                        <td class="sticky right-0 bg-white dark:bg-zinc-800 z-10 px-6 py-4 whitespace-nowrap text-right text-sm font-medium border-b border-zinc-100 dark:border-zinc-700/50 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.3)]">
+                            <flux:button href="{{ route('record.show', $record) }}" wire:navigate variant="ghost" size="sm" icon="eye" />
+                        </td>
+                    </tr>
+                @empty
+                    <!-- Empty row ... -->
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
-```
 
 ### Stacked Grid for Forms
 

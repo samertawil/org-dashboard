@@ -12,6 +12,7 @@ class StudentObserver
     {
         Cache::forget('StudentData-all');
         Cache::forget('StudentData-all-with-relations');
+        Cache::forget('StudentGroup-activeToday');
     }
 
     
@@ -19,6 +20,7 @@ class StudentObserver
     {
         Cache::forget('StudentData-all');
         Cache::forget('StudentData-all-with-relations');
+        Cache::forget('StudentGroup-activeToday');
     }
 
     
@@ -26,6 +28,7 @@ class StudentObserver
     {
         Cache::forget('StudentData-all');
         Cache::forget('StudentData-all-with-relations');
+        Cache::forget('StudentGroup-activeToday');
     }
 
    

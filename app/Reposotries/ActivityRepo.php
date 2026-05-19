@@ -15,5 +15,11 @@ class ActivityRepo
         });
     }
 
-    
+    public static function lastEducationalActivity()
+    {
+        return Cache::rememberForever('lastEducationalActivity', function () {
+            return Activity::select('id', 'name')->where('sector_id', 55)->latest()->get();
+        });
+    }
+
 }

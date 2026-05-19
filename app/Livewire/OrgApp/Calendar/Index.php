@@ -4,6 +4,7 @@ namespace App\Livewire\OrgApp\Calendar;
 
  
  
+use App\Models\ActivitySchedule;
 use App\Models\Event;
 use Livewire\Component;
 use App\Models\Activity;
@@ -114,8 +115,69 @@ class Index extends Component
         
         $activities = $activities->toBase();
 
-        // Merge and ensure uniqueness by ID, then reset keys
-        $this->events = $events->merge($activities)
+        // Educational Activity Schedules
+        $schedules = ActivitySchedule::with(['group', 'activityDomain', 'employee'])
+            ->whereNotNull('period_start')
+            ->whereNotNull('period_end')
+            ->where('activation', 1)
+            ->get()
+            ->groupBy(function ($schedule) {
+                // Group by activity_name, start time, end time, and activity domain to identify duplicates
+                return $schedule->activity_name . '___' . 
+                       $schedule->period_start->toDateTimeString() . '___' . 
+                       $schedule->period_end->toDateTimeString() . '___' . 
+                       $schedule->educational_activity_domain;
+            })
+            ->map(function ($groupSchedules) {
+                $firstSchedule = $groupSchedules->first();
+
+                // Extract group names and shorten them
+                $groupNames = [];
+                foreach ($groupSchedules as $s) {
+                    $fullGroupName = $s->group?->name ?? '';
+                    if ($fullGroupName) {
+                        $parts = array_map('trim', explode(' - ', $fullGroupName));
+                        $groupNames[] = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                    }
+                }
+                $groupNames = array_unique(array_filter($groupNames));
+                $allGroupsStr = implode(', ', $groupNames);
+
+                $domainName   = $firstSchedule->activityDomain?->status_name ?? '';
+                $employeeNames = $groupSchedules->map(fn($s) => $s->employee?->full_name)->filter()->unique()->implode(', ');
+
+                $title = '📅 ' . $firstSchedule->activity_name;
+                if ($allGroupsStr) {
+                    $title .= ' | ' . $allGroupsStr;
+                }
+
+                return [
+                    'id'        => 'schedule-' . $firstSchedule->id,
+                    'title'     => $title,
+                    'start'     => Carbon::parse($firstSchedule->period_start)->toIso8601String(),
+                    'end'       => Carbon::parse($firstSchedule->period_end)->toIso8601String(),
+                    'allDay'    => false,
+                    'className' => 'bg-teal-100 text-teal-800 border border-teal-300',
+                    'url'       => route('educational-activity-schedules.show', $firstSchedule->id),
+                    'editable'  => false,
+                    'extendedProps' => [
+                        'description' => implode(' | ', array_filter([
+                            $firstSchedule->activity_description,
+                            $domainName   ? 'Domain: '   . $domainName   : null,
+                            $allGroupsStr ? 'Groups: '   . $allGroupsStr : null,
+                            $employeeNames ? 'Teachers: ' . $employeeNames : null,
+                        ])),
+                        'type'   => 'schedule',
+                        'domain' => $domainName,
+                        'group'  => $allGroupsStr,
+                    ],
+                ];
+            })
+            ->values()
+            ->toBase();
+
+        // Merge events + activities + schedules
+        $this->events = $events->merge($activities)->merge($schedules)
             ->unique('id')
             ->values()
             ->toArray();
@@ -123,13 +185,15 @@ class Index extends Component
 
     public function newEvent($date = null)
     {
+       
         $this->resetForm();
         if ($date) {
-            $this->start = $date;
-            $this->end = $date; // Default 1 day or same day
+            $parsed = Carbon::parse($date);
+            $this->start = $parsed->format('Y-m-d\\TH:i');
+            $this->end   = $parsed->addHour()->format('Y-m-d\\TH:i'); // Default end = start + 1 hour
         } else {
-            $this->start = now()->format('Y-m-d\TH:i');
-             $this->end = now()->addHour()->format('Y-m-d\TH:i');
+            $this->start = now()->format('Y-m-d\\TH:i');
+            $this->end   = now()->addHour()->format('Y-m-d\\TH:i');
         }
         $this->showModal = true;
     }
@@ -176,7 +240,7 @@ class Index extends Component
     }
 
     public function saveEvent()
-    {
+    { 
         $this->validate([
             'title' => 'required|string',
             'start' => 'required|date',

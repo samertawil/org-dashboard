@@ -1,0 +1,1 @@
+activity-partner-{{ $index }}

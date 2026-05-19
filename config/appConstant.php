@@ -26,5 +26,7 @@ return [
     'parent_links' => 163,
     'job_title' => 165,
     'currencies' => 168,
+    'educational_activity_domains' => 185,
+   
     
 ];
