@@ -27,22 +27,22 @@
             </div>
         </flux:sidebar.header>
 
-
-
-
-
         <flux:sidebar.nav>
             <flux:sidebar.group :heading="__('Platform')" class="grid">
+
                 @auth
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                @endauth
+
+                @canany(['manager.reports.all', 'calendar.activity.sector', 'calendar.education.sector'])
                     <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
                         :current="request()->routeIs('calendar.index')" wire:navigate>
                         {{ __('Calendar') }}
                     </flux:sidebar.item>
-                @endauth
+                @endcanany
 
                 @canany(['activity.index', 'displacement.camps.index'])
                     <flux:sidebar.item icon="map" :href="route('operations.map')"

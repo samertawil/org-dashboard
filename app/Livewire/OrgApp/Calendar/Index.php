@@ -76,27 +76,29 @@ class Index extends Component
         });
 
         $events = $events->toBase();
-        if (Gate::allows('manager.reports.all') || Gate::allows('calendar.activity.sector')) { 
+
+        $activities = collect();
+        if (Gate::allows('manager.reports.all') || Gate::allows('calendar.activity.sector')) {
 
             $activities = \App\Models\Activity::with(['activityStatus', 'attachments', 'statusSpecificSector'])->get()->map(function ($activity) {
 
                 $statusName = $activity->status_info['name'] ?? 'Unknown';
                 $statusColor = $activity->status_info['color'] ?? 'zinc'; // Default to zinc
-    
+
                 $fullSectorName = $activity->statusSpecificSector->status_name ?? '';
                 // Get only the part before '-'
                 $sectorName = trim(explode('-', $fullSectorName)[0]);
-    
+
                 // Use light background (-100) and dark text (-800) for "light" look
                 $className = 'bg-' . $statusColor . '-100 text-' . $statusColor . '-800 border border-' . $statusColor . '-200';
-    
+
                 // Construct title: Name - Sector (if exists) - (Status)
                 $title = $activity->name;
                 if ($sectorName) {
                     $title .= ' - ' . $sectorName;
                 }
                 $title .= ' (' . $statusName . ')';
-    
+
                 return [
                     'id' => 'activity-' . $activity->id, // Unique ID prefix
                     'title' => $title,
@@ -114,85 +116,82 @@ class Index extends Component
                     ]
                 ];
             });
-    
+
             $activities = $activities->toBase();
-
         }
-       
 
+        $schedules = collect();
         // Educational Activity Schedules
         if (Gate::allows('manager.reports.all') || Gate::allows('calendar.education.sector')) {
-           
-        $schedules = ActivitySchedule::with(['group', 'activityDomain', 'employee'])
-        ->whereNotNull('period_start')
-        ->whereNotNull('period_end')
-        ->where('activation', 1)
-        ->get()
-        ->groupBy(function ($schedule) {
-            // Group by activity_name, start time, end time, and activity domain to identify duplicates
-            return $schedule->activity_name . '___' .
-                $schedule->period_start->toDateTimeString() . '___' .
-                $schedule->period_end->toDateTimeString() . '___' .
-                $schedule->educational_activity_domain;
-        })
-        ->map(function ($groupSchedules) {
-            $firstSchedule = $groupSchedules->first();
 
-            // Extract group names and shorten them
-            $groupNames = [];
-            foreach ($groupSchedules as $s) {
-                $fullGroupName = $s->group?->name ?? '';
-                if ($fullGroupName) {
-                    $parts = array_map('trim', explode(' - ', $fullGroupName));
-                    $groupNames[] = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
-                }
-            }
-            $groupNames = array_unique(array_filter($groupNames));
-            $allGroupsStr = implode(', ', $groupNames);
+            $schedules = ActivitySchedule::with(['group', 'activityDomain', 'employee'])
+                ->whereNotNull('period_start')
+                ->whereNotNull('period_end')
+                ->where('activation', 1)
+                ->get()
+                ->groupBy(function ($schedule) {
+                    // Group by activity_name, start time, end time, and activity domain to identify duplicates
+                    return $schedule->activity_name . '___' .
+                        $schedule->period_start->toDateTimeString() . '___' .
+                        $schedule->period_end->toDateTimeString() . '___' .
+                        $schedule->educational_activity_domain;
+                })
+                ->map(function ($groupSchedules) {
+                    $firstSchedule = $groupSchedules->first();
 
-            $domainName   = $firstSchedule->activityDomain?->status_name ?? '';
-            $employeeNames = $groupSchedules->map(fn($s) => $s->employee?->full_name)->filter()->unique()->implode(', ');
+                    // Extract group names and shorten them
+                    $groupNames = [];
+                    foreach ($groupSchedules as $s) {
+                        $fullGroupName = $s->group?->name ?? '';
+                        if ($fullGroupName) {
+                            $parts = array_map('trim', explode(' - ', $fullGroupName));
+                            $groupNames[] = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                        }
+                    }
+                    $groupNames = array_unique(array_filter($groupNames));
+                    $allGroupsStr = implode(', ', $groupNames);
 
-            $title = $firstSchedule->activity_name .  ' - ' . $firstSchedule->periodGroups?->description ?? '';
-            if ($allGroupsStr) {
-                $title .= ' | ' . $allGroupsStr;
-            }
+                    $domainName   = $firstSchedule->activityDomain?->status_name ?? '';
+                    $employeeNames = $groupSchedules->map(fn($s) => $s->employee?->full_name)->filter()->unique()->implode(', ');
 
-            return [
-                'id'        => 'schedule-' . $firstSchedule->id,
-                'title'     => $title,
-                'start'     => Carbon::parse($firstSchedule->period_start)->toIso8601String(),
-                'end'       => Carbon::parse($firstSchedule->period_end)->toIso8601String(),
-                'allDay'    => false,
-                'className' => 'bg-teal-100 text-teal-800 border border-teal-300',
-                'url'       => route('educational-activity-schedules.show', $firstSchedule->id),
-                'editable'  => false,
-                'extendedProps' => [
-                    'description' => implode(' | ', array_filter([
-                        $firstSchedule->activity_description,
-                        $domainName   ? 'Group: ('   . $firstSchedule->periodGroups?->description . ')/' . $firstSchedule->periodGroups?->status_name  : null,
-                        // $allGroupsStr ? 'Point: '   . $allGroupsStr : null,
+                    $title = $firstSchedule->activity_name .  ' - ' . $firstSchedule->periodGroups?->description ?? '';
+                    if ($allGroupsStr) {
+                        $title .= ' | ' . $allGroupsStr;
+                    }
 
-                        $employeeNames ? 'Teachers: ' . $employeeNames : null,
-                        'End At :' . Carbon::parse($firstSchedule->period_end)->format('g:i A')
-                    ])),
-                    'type'   => 'schedule',
-                    'domain' => $domainName,
-                    'group'  => $allGroupsStr,
-                ],
-            ];
-        })
-        ->values()
-        ->toBase();
+                    return [
+                        'id'        => 'schedule-' . $firstSchedule->id,
+                        'title'     => $title,
+                        'start'     => Carbon::parse($firstSchedule->period_start)->toIso8601String(),
+                        'end'       => Carbon::parse($firstSchedule->period_end)->toIso8601String(),
+                        'allDay'    => false,
+                        'className' => 'bg-teal-100 text-teal-800 border border-teal-300',
+                        'url'       => route('educational-activity-schedules.show', $firstSchedule->id),
+                        'editable'  => false,
+                        'extendedProps' => [
+                            'description' => implode(' | ', array_filter([
+                                $firstSchedule->activity_description,
+                                $domainName   ? 'Group: ('   . $firstSchedule->periodGroups?->description . ')/' . $firstSchedule->periodGroups?->status_name  : null,
+                                // $allGroupsStr ? 'Point: '   . $allGroupsStr : null,
 
-    // Merge events + activities + schedules
-    $this->events = $events->merge($activities)->merge($schedules)
-        ->unique('id')
-        ->values()
-        ->toArray();
+                                $employeeNames ? 'Teachers: ' . $employeeNames : null,
+                                'End At :' . Carbon::parse($firstSchedule->period_end)->format('g:i A')
+                            ])),
+                            'type'   => 'schedule',
+                            'domain' => $domainName,
+                            'group'  => $allGroupsStr,
+                        ],
+                    ];
+                })
+                ->values()
+                ->toBase();
         }
 
-
+        // Merge events + activities + schedules
+        $this->events = $events->merge($activities)->merge($schedules)
+            ->unique('id')
+            ->values()
+            ->toArray();
     }
 
     public function newEvent($date = null)
@@ -338,9 +337,9 @@ class Index extends Component
     #[Title('Calendar')]
     public function render(): View
     {
-        if (Gate::denies('manager.reports.all') || Gate::denies('calendar.activity.sector') || Gate::denies('calendar.education.sector')) {
-            abort(403, 'You do not have the necessary permissions.');
+        if (Gate::allows('manager.reports.all') || Gate::allows('calendar.activity.sector') || Gate::allows('calendar.education.sector')) {
+            return view('livewire.org-app.calendar.index');
         }
-        return view('livewire.org-app.calendar.index');
+        abort(403, 'You do not have the necessary permissions.');
     }
 }

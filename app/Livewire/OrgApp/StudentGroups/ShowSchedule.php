@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\StudentGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ShowSchedule extends Component
 {
@@ -132,7 +133,9 @@ class ShowSchedule extends Component
 
     public function render()
     {
-       
+        if (Gate::denies('student.group.schedule')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         // Parse the single Y-m string into a Carbon date
         $startOfMonth = Carbon::createFromFormat('Y-m', $this->currentYearMonth)->startOfMonth();
         $endOfMonth   = $startOfMonth->copy()->endOfMonth();
@@ -190,3 +193,4 @@ class ShowSchedule extends Component
         ]);
     }
 }
+

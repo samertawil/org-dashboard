@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\StudentGroup;
 use Carbon\Carbon;
 use App\Models\StudentDailyAttendance;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 
 class DailyStudents extends Component
@@ -117,6 +118,9 @@ class DailyStudents extends Component
 
     public function render()
     {
+        if (Gate::denies('student.group.date.students')) {
+            abort(403, 'You do not have the necessary permissions');
+        }
         $students = $this->getStudents();
         $groupedStudents = $students->groupBy('status_id');
 

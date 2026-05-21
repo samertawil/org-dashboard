@@ -222,10 +222,8 @@ class DailyLogReport extends Component
     public function render()
 
     {
-        if (Gate::denies('manager.reports.all') || Gate::denies('activity.index') || Gate::denies('student.index')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-        return view('livewire.org-app.reports.daily-log-report', [
+        if (Gate::allows('manager.reports.all') || Gate::allows('activity.index') || Gate::allows('student.index')) {
+          return view('livewire.org-app.reports.daily-log-report', [
             'activities' => $this->activities,
             'evaluations' => $this->evaluations,
             'attendanceStats' => $this->attendanceStats,
@@ -233,5 +231,9 @@ class DailyLogReport extends Component
             'educationalActivityDetails' => $this->educationalActivityDetails,
             'attendanceByGroup' => $this->attendanceByGroup,
         ]);
+         
+        }
+         
+         abort(403, 'You do not have the necessary permissions.');
     }
 }

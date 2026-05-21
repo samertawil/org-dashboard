@@ -8,6 +8,7 @@ use App\Reposotries\ActivityRepo;
 use App\Reposotries\EventAssigneeRepo;
 use App\Reposotries\PurchaseRequisitionRepo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -17,6 +18,10 @@ class Index extends Component
 
     #[Computed()]
     public function activities() {
+        if (!Gate::allows('activity.index')) {
+            return collect();
+        }
+
         $activitiesBySector =
 
         Activity::select('sector_id', DB::raw('count(*) as total'))
@@ -34,23 +39,24 @@ class Index extends Component
     }
 
     
-    #[Title('Dashboard')]
+    #[Title('AFSC Dashboard')]
     public function render()
     {
-        
-        // 1. KPI Cards Data
-        $activeActivitiesCount = ActivityRepo::activites()->count();
+        $hasActivityAccess = Gate::allows('activity.index');
 
-        $totalBeneficiaries =  ActivityBeneficiaryRepo::beneficiaries()->sum('beneficiaries_count');
+        // 1. KPI Cards Data
+        $activeActivitiesCount = $hasActivityAccess ? ActivityRepo::activites()->count() : 0;
+
+        $totalBeneficiaries =  $hasActivityAccess ? ActivityBeneficiaryRepo::beneficiaries()->sum('beneficiaries_count') : 0;
 
         // Budget/Expenses (Mock logic for now as budget structure might vary)
-        $totalBudget = ActivityRepo::activites()->sum('cost');
-        $totalBudgetNis = ActivityRepo::activites()->sum('cost_nis');
+        $totalBudget = $hasActivityAccess ? ActivityRepo::activites()->sum('cost') : 0;
+        $totalBudgetNis = $hasActivityAccess ? ActivityRepo::activites()->sum('cost_nis') : 0;
 
-        $pendingRequests = PurchaseRequisitionRepo::purchases()->count();
+        $pendingRequests = $hasActivityAccess ? PurchaseRequisitionRepo::purchases()->count() : 0;
       
         // 3. Recent Activity Feed
-        $plannedActivities = ActivityRepo::activites()->where('start_date', '>', now())->take(5);
+        $plannedActivities = $hasActivityAccess ? ActivityRepo::activites()->where('start_date', '>', now())->take(5) : collect();
 
         // 4. My Tasks
         $myTasks = EventAssigneeRepo::eventAssignees();
@@ -62,7 +68,8 @@ class Index extends Component
             'totalBudgetNis' => $totalBudgetNis,
             'pendingRequests' => $pendingRequests,
             'plannedActivities' => $plannedActivities,
-            'myTasks' => $myTasks
+            'myTasks' => $myTasks,
+            'hasActivityAccess' => $hasActivityAccess,
         ]);
     }
 }

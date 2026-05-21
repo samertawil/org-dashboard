@@ -230,7 +230,7 @@ class Student extends Model
 {
         // ->when(!$user->isSuperAdmin() || \Illuminate\Support\Facades\DB::table('teacher_student_group')->where('teacher_id', $user->id)->exists(), function ($query) use ($user) {
 
-    return $query->when(!$user->isSuperAdmin(), function ($q) use ($user) {
+    return $query->when(!$user->selectAnyStudent(), function ($q) use ($user) {
         $q->whereIn('student_groups_id', function ($subQuery) use ($user) {
             $subQuery->select('student_group_id')
                 ->from('teacher_student_group')

@@ -12,7 +12,8 @@ class AbilitieObserver
      */
     public function created(Ability $ability): void
     {
-       Cache::forget('Abilities-all');
+        Cache::forget('Abilities-all');
+        Cache::forget('abilities_names_list');
     }
 
     /**
@@ -21,6 +22,7 @@ class AbilitieObserver
     public function updated(Ability $ability): void
     {
         Cache::forget('Abilities-all');
+        Cache::forget('abilities_names_list');
     }
 
     /**
@@ -29,6 +31,7 @@ class AbilitieObserver
     public function deleted(Ability $ability): void
     {
         Cache::forget('Abilities-all');
+        Cache::forget('abilities_names_list');
     }
 
     /**

@@ -22,7 +22,7 @@
     <div class="flex-1 flex overflow-hidden gap-6">
         {{-- Sidebar Filters --}}
         <div class="lg:w-64 flex-shrink-0 hidden lg:flex flex-col gap-6 overflow-y-auto pr-2">
-            
+
             {{-- Source Filter --}}
             <div class="flex flex-col gap-2">
                 <flux:heading level="3" size="sm" class="mb-2 px-2">{{ __('Source') }}</flux:heading>
@@ -33,35 +33,42 @@
                         {{ __('All Sources') }}
                     </div>
                 </button>
-                <button wire:click="$set('filterSource', 'activity')"
-                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'activity' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
-                    <div class="flex items-center gap-2">
-                        <flux:icon icon="briefcase" size="sm" />
-                        {{ __('Activities') }}
-                    </div>
-                </button>
-                <button wire:click="$set('filterSource', 'purchase_request')"
-                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'purchase_request' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
-                    <div class="flex items-center gap-2">
-                        <flux:icon icon="shopping-cart" size="sm" />
-                        {{ __('Purchase Requests') }}
-                    </div>
-                </button>
-                <button wire:click="$set('filterSource', 'educational_activity')"
-                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'educational_activity' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}"
-                >
-                    <div class="flex items-center gap-2">
-                        <flux:icon icon="academic-cap" size="sm" />
-                        {{ __('Educational Activity') }}
-                    </div>
-                </button>
-                <button wire:click="$set('filterSource', 'subject_learning')"
-                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'subject_learning' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
-                    <div class="flex items-center gap-2">
-                        <flux:icon icon="academic-cap" size="sm" />
-                        {{ __('Subject Learning') }}
-                    </div>
-                </button>
+                @canany(['activity.index', 'activity.create', 'manager.reports.all'])
+                    <button wire:click="$set('filterSource', 'activity')"
+                        class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'activity' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
+                        <div class="flex items-center gap-2">
+                            <flux:icon icon="briefcase" size="sm" />
+                            {{ __('Activities') }}
+                        </div>
+                    </button>
+                @endcanany
+                @canany(['purchase_request.index', 'purchase_request.create', 'manager.reports.all'])
+                    <button wire:click="$set('filterSource', 'purchase_request')"
+                        class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'purchase_request' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
+                        <div class="flex items-center gap-2">
+                            <flux:icon icon="shopping-cart" size="sm" />
+                            {{ __('Purchase Requests') }}
+                        </div>
+                    </button>
+                @endcanany
+                @canany(['educational-activity-detail.index', 'educational-activity-detail.create', 'manager.reports.all'])
+                    <button wire:click="$set('filterSource', 'educational_activity')"
+                        class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'educational_activity' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
+                        <div class="flex items-center gap-2">
+                            <flux:icon icon="academic-cap" size="sm" />
+                            {{ __('Educational Activity') }}
+                        </div>
+                    </button>
+                @endcanany
+                @canany(['educational-activity-detail.index', 'educational-activity-detail.create', 'manager.reports.all'])
+                    <button wire:click="$set('filterSource', 'subject_learning')"
+                        class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'subject_learning' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
+                        <div class="flex items-center gap-2">
+                            <flux:icon icon="academic-cap" size="sm" />
+                            {{ __('Subject Learning') }}
+                        </div>
+                    </button>
+                @endcanany
             </div>
 
             {{-- Type Filter --}}
@@ -97,7 +104,8 @@
         {{-- Grid --}}
         <div class="flex-1 h-full overflow-y-auto pr-2 pb-20">
             @if ($attachments->isEmpty())
-                <div class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-900/50">
+                <div
+                    class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl bg-zinc-50 dark:bg-zinc-900/50">
                     <div class="flex flex-col items-center text-center p-6">
                         <div class="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-3">
                             <flux:icon icon="document-magnifying-glass" class="size-6 text-zinc-400" />
@@ -113,15 +121,25 @@
                             class="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:border-zinc-300 dark:hover:border-zinc-600 flex flex-col">
 
                             {{-- Preview Area --}}
-                            <div class="h-24 w-full bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden flex items-center justify-center">
+                            <div
+                                class="h-24 w-full bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden flex items-center justify-center">
                                 @php
-                                    $isImage = in_array(strtolower($attachment['extension']), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                                    $isImage = in_array(strtolower($attachment['extension']), [
+                                        'jpg',
+                                        'jpeg',
+                                        'png',
+                                        'gif',
+                                        'webp',
+                                        'svg',
+                                    ]);
                                 @endphp
 
-                                <a href="{{ Storage::url($attachment['path']) }}" target="_blank"  class="w-full h-full flex items-center justify-center group-hover:opacity-90 transition-opacity" style="width: 150px; height: 150px;" > 
+                                <a href="{{ Storage::url($attachment['path']) }}" target="_blank"
+                                    class="w-full h-full flex items-center justify-center group-hover:opacity-90 transition-opacity"
+                                    style="width: 150px; height: 150px;">
                                     @if ($isImage)
-                                        <img src="{{ Storage::url($attachment['path']) }}" alt="{{ $attachment['name'] }}"
-                                            class="w-full h-full object-cover">
+                                        <img src="{{ Storage::url($attachment['path']) }}"
+                                            alt="{{ $attachment['name'] }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="flex flex-col items-center gap-2 text-zinc-400">
                                             @php
@@ -134,7 +152,8 @@
                                                 };
                                             @endphp
                                             <flux:icon :icon="$icon" class="size-12" />
-                                            <span class="text-xs font-mono uppercase">{{ $attachment['extension'] }}</span>
+                                            <span
+                                                class="text-xs font-mono uppercase">{{ $attachment['extension'] }}</span>
                                         </div>
                                     @endif
                                 </a>
@@ -146,24 +165,29 @@
                                     title="{{ $attachment['name'] }}">{{ $attachment['name'] }}</h4>
                                 <div class="flex flex-col space-y-1 text-xs text-zinc-500">
                                     <div class="">
-                                        <span title="{{ $attachment['source_title'] }}" class="truncate max-w-[100px]">{{ $attachment['source_title'] }}</span>
+                                        <span title="{{ $attachment['source_title'] }}"
+                                            class="truncate max-w-[100px]">{{ $attachment['source_title'] }}</span>
                                         <span>{{ \Carbon\Carbon::parse($attachment['uploaded_at'])->format('M d, Y') }}</span>
                                     </div>
                                     <div class="flex items-center mt-1">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 whitespace-nowrap truncate max-w-[120px]" title="{{ $attachment['source'] }}">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 whitespace-nowrap truncate max-w-[120px]"
+                                            title="{{ $attachment['source'] }}">
                                             {{ $attachment['source'] }}
                                         </span>
                                     </div>
-                                    @if(!empty($attachment['group_name']))
+                                    @if (!empty($attachment['group_name']))
                                         <div class="flex items-center">
                                             <flux:icon icon="users" size="xs" class="mr-1" />
-                                            <span title="Group" class="truncate">{{ $attachment['group_name'] }}</span>
+                                            <span title="Group"
+                                                class="truncate">{{ $attachment['group_name'] }}</span>
                                         </div>
                                     @endif
-                                    @if(!empty($attachment['period_start']))
+                                    @if (!empty($attachment['period_start']))
                                         <div class="flex items-center">
                                             <flux:icon icon="calendar" size="xs" class="mr-1" />
-                                            <span title="Period Start" class="truncate">{{ $attachment['period_start'] }}</span>
+                                            <span title="Period Start"
+                                                class="truncate">{{ $attachment['period_start'] }}</span>
                                         </div>
                                     @endif
                                 </div>

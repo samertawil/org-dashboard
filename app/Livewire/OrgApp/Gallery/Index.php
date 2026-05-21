@@ -2,13 +2,14 @@
 
 namespace App\Livewire\OrgApp\Gallery;
 
+use App\Models\ActivityAttchment;
+use App\Models\EducationalActivityDetail;
+use App\Models\PurchaseRequisition;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\ActivityAttchment;
-use App\Models\PurchaseRequisition;
-use App\Models\EducationalActivityDetail;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class Index extends Component
 {
@@ -43,133 +44,170 @@ class Index extends Component
     {
         // 1. Fetch Activity & Subject Learning Attachments
         $genericAttachments = collect();
-        if ($this->filterSource === '' || $this->filterSource === 'activity' || $this->filterSource === 'subject_learning') {
-            $query = ActivityAttchment::with(['activity', 'subjectLearning'])
+        $hasSubjectLearningAccess = Gate::allows('educational-activity-detail.index') || Gate::allows('educational-activity-detail.create') || Gate::allows('manager.reports.all');
+        $hasActivityAccess = Gate::allows('activity.index') || Gate::allows('activity.create') || Gate::allows('manager.reports.all');
+
+        $shouldQuery = false;
+        if ($this->filterSource === '') {
+            $shouldQuery = $hasActivityAccess || $hasSubjectLearningAccess;
+        } elseif ($this->filterSource === 'activity') {
+            $shouldQuery = $hasActivityAccess;
+        } elseif ($this->filterSource === 'subject_learning') {
+            $shouldQuery = $hasSubjectLearningAccess;
+        }
+
+        if ($shouldQuery) {
+            $query = ActivityAttchment::select('id', 'activity_id', 'subject_learning_id', 'attchment_path', 'notes', 'attchment_type', 'created_at')
+                ->with([
+                    'activity' => function($q) {
+                        $q->select('id', 'name');
+                    },
+                    'subjectLearning' => function($q) {
+                        $q->select('id', 'name');
+                    }
+                ])
                 ->latest();
             
             if ($this->filterSource === 'activity') {
                 $query->whereNotNull('activity_id');
             } elseif ($this->filterSource === 'subject_learning') {
                 $query->whereNotNull('subject_learning_id');
+            } elseif ($this->filterSource === '') {
+                if (!$hasActivityAccess) {
+                    $query->whereNull('activity_id')->whereNotNull('subject_learning_id');
+                } elseif (!$hasSubjectLearningAccess) {
+                    $query->whereNull('subject_learning_id');
+                }
             }
 
             $genericAttachments = $query->get()->map(function ($item) {
-                    $ext = strtolower(pathinfo($item->attchment_path, PATHINFO_EXTENSION));
-                    $typeId = 49;
-                     if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
-                        $typeId = 48;
-                    } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
-                        $typeId = 50;
-                    }
+                $ext = strtolower(pathinfo($item->attchment_path, PATHINFO_EXTENSION));
+                $typeId = 49;
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                    $typeId = 48;
+                } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
+                    $typeId = 50;
+                }
 
-                    // Determine Source and Title
-                    $source = 'Unknown';
-                    $sourceTitle = '-';
-                    $sourceId = null;
+                // Determine Source and Title
+                $source = 'Unknown';
+                $sourceTitle = '-';
+                $sourceId = null;
 
-                    if ($item->activity_id) {
-                        $source = 'Activity';
-                        $sourceId = $item->activity_id;
-                        $sourceTitle = $item->activity->name ?? 'Activity #' . $item->activity_id;
-                    } elseif ($item->subject_learning_id) {
-                        $source = 'Subject Learning';
-                        $sourceId = $item->subject_learning_id;
-                        $sourceTitle = $item->subjectLearning->name ?? 'Subject #' . $item->subject_learning_id;
-                    }
+                if ($item->activity_id) {
+                    $source = 'Activity';
+                    $sourceId = $item->activity_id;
+                    $sourceTitle = $item->activity->name ?? 'Activity #' . $item->activity_id;
+                } elseif ($item->subject_learning_id) {
+                    $source = 'Subject Learning';
+                    $sourceId = $item->subject_learning_id;
+                    $sourceTitle = $item->subjectLearning->name ?? 'Subject #' . $item->subject_learning_id;
+                }
 
-                    return [
-                        'id' => 'gen-' . $item->id,
-                        'path' => $item->attchment_path,
-                        'name' => $item->notes ?? basename($item->attchment_path),
-                        'extension' => $ext,
-                        'type_id' => $item->attchment_type ?? $typeId, // Fallback
-                        'source' => $source,
-                        'source_id' => $sourceId,
-                        'source_title' => $sourceTitle,
-                        'date' => $item->created_at,
-                        'uploaded_at' => $item->created_at,
-                    ];
-                });
+                return [
+                    'id' => 'gen-' . $item->id,
+                    'path' => $item->attchment_path,
+                    'name' => $item->notes ?? basename($item->attchment_path),
+                    'extension' => $ext,
+                    'type_id' => $item->attchment_type ?? $typeId, // Fallback
+                    'source' => $source,
+                    'source_id' => $sourceId,
+                    'source_title' => $sourceTitle,
+                    'date' => $item->created_at,
+                    'uploaded_at' => $item->created_at,
+                ];
+            });
         }
-
-        // 2. Fetch Purchase Request Attachments (JSON)
         $prAttachments = collect();
-        if ($this->filterSource === '' || $this->filterSource === 'purchase_request') {
-            $prRequests = PurchaseRequisition::whereNotNull('attachments')
-                ->latest()
-                ->get();
+        if (Gate::allows('purchase_request.index') || Gate::allows('purchase_request.create') || Gate::allows('manager.reports.all')) {
+            // Fetch Purchase Request Attachments (JSON)
+            if ($this->filterSource === '' || $this->filterSource === 'purchase_request') {
+                $prRequests = PurchaseRequisition::select('id', 'request_number', 'created_at', 'attachments')
+                    ->whereNotNull('attachments')
+                    ->latest()
+                    ->get();
 
-            foreach ($prRequests as $pr) {
-                if (is_array($pr->attachments)) {
-                    foreach ($pr->attachments as $att) {
-                        // Ensure required fields exist
-                        if (!isset($att['path'])) continue;
+                foreach ($prRequests as $pr) {
+                    if (is_array($pr->attachments)) {
+                        foreach ($pr->attachments as $att) {
+                            // Ensure required fields exist
+                            if (!isset($att['path'])) continue;
 
-                        $ext = strtolower($att['extension'] ?? pathinfo($att['path'], PATHINFO_EXTENSION));
-                        // Logic to determine type_id if not present
-                         $typeId = $att['type_id'] ?? 49;
-                         if (!isset($att['type_id'])) {
-                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
-                                $typeId = 48;
-                            } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
-                                $typeId = 50;
+                            $ext = strtolower($att['extension'] ?? pathinfo($att['path'], PATHINFO_EXTENSION));
+                            // Logic to determine type_id if not present
+                            $typeId = $att['type_id'] ?? 49;
+                            if (!isset($att['type_id'])) {
+                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                                    $typeId = 48;
+                                } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
+                                    $typeId = 50;
+                                }
                             }
-                        }
 
-                        $prAttachments->push([
-                            'id' => 'pr-' . $pr->id . '-' . md5($att['path']), // unique fake ID
-                            'path' => $att['path'],
-                            'name' => $att['name'] ?? basename($att['path']),
-                            'extension' => $ext,
-                            'type_id' => $typeId,
-                            'source' => 'Purchase Request',
-                            'source_id' => $pr->id,
-                            'source_title' => 'PR #' . $pr->request_number,
-                            'date' => $att['uploaded_at'] ?? $pr->created_at,
-                            'uploaded_at' => $att['uploaded_at'] ?? $pr->created_at,
-                        ]);
+                            $prAttachments->push([
+                                'id' => 'pr-' . $pr->id . '-' . md5($att['path']), // unique fake ID
+                                'path' => $att['path'],
+                                'name' => $att['name'] ?? basename($att['path']),
+                                'extension' => $ext,
+                                'type_id' => $typeId,
+                                'source' => 'Purchase Request',
+                                'source_id' => $pr->id,
+                                'source_title' => 'PR #' . $pr->request_number,
+                                'date' => $att['uploaded_at'] ?? $pr->created_at,
+                                'uploaded_at' => $att['uploaded_at'] ?? $pr->created_at,
+                            ]);
+                        }
                     }
                 }
             }
         }
-
         // 3. Fetch Educational Activity Detail Attachments (JSON)
         $eduAttachments = collect();
-        if ($this->filterSource === '' || $this->filterSource === 'educational_activity') {
-            $eduDetails = EducationalActivityDetail::with('educationalActivity')
-                ->whereNotNull('attchments')
-                ->latest()
-                ->get();
-
-            foreach ($eduDetails as $detail) {
-                if (is_array($detail->attchments)) {
-                    foreach ($detail->attchments as $att) {
-                        if (!isset($att['path'])) continue;
-
-                        $ext = strtolower($att['extension'] ?? pathinfo($att['path'], PATHINFO_EXTENSION));
-                        $typeId = $att['type_id'] ?? 49;
-                        if (!isset($att['type_id'])) {
-                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
-                                $typeId = 48;
-                            } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
-                                $typeId = 50;
-                            }
+        if (Gate::allows('educational-activity-detail.index') || Gate::allows('educational-activity-detail.create') || Gate::allows('manager.reports.all')) {
+            if ($this->filterSource === '' || $this->filterSource === 'educational_activity') {
+                $eduDetails = EducationalActivityDetail::select('id', 'educational_activity_id', 'created_at', 'attchments')
+                    ->with([
+                        'educationalActivity' => function($q) {
+                            $q->select('id', 'activity_name', 'group_id', 'period_start');
+                        },
+                        'educationalActivity.group' => function($q) {
+                            $q->select('id', 'name');
                         }
+                    ])
+                    ->whereNotNull('attchments')
+                    ->latest()
+                    ->get();
 
-                        $eduAttachments->push([
-                            'id' => 'edu-' . $detail->id . '-' . md5($att['path']),
-                            'path' => $att['path'],
-                            'name' => $att['name'] ?? basename($att['path']),
-                            'extension' => $ext,
-                            'type_id' => $typeId,
-                            'source' => 'Educational Activity',
-                            'source_id' => $detail->id,
-                            'source_title' => $detail->educationalActivity?->activity_name ?? 'Activity #' . $detail->educational_activity_id,
-                            'group_name' => $detail->educationalActivity?->group?->name ?? '',
-                            'period_start' => $detail->educationalActivity?->period_start ? $detail->educationalActivity->period_start->format('Y-m-d') : '',
-                            'date' => $att['uploaded_at'] ?? $detail->created_at,
-                            'uploaded_at' => $att['uploaded_at'] ?? $detail->created_at,
-                        ]);
+                foreach ($eduDetails as $detail) {
+                    if (is_array($detail->attchments)) {
+                        foreach ($detail->attchments as $att) {
+                            if (!isset($att['path'])) continue;
+
+                            $ext = strtolower($att['extension'] ?? pathinfo($att['path'], PATHINFO_EXTENSION));
+                            $typeId = $att['type_id'] ?? 49;
+                            if (!isset($att['type_id'])) {
+                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                                    $typeId = 48;
+                                } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
+                                    $typeId = 50;
+                                }
+                            }
+
+                            $eduAttachments->push([
+                                'id' => 'edu-' . $detail->id . '-' . md5($att['path']),
+                                'path' => $att['path'],
+                                'name' => $att['name'] ?? basename($att['path']),
+                                'extension' => $ext,
+                                'type_id' => $typeId,
+                                'source' => 'Educational Activity',
+                                'source_id' => $detail->id,
+                                'source_title' => $detail->educationalActivity?->activity_name ?? 'Activity #' . $detail->educational_activity_id,
+                                'group_name' => $detail->educationalActivity?->group?->name ?? '',
+                                'period_start' => $detail->educationalActivity?->period_start ? $detail->educationalActivity->period_start->format('Y-m-d') : '',
+                                'date' => $att['uploaded_at'] ?? $detail->created_at,
+                                'uploaded_at' => $att['uploaded_at'] ?? $detail->created_at,
+                            ]);
+                        }
                     }
                 }
             }

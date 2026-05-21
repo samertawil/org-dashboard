@@ -72,7 +72,7 @@ class Index extends Component
 
     public function updating($property)
     {
-        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation','searchBatchNo', 'searchRegionId', 'searchCityId'])) {
+        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId'])) {
             $this->resetPage();
             $this->readyToLoad = false;
         }
@@ -81,7 +81,7 @@ class Index extends Component
 
     public function clearFilters()
     {
-        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation','searchBatchNo', 'searchRegionId', 'searchCityId']);
+        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId']);
         $this->readyToLoad = false;
         $this->resetPage();
     }
@@ -126,7 +126,7 @@ class Index extends Component
                 ->when($this->searchRegionId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('region_id', $this->searchRegionId)))
                 ->when($this->searchCityId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('city_id', $this->searchCityId)))
 
- 
+
 
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate($this->perPage);
@@ -259,10 +259,10 @@ class Index extends Component
     #[Computed()]
     public function studentFeedbacks()
     {
+        if (!$this->selectedStudentId) return [];
         if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
-        if (!$this->selectedStudentId) return [];
         return FeedBack::where('student_id', $this->selectedStudentId)
             ->with('feedbackTypeStatus')
             ->latest()
@@ -293,7 +293,7 @@ class Index extends Component
         }
 
         $activations = GlobalSystemConstant::options()->where('type', 'status');
-        $regions =RegionRepo::regions();
+        $regions = RegionRepo::regions();
         $cities = CityRepo::cities()->where('region_id', $this->searchRegionId);
 
         return view('livewire.org-app.student.index', [
