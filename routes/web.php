@@ -83,6 +83,11 @@ use App\Livewire\OrgApp\EducationalActivitySchedules\Create as EASCreate;
 use App\Livewire\OrgApp\EducationalActivitySchedules\Edit as EASEdit;
 use App\Livewire\OrgApp\EducationalActivitySchedules\Index as EASIndex;
 use App\Livewire\OrgApp\EducationalActivitySchedules\Show as EASShow;
+use App\Livewire\OrgApp\EducationalActivityDetail\Create as EADCreate;
+use App\Livewire\OrgApp\EducationalActivityDetail\Edit as EADEdit;
+use App\Livewire\OrgApp\EducationalActivityDetail\Index as EADIndex;
+use App\Livewire\OrgApp\EducationalActivityDetail\Show as EADShow;
+use App\Livewire\OrgApp\EducationalActivityDetail\Gallery as EADGallery;
 use App\Livewire\SocialLogin;
 use App\Mail\SendQuotationMail;
 use Illuminate\Support\Facades\Mail;
@@ -277,6 +282,12 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/educational-activity-schedules/{schedule}/edit', EASEdit::class)->name('educational-activity-schedules.edit');
     Route::get('/educational-activity-schedules/{schedule}/show', EASShow::class)->name('educational-activity-schedules.show');
 
+    // OrgApp - Educational Activity Details
+    Route::get('/educational-activity-detail', EADIndex::class)->name('educational-activity-detail.index');
+    Route::get('/educational-activity-detail/create', EADCreate::class)->name('educational-activity-detail.create');
+    Route::get('/educational-activity-detail/{detail}/edit', EADEdit::class)->name('educational-activity-detail.edit');
+    Route::get('/educational-activity-detail/{detail}/show', EADShow::class)->name('educational-activity-detail.show');
+    Route::get('/educational-activity-detail/{detail}/gallery', EADGallery::class)->name('educational-activity-detail.gallery');
     // Export
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');

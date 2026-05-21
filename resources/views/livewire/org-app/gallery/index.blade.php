@@ -47,6 +47,14 @@
                         {{ __('Purchase Requests') }}
                     </div>
                 </button>
+                <button wire:click="$set('filterSource', 'educational_activity')"
+                    class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'educational_activity' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}"
+                >
+                    <div class="flex items-center gap-2">
+                        <flux:icon icon="academic-cap" size="sm" />
+                        {{ __('Educational Activity') }}
+                    </div>
+                </button>
                 <button wire:click="$set('filterSource', 'subject_learning')"
                     class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ $filterSource === 'subject_learning' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50' }}">
                     <div class="flex items-center gap-2">
@@ -104,13 +112,6 @@
                         <div wire:key="att-{{ $attachment['id'] }}"
                             class="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:border-zinc-300 dark:hover:border-zinc-600 flex flex-col">
 
-                            {{-- Source Badge --}}
-                             <div class="absolute top-2 left-2 z-10">
-                                <span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-zinc-100/90 dark:bg-zinc-800/90 backdrop-blur-sm text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shadow-sm">
-                                    {{ $attachment['source'] }}
-                                </span>
-                            </div> 
-
                             {{-- Preview Area --}}
                             <div class="h-24 w-full bg-zinc-100 dark:bg-zinc-900 relative overflow-hidden flex items-center justify-center">
                                 @php
@@ -142,19 +143,30 @@
                             {{-- Footer Info --}}
                             <div class="p-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1">
                                 <h4 class="text-sm font-medium text-zinc-900 dark:text-gray-100 truncate"
-                                    title="{{ $attachment['name'] }}">
-                                    {{ $attachment['name'] }}
-                                </h4>
-                                <div class="flex items-center justify-between text-xs text-zinc-500">
-                                    <span title="{{ $attachment['source_title'] }}" class="truncate max-w-[100px]">
-                                        {{ $attachment['source_title'] }}
-                                    </span>
-                                    <span>
-                                        {{ \Carbon\Carbon::parse($attachment['uploaded_at'])->format('M d, Y') }}
-                                    </span>
+                                    title="{{ $attachment['name'] }}">{{ $attachment['name'] }}</h4>
+                                <div class="flex flex-col space-y-1 text-xs text-zinc-500">
+                                    <div class="">
+                                        <span title="{{ $attachment['source_title'] }}" class="truncate max-w-[100px]">{{ $attachment['source_title'] }}</span>
+                                        <span>{{ \Carbon\Carbon::parse($attachment['uploaded_at'])->format('M d, Y') }}</span>
+                                    </div>
+                                    <div class="flex items-center mt-1">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 whitespace-nowrap truncate max-w-[120px]" title="{{ $attachment['source'] }}">
+                                            {{ $attachment['source'] }}
+                                        </span>
+                                    </div>
+                                    @if(!empty($attachment['group_name']))
+                                        <div class="flex items-center">
+                                            <flux:icon icon="users" size="xs" class="mr-1" />
+                                            <span title="Group" class="truncate">{{ $attachment['group_name'] }}</span>
+                                        </div>
+                                    @endif
+                                    @if(!empty($attachment['period_start']))
+                                        <div class="flex items-center">
+                                            <flux:icon icon="calendar" size="xs" class="mr-1" />
+                                            <span title="Period Start" class="truncate">{{ $attachment['period_start'] }}</span>
+                                        </div>
+                                    @endif
                                 </div>
-                                
-                                 
                             </div>
                         </div>
                     @endforeach

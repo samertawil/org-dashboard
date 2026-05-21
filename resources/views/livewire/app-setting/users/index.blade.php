@@ -24,7 +24,7 @@
             </h2>
         </div>
         <div class="p-4 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {{-- Search by Name --}}
                 <div class="relative">
                     <flux:input wire:model.live.debounce.300ms="search" :label="__('Search by Name')" type="text"
@@ -55,13 +55,27 @@
                         <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
                     </div>
                 </div>
+
+                {{-- Filter by Role --}}
+                <div class="relative">
+                    <flux:select wire:model.live="searchRole" :label="__('Filter by Role')"
+                        :placeholder="__('All roles')">
+                        <option value="">{{ __('All Roles') }}</option>
+                        @foreach ($this->roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->name }}</option>
+                        @endforeach
+                    </flux:select>
+                    <div wire:loading wire:target="searchRole" class="absolute right-8 top-[2.4rem]">
+                        <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
+                    </div>
+                </div>
             </div>
 
             {{-- Clear Filters --}}
-            @if ($search || $searchEmail || $searchActivation)
+            @if ($search || $searchEmail || $searchActivation || $searchRole)
                 <div class="flex items-center justify-end pt-2">
                     <span title="{{ __('Reset all search filters') }}">
-                        <flux:button wire:click="$set('search', ''); $set('searchEmail', ''); $set('searchActivation', '');" variant="ghost" size="sm"
+                        <flux:button wire:click="$set('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '');" variant="ghost" size="sm"
                             icon="x-mark">
                             {{ __('Clear Filters') }}
                         </flux:button>
@@ -94,7 +108,13 @@
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-zinc-900 dark:text-white">{{ $user->name }}</h3>
+                                    @if ($user->employee)
+                                        <button wire:click="showEmployee({{ $user->id }})" class="font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline focus:outline-none transition-colors text-left">
+                                            {{ $user->name }}
+                                        </button>
+                                    @else
+                                        <h3 class="font-semibold text-zinc-900 dark:text-white">{{ $user->name }}</h3>
+                                    @endif
                                     <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $user->email }}</p>
                                 </div>
                             </div>
@@ -108,6 +128,9 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-700">
+                            <span title="{{ __('View Roles') }}">
+                                <flux:button wire:click="showUserRoles({{ $user->id }})" variant="ghost" size="sm" icon="eye" />
+                            </span>
                             <span title="{{ __('Grant privileges to this user') }}">
                                 <flux:button href="{{ route('grant.role.user', $user->id) }}" variant="ghost" size="sm" icon="shield-check" wire:navigate />
                             </span>
@@ -154,7 +177,13 @@
                                             <div class="size-8 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center text-xs text-zinc-500 font-bold">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </div>
-                                            <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $user->name }}</span>
+                                            @if ($user->employee)
+                                                <button wire:click="showEmployee({{ $user->id }})" class="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline focus:outline-none transition-colors text-left">
+                                                    {{ $user->name }}
+                                                </button>
+                                            @else
+                                                <span class="text-sm font-medium text-zinc-900 dark:text-white">{{ $user->name }}</span>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{{ $user->email }}</td>
@@ -168,20 +197,28 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <flux:dropdown>
-                                            <flux:button variant="ghost" icon="cog-6-tooth" size="sm" />
-                                            <flux:menu>
-                                                <flux:menu.item wire:click="resetPass({{ $user->id }})" wire:confirm="{{ __('Are you sure you want to reset password to default?') }}" icon="key">
-                                                    {{ __('Reset Password') }}
-                                                </flux:menu.item>
-                                                <flux:menu.item href="{{ route('grant.role.user', $user->id) }}" icon="shield-check" wire:navigate>
-                                                    {{ __('Grant Privileges') }}
-                                                </flux:menu.item>
-                                                <flux:menu.item wire:click="switchActivation({{ $user->id }})" icon="arrow-path">
-                                                    {{ __('Switch Activation') }}
-                                                </flux:menu.item>
-                                            </flux:menu>
-                                        </flux:dropdown>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span title="{{ __('View Roles') }}">
+                                                <flux:button wire:click="showUserRoles({{ $user->id }})" variant="ghost" size="sm" icon="eye" />
+                                            </span>
+                                            <flux:dropdown>
+                                                <flux:button variant="ghost" icon="cog-6-tooth" size="sm" />
+                                                <flux:menu>
+                                                    <flux:menu.item wire:click="showUserRoles({{ $user->id }})" icon="eye">
+                                                        {{ __('View Roles') }}
+                                                    </flux:menu.item>
+                                                    <flux:menu.item wire:click="resetPass({{ $user->id }})" wire:confirm="{{ __('Are you sure you want to reset password to default?') }}" icon="key">
+                                                        {{ __('Reset Password') }}
+                                                    </flux:menu.item>
+                                                    <flux:menu.item href="{{ route('grant.role.user', $user->id) }}" icon="shield-check" wire:navigate>
+                                                        {{ __('Grant Privileges') }}
+                                                    </flux:menu.item>
+                                                    <flux:menu.item wire:click="switchActivation({{ $user->id }})" icon="arrow-path">
+                                                        {{ __('Switch Activation') }}
+                                                    </flux:menu.item>
+                                                </flux:menu>
+                                            </flux:dropdown>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -203,14 +240,14 @@
             </div>
             <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-2">{{ __('No Users Found') }}</h3>
             <p class="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-8 max-w-sm">
-                @if ($search || $searchEmail || $searchActivation)
+                @if ($search || $searchEmail || $searchActivation || $searchRole)
                     {{ __('No users match your current filters. Try refining your search or clearing the filters.') }}
                 @else
                     {{ __('You haven\'t added any users yet. Start building your team by creating a new user.') }}
                 @endif
             </p>
-            @if ($search || $searchEmail || $searchActivation)
-                <flux:button wire:click="$set('search', ''); $set('searchEmail', ''); $set('searchActivation', '');" variant="primary" icon="x-mark">
+            @if ($search || $searchEmail || $searchActivation || $searchRole)
+                <flux:button wire:click="$set('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '');" variant="primary" icon="x-mark">
                     {{ __('Clear All Filters') }}
                 </flux:button>
             @else
@@ -220,4 +257,220 @@
             @endif
         </div>
     @endif
+
+    {{-- Employee Details Modal --}}
+    <flux:modal wire:model="showEmployeeModal" class="md:w-[650px]" @close="$wire.closeEmployeeModal()">
+        @if ($this->selectedEmployee)
+            <div class="space-y-6">
+                {{-- Header / Profile section --}}
+                <div class="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="h-16 w-16 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold shrink-0">
+                        {{ strtoupper(substr($this->selectedEmployee->full_name ?? $this->selectedEmployee->user->name, 0, 1)) }}
+                    </div>
+                    <div class="text-center sm:text-left space-y-1">
+                        <h2 class="text-xl font-bold text-zinc-900 dark:text-white">
+                            {{ $this->selectedEmployee->full_name }}
+                        </h2>
+                        <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
+                                #{{ $this->selectedEmployee->employee_number }}
+                            </span>
+                            @php
+                                $statusEnum = \App\Enums\GlobalSystemConstant::tryFrom($this->selectedEmployee->activation);
+                            @endphp
+                            @if ($statusEnum)
+                                <span @class([
+                                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                    'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' => $this->selectedEmployee->activation == 1,
+                                    'bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-400' => $this->selectedEmployee->activation != 1,
+                                ])>
+                                    {{ $statusEnum->label() }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Details Grid --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                    {{-- Department --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Department') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->department->name ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Partner Institution / Source --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Partner / Institution') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->employee_in_partner_id ? ($this->selectedEmployee->partner->name ?? '-') : 'AFSC' }}
+                        </span>
+                    </div>
+
+                    {{-- Job Title --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Job Title') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->jobTitle->status_name ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Position Status --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Position') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->positionStatus->status_name ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Hiring Type --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Hiring Type') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->hiringType->status_name ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Date of Joining --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Date of Joining') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->date_of_joining ?? '-' }}
+                        </span>
+                    </div>
+
+                    <div class="border-t border-zinc-100 dark:border-zinc-700/50 md:col-span-2 my-2"></div>
+
+                    {{-- Email --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Email') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100 break-all">
+                            {{ $this->selectedEmployee->email ?? $this->selectedEmployee->user->email }}
+                        </span>
+                    </div>
+
+                    {{-- Phone --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Phone') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->phone ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Gender --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Gender') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                            @php
+                                $genderEnum = \App\Enums\GlobalSystemConstant::tryFrom($this->selectedEmployee->gender);
+                            @endphp
+                            @if($genderEnum)
+                                <span>{{ $genderEnum->icon() }}</span>
+                                <span>{{ $genderEnum->label() }}</span>
+                            @else
+                                -
+                            @endif
+                        </span>
+                    </div>
+
+                    {{-- Date of Birth --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Date of Birth') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->date_of_birth ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Marital Status --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Marital Status') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->maritalStatus->status_name ?? '-' }}
+                        </span>
+                    </div>
+
+                    {{-- Region / Address --}}
+                    <div class="space-y-1">
+                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Region') }}</span>
+                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $this->selectedEmployee->region->status_name ?? '-' }}
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="flex justify-end pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                    <flux:button wire:click="closeEmployeeModal" variant="ghost">
+                        {{ __('Close') }}
+                    </flux:button>
+                </div>
+            </div>
+        @endif
+    </flux:modal>
+
+    {{-- User Roles Details Modal --}}
+    <flux:modal wire:model="showRolesModal" class="md:w-[500px]" @close="$wire.closeRolesModal()">
+        @if ($this->selectedUserForRoles)
+            <div class="space-y-6">
+                {{-- Header section --}}
+                <div class="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="h-12 w-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xl font-bold shrink-0">
+                        <flux:icon name="shield-check" class="size-6" />
+                    </div>
+                    <div class="text-center sm:text-left space-y-1">
+                        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">
+                            {{ __('Roles & Permissions') }}
+                        </h2>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                            {{ __('Granted roles and permissions for user:') }} <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $this->selectedUserForRoles->name }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Roles list --}}
+                <div class="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                    @if ($this->selectedUserRoles->count() > 0)
+                        <div class="flex flex-col gap-3">
+                            @foreach ($this->selectedUserRoles as $role)
+                                <div class="bg-zinc-50 dark:bg-zinc-900/40 rounded-xl border border-zinc-200 dark:border-zinc-700/80 p-4 space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="font-semibold text-sm text-zinc-900 dark:text-white flex items-center gap-1.5">
+                                            <span class="inline-block size-2 rounded-full bg-blue-500"></span>
+                                            {{ $role->name }}
+                                        </h3>
+                                    </div>
+                                    @if (!empty($role->abilities_description))
+                                        <div class="flex flex-wrap gap-1.5 pt-1">
+                                            @foreach ($role->abilities_description as $ability)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
+                                                    {{ $ability }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="text-xs text-zinc-400 dark:text-zinc-500 italic">{{ __('No capabilities details defined.') }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="flex flex-col items-center justify-center py-6 text-center">
+                            <flux:icon name="shield-exclamation" class="size-10 text-zinc-300 dark:text-zinc-600 mb-2" />
+                            <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('No roles or permissions assigned to this user.') }}</p>
+                            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{{ __('You can assign roles from the action menu.') }}</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Footer --}}
+                <div class="flex justify-end pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                    <flux:button wire:click="closeRolesModal" variant="ghost">
+                        {{ __('Close') }}
+                    </flux:button>
+                </div>
+            </div>
+        @endif
+    </flux:modal>
 </div>

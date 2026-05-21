@@ -3,6 +3,8 @@
 namespace App\Livewire\AppSetting\Users;
 
 use App\Models\User;
+use App\Models\Employee;
+use App\Models\Role;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
@@ -26,11 +28,18 @@ class Index extends Component
     // Pagination
     public int $perPage = 10;
 
+    public bool $showEmployeeModal = false;
+    public ?int $selectedEmployeeId = null;
+
+    public string|int|null $searchRole = '';
+    public bool $showRolesModal = false;
+    public ?int $selectedUserIdForRoles = null;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'searchEmail' => ['except' => ''],
         'searchActivation' => ['except' => ''],
-       
+        'searchRole' => ['except' => ''],
     ];
 
     public function sortBy($field): void
@@ -59,15 +68,25 @@ class Index extends Component
       
         $this->resetPage();
     }
+
+    public function updatingSearchRole(): void
+    {
+        $this->resetPage();
+    }
   
     #[Computed()]
     public function users(): LengthAwarePaginator
     {
         return User::query()
-           
+            ->with(['employee', 'rolesRelation'])
             ->SearchName($this->search)
             ->SearchEmail($this->searchEmail) 
             ->SearchActivation($this->searchActivation) 
+            ->when($this->searchRole, function ($query) {
+                $query->whereHas('rolesRelation', function ($q) {
+                    $q->where('roles.id', $this->searchRole);
+                });
+            })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
     }
@@ -96,6 +115,77 @@ class Index extends Component
         $user->save();
 
         session()->flash('message', 'User has been switched.');
+    }
+
+    public function showEmployee(int $userId): void
+    {
+        $user = User::with('employee')->findOrFail($userId);
+        if ($user->employee) {
+            $this->selectedEmployeeId = $user->employee->id;
+            $this->showEmployeeModal = true;
+        } else {
+            session()->flash('message', __('This user does not have employee details.'));
+        }
+    }
+
+    #[Computed()]
+    public function selectedEmployee(): ?Employee
+    {
+        if (!$this->selectedEmployeeId) {
+            return null;
+        }
+        return Employee::with([
+            'department',
+            'jobTitle',
+            'positionStatus',
+            'maritalStatus',
+            'region',
+            'hiringType',
+            'partner'
+        ])->find($this->selectedEmployeeId);
+    }
+
+    public function closeEmployeeModal(): void
+    {
+        $this->showEmployeeModal = false;
+        $this->selectedEmployeeId = null;
+    }
+
+    public function showUserRoles(int $userId): void
+    {
+        $this->selectedUserIdForRoles = $userId;
+        $this->showRolesModal = true;
+    }
+
+    public function closeRolesModal(): void
+    {
+        $this->showRolesModal = false;
+        $this->selectedUserIdForRoles = null;
+    }
+
+    #[Computed()]
+    public function roles()
+    {
+        return Role::all();
+    }
+
+    #[Computed()]
+    public function selectedUserRoles()
+    {
+        if (!$this->selectedUserIdForRoles) {
+            return collect();
+        }
+        $user = User::with('rolesRelation')->find($this->selectedUserIdForRoles);
+        return $user ? $user->rolesRelation : collect();
+    }
+
+    #[Computed()]
+    public function selectedUserForRoles(): ?User
+    {
+        if (!$this->selectedUserIdForRoles) {
+            return null;
+        }
+        return User::find($this->selectedUserIdForRoles);
     }
 
     public function render()

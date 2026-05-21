@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\Reports;
 use App\Models\Activity;
 use App\Models\ActivityComments;
 use App\Models\CurrancyValue;
+use App\Models\EducationalActivityDetail;
 use App\Models\StudentDailyAttendance;
 use App\Models\SurveyAnswer;
 use App\Notifications\MentionInCommentNotification;
@@ -78,6 +79,73 @@ class DailyLogReport extends Component
         return CurrancyValue::whereDate('exchange_date', '<=', $this->reportDate)
             ->orderBy('exchange_date', 'desc')
             ->first();
+    }
+
+    public function getEducationalActivityDetailsProperty()
+    {
+        return EducationalActivityDetail::query()
+            ->whereDate('created_at', $this->reportDate)
+            ->with([
+                'educationalActivity.activityDomain',
+                'educationalActivity.periodGroups',
+                'educationalActivity.group',
+                'educationalActivity.employee',
+                'educationalActivity.createdBy',
+            ])
+            ->latest()
+            ->get();
+    }
+
+    public function getAttendanceByGroupProperty()
+    {
+        // Get all unique (group_id, period_start date, educational_period_groups) triples
+        $details = $this->educationalActivityDetails;
+        $pairs = [];
+        foreach ($details as $detail) {
+            $schedule = $detail->educationalActivity;
+            if ($schedule && $schedule->group_id && $schedule->period_start) {
+                $dateStr = $schedule->period_start->format('Y-m-d');
+                $periodGroup = $schedule->educational_period_groups;
+                $key = $schedule->group_id . '_' . $dateStr . '_' . $periodGroup;
+                $pairs[$key] = [
+                    'group_id' => $schedule->group_id,
+                    'date' => $dateStr,
+                    'period_group' => $periodGroup,
+                ];
+            }
+        }
+
+        if (empty($pairs)) {
+            return collect();
+        }
+
+        // Build a query matching (group_id, attendance_date, students.status_id = educational_period_groups)
+        $query = DB::table('student_daily_attendances')
+            ->join('students', 'student_daily_attendances.student_id', '=', 'students.id')
+            ->join('statuses', 'students.status_id', '=', 'statuses.id')
+            ->where(function ($q) use ($pairs) {
+                foreach ($pairs as $pair) {
+                    $q->orWhere(function ($sub) use ($pair) {
+                        $sub->where('student_daily_attendances.student_group_id', $pair['group_id'])
+                            ->whereDate('student_daily_attendances.attendance_date', $pair['date'])
+                            ->where('students.status_id', $pair['period_group']);
+                    });
+                }
+            })
+            ->select(
+                'student_daily_attendances.student_group_id',
+                DB::raw("DATE(student_daily_attendances.attendance_date) as attendance_date"),
+                'students.status_id',
+                'statuses.status_name',
+                DB::raw("SUM(CASE WHEN student_daily_attendances.status = 'present' THEN 1 ELSE 0 END) as present_count"),
+                DB::raw("SUM(CASE WHEN student_daily_attendances.status = 'absent' THEN 1 ELSE 0 END) as absent_count"),
+                DB::raw("COUNT(*) as total_count")
+            )
+            ->groupBy('student_daily_attendances.student_group_id', DB::raw("DATE(student_daily_attendances.attendance_date)"), 'students.status_id', 'statuses.status_name')
+            ->get();
+
+        // Key by "groupId_date_statusId" for precise per-card lookup
+        return $query->groupBy(fn ($row) => $row->student_group_id . '_' . $row->attendance_date . '_' . $row->status_id);
     }
 
     public function sendToWhatsApp()
@@ -162,6 +230,8 @@ class DailyLogReport extends Component
             'evaluations' => $this->evaluations,
             'attendanceStats' => $this->attendanceStats,
             'exchangeRate' => $this->exchangeRate,
+            'educationalActivityDetails' => $this->educationalActivityDetails,
+            'attendanceByGroup' => $this->attendanceByGroup,
         ]);
     }
 }

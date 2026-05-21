@@ -211,7 +211,7 @@ class StudentGroupSchedule extends Component
              ];
              $currentDate->addDay();
         }
-
+        
         return view('livewire.org-app.student-groups.student-group-schedule', [
             'calendar' => $calendar,
             'currentMonthName' => $startOfMonth->format('F Y'),

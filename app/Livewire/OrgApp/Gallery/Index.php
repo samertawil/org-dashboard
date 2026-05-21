@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ActivityAttchment;
 use App\Models\PurchaseRequisition;
+use App\Models\EducationalActivityDetail;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -132,8 +133,50 @@ class Index extends Component
             }
         }
 
-        // 3. Merge and Sort
-        $all = collect($genericAttachments)->merge(collect($prAttachments))->sortByDesc('uploaded_at');
+        // 3. Fetch Educational Activity Detail Attachments (JSON)
+        $eduAttachments = collect();
+        if ($this->filterSource === '' || $this->filterSource === 'educational_activity') {
+            $eduDetails = EducationalActivityDetail::with('educationalActivity')
+                ->whereNotNull('attchments')
+                ->latest()
+                ->get();
+
+            foreach ($eduDetails as $detail) {
+                if (is_array($detail->attchments)) {
+                    foreach ($detail->attchments as $att) {
+                        if (!isset($att['path'])) continue;
+
+                        $ext = strtolower($att['extension'] ?? pathinfo($att['path'], PATHINFO_EXTENSION));
+                        $typeId = $att['type_id'] ?? 49;
+                        if (!isset($att['type_id'])) {
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                                $typeId = 48;
+                            } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'mp3', 'wav', 'ogg'])) {
+                                $typeId = 50;
+                            }
+                        }
+
+                        $eduAttachments->push([
+                            'id' => 'edu-' . $detail->id . '-' . md5($att['path']),
+                            'path' => $att['path'],
+                            'name' => $att['name'] ?? basename($att['path']),
+                            'extension' => $ext,
+                            'type_id' => $typeId,
+                            'source' => 'Educational Activity',
+                            'source_id' => $detail->id,
+                            'source_title' => $detail->educationalActivity?->activity_name ?? 'Activity #' . $detail->educational_activity_id,
+                            'group_name' => $detail->educationalActivity?->group?->name ?? '',
+                            'period_start' => $detail->educationalActivity?->period_start ? $detail->educationalActivity->period_start->format('Y-m-d') : '',
+                            'date' => $att['uploaded_at'] ?? $detail->created_at,
+                            'uploaded_at' => $att['uploaded_at'] ?? $detail->created_at,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 4. Merge and Sort
+        $all = collect($genericAttachments)->merge(collect($prAttachments))->merge(collect($eduAttachments))->sortByDesc('uploaded_at');
 
         // 4. Apply Filters (Search & Type)
         // Search
@@ -156,6 +199,7 @@ class Index extends Component
 
     public function render()
     {
+      
         // Custom Pagination for merged collection
         $items = $this->genericAttachments;
         $perPage = 24;

@@ -132,6 +132,7 @@ class ShowSchedule extends Component
 
     public function render()
     {
+       
         // Parse the single Y-m string into a Carbon date
         $startOfMonth = Carbon::createFromFormat('Y-m', $this->currentYearMonth)->startOfMonth();
         $endOfMonth   = $startOfMonth->copy()->endOfMonth();

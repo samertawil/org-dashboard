@@ -62,9 +62,10 @@
             <div>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">{{ __('Assigned Groups') }}</p>
                 <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $schedule->periodGroups?->status_name ?? '—' }}</p>
+                <span class="text-sm text-zinc-700 dark:text-zinc-300">({{ $schedule->periodGroups?->description ?? '—' }})</span>
             </div>
             <div>
-                <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">{{ __('Student Group') }}</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">{{ __('Student Point') }}</p>
                 <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $schedule->group?->name ?? '—' }}</p>
             </div>
             <div>

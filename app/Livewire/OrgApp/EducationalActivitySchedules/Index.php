@@ -18,6 +18,7 @@ class Index extends Component
     public string $filterDomain   = '';
     public string $filterCategory = '';
     public string $filterGroup    = '';
+    public string $filterBatch    = '';
     public string $filterDateFrom = '';
     public string $filterDateTo   = '';
     public $sortField             = 'period_start';
@@ -34,10 +35,16 @@ class Index extends Component
     public $cloneSourceGroupId;
     public array $cloneTargetGroupIds = [];
 
+    // Report Modal
+    public $reportModalAction = null;
+    public $selectedScheduleId = null;
+    public $selectedDetailId = null;
+
     protected $queryString = [
         'search'         => ['except' => ''],
         'filterDomain'   => ['except' => ''],
         'filterCategory' => ['except' => ''],
+        'filterBatch'    => ['except' => ''],
         'filterGroup'    => ['except' => ''],
         'filterDateFrom' => ['except' => ''],
         'filterDateTo'   => ['except' => ''],
@@ -69,6 +76,12 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatingFilterBatch(): void
+    {
+        $this->filterGroup = '';
+        $this->resetPage();
+    }
+
     public function updatingFilterGroup(): void
     {
         $this->resetPage();
@@ -87,30 +100,53 @@ class Index extends Component
     #[Computed()]
     public function schedules()
     {
-        return ActivitySchedule::query()
-            ->with(['activityDomain', 'group', 'employee', 'periodGroups'])
-            ->when($this->search, fn($q) =>
+        if (empty($this->filterBatch)) {
+            $emptyQuery = ActivitySchedule::query()->where('id', '<', 0);
+            $limit = $this->viewType === 'tree' ? 1000 : $this->perPage;
+            return $emptyQuery->paginate($limit);
+        }
+
+        $query = ActivitySchedule::query()
+            ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
+            ->whereHas('group', function ($q) {
+                $q->where('batch_no', $this->filterBatch);
+            })
+            ->when(
+                $this->search,
+                fn($q) =>
                 $q->where('activity_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                  ->orWhere('notes', 'like', '%' . $this->search . '%')
+                    ->orWhere('target_category', 'like', '%' . $this->search . '%')
+                    ->orWhere('notes', 'like', '%' . $this->search . '%')
             )
-            ->when($this->filterDomain, fn($q) =>
+            ->when(
+                $this->filterDomain,
+                fn($q) =>
                 $q->where('educational_activity_domain', $this->filterDomain)
             )
-            ->when($this->filterCategory, fn($q) =>
+            ->when(
+                $this->filterCategory,
+                fn($q) =>
                 $q->where('target_category', $this->filterCategory)
             )
-            ->when($this->filterGroup, fn($q) =>
+            ->when(
+                $this->filterGroup,
+                fn($q) =>
                 $q->where('group_id', $this->filterGroup)
             )
-            ->when($this->filterDateFrom, fn($q) =>
+            ->when(
+                $this->filterDateFrom,
+                fn($q) =>
                 $q->where('period_start', '>=', $this->filterDateFrom . ' 00:00:00')
             )
-            ->when($this->filterDateTo, fn($q) =>
+            ->when(
+                $this->filterDateTo,
+                fn($q) =>
                 $q->where('period_start', '<=', $this->filterDateTo . ' 23:59:59')
             )
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
+            ->orderBy($this->sortField, $this->sortDirection);
+
+        $limit = $this->viewType === 'tree' ? 5000 : $this->perPage;
+        return $query->paginate($limit);
     }
 
     public function delete(int $id): void
@@ -123,6 +159,32 @@ class Index extends Component
         $schedule->delete();
 
         session()->flash('message', __('Schedule successfully deleted.'));
+    }
+
+    public function openReportModal($action, $scheduleId)
+    {
+        $this->selectedScheduleId = $scheduleId;
+        $this->reportModalAction = $action;
+
+        $detail = \App\Models\EducationalActivityDetail::where('educational_activity_id', $scheduleId)->first();
+
+        if ($detail) {
+            $this->selectedDetailId = $detail->id;
+        } else {
+            $this->selectedDetailId = null;
+        }
+
+        if (in_array($action, ['edit', 'show', 'gallery']) && !$this->selectedDetailId) {
+            session()->flash('error', __('No report exists for this schedule yet.'));
+            $this->reportModalAction = null;
+            return;
+        }
+
+        if ($action === 'create' && $this->selectedDetailId) {
+            $this->reportModalAction = 'edit';
+        }
+
+        $this->dispatch('modal-show', name: 'report-modal');
     }
 
 
@@ -143,7 +205,7 @@ class Index extends Component
 
     public function openCloneMonthModal(): void
     {
-        if (Gate::denies('educational-activity-schedules.create')) {
+        if (Gate::denies('educational-activity-schedules.duplicate')) {
             abort(403, 'You do not have the necessary permissions.');
         }
 
@@ -156,7 +218,7 @@ class Index extends Component
 
     public function cloneMonthSchedules(): void
     {
-        if (Gate::denies('educational-activity-schedules.create')) {
+        if (Gate::denies('educational-activity-schedules.duplicate')) {
             abort(403, 'You do not have the necessary permissions.');
         }
 
@@ -238,26 +300,46 @@ class Index extends Component
             abort(403, 'You do not have the necessary permissions.');
         }
 
+        if (empty($this->filterBatch)) {
+            session()->flash('error', __('Please select a Batch before exporting.'));
+            return;
+        }
+
         $query = ActivitySchedule::query()
-            ->with(['activityDomain', 'group', 'employee', 'periodGroups'])
-            ->when($this->search, fn($q) =>
+            ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
+            ->whereHas('group', function ($q) {
+                $q->where('batch_no', $this->filterBatch);
+            })
+            ->when(
+                $this->search,
+                fn($q) =>
                 $q->where('activity_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                  ->orWhere('notes', 'like', '%' . $this->search . '%')
+                    ->orWhere('target_category', 'like', '%' . $this->search . '%')
+                    ->orWhere('notes', 'like', '%' . $this->search . '%')
             )
-            ->when($this->filterDomain, fn($q) =>
+            ->when(
+                $this->filterDomain,
+                fn($q) =>
                 $q->where('educational_activity_domain', $this->filterDomain)
             )
-            ->when($this->filterCategory, fn($q) =>
+            ->when(
+                $this->filterCategory,
+                fn($q) =>
                 $q->where('target_category', $this->filterCategory)
             )
-            ->when($this->filterGroup, fn($q) =>
+            ->when(
+                $this->filterGroup,
+                fn($q) =>
                 $q->where('group_id', $this->filterGroup)
             )
-            ->when($this->filterDateFrom, fn($q) =>
+            ->when(
+                $this->filterDateFrom,
+                fn($q) =>
                 $q->where('period_start', '>=', $this->filterDateFrom . ' 00:00:00')
             )
-            ->when($this->filterDateTo, fn($q) =>
+            ->when(
+                $this->filterDateTo,
+                fn($q) =>
                 $q->where('period_start', '<=', $this->filterDateTo . ' 23:59:59')
             )
             ->orderBy($this->sortField, $this->sortDirection);
@@ -267,6 +349,7 @@ class Index extends Component
 
     public function render()
     {
+
         if (Gate::denies('educational-activity-schedules.index')) {
             abort(403, 'You do not have the necessary permissions.');
         }

@@ -20,7 +20,7 @@
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
             <div class="flex items-center gap-1 ml-auto">
                 @auth
-                <livewire:notification-bell />
+                    <livewire:notification-bell />
                 @endauth
                 <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
                 <flux:sidebar.collapse class="hidden lg:flex" id="flux-sidebar-toggle-desktop" />
@@ -38,18 +38,19 @@
                         wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                      <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
+                    <flux:sidebar.item icon="calendar" :href="route('calendar.index')"
                         :current="request()->routeIs('calendar.index')" wire:navigate>
                         {{ __('Calendar') }}
-                    </flux:sidebar.item> 
+                    </flux:sidebar.item>
                 @endauth
 
                 @canany(['activity.index', 'displacement.camps.index'])
-                <flux:sidebar.item icon="map" :href="route('operations.map')" :current="request()->routeIs('operations.map')" wire:navigate
+                    <flux:sidebar.item icon="map" :href="route('operations.map')"
+                        :current="request()->routeIs('operations.map')" wire:navigate
                         class="text-indigo-600 dark:text-indigo-400 font-bold">
-                        {{ __('Operations Map') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                        {{ __('Operations Map') }} <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
                     </flux:sidebar.item>
-                 
                 @endcanany
 
                 @canany([
@@ -76,18 +77,20 @@
                 @endcan
                 @can('manager.reports.all')
                     <flux:sidebar.item icon="document-chart-bar" :href="route('reports.monthly.manager.report')"
-                    :current="request()->routeIs('reports.monthly.manager.report')" wire:navigate
-                    class="text-emerald-600 dark:text-emerald-400 font-bold">
-                    {{ __('Monthly Manager Report') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
-                </flux:sidebar.item>
- @endcan
- @canany(['activity.index','activity.show','student.index','student.show','manager.reports.all'])
-                <flux:sidebar.item icon="list-bullet" :href="route('reports.daily.log.report')"
-                    :current="request()->routeIs('reports.daily.log.report')" wire:navigate
-                    class="text-indigo-600 dark:text-indigo-400 font-bold">
-                    {{ __('Daily Entries Log') }} <flux:badge size="sm" color="red" class="ml-1 uppercase text-[10px]">NEW</flux:badge>
-                </flux:sidebar.item>
-                 @endcanany
+                        :current="request()->routeIs('reports.monthly.manager.report')" wire:navigate
+                        class="text-emerald-600 dark:text-emerald-400 font-bold">
+                        {{ __('Monthly Manager Report') }} <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                    </flux:sidebar.item>
+                @endcan
+                @canany(['activity.index', 'activity.show', 'student.index', 'student.show', 'manager.reports.all'])
+                    <flux:sidebar.item icon="list-bullet" :href="route('reports.daily.log.report')"
+                        :current="request()->routeIs('reports.daily.log.report')" wire:navigate
+                        class="text-indigo-600 dark:text-indigo-400 font-bold">
+                        {{ __('Daily Entries Log') }} <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                    </flux:sidebar.item>
+                @endcanany
             </flux:sidebar.group>
 
         </flux:sidebar.nav>
@@ -98,7 +101,8 @@
 
 
                 @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
-                    'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index','teacher-student-groups.create'])
+                    'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index',
+                    'teacher-student-groups.create'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Education')" icon="book-open-text"
                         class="grid">
 
@@ -149,24 +153,29 @@
 
                 {{-- Educational Activity Schedules Group --}}
                 @canany(['educational-activity-schedules.index', 'educational-activity-schedules.create'])
-                    <flux:sidebar.group expandable :expanded="false"
-                        icon="calendar-days"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="false" icon="calendar-days" class="grid">
                         <x-slot:heading>
                             {{ __('Educational Plane') }}
-                         
+
                         </x-slot:heading>
 
                         @can('educational-activity-schedules.index')
-                            <flux:sidebar.item icon="list-bullet"
-                                :href="route('educational-activity-schedules.index')"
+                            <flux:sidebar.item icon="list-bullet" :href="route('educational-activity-schedules.index')"
                                 :current="request()->routeIs('educational-activity-schedules.index', 'educational-activity-schedules.show')"
                                 wire:navigate>
-                                {{ __('Schedules List') }} 
+                                {{ __('Schedules List') }}
                             </flux:sidebar.item>
-                         
                         @endcan
-
+                        {{-- 
+                        @can('educational-activity-detail.index')
+                            <flux:sidebar.item icon="document-text"
+                                :href="route('educational-activity-detail.index')"
+                                :current="request()->routeIs('educational-activity-detail.index', 'educational-activity-detail.show')"
+                                wire:navigate>
+                                {{ __('Plane Details') }} 
+                            </flux:sidebar.item>
+                        @endcan  
+ 
                         @can('educational-activity-schedules.create')
                             <flux:sidebar.item icon="plus"
                                 :href="route('educational-activity-schedules.create')"
@@ -174,7 +183,7 @@
                                 wire:navigate>
                                 {{ __('Add Schedule') }}
                             </flux:sidebar.item>
-                        @endcan
+                        @endcan --}}
 
                     </flux:sidebar.group>
                 @endcanany
@@ -292,7 +301,7 @@
                             {{ __('Feedback Reports') }}
                         </flux:sidebar.item>
 
-                     
+
                     </flux:sidebar.group>
                 @endcanany
             </flux:sidebar.group>
@@ -384,7 +393,7 @@
 
                 <!-- Survey Group -->
                 @canany(['survey.index', 'survey.create', 'survey.manage', 'survey.export', 'survey-answers.create',
-                    'survey-answers.create','survey.grading.scale.index','outer.servey.list'])
+                    'survey-answers.create', 'survey.grading.scale.index', 'outer.servey.list'])
                     <flux:sidebar.group expandable :expanded="false" :heading="__('Surveys')" icon="briefcase"
                         class="grid">
 
@@ -412,8 +421,10 @@
                             {{ __('Grading Scales') }}
                         </flux:sidebar.item>
 
-                        <flux:sidebar.item icon="adjustments-horizontal" :href="route('org-app.survey-questions.comparison-scale.index')"
-                            :current="request()->routeIs('org-app.survey-questions.comparison-scale.index')" wire:navigate>
+                        <flux:sidebar.item icon="adjustments-horizontal"
+                            :href="route('org-app.survey-questions.comparison-scale.index')"
+                            :current="request()->routeIs('org-app.survey-questions.comparison-scale.index')"
+                            wire:navigate>
                             {{ __('Comparison Scales') }}
                         </flux:sidebar.item>
 

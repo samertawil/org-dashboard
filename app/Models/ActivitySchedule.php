@@ -62,6 +62,14 @@ class ActivitySchedule extends Model
     }
 
     /**
+     * تفاصيل التقرير للنشاط
+     */
+    public function activityDetail(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EducationalActivityDetail::class, 'educational_activity_id');
+    }
+
+    /**
      * المجموعة الدراسية المرتبطة
      */
     public function group(): BelongsTo

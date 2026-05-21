@@ -1,1 +1,0 @@
-work-team-<?php echo e($index); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/35e9edb7fece611c29d851add063a1ed.blade.php ENDPATH**/ ?>

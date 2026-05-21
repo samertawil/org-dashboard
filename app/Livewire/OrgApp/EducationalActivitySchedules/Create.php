@@ -12,12 +12,46 @@ class Create extends Component
 {
     use FormTrait;
 
+    /**
+     * Called once when the component is first loaded.
+     * If ?copy_from=ID is present in the URL, pre-fill all form fields
+     * from that existing schedule so the user only needs to adjust & save.
+     */
+    public function mount(): void
+    {
+        $copyFromId = request()->query('copy_from');
+
+        if ($copyFromId) {
+            $source = ActivitySchedule::find($copyFromId);
+
+            if ($source) {
+                $this->group_id                    = $source->group_id ?? '';
+                $this->educational_activity_domain = $source->educational_activity_domain ?? '';
+                $this->target_category             = $source->target_category ?? '';
+                $this->activity_name               = $source->activity_name ?? '';
+                $this->activity_description        = $source->activity_description ?? '';
+                $this->educational_period_groups   = $source->educational_period_groups ?? '';
+                $this->notes                       = $source->notes ?? '';
+                $this->sort_order                  = $source->sort_order ?? 0;
+                $this->activation                  = $source->activation ?? 1;
+                $this->employee_id                 = $source->employee_id ?? '';
+
+                // Keep the same time-of-day but clear the date so user picks a new date
+                if ($source->period_start) {
+                    $this->period_start = $source->period_start->format('Y-m-d\TH:i');
+                }
+                if ($source->period_end) {
+                    $this->period_end = $source->period_end->format('Y-m-d\TH:i');
+                }
+            }
+        }
+    }
+
     public function save()
     {
         $this->validate();
 
         ActivitySchedule::create([
-          
             'group_id'                    => $this->group_id ?: null,
             'educational_activity_domain' => $this->educational_activity_domain ?: null,
             'target_category'             => $this->target_category ?: null,
@@ -45,9 +79,15 @@ class Create extends Component
             abort(403, 'You do not have the necessary permissions.');
         }
 
+        $isCopy  = (bool) request()->query('copy_from');
+        $heading = $isCopy
+            ? __('Copy Educational Activity Schedule')
+            : __('Create Educational Activity Schedule');
+
         return view('livewire.org-app.educational-activity-schedules.create', [
-            'heading' => __('Create Educational Activity Schedule'),
+            'heading' => $heading,
             'type'    => 'save',
         ]);
     }
 }
+

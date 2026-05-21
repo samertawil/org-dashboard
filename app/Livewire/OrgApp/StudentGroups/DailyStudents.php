@@ -69,7 +69,8 @@ class DailyStudents extends Component
         if ($dayOfWeek === 4) { $enrollmentTypes[] = 'sun_tue_thu'; } // Thursday
 
         return $this->group->students()
-            ->select('students.id', 'full_name', 'identity_number', 'enrollment_type', 'students.activation')
+            ->select('students.id', 'full_name', 'identity_number', 'enrollment_type', 'students.activation', 'students.status_id')
+            ->with('status:id,status_name')
             ->whereIn('enrollment_type', $enrollmentTypes)
             ->get();
     }
@@ -116,9 +117,17 @@ class DailyStudents extends Component
 
     public function render()
     {
-      
+        $students = $this->getStudents();
+        $groupedStudents = $students->groupBy('status_id');
+
+        // Load status names for group headers
+        $statusNames = \App\Models\Status::whereIn('id', $groupedStudents->keys()->filter())
+            ->pluck('description', 'id');
+
         return view('livewire.org-app.student-groups.daily-students', [
-            'students' => $this->getStudents()
+            'students' => $students,
+            'groupedStudents' => $groupedStudents,
+            'statusNames' => $statusNames,
         ]);
     }
 }
