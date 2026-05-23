@@ -33,7 +33,7 @@
         }
 
         body {
-            font-family: 'DejaVu Sans', 'Cairo', 'Amiri', sans-serif;
+            font-family: 'Amiri', 'DejaVu Sans', sans-serif;
             color: #333;
             font-size: 12px;
             line-height: 1.5;

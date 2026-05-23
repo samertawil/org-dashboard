@@ -38,6 +38,12 @@ class SurveyTable extends Model
         return $this->hasMany(SurveyQuestion::class, 'survey_table_id');
     }
 
+    public function surveyQuestions()
+    {
+        return $this->hasMany(SurveyQuestion::class, 'survey_for_section', 'survey_for_section');
+    }
+
+
     public function answers()
     {
         return $this->hasMany(SurveyAnswer::class, 'survey_table_id');

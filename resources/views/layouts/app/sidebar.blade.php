@@ -269,13 +269,14 @@
                 @canany(['reports.all', 'subject.index', 'subject.create', 'student.group.index',
                     'student.group.create', 'student.index', 'student.create', 'reports.groups.attendance',
                     'teacher-student-groups.index', 'teacher-student-groups.create', 'student.group.date.students',
-                    'reports.educational.progress'])
-                    <flux:sidebar.group expandable :expanded="request()->routeIs(['student.setup.map', 'reports.*'])"
+                    'reports.educational.progress', 'survey.manage', 'survey-questions.show'])
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['student.setup.map', 'reports.*', 'survey-questions.show'])"
                         :heading="__('Statistics & Reports')" icon="chart-pie" class="grid">
 
                         @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
                             'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index',
-                            'teacher-student-groups.create'])
+                            'teacher-student-groups.create', 'survey.manage', 'survey-questions.show'])
                             <flux:sidebar.group :heading="__('Education')" class="grid">
                                 @canany(['student.setup.map', 'reports.all'])
                                     <flux:sidebar.item icon="map" :href="route('student.setup.map')"
@@ -294,6 +295,12 @@
                                     <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
                                         :current="request()->routeIs('reports.educational.progress')" wire:navigate>
                                         {{ __('Educational Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('survey-questions.show')
+                                    <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"
+                                        :current="request()->routeIs('survey-questions.show')" wire:navigate>
+                                        {{ __('Survey Tree View') }}
                                     </flux:sidebar.item>
                                 @endcan
                             </flux:sidebar.group>

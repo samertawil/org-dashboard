@@ -19,57 +19,120 @@ class Arabic
     {
         $str = (string) $str;
         
-        // Basic Hebrew/Arabic range check to avoid processing English text extensively
-        if (! preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $str)) {
+        if (!preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $str)) {
             return $str;
         }
 
-        $str = $this->utf8ToHif($str);
-        
-        // Split utf8 string into array of chars
-        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
-        $total = count($chars);
-        $output = '';
+        // Split UTF-8 string into array of tokens by space boundaries
+        $tokens = preg_split('/(\s+)/u', $str, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $processedTokens = [];
 
-        for ($i = 0; $i < $total; $i++) {
-            $char = $chars[$i];
+        foreach ($tokens as $token) {
+            if ($token === '') continue;
             
-            // Check if char is Arabic
-            if ($this->isArabic($char)) {
-                $prev = $i > 0 ? $chars[$i - 1] : null;
-                $next = $i < $total - 1 ? $chars[$i + 1] : null;
-
-                $type = 'isolated';
+            // Check if token contains Arabic
+            if (preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $token)) {
+                // Split token into runs of Arabic and non-Arabic
+                $subTokens = preg_split('/([\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]+)/u', $token, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+                $processedSubTokens = [];
                 
-                if ($prev && $next && $this->isArabic($prev) && $this->isArabic($next) && $this->connectsNext($prev) && $this->connectsPrevious($char) && $this->connectsNext($char) && $this->connectsPrevious($next)) {
-                    $type = 'medial';
-                } elseif ($prev && $this->isArabic($prev) && $this->connectsNext($prev) && $this->connectsPrevious($char)) {
-                    $type = 'final';
-                } elseif ($next && $this->isArabic($next) && $this->connectsNext($char) && $this->connectsPrevious($next)) {
-                    $type = 'initial';
+                foreach ($subTokens as $subToken) {
+                    if (preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $subToken)) {
+                        // Arabic sub-token: reshape and reverse
+                        $processedSubTokens[] = $this->reshapeArabicSubToken($subToken);
+                    } else {
+                        // Non-Arabic sub-token: mirror brackets
+                        $processedSubTokens[] = $this->mirrorBrackets($subToken);
+                    }
                 }
-
-                $output .= $this->getCharForm($char, $type);
+                
+                // Reverse the sequence of sub-tokens inside the Arabic-containing token
+                $processedTokens[] = implode('', array_reverse($processedSubTokens));
             } else {
-                $output .= $char;
+                // Pure LTR token: keep as is
+                $processedTokens[] = $token;
             }
         }
+
+        // Reverse the order of all tokens to render RTL in LTR flow
+        return implode('', array_reverse($processedTokens));
+    }
+
+    protected function reshapeArabicSubToken($subToken)
+    {
+        $subChars = preg_split('//u', $subToken, -1, PREG_SPLIT_NO_EMPTY);
+        $len = count($subChars);
+        $reshapedSub = [];
         
-        // Reverse for RTL visual support if mostly Arabic
-        // Simple word reverse might be needed or full string reverse
-        // For dompdf without RTL support, usually we accept visual ordering:
-        // Identify runs of Arabic and reverse them? 
-        // Or just reverse the whole string if it's an Arabic block?
+        for ($j = 0; $j < $len; $j++) {
+            $char = $subChars[$j];
+            
+            // Lam-Alef Ligature Check
+            if ($char === mb_chr(0x0644) && $j < $len - 1) {
+                $nextChar = $subChars[$j + 1];
+                $nextOrd = mb_ord($nextChar);
+                $ligatureCode = null;
+                
+                if ($nextOrd === 0x0622) { // ALEF MADDA
+                    $ligatureCode = [0xFEF5, 0xFEF6];
+                } elseif ($nextOrd === 0x0623) { // ALEF HAMZA ABOVE
+                    $ligatureCode = [0xFEF7, 0xFEF8];
+                } elseif ($nextOrd === 0x0625) { // ALEF HAMZA BELOW
+                    $ligatureCode = [0xFEF9, 0xFEFA];
+                } elseif ($nextOrd === 0x0627) { // ALEF
+                    $ligatureCode = [0xFEFB, 0xFEFC];
+                }
+                
+                if ($ligatureCode !== null) {
+                    $prev = $j > 0 ? $subChars[$j - 1] : null;
+                    $connectsPrev = ($prev && $this->isArabic($prev) && $this->connectsNext($prev));
+                    
+                    $formOrd = $connectsPrev ? $ligatureCode[1] : $ligatureCode[0];
+                    $reshapedSub[] = mb_chr($formOrd);
+                    $j++; // Skip next Alef
+                    continue;
+                }
+            }
+            
+            // Standard reshaping
+            $prev = $j > 0 ? $subChars[$j - 1] : null;
+            $next = $j < $len - 1 ? $subChars[$j + 1] : null;
+            
+            $type = 'isolated';
+            
+            $prevConnects = ($prev && $this->isArabic($prev) && $this->connectsNext($prev));
+            $nextConnects = ($next && $this->isArabic($next) && $this->connectsPrevious($next));
+            
+            if ($prevConnects && $nextConnects && $this->connectsPrevious($char) && $this->connectsNext($char)) {
+                $type = 'medial';
+            } elseif ($prevConnects && $this->connectsPrevious($char)) {
+                $type = 'final';
+            } elseif ($nextConnects && $this->connectsNext($char)) {
+                $type = 'initial';
+            }
+            
+            $reshapedSub[] = $this->getCharForm($char, $type);
+        }
         
-        // Let's try reversing the Arabic words sequence or the whole string based on common solutions
-        // Often we just reverse the whole string if it is primarily RTL.
-        
-        // Reversing the string (keeping unicode intact)
-        preg_match_all('/./us', $output, $ar);
-        
-        // We need to handle mixed content carefully, but for now let's reverse the whole result
-        // if it's primarily Arabic context.
-        return implode('', array_reverse($ar[0]));
+        return implode('', array_reverse($reshapedSub));
+    }
+
+    protected function mirrorBrackets($str)
+    {
+        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
+        $result = '';
+        foreach ($chars as $char) {
+            if ($char === '(') $result .= ')';
+            elseif ($char === ')') $result .= '(';
+            elseif ($char === '[') $result .= ']';
+            elseif ($char === ']') $result .= '[';
+            elseif ($char === '{') $result .= '}';
+            elseif ($char === '}') $result .= '{';
+            elseif ($char === '<') $result .= '>';
+            elseif ($char === '>') $result .= '<';
+            else $result .= $char;
+        }
+        return $result;
     }
 
     protected function isArabic($char)
@@ -87,19 +150,20 @@ class Arabic
         $non_connecting = [
             0x0622, 0x0623, 0x0624, 0x0625, 0x0627, 0x0629, 
             0x062F, 0x0630, 0x0631, 0x0632, 0x0648, 0x0671,
-            0x0649 // Alef Maksura usually connects? No, rarely in middle. It behaves like Ya but only final? Actually usually final unless ligatured.
-            // Let's stick to standard unconnectors
+            0x0649 // Alef Maksura usually connects
         ];
         
         if (in_array($c, $non_connecting)) return false;
         
-        // Basic range check for standard arabic letters
+        // Presentation form Lam-Alef ligatures also do not connect next
+        if ($c >= 0xFEF5 && $c <= 0xFEFC) return false;
+        
         return true; 
     }
 
     protected function connectsPrevious($char)
     {
-        return true; // Most connect from previous
+        return true;
     }
 
     // Simplified mapping for basic testing - In reality this table is huge

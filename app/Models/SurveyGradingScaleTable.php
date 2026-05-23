@@ -38,4 +38,9 @@ class SurveyGradingScaleTable extends Model
     {
         return $this->belongsTo(Employee::class, 'updated_by');
     }
+
+    public function gradingScale()
+    {
+        return $this->hasMany(SurveyGradingScaleDescription::class, 'survey_grading_scale_id');
+    }
 }

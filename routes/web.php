@@ -258,6 +258,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     //Survey
     Route::get('/surveys', \App\Livewire\OrgApp\Survey\Index::class)->name('survey.index');
     Route::get('/survey-manage/{survey_table_id?}',SurveyQuestionsManage::class)->name('survey.manage');
+    Route::get('/survey-questions/show', \App\Livewire\OrgApp\SurveyQuestions\Show::class)->name('survey-questions.show');
     Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
     Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');
