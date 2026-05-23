@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class BeneficiaryImpact extends Component
 {
-    public $dateFrom='2023-10-30';
+    public $dateFrom = '2023-10-30';
     public $dateTo;
     public $selectedRegion;
 
@@ -24,7 +24,7 @@ class BeneficiaryImpact extends Component
 
     public function render()
     {
-        if (Gate::denies('reports.all')) {
+        if (Gate::denies('reports.beneficiary.impact')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         // 1. Base Query for Activities
@@ -40,17 +40,17 @@ class BeneficiaryImpact extends Component
 
         // 2. KPIs
         $totalBeneficiaries = $activities->sum(fn($a) => $a->beneficiaries->sum('beneficiaries_count'));
-        
+
         // Count distinct activities impacting beneficiaries
         $activitiesWithBeneficiaries = $activities->filter(fn($a) => $a->beneficiaries->count() > 0)->count();
-        
+
         // Calculate average beneficiaries per activity (for those that have any)
-        $avgBeneficiariesPerActivity = $activitiesWithBeneficiaries > 0 
-            ? round($totalBeneficiaries / $activitiesWithBeneficiaries) 
+        $avgBeneficiariesPerActivity = $activitiesWithBeneficiaries > 0
+            ? round($totalBeneficiaries / $activitiesWithBeneficiaries)
             : 0;
 
         // 3. Chart Data
-        
+
         // Chart 1: Beneficiaries by Type
         // We need to flatten the beneficiaries and group by their type name
         $beneficiariesByType = $activities->pluck('beneficiaries')->flatten()
@@ -65,7 +65,7 @@ class BeneficiaryImpact extends Component
         // Chart 2: Beneficiaries by Region (Impact Spread)
         // Group activities by region and sum their beneficiaries
         $beneficiariesByRegion = $activities->groupBy(fn($a) => $a->regions->region_name ?? 'Unknown')
-             ->map->sum(fn($a) => $a->beneficiaries->sum('beneficiaries_count'));
+            ->map->sum(fn($a) => $a->beneficiaries->sum('beneficiaries_count'));
 
         $regionChartData = [
             'labels' => $beneficiariesByRegion->keys()->toArray(),
@@ -79,8 +79,8 @@ class BeneficiaryImpact extends Component
             ->map->sum(fn($a) => $a->beneficiaries->sum('beneficiaries_count'));
 
         $monthlyChartData = [
-             'labels' => $monthlyReach->keys()->toArray(),
-             'series' => $monthlyReach->values()->toArray()
+            'labels' => $monthlyReach->keys()->toArray(),
+            'series' => $monthlyReach->values()->toArray()
         ];
 
 

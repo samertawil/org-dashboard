@@ -101,16 +101,10 @@
 
 
                 @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
-                    'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index',
-                    'teacher-student-groups.create'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Education')" icon="book-open-text"
-                        class="grid">
-
-                        <flux:sidebar.item icon="map" :href="route('student.setup.map')"
-                            :current="request()->routeIs('student.setup.map')" wire:navigate
-                            class="text-indigo-600 dark:text-indigo-400 font-bold">
-                            {{ __('Setup & Tracking') }}
-                        </flux:sidebar.item>
+                    'student.index', 'student.create', 'teacher-student-groups.index', 'teacher-student-groups.create'])
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['subject.*', 'student.group.*', 'student.index', 'student.create', 'student.edit', 'student.show', 'student.imported-files', 'teacher-student-groups.*'])"
+                        :heading="__('Education')" icon="book-open-text" class="grid">
 
                         @can('subject.index')
                             <flux:sidebar.item icon="list-bullet" :href="route('subject.index')"
@@ -132,12 +126,7 @@
                                 {{ __('Students List') }}
                             </flux:sidebar.item>
                         @endcan
-                        @can('reports.groups.attendance')
-                            <flux:sidebar.item icon="document-text" :href="route('reports.groups.attendance')"
-                                :current="request()->routeIs('reports.groups.attendance')" wire:navigate>
-                                {{ __('Groups Attendance') }}
-                            </flux:sidebar.item>
-                        @endcan
+
 
                         @can('teacher-student-groups.index')
                             <flux:sidebar.item icon="document-text" :href="route('teacher-student-groups.index')"
@@ -153,7 +142,9 @@
 
                 {{-- Educational Activity Schedules Group --}}
                 @canany(['educational-activity-schedules.index', 'educational-activity-schedules.create'])
-                    <flux:sidebar.group expandable :expanded="false" icon="calendar-days" class="grid">
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['educational-activity-schedules.*', 'educational-activity-detail.*'])"
+                        icon="calendar-days" class="grid">
                         <x-slot:heading>
                             {{ __('Educational Plane') }}
 
@@ -192,8 +183,9 @@
 
 
                 @canany(['activity.index', 'activity.create', 'sector.show'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Activities')"
-                        icon="clipboard-document-list" class="grid">
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['activity.feed', 'activity.index', 'activity.create', 'activity.edit', 'activity.show', 'activity.gallery', 'sector.show'])"
+                        :heading="__('Activities')" icon="clipboard-document-list" class="grid">
 
                         @can('activity.index')
                             <flux:sidebar.item icon="newspaper" :href="route('activity.feed')"
@@ -227,8 +219,8 @@
 
                 <!-- Purchase Group -->
                 @canany(['purchase_request.index', 'purchase_request.create'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Purchase')" icon="shopping-cart"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs(['purchase_request.*', 'quotation.*'])"
+                        :heading="__('Purchase')" icon="shopping-cart" class="grid">
                         @can('purchase_request.index')
                             <flux:sidebar.item icon="list-bullet" :href="route('purchase_request.index')"
                                 :current="request()->routeIs('purchase_request.index')" wire:navigate>
@@ -246,8 +238,9 @@
                 <!-- Camps And Beneficiaries -->
                 @canany(['displacement.camps.index', 'displacement.camps.create', 'camps.residents.index',
                     'activity.beneficiaries.index'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Camps/Beneficiaries')"
-                        icon="map" class="grid">
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['displacement.camps.*', 'camps.residents.*', 'activity.beneficiaries.*'])"
+                        :heading="__('Camps/Beneficiaries')" icon="map" class="grid">
                         @can('displacement.camps.index')
                             <flux:sidebar.item icon="list-bullet" :href="route('displacement.camps.index')"
                                 :current="request()->routeIs('displacement.camps.index')" wire:navigate>
@@ -273,34 +266,69 @@
                 @endcanany
                 <!-- Statistics  Group -->
 
-                @canany(['reports.all'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Statistics')" icon="chart-pie"
-                        class="grid">
-                        <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.activity.overview')"
-                            :current="request()->routeIs('reports.activity.overview')" wire:navigate>
-                            {{ __('Activity Reports') }}
-                        </flux:sidebar.item>
+                @canany(['reports.all', 'subject.index', 'subject.create', 'student.group.index',
+                    'student.group.create', 'student.index', 'student.create', 'reports.groups.attendance',
+                    'teacher-student-groups.index', 'teacher-student-groups.create', 'student.group.date.students',
+                    'reports.educational.progress'])
+                    <flux:sidebar.group expandable :expanded="request()->routeIs(['student.setup.map', 'reports.*'])"
+                        :heading="__('Statistics & Reports')" icon="chart-pie" class="grid">
 
-                        <flux:sidebar.item icon="currency-dollar" :href="route('reports.financial.summary')"
-                            :current="request()->routeIs('reports.financial.summary')" wire:navigate>
-                            {{ __('Financial Reports') }}
-                        </flux:sidebar.item>
+                        @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
+                            'student.index', 'student.create', 'reports.groups.attendance', 'teacher-student-groups.index',
+                            'teacher-student-groups.create'])
+                            <flux:sidebar.group :heading="__('Education')" class="grid">
+                                @canany(['student.setup.map', 'reports.all'])
+                                    <flux:sidebar.item icon="map" :href="route('student.setup.map')"
+                                        :current="request()->routeIs('student.setup.map')" wire:navigate
+                                        class="text-indigo-600 dark:text-indigo-400 font-bold">
+                                        {{ __('Setup & Tracking') }}
+                                    </flux:sidebar.item>
+                                @endcanany
+                                @canany(['reports.groups.attendance', 'student.group.date.students', 'reports.all'])
+                                    <flux:sidebar.item icon="document-text" :href="route('reports.groups.attendance')"
+                                        :current="request()->routeIs('reports.groups.attendance')" wire:navigate>
+                                        {{ __('Groups Attendance') }}
+                                    </flux:sidebar.item>
+                                @endcanany
+                                @can('reports.educational.progress')
+                                    <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
+                                        :current="request()->routeIs('reports.educational.progress')" wire:navigate>
+                                        {{ __('Educational Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                            </flux:sidebar.group>
+                        @endcanany
 
-                        <flux:sidebar.item icon="user-group" :href="route('reports.beneficiary.impact')"
-                            :current="request()->routeIs('reports.beneficiary.impact')" wire:navigate>
-                            {{ __('Beneficiaries Reports') }}
-                        </flux:sidebar.item>
+                        @canany(['reports.all', 'reports.activity.overview', 'reports.financial.summary',
+                            'reports.beneficiary.impact', 'reports.feedback.analysis'])
+                            <flux:sidebar.group :heading="__('Relief')" class="grid">
+                                @can('reports.activity.overview')
+                                    <flux:sidebar.item icon="presentation-chart-line" :href="route('reports.activity.overview')"
+                                        :current="request()->routeIs('reports.activity.overview')" wire:navigate>
+                                        {{ __('Activity Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('reports.financial.summary')
+                                    <flux:sidebar.item icon="currency-dollar" :href="route('reports.financial.summary')"
+                                        :current="request()->routeIs('reports.financial.summary')" wire:navigate>
+                                        {{ __('Financial Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('reports.beneficiary.impact')
+                                    <flux:sidebar.item icon="user-group" :href="route('reports.beneficiary.impact')"
+                                        :current="request()->routeIs('reports.beneficiary.impact')" wire:navigate>
+                                        {{ __('Beneficiaries Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('reports.feedback.analysis')
+                                    <flux:sidebar.item icon="star" :href="route('reports.feedback.analysis')"
+                                        :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
+                                        {{ __('Feedback Reports') }}
+                                    </flux:sidebar.item>
+                                @endcan
 
-                        <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
-                            :current="request()->routeIs('reports.educational.progress')" wire:navigate>
-                            {{ __('Educational Reports') }}
-                        </flux:sidebar.item>
-
-                        <flux:sidebar.item icon="star" :href="route('reports.feedback.analysis')"
-                            :current="request()->routeIs('reports.feedback.analysis')" wire:navigate>
-                            {{ __('Feedback Reports') }}
-                        </flux:sidebar.item>
-
+                            </flux:sidebar.group>
+                        @endcanany
 
                     </flux:sidebar.group>
                 @endcanany
@@ -319,8 +347,8 @@
                 @endcanany
                 <!-- Department Group -->
                 @can('department.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Department')" icon="flag"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('department.*')"
+                        :heading="__('Department')" icon="flag" class="grid">
                         <flux:sidebar.item icon="plus" :href="route('department.create')"
                             :current="request()->routeIs('department.create')" wire:navigate>
                             {{ __('Create Department') }}
@@ -337,8 +365,8 @@
 
                 <!-- Employees Group -->
                 @can('employee.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Employees')" icon="user-group"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('employee.*')" :heading="__('Employees')"
+                        icon="user-group" class="grid">
                         <flux:sidebar.item icon="plus" :href="route('employee.create')"
                             :current="request()->routeIs('employee.create')" wire:navigate>
                             {{ __('Create Employees') }}
@@ -351,8 +379,8 @@
                 @endcan
 
                 @canany(['currency.index', 'currency.create'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Currency')" icon="currency-dollar"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('currency.*')" :heading="__('Currency')"
+                        icon="currency-dollar" class="grid">
                         @can('currency.create')
                             <flux:sidebar.item icon="plus" :href="route('currency.create')"
                                 :current="request()->routeIs('currency.create')" wire:navigate>
@@ -374,8 +402,8 @@
 
                 <!-- Partners Group -->
                 @canany(['partner.index', 'partner.create'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Partners')" icon="briefcase"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('partner.*')" :heading="__('Partners')"
+                        icon="briefcase" class="grid">
                         @can('partner.create')
                             <flux:sidebar.item icon="plus" :href="route('partner.create')"
                                 :current="request()->routeIs('partner.create')" wire:navigate>
@@ -394,8 +422,9 @@
                 <!-- Survey Group -->
                 @canany(['survey.index', 'survey.create', 'survey.manage', 'survey.export', 'survey-answers.create',
                     'survey-answers.create', 'survey.grading.scale.index', 'outer.servey.list'])
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Surveys')" icon="briefcase"
-                        class="grid">
+                    <flux:sidebar.group expandable
+                        :expanded="request()->routeIs(['survey.*', 'org-app.survey-questions.comparison-scale.*', 'survey-answers.*', 'reports.survey-comparison'])"
+                        :heading="__('Surveys')" icon="briefcase" class="grid">
 
                         @can('survey.manage')
                             <flux:sidebar.item icon="list-bullet" :href="route('survey.manage')"
@@ -447,8 +476,8 @@
 
                 <!-- Status Group -->
                 @can('status.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Status')" icon="flag"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs(['status.*', 'system.names.*'])"
+                        :heading="__('Status')" icon="flag" class="grid">
                         <flux:sidebar.item icon="plus" :href="route('status.create')"
                             :current="request()->routeIs('status.create')" wire:navigate>
                             {{ __('Create Status') }}
@@ -471,8 +500,8 @@
 
 
                 @can('ability.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Permissions')" icon="key"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs(['ability.*', 'role.*'])"
+                        :heading="__('Permissions')" icon="key" class="grid">
 
                         <flux:sidebar.item icon="plus" :href="route('ability.create')"
                             :current="request()->routeIs('ability.create')" wire:navigate>
@@ -501,8 +530,8 @@
 
                 <!-- Users Group -->
                 @can('user.create')
-                    <flux:sidebar.group expandable :expanded="false" :heading="__('Users')" icon="users"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('user.*')" :heading="__('Users')"
+                        icon="users" class="grid">
                         <flux:sidebar.item icon="plus" :href="route('user.create')"
                             :current="request()->routeIs('user.create')" wire:navigate>
                             {{ __('Create User') }}

@@ -6,7 +6,6 @@ use App\Models\Region;
 use App\Models\Student;
 use App\Models\StudentGroup;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -17,29 +16,29 @@ class EducationalProgress extends Component
 
     public function render()
     {
-        if (Gate::denies('reports.all')) {
+        if (Gate::denies('reports.educational.progress')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         // 1. Base Query for Students
         $studentQuery = Student::query()
-             ->where('activation', 1);
+            ->where('activation', 1);
 
         if ($this->selectedRegion) {
-             $studentQuery->where('region_id', $this->selectedRegion);
+            $studentQuery->where('region_id', $this->selectedRegion);
         }
-        
-         if ($this->selectedGroup) {
-             $studentQuery->where('student_groups_id', $this->selectedGroup);
+
+        if ($this->selectedGroup) {
+            $studentQuery->where('student_groups_id', $this->selectedGroup);
         }
 
         $students = $studentQuery->with(['studentGroup', 'region'])->get();
-        
+
         // 2. Base Query for Groups (to filter charts if needed and calculate total capacity)
         $groupQuery = StudentGroup::query()->where('activation', 1);
         if ($this->selectedRegion) {
             $groupQuery->where('region_id', $this->selectedRegion);
         }
-         if ($this->selectedGroup) {
+        if ($this->selectedGroup) {
             $groupQuery->where('id', $this->selectedGroup);
         }
         $groups = $groupQuery->get();
@@ -49,7 +48,7 @@ class EducationalProgress extends Component
         $totalStudents = $students->count();
         $totalGroups = $groups->count();
         $totalCapacity = $groups->sum('max_students');
-        
+
         // Calculate Enrollment Rate directly from current_student_count in groups for accuracy over raw student list if filtered
         // OR filtering the students list is better if filters applied.
         // Let's us Students list to be dynamic with filters.
@@ -61,23 +60,23 @@ class EducationalProgress extends Component
         // Assuming 'dailyAttendances' relation exists on Student as checked.
         $totalAttendanceRecords = 0;
         $presentRecords = 0;
-        
+
         // To avoid N+1, ideally we'd load this count. For now, let's skip complex attendance calc to avoid SQL errors if table empty/different.
         // We will show Gender and Age distribution instead which are reliable on Student model.
 
         // 4. Chart Data
-        
+
         // Chart 1: Gender Distribution
         $genderDistribution = $students->groupBy('gender')
             ->map->count();
-            
+
         // Map common values 1=Male, 2=Female if integers, or strings. Assuming strings or standard ID.
         // Let's just use keys.
         $genderChartData = [
-             'labels' => $genderDistribution->keys()->map(fn($k) => $k == 1 ? __('Male') : ($k == 2 ? __('Female') : $k))->toArray(),
-             'series' => $genderDistribution->values()->toArray()
+            'labels' => $genderDistribution->keys()->map(fn($k) => $k == 1 ? __('Male') : ($k == 2 ? __('Female') : $k))->toArray(),
+            'series' => $genderDistribution->values()->toArray()
         ];
-        
+
         // Chart 2: Students per Group (Top 10)
         $groupCounts = $students->groupBy(fn($s) => $s->studentGroup->name ?? 'Unassigned')
             ->map->count()
@@ -85,34 +84,34 @@ class EducationalProgress extends Component
             ->take(10);
 
         $groupChartData = [
-             'labels' => $groupCounts->keys()->toArray(),
-             'series' => $groupCounts->values()->toArray()
+            'labels' => $groupCounts->keys()->toArray(),
+            'series' => $groupCounts->values()->toArray()
         ];
-        
+
         // Chart 3: Age Distribution (Calculated from birth_date)
-        $ageDistribution = $students->map(function($student) {
+        $ageDistribution = $students->map(function ($student) {
             if (!$student->birth_date) return 'Unknown';
             return Carbon::parse($student->birth_date)->age;
-        })->groupBy(function($age) {
+        })->groupBy(function ($age) {
             if ($age === 'Unknown') return 'Unknown';
             if ($age < 6) return '< 6';
             if ($age <= 12) return '6-12';
             if ($age <= 18) return '13-18';
             return '18+';
         })->map->count();
-        
+
         // Ensure consistent order
         $ageOrder = ['< 6', '6-12', '13-18', '18+', 'Unknown'];
         $sortedAgeData = [];
         foreach ($ageOrder as $key) {
-             if (isset($ageDistribution[$key])) {
-                 $sortedAgeData[$key] = $ageDistribution[$key];
-             }
+            if (isset($ageDistribution[$key])) {
+                $sortedAgeData[$key] = $ageDistribution[$key];
+            }
         }
 
         $ageChartData = [
-             'labels' => array_keys($sortedAgeData),
-             'series' => array_values($sortedAgeData)
+            'labels' => array_keys($sortedAgeData),
+            'series' => array_values($sortedAgeData)
         ];
 
 

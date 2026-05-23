@@ -12,6 +12,7 @@ use App\Models\SurveyQuestion;
 use App\Reposotries\StudentRepo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -22,6 +23,9 @@ class SetupMap extends Component
     #[Layout('layouts.app.land')]
     public function render()
     {
+        if (Gate::denies('student.setup.map')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         // Get late students grouped by group id
         $lateStudentsData = StudentRepo::studentsSurveyLate();
         $lateStudentsGroups = collect($lateStudentsData)->where('activation', 1)->groupBy('student_groups_id');
@@ -180,7 +184,7 @@ class SetupMap extends Component
         }
 
         $gradingScaleMissingNames = Status::whereIn('id', array_unique($gradingScaleMissingIds))->pluck('status_name')->toArray();
-       
+
         // 5. حساب إحصائيات الحضور والغياب لليوم الحالي
         $enrollmentTypes = ['full_week'];
         $dayOfWeek = now()->dayOfWeek; // 0=Sun, 1=Mon, ..., 6=Sat
@@ -245,7 +249,7 @@ class SetupMap extends Component
         $totalAllStudentsCombined = $activeGroupsData->sum('students_count') + $overallWithdrawnCount;
         $overallWithdrawnPercentage = $totalAllStudentsCombined > 0 ?      (($overallWithdrawnCount / $totalAllStudentsCombined) * 100) : 1;
 
- 
+
 
         return view('livewire.org-app.student.setup-map', [
             'activeGroupsData' => $activeGroupsData,

@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class ActivityOverview extends Component
 {
-    public $dateFrom='2023-10-30';
+    public $dateFrom = '2023-10-30';
     public $dateTo;
     public $selectedRegion;
     public $selectedStatus;
@@ -22,8 +22,8 @@ class ActivityOverview extends Component
 
     public function render()
     {
-           
-        if (Gate::denies('reports.all')) {
+
+        if (Gate::denies('reports.activity.overview')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         // 1. Base Query
@@ -47,7 +47,7 @@ class ActivityOverview extends Component
         // }
 
         $activities = $query->get();
-       
+
         // 2. KPIs
         $totalActivities = $activities->count();
         $completedActivities = $activities->filter(fn($a) => $a->status_info['raw_name'] === 'Completed')->count();
@@ -80,19 +80,19 @@ class ActivityOverview extends Component
 
         // Chart 3: Monthly Progress
         $monthlyCounts = $activities->groupBy(fn($a) => \Carbon\Carbon::parse($a->start_date)->format('M Y'))
-             ->map->count();
-        
+            ->map->count();
+
         // Ensure chronological order could be complex, for simplified V1 we just take the grouping
         $monthlyChartData = [
-             'labels' => $monthlyCounts->keys()->toArray(),
-             'series' => $monthlyCounts->values()->toArray()
+            'labels' => $monthlyCounts->keys()->toArray(),
+            'series' => $monthlyCounts->values()->toArray()
         ];
 
 
         return view('livewire.org-app.reports.activity-overview', [
             'activities' => $activities,
             'regions' => \App\Reposotries\RegionRepo::regions(),
-            'kpis' => compact('totalActivities', 'completedActivities', 'ongoingActivities', 'totalBudget', 'PlannedActivities','OnHoldActivities'),
+            'kpis' => compact('totalActivities', 'completedActivities', 'ongoingActivities', 'totalBudget', 'PlannedActivities', 'OnHoldActivities'),
             'statusChartData' => $statusChartData,
             'geoChartData' => $geoChartData,
             'monthlyChartData' => $monthlyChartData

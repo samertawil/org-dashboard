@@ -24,6 +24,8 @@ class Index extends Component
     public $viewingSubjects = [];
     public $viewingGroupName = '';
     public $showSubjectsModal = false;
+    public $selectedGroup = null;
+    public $showDetailsModal = false;
 
     // Pagination
     public int $perPage = 5;
@@ -87,6 +89,28 @@ class Index extends Component
             $this->viewingGroupName = $group->name;
             $this->showSubjectsModal = true;
         }
+    }
+
+    public function viewGroupDetails($groupId)
+    {
+        $this->selectedGroup = StudentGroup::with([
+            'region',
+            'city',
+            'neighbourhood',
+            'location',
+            'status',
+            'partner'
+        ])->withCount(['students' => function ($query) {
+            $query->where('activation', 1);
+        }])->findOrFail($groupId);
+
+        $this->showDetailsModal = true;
+    }
+
+    public function closeDetailsModal()
+    {
+        $this->selectedGroup = null;
+        $this->showDetailsModal = false;
     }
     
     public function generateSchedule($groupId)

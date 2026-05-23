@@ -6,6 +6,7 @@ use App\Models\StudentGroup;
 use App\Enums\GlobalSystemConstant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 
 class StudentGroupRepo
 {
@@ -15,22 +16,46 @@ class StudentGroupRepo
             return StudentGroup::select('id', 'name')->get();
         });
     }
- public static function activeToday()
+    public static function activeToday()
     {
-         return Cache::rememberForever('StudentGroup-activeToday', function () {
+        return Cache::rememberForever('StudentGroup-activeToday', function () {
             return StudentGroup::select('id', 'name')->where('activation', GlobalSystemConstant::ACTIVE)->where('start_date', '<=', Carbon::today())
-            ->where('end_date', '>=', Carbon::today())->get();
+                ->where('end_date', '>=', Carbon::today()->subDays(15))->get();
         });
     }
     public static function educationPoints()
     {
         $user = auth()->user();
 
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
             return self::studentGroups();
         }
 
-        return $user->employee?->studentGroups()
-            ->get() ?: collect();
+        $employee = $user->employee;
+        if ($employee) {
+            return Cache::rememberForever("employee-groups-{$employee->id}", function () use ($employee) {
+                return $employee->studentGroups()->get();
+            });
+        }
+
+        return collect();
+    }
+
+    public static function activateEducationPointsWithEmployee()
+    {
+        $user = auth()->user();
+
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+            return self::activeToday();
+        }
+
+        $employee = $user->employee;
+        if ($employee) {
+            return Cache::rememberForever("employee-groups-{$employee->id}", function () use ($employee) {
+                return $employee->studentGroups()->get();
+            });
+        }
+
+        return collect();
     }
 }

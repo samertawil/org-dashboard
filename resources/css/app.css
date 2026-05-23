@@ -61,6 +61,31 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+/* Custom active sidebar item styling */
+[data-flux-sidebar-item][data-current] {
+    background-color: var(--color-indigo-600) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+
+[data-flux-sidebar-item][data-current] * {
+    color: #ffffff !important;
+}
+
+[data-flux-sidebar-item][data-current]:hover {
+    background-color: var(--color-indigo-700) !important;
+}
+
+.dark [data-flux-sidebar-item][data-current] {
+    background-color: var(--color-indigo-500) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+
+.dark [data-flux-sidebar-item][data-current] * {
+    color: #ffffff !important;
+}
+
+.dark [data-flux-sidebar-item][data-current]:hover {
+    background-color: var(--color-indigo-600) !important;
+}

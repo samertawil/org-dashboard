@@ -33,7 +33,7 @@ class Student extends Model
         $y = $from->modify(config('malRules.allowDate1.fromDate'));
         $from = $y->modify(config('malRules.allowDate1.min_date'));
         $from =  $from->format('Y-m-d');  // birthdate not grater than $from date  "6 years old"
-       
+
         return $from;
     }
 
@@ -41,7 +41,7 @@ class Student extends Model
     {
         $to = new DateTime();
         $x =  $to->modify(config('malRules.allowDate1.toDate'));
-        $to=$x->modify(config('malRules.allowDate1.plus_date'));
+        $to = $x->modify(config('malRules.allowDate1.plus_date'));
         $to =  $to->format('Y-m-d');   // birthdate not less than $from date  "6 years old"
         return $to;
     }
@@ -67,7 +67,7 @@ class Student extends Model
         return $this->belongsTo(Status::class);
     }
 
- 
+
 
     public function creator()
     {
@@ -118,7 +118,7 @@ class Student extends Model
     }
 
 
- 
+
     public function studentGroup()
     {
         return $this->belongsTo(StudentGroup::class, 'student_groups_id');
@@ -180,7 +180,9 @@ class Student extends Model
                 ->get()
                 ->groupBy('domain_id');
 
-            $totalPre = 0; $totalPost = 0; $totalMax = 0;
+            $totalPre = 0;
+            $totalPost = 0;
+            $totalMax = 0;
 
             foreach ($domains as $domain) {
                 $score = $domainScores->firstWhere('domain_id', $domain->id);
@@ -202,7 +204,9 @@ class Student extends Model
                         'color' => $scale->color ?? '#9ca3af',
                     ];
 
-                    $totalPre += $pre; $totalPost += $post; $totalMax += $max;
+                    $totalPre += $pre;
+                    $totalPost += $post;
+                    $totalMax += $max;
                 }
             }
 
@@ -227,17 +231,15 @@ class Student extends Model
     }
 
     public function scopeVisibleToTeacher($query, $user)
-{
+    {
         // ->when(!$user->isSuperAdmin() || \Illuminate\Support\Facades\DB::table('teacher_student_group')->where('teacher_id', $user->id)->exists(), function ($query) use ($user) {
 
-    return $query->when(!$user->selectAnyStudent(), function ($q) use ($user) {
-        $q->whereIn('student_groups_id', function ($subQuery) use ($user) {
-            $subQuery->select('student_group_id')
-                ->from('teacher_student_group')
-                ->where('teacher_id', $user->id);
+        return $query->when(!$user->selectAnyStudent(), function ($q) use ($user) {
+            $q->whereIn('student_groups_id', function ($subQuery) use ($user) {
+                $subQuery->select('student_group_id')
+                    ->from('teacher_student_group')
+                    ->where('teacher_id', $user->id);
+            });
         });
-    });
-}
-
- 
+    }
 }

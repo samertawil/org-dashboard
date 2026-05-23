@@ -269,11 +269,10 @@
                                     @endif
                                 </div>
                             </td>
-
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-700/50">
                                 {{ $schedule->activityDomain?->status_name ?? '—' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm border-b border-zinc-100 dark:border-zinc-700/50">
                                 @if($schedule->target_category === 'work_team')
                                     <flux:badge color="blue" size="sm">{{ __('Work Team') }}</flux:badge>
                                 @elseif($schedule->target_category === 'children')
@@ -284,10 +283,10 @@
                                     <span class="text-zinc-400">—</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-700/50">
                                 {{ $schedule->period_start?->format('Y-m-d H:i') ?? '—' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-700/50">
                                 @if($schedule->period_end)
                                     @if($schedule->period_start && $schedule->period_start->isSameDay($schedule->period_end))
                                         {{-- Same day: show time only --}}
@@ -302,7 +301,7 @@
                                 @endif
                             </td>
                            
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-700/50">
                                 {{ $schedule->periodGroups?->status_name ?? '—' }}
                             </td>
 

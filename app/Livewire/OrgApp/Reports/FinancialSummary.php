@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class FinancialSummary extends Component
 {
-    public $dateFrom='2023-10-30';
+    public $dateFrom = '2023-10-30';
     public $dateTo;
     public $selectedSector;
 
@@ -23,7 +23,7 @@ class FinancialSummary extends Component
 
     public function render()
     {
-        if (Gate::denies('reports.all')) {
+        if (Gate::denies('reports.financial.summary')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         // 1. Base Query
@@ -41,22 +41,22 @@ class FinancialSummary extends Component
         $totalCostUSD = ($activities->sum('cost'));
         $totalCostNIS = $activities->sum('cost_nis');
         $avgCost = $activities->avg('cost') ?? 0;
-        
+
         // Cost per Beneficiary (Approximate - sums all beneficiaries across activities)
         // Note: This is a simple aggregation. Real cost/beneficiary might need more granular calculation per activity.
-        $totalBeneficiaries = $activities->sum(function($activity) {
+        $totalBeneficiaries = $activities->sum(function ($activity) {
             return $activity->beneficiaries->sum('beneficiaries_count');
         });
-        
+
         $costPerBeneficiary = $totalBeneficiaries > 0 ? ($totalCostUSD / $totalBeneficiaries) : 0;
 
 
         // 3. Chart Data
-        
+
         // Chart 1: Cost by Sector
         $sectorCosts = $activities->groupBy(fn($a) => $a->statusSpecificSector->status_name ?? 'Unknown')
             ->map(fn($group) => round($group->sum('cost'))); // Sum USD cost
-            
+
         $sectorChartData = [
             'labels' => $sectorCosts->keys()->toArray(),
             'series' => $sectorCosts->values()->toArray(),
@@ -66,9 +66,9 @@ class FinancialSummary extends Component
         // Group by month and sum cost
         $monthlySpending = $activities->groupBy(fn($a) => \Carbon\Carbon::parse($a->start_date)->format('M Y'))
             ->map(fn($group) => round($group->sum('cost')));
-         $monthlyChartData = [
-             'labels' => $monthlySpending->keys()->toArray(),
-             'series' => $monthlySpending->values()->toArray()
+        $monthlyChartData = [
+            'labels' => $monthlySpending->keys()->toArray(),
+            'series' => $monthlySpending->values()->toArray()
         ];
 
 
@@ -81,7 +81,7 @@ class FinancialSummary extends Component
             'kpis' => compact('totalCostUSD', 'totalCostNIS', 'avgCost', 'totalBeneficiaries', 'costPerBeneficiary'),
             'sectorChartData' => $sectorChartData,
             'monthlyChartData' => $monthlyChartData,
-            'availableSectors' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.sectors')) 
+            'availableSectors' => StatusRepo::statuses()->where('p_id_sub', config('appConstant.sectors'))
 
         ]);
     }

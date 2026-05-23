@@ -32,17 +32,17 @@ class DailyStudents extends Component
             ->get()
             ->keyBy('student_id');
 
-        // We will initialize this further in render or just rely on dynamic filling
-        // But to ensure all keys exist for the view, we can leave it empty and handle in view or prepopulate
-        // Better to prepopulate so wire:model works cleanly
-        
-        // However, we need the student list first to populate defaults. 
-        // Note: In Livewire mount runs before render. But obtaining students logic is in render currently.
-        // We should extract student fetching logic to a private method or hydrate it.
-        // For now, let's load what we have.
-        foreach ($existingAttendance as $studentId => $record) {
-            $this->attendance[$studentId] = ($record->status === 'present');
-            $this->attendanceStatus[$studentId] = $record->status;
+        // Initialize attendance keys for all scheduled students so Alpine entangle works properly
+        $students = $this->getStudents();
+        foreach ($students as $student) {
+            $record = $existingAttendance->get($student->id);
+            if ($record) {
+                $this->attendance[$student->id] = ($record->status === 'present');
+                $this->attendanceStatus[$student->id] = $record->status;
+            } else {
+                $this->attendance[$student->id] = false;
+                $this->attendanceStatus[$student->id] = null;
+            }
         }
     }
 
@@ -53,21 +53,34 @@ class DailyStudents extends Component
         $groupStart = $this->group->start_date ? Carbon::parse($this->group->start_date)->startOfDay() : null;
         $groupEnd = $this->group->end_date ? Carbon::parse($this->group->end_date)->startOfDay() : null;
 
-        if (($groupStart && $currentDate->lt($groupStart)) || 
-            ($groupEnd && $currentDate->gt($groupEnd))) {
+        if (($groupStart && $currentDate->lt($groupStart)) ||
+            ($groupEnd && $currentDate->gt($groupEnd))
+        ) {
             return collect([]);
         }
 
         // Determine enrollment types to include based on day of week
         $enrollmentTypes = ['full_week'];
         $dayOfWeek = Carbon::parse($this->date)->dayOfWeek; // 0=Sun, 1=Mon, ..., 6=Sat
-        
-        if ($dayOfWeek === 6) { $enrollmentTypes[] = 'sat_mon_wed'; } // Saturday
-        if ($dayOfWeek === 0) { $enrollmentTypes[] = 'sun_tue_thu'; } // Sunday
-        if ($dayOfWeek === 1) { $enrollmentTypes[] = 'sat_mon_wed'; } // Monday
-        if ($dayOfWeek === 2) { $enrollmentTypes[] = 'sun_tue_thu'; } // tuesday
-        if ($dayOfWeek === 3) { $enrollmentTypes[] = 'sat_mon_wed'; } // Wednesday
-        if ($dayOfWeek === 4) { $enrollmentTypes[] = 'sun_tue_thu'; } // Thursday
+
+        if ($dayOfWeek === 6) {
+            $enrollmentTypes[] = 'sat_mon_wed';
+        } // Saturday
+        if ($dayOfWeek === 0) {
+            $enrollmentTypes[] = 'sun_tue_thu';
+        } // Sunday
+        if ($dayOfWeek === 1) {
+            $enrollmentTypes[] = 'sat_mon_wed';
+        } // Monday
+        if ($dayOfWeek === 2) {
+            $enrollmentTypes[] = 'sun_tue_thu';
+        } // tuesday
+        if ($dayOfWeek === 3) {
+            $enrollmentTypes[] = 'sat_mon_wed';
+        } // Wednesday
+        if ($dayOfWeek === 4) {
+            $enrollmentTypes[] = 'sun_tue_thu';
+        } // Thursday
 
         return $this->group->students()
             ->select('students.id', 'full_name', 'identity_number', 'enrollment_type', 'students.activation', 'students.status_id')
@@ -79,11 +92,41 @@ class DailyStudents extends Component
     public function saveAttendance()
     {
         $students = $this->getStudents();
-        
+
+        // 1. Gather all status IDs of students who are marked as present in the form
+        $activeStatusIds = [];
         foreach ($students as $student) {
             $isPresent = $this->attendance[$student->id] ?? false;
+            if ($isPresent) {
+                $activeStatusIds[] = $student->status_id;
+            }
+        }
+
+        // 2. Also include status IDs that already have attendance records for today
+        $existingStudentIds = StudentDailyAttendance::where('student_group_id', $this->group->id)
+            ->where('attendance_date', $this->date)
+            ->pluck('student_id')
+            ->toArray();
+
+        if (!empty($existingStudentIds)) {
+            $existingStatusIds = $students->whereIn('id', $existingStudentIds)
+                ->pluck('status_id')
+                ->unique()
+                ->toArray();
+            $activeStatusIds = array_merge($activeStatusIds, $existingStatusIds);
+        }
+
+        $activeStatusIds = array_unique($activeStatusIds);
+
+        // 3. Save attendance only for students in the active status groups
+        foreach ($students as $student) {
+            if (!in_array($student->status_id, $activeStatusIds)) {
+                continue;
+            }
+
+            $isPresent = $this->attendance[$student->id] ?? false;
             $status = $isPresent ? 'present' : 'absent';
-            
+
             StudentDailyAttendance::updateOrCreate(
                 [
                     'student_id' => $student->id,
@@ -92,17 +135,13 @@ class DailyStudents extends Component
                 ],
                 [
                     'status' => $status,
-                    'updated_by' => auth()->id() ?? null, // Assuming auth
+                    'updated_by' => auth()->id() ?? null,
                 ]
             );
-            
-            // Update local status to reflect saved changes immediately (though dispatch usually re-renders)
+
             $this->attendanceStatus[$student->id] = $status;
         }
 
-        // Flash success
-        // session()->flash('message', 'Attendance saved successfully.'); 
-        // Or use Flux toast if available, or just standard Livewire dispatch
         $this->dispatch('attendance-saved');
     }
 
