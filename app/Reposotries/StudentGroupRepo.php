@@ -13,7 +13,7 @@ class StudentGroupRepo
     public static function studentGroups()
     {
         return Cache::rememberForever('StudentGroup-all', function () {
-            return StudentGroup::select('id', 'name')->get();
+            return StudentGroup::select('id', 'name', 'batch_no')->get();
         });
     }
     public static function activeToday()

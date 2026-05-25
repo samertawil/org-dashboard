@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Reposotries\StudentGroupRepo;
 use App\Exports\EducationalActivitySchedulesExport;
 use Maatwebsite\Excel\Facades\Excel;
+
 
 class Index extends Component
 {
@@ -97,6 +99,52 @@ class Index extends Component
         $this->resetPage();
     }
 
+    /**
+     * Get the student groups accessible by the current user.
+     */
+    #[Computed()]
+    public function accessibleGroups()
+    {
+        return StudentGroupRepo::educationPoints();
+    }
+
+    /**
+     * Get the student group IDs accessible by the current teacher.
+     * Returns null for super admins (no restriction).
+     */
+    #[Computed()]
+    public function accessibleGroupIds()
+    {
+
+        $user = auth()->user();
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+            return null;
+        }
+        return $this->accessibleGroups->pluck('id')->toArray();
+    }
+
+    /**
+     * Available batches filtered by teacher's accessible groups.
+     */
+    #[Computed()]
+    public function availableBatches()
+    {
+        return $this->accessibleGroups->pluck('batch_no')->filter()->unique()->values()->toArray();
+    }
+
+    /**
+     * Available groups filtered by batch and teacher's accessible groups.
+     */
+    #[Computed()]
+    public function availableGroups()
+    {
+        $groups = $this->accessibleGroups;
+        if (!empty($this->filterBatch)) {
+            $groups = $groups->where('batch_no', $this->filterBatch);
+        }
+        return $groups->values();
+    }
+
     #[Computed()]
     public function schedules()
     {
@@ -106,11 +154,22 @@ class Index extends Component
             return $emptyQuery->paginate($limit);
         }
 
+        $teacherGroupIds = $this->accessibleGroupIds;
+
         $query = ActivitySchedule::query()
             ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
             ->whereHas('group', function ($q) {
                 $q->where('batch_no', $this->filterBatch);
             })
+            ->when(
+                $teacherGroupIds !== null,
+                fn($q) =>
+                $q->whereIn('group_id', $teacherGroupIds)
+                    ->where(function ($query) {
+                        $query->where('employee_id', auth()->user()->employee?->id)
+                            ->orWhereNull('employee_id');
+                    })
+            )
             ->when(
                 $this->search,
                 fn($q) =>
@@ -151,11 +210,9 @@ class Index extends Component
 
     public function delete(int $id): void
     {
-        if (Gate::denies('educational-activity-schedules.create')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-
         $schedule = ActivitySchedule::findOrFail($id);
+
+        Gate::authorize('delete', $schedule);
         $schedule->delete();
 
         session()->flash('message', __('Schedule successfully deleted.'));
@@ -188,26 +245,9 @@ class Index extends Component
     }
 
 
-    #[Computed()]
-    public function studentGroups()
-    {
-        $user = auth()->user();
-        $allActiveGroups = \App\Reposotries\StudentGroupRepo::activeToday();
-
-        if ($user->isSuperAdmin()) {
-            return $allActiveGroups;
-        }
-
-        $teacherGroupIds = $user->teacher()->pluck('student_group_id');
-        return $allActiveGroups->whereIn('id', $teacherGroupIds)->values();
-    }
-
-
     public function openCloneMonthModal(): void
     {
-        if (Gate::denies('educational-activity-schedules.duplicate')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        Gate::authorize('duplicate', ActivitySchedule::class);
 
         $this->cloneSourceMonth     = now()->month;
         $this->cloneSourceYear      = now()->year;
@@ -218,9 +258,8 @@ class Index extends Component
 
     public function cloneMonthSchedules(): void
     {
-        if (Gate::denies('educational-activity-schedules.duplicate')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+
+        Gate::authorize('duplicate', ActivitySchedule::class);
 
         $this->validate([
             'cloneSourceMonth'      => 'required|integer|between:1,12',
@@ -233,8 +272,18 @@ class Index extends Component
         $startDate = \Carbon\Carbon::create($this->cloneSourceYear, $this->cloneSourceMonth, 1, 0, 0, 0);
         $endDate   = $startDate->copy()->endOfMonth();
 
+        $teacherGroupIds = $this->accessibleGroupIds;
+
         $schedules = ActivitySchedule::where('group_id', $this->cloneSourceGroupId)
             ->whereBetween('period_start', [$startDate, $endDate])
+            ->when(
+                $teacherGroupIds !== null,
+                fn($q) =>
+                $q->where(function ($query) {
+                    $query->where('employee_id', auth()->user()->employee?->id)
+                        ->orWhereNull('employee_id');
+                })
+            )
             ->get();
 
         if ($schedules->isEmpty()) {
@@ -296,20 +345,28 @@ class Index extends Component
 
     public function export()
     {
-        if (Gate::denies('educational-activity-schedules.index')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-
+        Gate::authorize('export', ActivitySchedule::class);
         if (empty($this->filterBatch)) {
             session()->flash('error', __('Please select a Batch before exporting.'));
             return;
         }
+
+        $teacherGroupIds = $this->accessibleGroupIds;
 
         $query = ActivitySchedule::query()
             ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
             ->whereHas('group', function ($q) {
                 $q->where('batch_no', $this->filterBatch);
             })
+            ->when(
+                $teacherGroupIds !== null,
+                fn($q) =>
+                $q->whereIn('group_id', $teacherGroupIds)
+                    ->where(function ($query) {
+                        $query->where('employee_id', auth()->user()->employee?->id)
+                            ->orWhereNull('employee_id');
+                    })
+            )
             ->when(
                 $this->search,
                 fn($q) =>
@@ -349,10 +406,7 @@ class Index extends Component
 
     public function render()
     {
-
-        if (Gate::denies('educational-activity-schedules.index')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        Gate::authorize('viewAny', ActivitySchedule::class);
 
         return view('livewire.org-app.educational-activity-schedules.index');
     }

@@ -27,7 +27,6 @@ trait FormTrait
     #[Computed()]
     public function activitySchedules()
     {
-        // For simplicity, returning all. In a real scenario, you might filter by active ones or ones belonging to the user.
-        return ActivitySchedule::latest()->get();
+        return \App\Reposotries\EducationalActivityDetailRepo::getTeacherSchedules();
     }
 }

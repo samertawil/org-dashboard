@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\ActivitySchedule;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Auth\Access\Response;
+
+class ActivitySchedulePolicy
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): Response|bool
+    {
+
+        if (
+            $user->isSuperAdmin() ||
+            Gate::allows('select.any.educational-activity-detail') ||
+            Gate::allows('select.any.student') ||
+            Gate::allows('educational-activity-schedules.index')
+        ) {
+            return true;
+        }
+
+        return Response::deny('You do not have permission to view this schedule.');
+    }
+
+
+    public function view(User $user, ActivitySchedule $activitySchedule): Response|bool
+    {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
+            return Response::allow();
+        }
+        // check if the user belong to group ip and activitySchedule
+        $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
+        $employeeId = $user->employee?->id;
+
+        if (in_array($activitySchedule->group_id, $groupIds) && $activitySchedule->employee_id === $employeeId) {
+            return Response::allow();
+        }
+
+        return Response::deny('You do not have permission to view this schedule.');
+    }
+
+    public function duplicate(User $user): Response|bool
+    {
+
+        if ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.duplicate')) {
+            return Response::allow();
+        }
+
+        return Response::deny('You do not have permission to duplicate schedules.');
+    }
+
+    public function export(User $user): Response|bool
+    {
+
+        if (
+            $user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail')
+        ) {
+            return Response::allow();
+        }
+
+        return Response::deny('You do not have permission to delete schedules.');
+    }
+
+    public function create(User $user): Response|bool
+    {
+        if ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create')) {
+            return Response::allow();
+        }
+        return Response::deny('You do not have permission to Create schedules.');
+    }
+
+    public function update(User $user, ActivitySchedule $activitySchedule): Response|bool
+    {
+        if ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create')) {
+            return Response::allow();
+        }
+        return Response::deny('You do not have permission to create schedules.');
+    }
+
+
+    public function delete(User $user, ActivitySchedule $activitySchedule): Response|bool
+    {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('educational-activity-schedules.create')) {
+
+            return Response::allow();
+        }
+
+        return Response::deny('You do not have permission to delete this record.');
+    }
+
+
+    public function restore(User $user, ActivitySchedule $activitySchedule): bool
+    {
+        return false;
+    }
+
+
+    public function forceDelete(User $user, ActivitySchedule $activitySchedule): bool
+    {
+        return false;
+    }
+}

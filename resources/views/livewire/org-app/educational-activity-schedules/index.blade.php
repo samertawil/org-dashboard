@@ -19,17 +19,17 @@
                     {{ __('Tree View') }}
                 </button>
             </div>
-            @can('educational-activity-schedules.create')
+            @can('export', \App\Models\ActivitySchedule::class)
                 <flux:button wire:click="export" variant="outline" icon="document-arrow-down">
                     {{ __('Export Excel') }}
                 </flux:button>
             @endcan
-            @can('educational-activity-schedules.duplicate')
+            @can('duplicate', \App\Models\ActivitySchedule::class)
                 <flux:button wire:click="openCloneMonthModal" variant="outline" icon="document-duplicate">
                     {{ __('Clone Month') }}
                 </flux:button>
             @endcan
-            @can('educational-activity-schedules.create')
+            @can('create', \App\Models\ActivitySchedule::class)
                 <flux:button href="{{ route('educational-activity-schedules.create') }}" wire:navigate variant="primary"
                     icon="plus">
                     {{ __('Add Schedule') }}
@@ -68,7 +68,7 @@
                 <div>
                     <flux:select wire:model.live="filterBatch">
                         <option value="">-- {{ __('Select Batch (Required)') }} --</option>
-                        @foreach (\App\Models\StudentGroup::whereNotNull('batch_no')->distinct()->orderBy('batch_no', 'desc')->pluck('batch_no') as $batch)
+                        @foreach ($this->availableBatches as $batch)
                             <option value="{{ $batch }}">{{ $batch }}</option>
                         @endforeach
                     </flux:select>
@@ -78,14 +78,7 @@
                 <div>
                     <flux:select wire:model.live="filterGroup" :disabled="empty($this->filterBatch)">
                         <option value="">-- {{ __('All Student Groups') }} --</option>
-                        @php
-                            $groupsQuery = \App\Models\StudentGroup::select('id', 'name');
-                            if (!empty($this->filterBatch)) {
-                                $groupsQuery->where('batch_no', $this->filterBatch);
-                            }
-                            $groups = $groupsQuery->orderBy('id', 'desc')->get();
-                        @endphp
-                        @foreach ($groups as $group)
+                        @foreach ($this->availableGroups as $group)
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach
                     </flux:select>
@@ -268,19 +261,23 @@
                                                     href="{{ route('educational-activity-schedules.show', $schedule) }}"
                                                     wire:navigate variant="ghost" size="xs" icon="eye" />
                                             </span>
-                                            @can('educational-activity-schedules.create')
+                                            @can('create', \App\Models\ActivitySchedule::class)
                                                 <span title="{{ __('Copy Schedule') }}">
                                                     <flux:button
                                                         href="{{ route('educational-activity-schedules.create', ['copy_from' => $schedule->id]) }}"
                                                         wire:navigate variant="ghost" size="xs"
                                                         icon="document-duplicate" class="text-amber-500" />
                                                 </span>
+                                            @endcan
+                                            @can('update', \App\Models\ActivitySchedule::class)
                                                 <span title="{{ __('Edit') }}">
                                                     <flux:button
                                                         href="{{ route('educational-activity-schedules.edit', $schedule) }}"
                                                         wire:navigate variant="ghost" size="xs"
                                                         icon="pencil-square" />
                                                 </span>
+                                            @endcan
+                                            @can('delete', \App\Models\ActivitySchedule::class)
                                                 <span title="{{ __('Delete') }}">
                                                     <flux:button wire:click="delete({{ $schedule->id }})"
                                                         wire:confirm="{{ __('Are you sure?') }}" variant="ghost"
@@ -323,10 +320,12 @@
                                         </div>
                                     </th>
 
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                                         {{ __('Domain') }}
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                                         {{ __('Category') }}
                                     </th>
                                     <th wire:click="sortBy('period_start')"
@@ -342,7 +341,8 @@
                                             @endif
                                         </div>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                                         {{ __('Group') }}
                                     </th>
                                     <th scope="col"
@@ -353,47 +353,63 @@
                             </thead>
                             <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
                                 @forelse($this->schedules as $schedule)
-                                    <tr class="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors duration-150">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
+                                    <tr
+                                        class="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors duration-150">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                             <div class="flex flex-col gap-1 max-w-[220px]">
-                                                <span class="font-semibold truncate text-zinc-900 dark:text-zinc-100" title="{{ $schedule->activity_name }}">{{ $schedule->activity_name }}</span>
+                                                <span class="font-semibold truncate text-zinc-900 dark:text-zinc-100"
+                                                    title="{{ $schedule->activity_name }}">{{ $schedule->activity_name }}</span>
                                                 @if ($schedule->activity_description)
-                                                    <span class="text-xs text-zinc-400 dark:text-zinc-500 truncate" title="{{ $schedule->activity_description }}">
+                                                    <span class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
+                                                        title="{{ $schedule->activity_description }}">
                                                         {{ $schedule->activity_description }}
                                                     </span>
                                                 @endif
                                             </div>
                                         </td>
 
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200/50 dark:border-zinc-700/30">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200/50 dark:border-zinc-700/30">
                                                 {{ $schedule->activityDomain?->status_name ?? '—' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             @if ($schedule->target_category === 'work_team')
-                                                <flux:badge color="blue" size="sm">{{ __('Work Team') }}</flux:badge>
+                                                <flux:badge color="blue" size="sm">{{ __('Work Team') }}
+                                                </flux:badge>
                                             @elseif($schedule->target_category === 'children')
-                                                <flux:badge color="green" size="sm">{{ __('Children') }}</flux:badge>
+                                                <flux:badge color="green" size="sm">{{ __('Children') }}
+                                                </flux:badge>
                                             @elseif($schedule->target_category === 'parents')
-                                                <flux:badge color="purple" size="sm">{{ __('Parents') }}</flux:badge>
+                                                <flux:badge color="purple" size="sm">{{ __('Parents') }}
+                                                </flux:badge>
                                             @else
                                                 <span class="text-zinc-400">—</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                             <div class="flex flex-col gap-1">
-                                                <div class="flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100 font-medium">
-                                                    <flux:icon name="calendar" class="size-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
+                                                <div
+                                                    class="flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100 font-medium">
+                                                    <flux:icon name="calendar"
+                                                        class="size-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
                                                     <span>{{ $schedule->period_start?->format('Y-m-d') ?? '—' }}</span>
                                                 </div>
-                                                <div class="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-                                                    <flux:icon name="clock" class="size-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
+                                                <div
+                                                    class="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                                                    <flux:icon name="clock"
+                                                        class="size-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
                                                     @if ($schedule->period_start && $schedule->period_end)
                                                         @if ($schedule->period_start->isSameDay($schedule->period_end))
-                                                            <span>{{ $schedule->period_start->format('H:i') }} &rarr; {{ $schedule->period_end->format('H:i') }}</span>
+                                                            <span>{{ $schedule->period_start->format('H:i') }} &rarr;
+                                                                {{ $schedule->period_end->format('H:i') }}</span>
                                                         @else
-                                                            <span>{{ $schedule->period_start->format('H:i') }} &rarr; {{ $schedule->period_end->format('Y-m-d H:i') }}</span>
+                                                            <span>{{ $schedule->period_start->format('H:i') }} &rarr;
+                                                                {{ $schedule->period_end->format('Y-m-d H:i') }}</span>
                                                         @endif
                                                     @else
                                                         <span>{{ $schedule->period_start?->format('H:i') ?? '—' }}</span>
@@ -871,7 +887,7 @@
                     <div>
                         <flux:select wire:model.live="cloneSourceGroupId" :label="__('Source Group')">
                             <option value="">-- {{ __('Select Source Group') }} --</option>
-                            @foreach ($this->studentGroups as $group)
+                            @foreach ($this->accessibleGroups as $group)
                                 <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endforeach
                         </flux:select>
@@ -884,7 +900,7 @@
                         <flux:label>{{ __('Select Target Groups') }}</flux:label>
                         <div
                             class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
-                            @foreach ($this->studentGroups as $group)
+                            @foreach ($this->accessibleGroups as $group)
                                 @if ($group->id != $cloneSourceGroupId)
                                     <label
                                         class="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1.5 rounded cursor-pointer">

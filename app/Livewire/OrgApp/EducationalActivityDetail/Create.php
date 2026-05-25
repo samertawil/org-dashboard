@@ -25,6 +25,17 @@ class Create extends Component
     {
         $this->validate();
 
+        $user = auth()->user();
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+            $hasSchedule = \App\Reposotries\EducationalActivityDetailRepo::getTeacherSchedulesQuery()
+                ->where('id', $this->educational_activity_id)
+                ->exists();
+
+            if (!$hasSchedule) {
+                abort(403, 'You do not have permission to use this educational activity.');
+            }
+        }
+
         EducationalActivityDetail::create([
             'educational_activity_id' => $this->educational_activity_id,
             'consistent'              => $this->consistent !== '' ? $this->consistent : null,

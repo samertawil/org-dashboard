@@ -13,6 +13,16 @@ class Show extends Component
 
     public function mount(EducationalActivityDetail $detail, $isModal = false)
     {
+        $user = auth()->user();
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+            $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+                ->where('id', $detail->id)
+                ->exists();
+            if (!$hasDetail) {
+                abort(403, 'You do not have permission to view this record.');
+            }
+        }
+
         $this->detail = $detail->load('educationalActivity');
         $this->isModal = $isModal;
     }

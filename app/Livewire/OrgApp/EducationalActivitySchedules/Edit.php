@@ -19,7 +19,7 @@ class Edit extends Component
         $this->schedule = $schedule;
 
         // تحميل بيانات السجل في الحقول
-      
+
         $this->group_id                    = $schedule->group_id;
         $this->educational_activity_domain = $schedule->educational_activity_domain;
         $this->target_category             = $schedule->target_category;
@@ -39,7 +39,7 @@ class Edit extends Component
         $this->validate();
 
         $this->schedule->fill([
-          
+
             'group_id'                    => $this->group_id ?: null,
             'educational_activity_domain' => $this->educational_activity_domain ?: null,
             'target_category'             => $this->target_category ?: null,
@@ -68,9 +68,7 @@ class Edit extends Component
 
     public function render()
     {
-        if (Gate::denies('educational-activity-schedules.create')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        Gate::authorize('update', $this->schedule);
 
         return view('livewire.org-app.educational-activity-schedules.edit', [
             'heading' => __('Edit Educational Activity Schedule'),

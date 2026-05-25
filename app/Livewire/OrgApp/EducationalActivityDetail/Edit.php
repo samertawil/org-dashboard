@@ -16,6 +16,16 @@ class Edit extends Component
 
     public function mount(EducationalActivityDetail $detail, $isModal = false)
     {
+        $user = auth()->user();
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+            $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+                ->where('id', $detail->id)
+                ->exists();
+            if (!$hasDetail) {
+                abort(403, 'You do not have permission to view/edit this record.');
+            }
+        }
+
         $this->detail = $detail;
         $this->isModal = $isModal;
         
@@ -28,6 +38,25 @@ class Edit extends Component
     public function save()
     {
         $this->validate();
+
+        $user = auth()->user();
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+            // check that the original detail record belongs to this employee
+            $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+                ->where('id', $this->detail->id)
+                ->exists();
+            if (!$hasDetail) {
+                abort(403, 'You do not have permission to update this record.');
+            }
+
+            // check that the new selected schedule also belongs to this employee
+            $hasSchedule = \App\Reposotries\EducationalActivityDetailRepo::getTeacherSchedulesQuery()
+                ->where('id', $this->educational_activity_id)
+                ->exists();
+            if (!$hasSchedule) {
+                abort(403, 'You do not have permission to use this educational activity.');
+            }
+        }
 
         $this->detail->update([
             'educational_activity_id' => $this->educational_activity_id,

@@ -30,18 +30,16 @@ class PublicResponse extends Component
     public $gender = '';
     public $apiFailed = false;
 
-    protected $rules = [
-        'account_id' => 'required|numeric|min_digits:9|max_digits:9|unique:students,identity_number',
-        // 'account_id' => 'required|numeric|min_digits:9|max_digits:9|unique:survey_answers,account_id,NULL,id,survey_table_id,' . 'surveyId',
-    ];
+    public function rules()
+    {
+        return \App\Services\Survey\Validation\SurveyValidationFactory::make($this->survey())->getRules();
+    }
 
-    protected $messages = [
-        'account_id.required' => 'رقم الهوية مطلوب',
-        'account_id.numeric' => 'رقم الهوية يجب أن يكون رقمًا',
-        'account_id.min_digits' => 'رقم الهوية يجب أن يكون 9 أرقام',
-        'account_id.max_digits' => 'رقم الهوية يجب أن يكون 9 أرقام',
-        'account_id.unique' => 'رقم الهوية استفاد مسبقا',
-    ];
+    public function messages()
+    {
+        return \App\Services\Survey\Validation\SurveyValidationFactory::make($this->survey())->getMessages();
+    }
+
 
     public function mount($id)
     {
@@ -243,6 +241,7 @@ class PublicResponse extends Component
     #[Title('استبيان')]
     public function render()
     {
+
         return view('livewire.org-app.survey.public-response')
             ->layout('layouts.guest'); // Use guest layout for public access
     }

@@ -70,14 +70,12 @@ class Create extends Component
 
         session()->flash('message', __('Schedule successfully created.'));
 
-        return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
+        // return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
     }
 
     public function render()
     {
-        if (Gate::denies('educational-activity-schedules.create')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        Gate::authorize('create', ActivitySchedule::class);
 
         $isCopy  = (bool) request()->query('copy_from');
         $heading = $isCopy
@@ -90,4 +88,3 @@ class Create extends Component
         ]);
     }
 }
-

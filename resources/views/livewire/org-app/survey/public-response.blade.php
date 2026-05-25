@@ -7,7 +7,7 @@
             <img src="{{ asset('logo.png') }}" alt="" style="width: 200px; height: 100px;">
         </div>
         {{-- Header --}}
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 pt-4 text-center">
+        <div class="bg-gradient-to-r from-zinc-600 to-indigo-700 pt-4 text-center">
             <h1 class="text-2xl font-bold">{{ $this->survey->survey_name }}</h1>
             {{-- <p class="text-blue-100 mt-2">يرجى تعبئة المعلومات أدناه بعناية.</p> --}}
         </div>
