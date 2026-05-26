@@ -8,7 +8,8 @@
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             @can('student.create')
                 <span title="{{ __('Archived Imports') }}">
-                    <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box" class="flex-1 sm:flex-none">
+                    <flux:button href="{{ route('student.imported-files') }}" wire:navigate variant="ghost" icon="archive-box"
+                        class="flex-1 sm:flex-none">
                         {{ __('Archived Imports') }}
                     </flux:button>
                 </span>
@@ -16,11 +17,13 @@
             @can('student.create')
                 <flux:modal.trigger name="import-modal" class="flex-1 sm:flex-none">
                     <span title="{{ __('Import Excel') }}">
-                        <flux:button variant="ghost" icon="document-arrow-up" class="w-full">{{ __('Import Excel') }}</flux:button>
+                        <flux:button variant="ghost" icon="document-arrow-up" class="w-full">{{ __('Import Excel') }}
+                        </flux:button>
                     </span>
                 </flux:modal.trigger>
                 <span title="{{ __('Add New Student') }}">
-                    <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus" class="flex-1 sm:flex-none">
+                    <flux:button href="{{ route('student.create') }}" wire:navigate variant="primary" icon="plus"
+                        class="flex-1 sm:flex-none">
                         {{ __('Add Student') }}
                     </flux:button>
                 </span>
@@ -55,8 +58,9 @@
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 relative">
 
-            <flux:input wire:model="searchIdentityNumber" :placeholder="__('Search by identity number...')" class="p-1"/>
-            <flux:input wire:model="searchBatchNo" :placeholder="__('Search by batch no...')" class="p-1"/>
+            <flux:input wire:model="searchIdentityNumber" :placeholder="__('Search by identity number...')"
+                class="p-1" />
+            <flux:input wire:model="searchBatchNo" :placeholder="__('Search by batch no...')" class="p-1" />
 
             {{-- Searchable Student Name Field --}}
             <div class="px-4 pb-3" x-data="{
@@ -274,63 +278,81 @@
                 <flux:error name="searchStudentGroupName" />
             </div>
 
-             {{-- Enrollment Type --}}
-        <flux:select wire:model="searchEnrollment">
-            <option value="">All Enrollment Days</option>
-            <option value="sat_mon_wed">{{ __('Saturday / Monday / Wednesday') }}</option>
-            <option value="sun_tue_thu">{{ __('Sunday / Tuesday / Thursday') }}</option>
-            <option value="full_week">{{ __('Full Week') }}</option>
-        </flux:select>
-
-        {{-- activation Type --}}
-        <flux:field class="">
-            <flux:select wire:model="searchActivation">
-                <option value="">All Activaion Status</option>
-                @foreach ($activations as $a)
-                    <option value="{{ $a['value'] }}">{{ $a['label'] }}</option>
-                @endforeach
+            {{-- Enrollment Type --}}
+            <flux:select wire:model="searchEnrollment">
+                <option value="">All Enrollment Days</option>
+                <option value="sat_mon_wed">{{ __('Saturday / Monday / Wednesday') }}</option>
+                <option value="sun_tue_thu">{{ __('Sunday / Tuesday / Thursday') }}</option>
+                <option value="full_week">{{ __('Full Week') }}</option>
             </flux:select>
-        </flux:field>
 
-        {{-- Region Type --}}
-        <flux:field>
-            <flux:select wire:model.live="searchRegionId">
-                <option value="">{{ __('All Regions') }}</option>
-                @foreach ($regions as $region)
-                    <option value="{{ $region->id }}">{{ $region->region_name }}</option>
-                @endforeach
-            </flux:select>
-        </flux:field>
+            {{-- activation Type --}}
+            <flux:field class="">
+                <flux:select wire:model="searchActivation">
+                    <option value="">All Activaion Status</option>
+                    @foreach ($activations as $a)
+                        <option value="{{ $a['value'] }}">{{ $a['label'] }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
 
-        {{-- City Type --}}
-        <flux:field>
-            <flux:select wire:model="searchCityId">
-                <option value="">{{ __('All Cities') }}</option>
-                @foreach ($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->city_name }}</option>
-                @endforeach
-            </flux:select>
-        </flux:field>
+            {{-- Region Type --}}
+            <flux:field>
+                <flux:select wire:model.live="searchRegionId">
+                    <option value="">{{ __('All Regions') }}</option>
+                    @foreach ($regions as $region)
+                        <option value="{{ $region->id }}">{{ $region->region_name }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
 
-      
+            {{-- City Type --}}
+            <flux:field>
+                <flux:select wire:model="searchCityId">
+                    <option value="">{{ __('All Cities') }}</option>
+                    @foreach ($cities as $city)
+                        <option value="{{ $city->id }}">{{ $city->city_name }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
+
+
         </div>
 
-       
 
-        <div class="px-4 pb-4 flex flex-wrap items-center justify-center sm:justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
+
+        <div
+            class="px-4 pb-4 flex flex-wrap items-center justify-center sm:justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700">
             <span title="{{ __('Search for students based on filters') }}">
-                <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass" class="flex-1 sm:flex-none">
+                <flux:button wire:click="searchData" variant="primary" size="sm" icon="magnifying-glass"
+                    class="flex-1 sm:flex-none">
                     {{ __('Find Data') }}
                 </flux:button>
             </span>
-            <span title="{{ __('Export filtered results to Excel') }}">
-                <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}" variant="ghost" size="sm" icon="document-arrow-down" class="flex-1 sm:flex-none">
-                    {{ __('Export Excel') }}
-                </flux:button>
-            </span>
-            @if ($searchIdentityNumber || $searchStudentName || $searchStudentGroupName || $searchEnrollment || $searchBatchNo || $searchActivation || $searchRegionId || $searchCityId || $readyToLoad)
+
+            @can('exportStudentList', App\Models\Student::class)
+                <span title="{{ __('Export filtered results to Excel') }}">
+                    <flux:button href="{{ route('export.filtter.students', ['params' => $this->exportParams]) }}"
+                        variant="ghost" size="sm" icon="document-arrow-down" class="flex-1 sm:flex-none">
+                        {{ __('Export Excel') }}
+                    </flux:button>
+                </span>
+            @endcan
+
+
+            @if (
+                $searchIdentityNumber ||
+                    $searchStudentName ||
+                    $searchStudentGroupName ||
+                    $searchEnrollment ||
+                    $searchBatchNo ||
+                    $searchActivation ||
+                    $searchRegionId ||
+                    $searchCityId ||
+                    $readyToLoad)
                 <span title="{{ __('Clear all filters and search fields') }}">
-                    <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark" class="flex-1 sm:flex-none">
+                    <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark"
+                        class="flex-1 sm:flex-none">
                         {{ __('Clear Filters') }}
                     </flux:button>
                 </span>
@@ -357,7 +379,8 @@
                     <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                         <div class="flex justify-between items-start">
                             <div class="flex flex-col">
-                                <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $student->full_name }}</span>
+                                <span
+                                    class="text-sm font-bold text-zinc-900 dark:text-white">{{ $student->full_name }}</span>
                                 <span class="text-xs text-zinc-500">{{ $student->identity_number }}</span>
                             </div>
                             @php
@@ -366,8 +389,10 @@
                             @if ($statusEnum)
                                 <span @class([
                                     'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium',
-                                    'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' => $student->activation == 1,
-                                    'bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-400' => $student->activation != 1,
+                                    'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' =>
+                                        $student->activation == 1,
+                                    'bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-400' =>
+                                        $student->activation != 1,
                                 ])>
                                     {{ $statusEnum->label() }}
                                 </span>
@@ -376,13 +401,17 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Education Point') }}</span>
+                                <span
+                                    class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Education Point') }}</span>
                                 <div class="text-xs text-zinc-600 dark:text-zinc-300 leading-tight">
                                     @php
                                         $fullGroupName = $student->studentGroup?->name ?? '';
                                         if ($fullGroupName) {
                                             $parts = array_map('trim', explode(' - ', $fullGroupName));
-                                            $shortGroupName = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                                            $shortGroupName =
+                                                count($parts) > 2
+                                                    ? implode(' - ', array_slice($parts, -2))
+                                                    : $fullGroupName;
                                         } else {
                                             $shortGroupName = '-';
                                         }
@@ -394,44 +423,60 @@
                                 </div>
                             </div>
                             <div>
-                                <span class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Enrollment') }}</span>
+                                <span
+                                    class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-1">{{ __('Enrollment') }}</span>
                                 <div class="text-xs text-zinc-600 dark:text-zinc-300">
-                                    @if ($student->enrollment_type === 'full_week') {{ __('Full Week') }}
-                                    @elseif($student->enrollment_type === 'sat_mon_wed') {{ __('Sat/Mon/Wed') }}
-                                    @elseif($student->enrollment_type === 'sun_tue_thu') {{ __('Sun/Mon/Thu') }}
-                                    @else - @endif
-                                    <div class="text-emerald-600 font-medium mt-0.5">{{ $student->status->status_name ?? '' }}</div>
+                                    @if ($student->enrollment_type === 'full_week')
+                                        {{ __('Full Week') }}
+                                    @elseif($student->enrollment_type === 'sat_mon_wed')
+                                        {{ __('Sat/Mon/Wed') }}
+                                    @elseif($student->enrollment_type === 'sun_tue_thu')
+                                        {{ __('Sun/Mon/Thu') }}
+                                    @else
+                                        -
+                                    @endif
+                                    <div class="text-emerald-600 font-medium mt-0.5">
+                                        {{ $student->status->status_name ?? '' }}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+                        <div
+                            class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
                             <div class="text-xs text-zinc-500">
-                                <span class="font-medium text-zinc-700 dark:text-zinc-400">{{ __('Batch') }}:</span> 
+                                <span class="font-medium text-zinc-700 dark:text-zinc-400">{{ __('Batch') }}:</span>
                                 {{ $student->studentGroup?->batch_no ?? '-' }}
                             </div>
-                             <div class="flex items-center gap-1">
+                            <div class="flex items-center gap-1">
                                 <span title="{{ __('View Details') }}">
-                                    <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate variant="ghost" size="xs" icon="eye" />
+                                    <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate
+                                        variant="ghost" size="xs" icon="eye" />
                                 </span>
                                 <span title="{{ __('Edit Student') }}">
-                                    <flux:button href="{{ route('student.edit', $student) }}" wire:navigate variant="ghost" size="xs" icon="pencil-square" />
+                                    <flux:button href="{{ route('student.edit', $student) }}" wire:navigate
+                                        variant="ghost" size="xs" icon="pencil-square" />
                                 </span>
                                 <flux:modal.trigger name="feedback-modal">
                                     <div class="relative">
                                         <span title="{{ __('Feedback & Mentoring') }}">
-                                            <flux:button wire:click="manageFeedback({{ $student->id }})" variant="ghost" size="xs" icon="chat-bubble-left-right" style="{{ $student->feedbacks_count > 0 ? 'color: #3b82f6 !important;' : '' }}" />
+                                            <flux:button wire:click="manageFeedback({{ $student->id }})"
+                                                variant="ghost" size="xs" icon="chat-bubble-left-right"
+                                                style="{{ $student->feedbacks_count > 0 ? 'color: #3b82f6 !important;' : '' }}" />
                                         </span>
                                         @if ($student->feedbacks_count > 0)
-                                            <span class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                            <span
+                                                class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500"></span>
                                         @endif
                                     </div>
                                 </flux:modal.trigger>
                                 <span title="{{ __('Take Survey') }}">
-                                    <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})" variant="ghost" size="xs" icon="clipboard-document-check" />
+                                    <flux:button wire:click="takeSurveyAnswer({{ $student->identity_number }})"
+                                        variant="ghost" size="xs" icon="clipboard-document-check" />
                                 </span>
                                 <span title="{{ __('Delete Student') }}">
-                                    <flux:button wire:click="delete({{ $student->identity_number }})" wire:confirm="{{ __('Are you sure?') }}" variant="ghost" size="xs" icon="trash" class="text-red-500" />
+                                    <flux:button wire:click="delete({{ $student->identity_number }})"
+                                        wire:confirm="{{ __('Are you sure?') }}" variant="ghost" size="xs"
+                                        icon="trash" class="text-red-500" />
                                 </span>
                             </div>
                         </div>
@@ -460,7 +505,7 @@
                                 @endif
                             </div>
                         </th>
-                       
+
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Education Point') }}
@@ -492,21 +537,27 @@
                         <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                 {{ $student->full_name }}<br>
-                                 <span  class="py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">   {{ $student->identity_number }}</span>
+                                <span class="py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                    {{ $student->identity_number }}</span>
                             </td>
-                             
+
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 @php
                                     $fullGroupName = $student->studentGroup?->name ?? '';
                                     if ($fullGroupName) {
                                         $parts = array_map('trim', explode(' - ', $fullGroupName));
-                                        $shortGroupName = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                                        $shortGroupName =
+                                            count($parts) > 2
+                                                ? implode(' - ', array_slice($parts, -2))
+                                                : $fullGroupName;
                                     } else {
                                         $shortGroupName = '-';
                                     }
                                 @endphp
-                                {{ $shortGroupName }}  <br>
-                                <span class = "text-blue-600"> {{ $student->studentGroup?->region->region_name ?? '-' }}/ {{ $student->studentGroup?->city->city_name ?? '-' }}</span>
+                                {{ $shortGroupName }} <br>
+                                <span class = "text-blue-600">
+                                    {{ $student->studentGroup?->region->region_name ?? '-' }}/
+                                    {{ $student->studentGroup?->city->city_name ?? '-' }}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $student->studentGroup?->batch_no ?? '-' }}
@@ -528,7 +579,7 @@
                                     -
                                 @endif
                                 <span class="text-blue-600">{{ $student->status->status_name ?? '' }}</span>
-                              
+
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @php
@@ -549,7 +600,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                 <div class="flex items-center justify-end gap-2">
+                                <div class="flex items-center justify-end gap-2">
                                     <span title="{{ __('View Details') }}">
                                         <flux:button href="{{ route('student.show', $student->id) }}" wire:navigate
                                             variant="ghost" size="sm" icon="eye" />
@@ -692,7 +743,8 @@
                         <flux:label class="bg-zinc-50 dark:bg-zinc-900 p-3">{{ __('Feedback Type') }}</flux:label>
                         <select wire:model="feedbackType"
                             class="block w-full rounded-md border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Type') }}
+                            <option value="" class="text-gray-500 placeholder-gray-500">
+                                {{ __('Select Type') }}
                             </option>
                             @foreach ($this->feedbackTypes->where('p_id_sub', 56) as $type)
                                 <option value="{{ $type->id }}">{{ $type->status_name }}</option>
@@ -705,7 +757,8 @@
                         <flux:label class="bg-zinc-50 dark:bg-zinc-900 p-3">{{ __('Feedback Time') }}</flux:label>
                         <select wire:model="studentFeedBackTime"
                             class="block w-full rounded-md border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="" class="text-gray-500 placeholder-gray-500">{{ __('Select Time') }}
+                            <option value="" class="text-gray-500 placeholder-gray-500">
+                                {{ __('Select Time') }}
                             </option>
                             @foreach ($this->feedbackTypes->where('p_id_sub', 60) as $type)
                                 <option value="{{ $type->id }}">{{ $type->status_name }}</option>

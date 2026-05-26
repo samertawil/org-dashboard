@@ -29,6 +29,7 @@ class Show extends Component
 
     public function render()
     {
+
         return view('livewire.org-app.educational-activity-schedules.show', [
             'heading' => __('Schedule Details'),
         ]);

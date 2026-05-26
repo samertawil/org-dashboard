@@ -4,8 +4,11 @@ namespace App\Livewire\OrgApp\EducationalActivityDetail;
 
 use App\Models\EducationalActivityDetail;
 use Illuminate\Support\Facades\Gate;
+use App\Reposotries\EducationalActivityDetailRepo;
 use Livewire\Component;
 use Livewire\WithPagination;
+
+use Livewire\Attributes\Computed;
 
 class Index extends Component
 {
@@ -22,17 +25,9 @@ class Index extends Component
 
     public function showDetails($id): void
     {
-        $user = auth()->user();
         $this->selectedDetail = EducationalActivityDetail::with(['educationalActivity.periodGroups'])->findOrFail($id);
 
-        if (!$user->isSuperAdmin()) {
-            $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
-            $groupId = $this->selectedDetail->educationalActivity?->group_id;
-            $employeeId = $user->employee?->id;
-            if (!in_array($groupId, $groupIds) || $this->selectedDetail->educationalActivity?->employee_id !== $employeeId) {
-                abort(403, 'You do not have permission to view this record.');
-            }
-        }
+        Gate::authorize('view', $this->selectedDetail);
 
         $this->dispatch('modal-show', name: 'show-detail-modal');
     }
@@ -49,37 +44,18 @@ class Index extends Component
 
     public function delete($id): void
     {
-        if (Gate::denies('educational-activity-detail.create')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-
-        $user = auth()->user();
         $detail = EducationalActivityDetail::findOrFail($id);
-
-        if (!$user->isSuperAdmin()) {
-            $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
-            $groupId = $detail->educationalActivity?->group_id;
-            $employeeId = $user->employee?->id;
-            if (!in_array($groupId, $groupIds) || $detail->educationalActivity?->employee_id !== $employeeId) {
-                abort(403, 'You do not have permission to delete this record.');
-            }
-        }
-
+        Gate::authorize('view', $detail);
         $detail->delete();
 
         session()->flash('message', __('Deleted successfully.'));
     }
 
-    public function render()
+    #[Computed]
+    public function details()
     {
 
-        if (Gate::denies('educational-activity-detail.index')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
-        $user = auth()->user();
-        $employee = $user->employee;
-
-        $details = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+        return EducationalActivityDetailRepo::getTeacherDetailsQuery()
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->whereHas('educationalActivity', function ($sub) {
@@ -97,9 +73,13 @@ class Index extends Component
             })
             ->latest()
             ->paginate(10);
+    }
 
-        return view('livewire.org-app.educational-activity-detail.index', [
-            'details' => $details,
-        ]);
+    public function render()
+    {
+
+        Gate::authorize('viewAny', EducationalActivityDetail::class);
+
+        return view('livewire.org-app.educational-activity-detail.index');
     }
 }

@@ -272,6 +272,7 @@ class Index extends Component
     #[Computed()]
     public function exportParams()
     {
+
         $filters = [
             'searchIdentityNumber' => $this->searchIdentityNumber,
             'searchStudentName' => $this->searchStudentName,

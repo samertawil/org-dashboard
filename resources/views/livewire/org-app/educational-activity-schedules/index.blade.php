@@ -1,4 +1,5 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-on:modal-show.window="Flux.modal($event.detail.name).show()"
+    x-on:modal-close.window="Flux.modal($event.detail.name).hide()">
     <div class="flex items-start justify-between flex-wrap gap-4">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ __('Educational Activity Schedules') }}</flux:heading>
@@ -257,7 +258,7 @@
                                         </div>
                                         <div class="flex items-center gap-1">
                                             <span title="{{ __('View Details') }}">
-                                                <flux:button
+                                                <flux:button target="_blank"
                                                     href="{{ route('educational-activity-schedules.show', $schedule) }}"
                                                     wire:navigate variant="ghost" size="xs" icon="eye" />
                                             </span>
@@ -432,7 +433,7 @@
 
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-1.5">
-                                                <flux:button
+                                                <flux:button target="_blank"
                                                     href="{{ route('educational-activity-schedules.show', $schedule) }}"
                                                     wire:navigate variant="ghost" size="sm" icon="eye" />
                                                 @can('educational-activity-schedules.create')
@@ -450,33 +451,43 @@
                                                         variant="ghost" size="sm" icon="trash"
                                                         class="text-red-500 hover:text-red-600" />
                                                 @endcan
-                                                <flux:dropdown>
-                                                    <flux:button variant="ghost" size="sm" icon="document-text"
-                                                        style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
-                                                        class="relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
-                                                        {{ __('Report') }}
-                                                        @if ($schedule->activityDetail)
-                                                            <span
-                                                                class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
-                                                        @endif
-                                                    </flux:button>
-                                                    <flux:menu>
-                                                        <flux:menu.item
-                                                            wire:click="openReportModal('create', {{ $schedule->id }})"
-                                                            icon="plus">{{ __('Add Report') }}</flux:menu.item>
-                                                        <flux:menu.item
-                                                            wire:click="openReportModal('edit', {{ $schedule->id }})"
-                                                            icon="pencil-square">{{ __('Edit Report') }}
-                                                        </flux:menu.item>
-                                                        <flux:menu.item
-                                                            wire:click="openReportModal('show', {{ $schedule->id }})"
-                                                            icon="eye">{{ __('Show Report') }}</flux:menu.item>
-                                                        <flux:menu.item
-                                                            wire:click="openReportModal('gallery', {{ $schedule->id }})"
-                                                            icon="photo">{{ __('Add Attachments') }}
-                                                        </flux:menu.item>
-                                                    </flux:menu>
-                                                </flux:dropdown>
+                                                @can('viewAny', \App\Models\EducationalActivityDetail::class)
+                                                    <flux:dropdown>
+                                                        <flux:button variant="ghost" size="sm" icon="document-text"
+                                                            style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
+                                                            class="relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
+                                                            {{ __('Report') }}
+                                                            @if ($schedule->activityDetail)
+                                                                <span
+                                                                    class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                                            @endif
+                                                        </flux:button>
+                                                        <flux:menu>
+                                                            @can('create', \App\Models\EducationalActivityDetail::class)
+                                                                <flux:menu.item
+                                                                    wire:click="openReportModal('create', {{ $schedule->id }})"
+                                                                    icon="plus">{{ __('Add Report') }}</flux:menu.item>
+                                                            @endcan
+                                                            @can('update', $schedule->activityDetail)
+                                                                <flux:menu.item
+                                                                    wire:click="openReportModal('edit', {{ $schedule->id }})"
+                                                                    icon="pencil-square">{{ __('Edit Report') }}
+                                                                </flux:menu.item>
+                                                            @endcan
+                                                            @can('view', $schedule->activityDetail)
+                                                                <flux:menu.item
+                                                                    wire:click="openReportModal('show', {{ $schedule->id }})"
+                                                                    icon="eye">{{ __('Show Report') }}</flux:menu.item>
+                                                            @endcan
+                                                            @can('create', \App\Models\EducationalActivityDetail::class)
+                                                                <flux:menu.item
+                                                                    wire:click="openReportModal('gallery', {{ $schedule->id }})"
+                                                                    icon="photo">{{ __('Add Attachments') }}
+                                                                </flux:menu.item>
+                                                            @endcan
+                                                        </flux:menu>
+                                                    </flux:dropdown>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>
@@ -503,7 +514,21 @@
                     </div>
                 @else
                     {{-- Tree View (Grouped by Student Group -> Month -> Date) --}}
-                    <div x-data="{ openGroups: {}, openMonths: {}, openDates: {} }" class="p-6 space-y-4">
+                    <div x-data="{ openGroups: {}, openMonths: {}, openDates: {} }" x-init="@if ($lastGroupId) openGroups['{{ $lastGroupId }}'] = true; @endif
+                    @if ($lastGroupId && $lastMonth) openMonths['{{ $lastGroupId }}_{{ $lastMonth }}'] = true; @endif
+                    @if ($lastGroupId && $lastMonth && $lastDate) openDates['{{ $lastGroupId }}_{{ $lastMonth }}_{{ $lastDate }}'] = true; @endif
+                    
+                    $nextTick(() => {
+                        let lastDateKey = '{{ $lastGroupId }}_{{ $lastMonth }}_{{ $lastDate }}';
+                        let element = document.getElementById('date-' + lastDateKey);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'dark:ring-offset-zinc-800');
+                            setTimeout(() => {
+                                element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'dark:ring-offset-zinc-800');
+                            }, 3000);
+                        }
+                    })" class="p-6 space-y-4">
                         @php
                             $schedulesData =
                                 $this->schedules instanceof \Illuminate\Database\Eloquent\Builder
@@ -748,7 +773,7 @@
                                                                                 <td class="px-4 py-3 text-left">
                                                                                     <div
                                                                                         class="flex items-center gap-1 justify-end">
-                                                                                        <flux:button
+                                                                                        <flux:button target="_blank"
                                                                                             href="{{ route('educational-activity-schedules.show', $schedule) }}"
                                                                                             wire:navigate
                                                                                             variant="ghost"
@@ -777,42 +802,57 @@
                                                                                                 icon="trash"
                                                                                                 class="text-red-500" />
                                                                                         @endcan
-                                                                                        <flux:dropdown>
-                                                                                            <flux:button
-                                                                                                variant="ghost"
-                                                                                                size="xs"
-                                                                                                icon="document-text"
-                                                                                                style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
-                                                                                                class="px-2 flex items-center gap-1 relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
-                                                                                                {{ __('Report') }}
-                                                                                                @if ($schedule->activityDetail)
-                                                                                                    <span
-                                                                                                        class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
-                                                                                                @endif
-                                                                                            </flux:button>
-                                                                                            <flux:menu>
-                                                                                                <flux:menu.item
-                                                                                                    wire:click="openReportModal('create', {{ $schedule->id }})"
-                                                                                                    icon="plus">
-                                                                                                    {{ __('Add Report') }}
-                                                                                                </flux:menu.item>
-                                                                                                <flux:menu.item
-                                                                                                    wire:click="openReportModal('edit', {{ $schedule->id }})"
-                                                                                                    icon="pencil-square">
-                                                                                                    {{ __('Edit Report') }}
-                                                                                                </flux:menu.item>
-                                                                                                <flux:menu.item
-                                                                                                    wire:click="openReportModal('show', {{ $schedule->id }})"
-                                                                                                    icon="eye">
-                                                                                                    {{ __('Show Report') }}
-                                                                                                </flux:menu.item>
-                                                                                                <flux:menu.item
-                                                                                                    wire:click="openReportModal('gallery', {{ $schedule->id }})"
-                                                                                                    icon="photo">
-                                                                                                    {{ __('Add Attachments') }}
-                                                                                                </flux:menu.item>
-                                                                                            </flux:menu>
-                                                                                        </flux:dropdown>
+                                                                                        @can('viewAny',
+                                                                                            \App\Models\EducationalActivityDetail::class)
+                                                                                            <flux:dropdown>
+                                                                                                <flux:button
+                                                                                                    variant="ghost"
+                                                                                                    size="xs"
+                                                                                                    icon="document-text"
+                                                                                                    style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
+                                                                                                    class="px-2 flex items-center gap-1 relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
+                                                                                                    {{ __('Report') }}
+                                                                                                    @if ($schedule->activityDetail)
+                                                                                                        <span
+                                                                                                            class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                                                                                    @endif
+                                                                                                </flux:button>
+                                                                                                <flux:menu>
+                                                                                                    @can('create',
+                                                                                                        \App\Models\EducationalActivityDetail::class)
+                                                                                                        <flux:menu.item
+                                                                                                            wire:click="openReportModal('create', {{ $schedule->id }})"
+                                                                                                            icon="plus">
+                                                                                                            {{ __('Add Report') }}
+                                                                                                        </flux:menu.item>
+                                                                                                    @endcan
+                                                                                                    @can('update',
+                                                                                                        $schedule->activityDetail)
+                                                                                                        <flux:menu.item
+                                                                                                            wire:click="openReportModal('edit', {{ $schedule->id }})"
+                                                                                                            icon="pencil-square">
+                                                                                                            {{ __('Edit Report') }}
+                                                                                                        </flux:menu.item>
+                                                                                                    @endcan
+                                                                                                    @can('view',
+                                                                                                        $schedule->activityDetail)
+                                                                                                        <flux:menu.item
+                                                                                                            wire:click="openReportModal('show', {{ $schedule->id }})"
+                                                                                                            icon="eye">
+                                                                                                            {{ __('Show Report') }}
+                                                                                                        </flux:menu.item>
+                                                                                                    @endcan
+                                                                                                    @can('create',
+                                                                                                        \App\Models\EducationalActivityDetail::class)
+                                                                                                        <flux:menu.item
+                                                                                                            wire:click="openReportModal('gallery', {{ $schedule->id }})"
+                                                                                                            icon="photo">
+                                                                                                            {{ __('Add Attachments') }}
+                                                                                                        </flux:menu.item>
+                                                                                                    @endcan
+                                                                                                </flux:menu>
+                                                                                            </flux:dropdown>
+                                                                                        @endcan
                                                                                     </div>
                                                                                 </td>
                                                                             </tr>

@@ -30,6 +30,10 @@ class Index extends Component
 
 
 
+    public string $lastGroupId = '';
+    public string $lastMonth   = '';
+    public string $lastDate    = '';
+
     // Clone month properties
     public bool $showCloneMonthModal = false;
     public $cloneSourceMonth;
@@ -52,6 +56,66 @@ class Index extends Component
         'filterDateTo'   => ['except' => ''],
         'viewType'       => ['except' => 'tree'],
     ];
+
+    public function mount()
+    {
+        if (session('eas_is_returning')) {
+            $this->search         = request()->query('search', session('eas_search', ''));
+            $this->filterDomain   = request()->query('filterDomain', session('eas_filterDomain', ''));
+            $this->filterCategory = request()->query('filterCategory', session('eas_filterCategory', ''));
+            $this->filterBatch    = request()->query('filterBatch', session('eas_filterBatch', ''));
+            $this->filterGroup    = request()->query('filterGroup', session('eas_filterGroup', ''));
+            $this->filterDateFrom = request()->query('filterDateFrom', session('eas_filterDateFrom', ''));
+            $this->filterDateTo   = request()->query('filterDateTo', session('eas_filterDateTo', ''));
+            $this->viewType       = request()->query('viewType', session('eas_viewType', 'tree'));
+
+            // تحميل حالات الكولابس
+            $this->lastGroupId = session('eas_last_group_id', '');
+            $this->lastMonth   = session('eas_last_month', '');
+            $this->lastDate    = session('eas_last_date', '');
+
+            // تفريغ الجلسة من متغيرات العودة حتى لا تبقى مفعلة للأبد
+            session()->forget([
+                'eas_is_returning',
+                'eas_last_group_id',
+                'eas_last_month',
+                'eas_last_date'
+            ]);
+        } else {
+            // تحميل نظيف بدون فلاتر مخزنة مسبقاً
+            $this->search         = request()->query('search', '');
+            $this->filterDomain   = request()->query('filterDomain', '');
+            $this->filterCategory = request()->query('filterCategory', '');
+            $this->filterBatch    = request()->query('filterBatch', '');
+            $this->filterGroup    = request()->query('filterGroup', '');
+            $this->filterDateFrom = request()->query('filterDateFrom', '');
+            $this->filterDateTo   = request()->query('filterDateTo', '');
+            $this->viewType       = request()->query('viewType', 'tree');
+
+            // تفريغ الفلاتر المخزنة مسبقاً من الجلسة لمنع الحفظ الدائم بعد تسجيل الخروج أو الانتقال
+            session()->forget([
+                'eas_search',
+                'eas_filterDomain',
+                'eas_filterCategory',
+                'eas_filterBatch',
+                'eas_filterGroup',
+                'eas_filterDateFrom',
+                'eas_filterDateTo',
+                'eas_viewType',
+                'eas_last_group_id',
+                'eas_last_month',
+                'eas_last_date'
+            ]);
+        }
+    }
+
+    public function updated($property, $value)
+    {
+        $filters = ['search', 'filterDomain', 'filterCategory', 'filterBatch', 'filterGroup', 'filterDateFrom', 'filterDateTo', 'viewType'];
+        if (in_array($property, $filters)) {
+            session(['eas_' . $property => $value]);
+        }
+    }
 
     public function sortBy(string $field): void
     {
@@ -166,9 +230,9 @@ class Index extends Component
                 fn($q) =>
                 $q->whereIn('group_id', $teacherGroupIds)
                     ->where(function ($query) {
-                        $query->where('employee_id', auth()->user()->employee?->id)
-                            ->orWhereNull('employee_id');
+                        $query->where('employee_id', auth()->user()->employee?->id);
                     })
+                // ->orWhereNull('employee_id')
             )
             ->when(
                 $this->search,
@@ -220,6 +284,7 @@ class Index extends Component
 
     public function openReportModal($action, $scheduleId)
     {
+
         $this->selectedScheduleId = $scheduleId;
         $this->reportModalAction = $action;
 

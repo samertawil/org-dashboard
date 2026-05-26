@@ -19,6 +19,7 @@ class Create extends Component
      */
     public function mount(): void
     {
+        session(['eas_is_returning' => true]);
         $copyFromId = request()->query('copy_from');
 
         if ($copyFromId) {
@@ -43,6 +44,9 @@ class Create extends Component
                 if ($source->period_end) {
                     $this->period_end = $source->period_end->format('Y-m-d\TH:i');
                 }
+
+                // حفظ حالة الفلاتر والتفاصيل لفتح الكولابس المناسب عند العودة
+                $this->saveStateToSession($source->period_start);
             }
         }
     }
@@ -50,6 +54,16 @@ class Create extends Component
     public function save()
     {
         $this->validate();
+
+        $exists = ActivitySchedule::where('group_id', $this->group_id)
+            ->where('period_start', $this->period_start)
+            ->where('educational_period_groups', $this->educational_period_groups)
+            ->exists();
+
+        if ($exists) {
+            $this->addError('group_id', __('This schedule already exists for the selected group, period, and time.'));
+            return;
+        }
 
         ActivitySchedule::create([
             'group_id'                    => $this->group_id ?: null,
@@ -61,7 +75,7 @@ class Create extends Component
             'period_end'                  => $this->period_end,
             'educational_period_groups'   => $this->educational_period_groups ?: null,
             'notes'                       => $this->notes ?: null,
-            'sort_order'                  => $this->sort_order ?? 0,
+            'sort_order'                  => (int) ($this->sort_order ?? 0),
             'activation'                  => $this->activation,
             'employee_id'                 => $this->employee_id ?: null,
             'created_by'                  => Auth::id(),
@@ -69,8 +83,9 @@ class Create extends Component
         ]);
 
         session()->flash('message', __('Schedule successfully created.'));
+        $this->dispatch('scroll-to-top');
 
-        // return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
+        return $this->backToEducationalActivitySchedules();
     }
 
     public function render()

@@ -4,10 +4,10 @@ namespace App\Concerns\EducationalActivitySchedule;
 
 use App\Models\Employee;
 use App\Models\TeacherStudentGroup;
-use App\Reposotries\employeeRepo;
 use App\Reposotries\StatusRepo;
 use App\Reposotries\StudentGroupRepo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 
@@ -82,20 +82,10 @@ trait FormTrait
         $user = Auth::user();
 
         // Get all active student groups today
-        $allActiveGroups = StudentGroupRepo::activeToday();
+        $allActiveGroups = StudentGroupRepo::activateEducationPointsWithEmployee();
 
-        if ($user->isSuperAdmin()) {
-            // SuperAdmin sees all active groups
-            $this->studentGroups = $allActiveGroups;
-            $teacherGroupIds     = $allActiveGroups->pluck('id');
-        } else {
-            // Get the group IDs this teacher is assigned to
-            $teacherGroupIds     = $user->teacher()->pluck('student_group_id');
 
-            // Filter active groups to only those the teacher is assigned to
-            $this->studentGroups = $allActiveGroups->whereIn('id', $teacherGroupIds)->values();
-        }
-
+        $this->studentGroups = $allActiveGroups;
     } // end bootFormTrait
 
     // =====================================================
@@ -129,7 +119,7 @@ trait FormTrait
             ->where('activation', 1)
             ->get(['id', 'full_name', 'user_id']);
     }
- 
+
 
 
     /**
@@ -152,5 +142,39 @@ trait FormTrait
     {
         return $this->allStatuses()
             ->where('p_id_sub', config('appConstant.educational_period_groups'));
+    }
+
+    public function saveStateToSession($periodStart = null): void
+    {
+        $groupId = $this->group_id;
+        $group = \App\Models\StudentGroup::find($groupId);
+        if ($group) {
+            session([
+                'eas_filterBatch' => $group->batch_no,
+                'eas_filterGroup' => $group->id,
+            ]);
+        }
+
+        $dateStr = $periodStart ?: $this->period_start;
+        if ($dateStr) {
+            try {
+                $periodStartCarbon = \Carbon\Carbon::parse($dateStr);
+                session([
+                    'eas_last_group_id' => $groupId,
+                    'eas_last_month'    => $periodStartCarbon->format('Y-m'),
+                    'eas_last_date'     => $periodStartCarbon->format('Y-m-d'),
+                ]);
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+        session(['eas_is_returning' => true]);
+    }
+
+    public function backToEducationalActivitySchedules($periodStart = null)
+    {
+        $this->saveStateToSession($periodStart);
+
+        return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
     }
 }

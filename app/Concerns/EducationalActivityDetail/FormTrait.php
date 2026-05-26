@@ -2,7 +2,6 @@
 
 namespace App\Concerns\EducationalActivityDetail;
 
-use App\Models\ActivitySchedule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 
@@ -20,9 +19,7 @@ trait FormTrait
     #[Validate('nullable|string')]
     public $teacher_report_detail = '';
 
-    public function bootFormTrait()
-    {
-    }
+    public function bootFormTrait() {}
 
     #[Computed()]
     public function activitySchedules()

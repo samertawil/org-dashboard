@@ -27,7 +27,7 @@ class StudentGroupRepo
     {
         $user = auth()->user();
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+        if ($user->can('selectAnyGroup', StudentGroup::class)) {
             return self::studentGroups();
         }
 
@@ -45,7 +45,7 @@ class StudentGroupRepo
     {
         $user = auth()->user();
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+        if ($user->can('selectAnyGroup', StudentGroup::class)) {
             return self::activeToday();
         }
 

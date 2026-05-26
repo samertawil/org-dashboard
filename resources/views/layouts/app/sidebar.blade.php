@@ -141,7 +141,8 @@
 
 
                 {{-- Educational Activity Schedules Group --}}
-                @canany(['educational-activity-schedules.index', 'educational-activity-schedules.create'])
+                @canany(['educational-activity-schedules.index', 'educational-activity-schedules.create',
+                    'educational-activity-detail.index'])
                     <flux:sidebar.group expandable
                         :expanded="request()->routeIs(['educational-activity-schedules.*', 'educational-activity-detail.*'])"
                         icon="calendar-days" class="grid">
@@ -157,16 +158,15 @@
                                 {{ __('Schedules List') }}
                             </flux:sidebar.item>
                         @endcan
-                        {{-- 
-                        @can('educational-activity-detail.index')
-                            <flux:sidebar.item icon="document-text"
-                                :href="route('educational-activity-detail.index')"
+
+                        @can('viewAny', \App\Models\EducationalActivityDetail::class)
+                            <flux:sidebar.item icon="document-text" :href="route('educational-activity-detail.index')"
                                 :current="request()->routeIs('educational-activity-detail.index', 'educational-activity-detail.show')"
                                 wire:navigate>
-                                {{ __('Plane Details') }} 
+                                {{ __('Teacher Report') }}
                             </flux:sidebar.item>
-                        @endcan  
- 
+                        @endcan
+                        {{-- 
                         @can('educational-activity-schedules.create')
                             <flux:sidebar.item icon="plus"
                                 :href="route('educational-activity-schedules.create')"

@@ -9,6 +9,7 @@ use Illuminate\Auth\Access\Response;
 
 class ActivitySchedulePolicy
 {
+
     /**
      * Determine whether the user can view any models.
      */
@@ -57,9 +58,8 @@ class ActivitySchedulePolicy
     public function export(User $user): Response|bool
     {
 
-        if (
-            $user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail')
-        ) {
+        if ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create')) {
+
             return Response::allow();
         }
 

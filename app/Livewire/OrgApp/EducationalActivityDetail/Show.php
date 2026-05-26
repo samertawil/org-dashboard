@@ -29,10 +29,11 @@ class Show extends Component
 
     public function render()
     {
-        if (Gate::denies('educational-activity-detail.index')) {
+
+        if (Gate::denies('view', $this->detail)) {
             abort(403, 'You do not have the necessary permissions.');
         }
-        
+
         return view('livewire.org-app.educational-activity-detail.show', [
             'heading' => __('Educational Activity Detail'),
         ]);

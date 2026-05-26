@@ -32,11 +32,25 @@ class Edit extends Component
         $this->sort_order                  = $schedule->sort_order;
         $this->activation                  = $schedule->activation;
         $this->employee_id                 = $schedule->employee_id;
+
+        // حفظ حالة الفلاتر والتفاصيل لفتح الكولابس المناسب عند العودة
+        $this->saveStateToSession($schedule->period_start);
     }
 
     public function save()
     {
         $this->validate();
+
+        $exists = ActivitySchedule::where('group_id', $this->group_id)
+            ->where('period_start', $this->period_start)
+            ->where('educational_period_groups', $this->educational_period_groups)
+            ->where('id', '!=', $this->schedule->id)
+            ->exists();
+
+        if ($exists) {
+            $this->addError('group_id', __('This schedule already exists for the selected group, period, and time.'));
+            return;
+        }
 
         $this->schedule->fill([
 
@@ -49,7 +63,7 @@ class Edit extends Component
             'period_end'                  => $this->period_end,
             'educational_period_groups'   => $this->educational_period_groups ?: null,
             'notes'                       => $this->notes ?: null,
-            'sort_order'                  => $this->sort_order ?? 0,
+            'sort_order'                  =>(int) ($this->sort_order ?? 0),
             'activation'                  => $this->activation,
             'employee_id'                 => $this->employee_id ?: null,
             'updated_by'                  => Auth::id(),
@@ -62,8 +76,9 @@ class Edit extends Component
             session()->flash('message', __('No changes were made!'));
             session()->flash('type', 'warning');
         }
+        $this->dispatch('scroll-to-top');
 
-        return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
+        return $this->backToEducationalActivitySchedules();
     }
 
     public function render()

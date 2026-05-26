@@ -19,7 +19,8 @@ class EducationalActivityDetailRepo
         $user = auth()->user();
         $query = ActivitySchedule::query();
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail')) {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
+
             return $query;
         }
 
@@ -54,7 +55,8 @@ class EducationalActivityDetailRepo
         $user = auth()->user();
         $query = EducationalActivityDetail::query()->with(['educationalActivity.periodGroups']);
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail')) {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
+
             return $query;
         }
 

@@ -1,10 +1,11 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-data x-on:scroll-to-top.window="window.scrollTo({ top: 0, behavior: 'smooth' })">
     <div class="flex items-start justify-between">
         <div class="flex flex-col gap-1">
             <flux:heading level="1" size="xl">{{ $heading }}</flux:heading>
             <flux:subheading>{{ __('Manage educational activity schedule details') }}</flux:subheading>
         </div>
-        <flux:button href="{{ route('educational-activity-schedules.index') }}" wire:navigate variant="ghost" icon="arrow-left">
+        <flux:button href="{{ route('educational-activity-schedules.index') }}" wire:navigate variant="ghost"
+            icon="arrow-left">
             {{ __('Back to List') }}
         </flux:button>
     </div>
@@ -21,13 +22,13 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-             
+
 
                 <div class="flex flex-col gap-2">
                     <flux:label>{{ __('Student Group') }}</flux:label>
                     <flux:select wire:model.live="group_id">
                         <option value="">-- {{ __('Select Group') }} --</option>
-                        @foreach($studentGroups as $group)
+                        @foreach ($studentGroups as $group)
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach
                     </flux:select>
@@ -42,7 +43,8 @@
 
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <flux:label>{{ __('Activity Description') }}</flux:label>
-                    <flux:textarea wire:model="activity_description" rows="3" :placeholder="__('Detailed description of the activity...')" />
+                    <flux:textarea wire:model="activity_description" rows="3"
+                        :placeholder="__('Detailed description of the activity...')" />
                     <flux:error name="activity_description" />
                 </div>
 
@@ -61,7 +63,7 @@
                     <flux:label>{{ __('Activity Domain') }}</flux:label>
                     <flux:select wire:model="educational_activity_domain">
                         <option value="">-- {{ __('Select Domain') }} --</option>
-                        @foreach($this->allStatuses->where('p_id_sub',config('appConstant.educational_activity_domains')) as $domain)
+                        @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.educational_activity_domains')) as $domain)
                             <option value="{{ $domain->id }}">{{ $domain->status_name }}</option>
                         @endforeach
                     </flux:select>
@@ -72,7 +74,7 @@
                     <flux:label>{{ __('Target Category') }}</flux:label>
                     <flux:select wire:model="target_category">
                         <option value="">-- {{ __('Select Category') }} --</option>
-                        @foreach(\App\Models\ActivitySchedule::TARGET_CATEGORIES as $key => $label)
+                        @foreach (\App\Models\ActivitySchedule::TARGET_CATEGORIES as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
                         @endforeach
                     </flux:select>
@@ -83,7 +85,7 @@
                     <flux:label>{{ __('Assigned Groups') }}</flux:label>
                     <flux:select wire:model="educational_period_groups">
                         <option value="">-- {{ __('Select Group') }} --</option>
-                        @foreach($this->allStatuses->where('p_id_sub',config('appConstant.student_groups')) as $group)
+                        @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.student_groups')) as $group)
                             <option value="{{ $group->id }}">{{ $group->status_name }}</option>
                         @endforeach
                     </flux:select>
@@ -94,13 +96,13 @@
                     <flux:label>{{ __('Responsible Employee') }}</flux:label>
                     <flux:select wire:model="employee_id" wire:key="emp-{{ $group_id }}">
                         <option value="">
-                            @if(!$group_id)
+                            @if (!$group_id)
                                 -- {{ __('Select a group first') }} --
                             @else
                                 -- {{ __('Select Employee') }} --
                             @endif
                         </option>
-                        @foreach($this->employees as $emp)
+                        @foreach ($this->employees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
                         @endforeach
                     </flux:select>
@@ -174,5 +176,6 @@
                 {{ __('Save') }}
             </flux:button>
         </div>
+        @include('layouts._show_all_input_error')
     </form>
 </div>
