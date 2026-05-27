@@ -22,6 +22,7 @@ class ActivitySchedulePolicy
             Gate::allows('select.any.student') ||
             Gate::allows('educational-activity-schedules.index')
         ) {
+
             return true;
         }
 
@@ -31,7 +32,8 @@ class ActivitySchedulePolicy
 
     public function view(User $user, ActivitySchedule $activitySchedule): Response|bool
     {
-        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
+
+        if ($user->isSuperAdmin() || $user->can('select.any.educational-activity-detail') || $user->can('select.any.student')) {
             return Response::allow();
         }
         // check if the user belong to group ip and activitySchedule

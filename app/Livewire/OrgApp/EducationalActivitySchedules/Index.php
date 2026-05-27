@@ -219,6 +219,9 @@ class Index extends Component
         }
 
         $teacherGroupIds = $this->accessibleGroupIds;
+        $employee = auth()->user()->employee;
+        $isJobTitle167 = $employee && $employee->job_title == 167;
+
 
         $query = ActivitySchedule::query()
             ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
@@ -229,10 +232,9 @@ class Index extends Component
                 $teacherGroupIds !== null,
                 fn($q) =>
                 $q->whereIn('group_id', $teacherGroupIds)
-                    ->where(function ($query) {
-                        $query->where('employee_id', auth()->user()->employee?->id);
+                    ->when(!$isJobTitle167, function ($query) use ($employee) {
+                        $query->where('employee_id', $employee?->id);
                     })
-                // ->orWhereNull('employee_id')
             )
             ->when(
                 $this->search,
@@ -338,15 +340,19 @@ class Index extends Component
         $endDate   = $startDate->copy()->endOfMonth();
 
         $teacherGroupIds = $this->accessibleGroupIds;
+        $employee = auth()->user()->employee;
+        $isJobTitle167 = $employee && $employee->job_title == 167;
 
         $schedules = ActivitySchedule::where('group_id', $this->cloneSourceGroupId)
             ->whereBetween('period_start', [$startDate, $endDate])
             ->when(
                 $teacherGroupIds !== null,
                 fn($q) =>
-                $q->where(function ($query) {
-                    $query->where('employee_id', auth()->user()->employee?->id)
-                        ->orWhereNull('employee_id');
+                $q->when(!$isJobTitle167, function ($query) use ($employee) {
+                    $query->where(function ($query) use ($employee) {
+                        $query->where('employee_id', $employee?->id)
+                            ->orWhereNull('employee_id');
+                    });
                 })
             )
             ->get();
@@ -417,6 +423,8 @@ class Index extends Component
         }
 
         $teacherGroupIds = $this->accessibleGroupIds;
+        $employee = auth()->user()->employee;
+        $isJobTitle167 = $employee && $employee->job_title == 167;
 
         $query = ActivitySchedule::query()
             ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
@@ -427,9 +435,11 @@ class Index extends Component
                 $teacherGroupIds !== null,
                 fn($q) =>
                 $q->whereIn('group_id', $teacherGroupIds)
-                    ->where(function ($query) {
-                        $query->where('employee_id', auth()->user()->employee?->id)
-                            ->orWhereNull('employee_id');
+                    ->when(!$isJobTitle167, function ($query) use ($employee) {
+                        $query->where(function ($query) use ($employee) {
+                            $query->where('employee_id', $employee?->id)
+                                ->orWhereNull('employee_id');
+                        });
                     })
             )
             ->when(
