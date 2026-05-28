@@ -43,10 +43,7 @@ class Employee extends Model
         return $this->belongsToMany(StudentGroup::class, 'teacher_student_group', 'teacher_id', 'student_group_id', 'user_id', 'id');
     }
 
-    public function jobTitle()
-    {
-        return $this->belongsTo(Status::class, 'job_title');
-    }
+
 
     public function partner()
     {

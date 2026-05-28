@@ -12,7 +12,7 @@ class SurveyAnswer extends Model
         'survey_no',
         'question_id',
         'answer_ar_text',
-        'answer_en_text',
+        'answer_label',
         'created_by',
         'updated_by',
     ];

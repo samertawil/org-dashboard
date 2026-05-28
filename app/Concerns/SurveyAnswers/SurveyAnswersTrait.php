@@ -25,7 +25,7 @@ trait SurveyAnswersTrait
     public $answer_ar_text = '';
 
     #[Validate('nullable|string')]
-    public $answer_en_text = '';
+    public $answer_label = '';
 
     #[Validate('nullable|exists:employees,id')]
     public $created_by = '';

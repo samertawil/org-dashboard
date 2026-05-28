@@ -5,7 +5,7 @@
             <flux:subheading>{{ __('Manage your educational activity reports.') }}</flux:subheading>
         </div>
 
-        @can('educational-activity-detail.create')
+        @can('create', App\Models\EducationalActivityDetail::class)
             <flux:button href="{{ route('educational-activity-detail.create') }}" wire:navigate variant="primary"
                 icon="plus">
                 {{ __('Create New') }}

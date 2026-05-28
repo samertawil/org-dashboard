@@ -7,19 +7,21 @@ use Livewire\Component;
 use App\Models\StudentGroup;
 use App\Models\StudentSubjectForLearn;
 use Livewire\WithPagination;
+use App\Reposotries\StudentGroupRepo;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use App\Concerns\AccessibleGroupsTrait;
 
 class Index extends Component
 {
-    use WithPagination;
-    
+    use WithPagination, AccessibleGroupsTrait;
+
     // Search properties
     public string $search = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
-    
+
     // Modal State
     public $viewingSubjects = [];
     public $viewingGroupName = '';
@@ -49,26 +51,34 @@ class Index extends Component
         $this->resetPage();
     }
 
+
+
+
     #[Computed()]
     public function groups()
     {
-     return  StudentGroup::query()
-            ->with(['region', 'city', 'status','partner'])  ->withCount(['students' => function ($query) {
-    $query->where('activation', 1);
-}])
+        $teacherGroupIds = $this->accessibleGroupIds;
+
+        return  StudentGroup::query()
+            ->with(['region', 'city', 'status', 'partner'])->withCount(['students' => function ($query) {
+                $query->where('activation', 1);
+            }])
+            ->when(
+                $teacherGroupIds !== null,
+                fn($q) => $q->whereIn('id', $teacherGroupIds)
+            )
             ->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('Moderator', 'like', '%' . $this->search . '%')
-                      ->orWhere('batch_no', 'like', '%' . $this->search . '%');
+                    ->orWhere('Moderator', 'like', '%' . $this->search . '%')
+                    ->orWhere('batch_no', 'like', '%' . $this->search . '%');
             })
             ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);      
+            ->paginate($this->perPage);
     }
 
     public function delete($id)
     {
-        if (Gate::denies('student.group.create')) 
-        { 
+        if (Gate::denies('student.group.create')) {
             abort(403, 'You do not have the necessary permissions');
         }
         $group = StudentGroup::findOrFail($id);
@@ -82,9 +92,9 @@ class Index extends Component
         if ($group) {
             $ids = $group->subject_to_learn_id ?? [];
             if (is_array($ids) && count($ids) > 0) {
-                 $this->viewingSubjects = StudentSubjectForLearn::whereIn('id', $ids)->pluck('name')->toArray();
+                $this->viewingSubjects = StudentSubjectForLearn::whereIn('id', $ids)->pluck('name')->toArray();
             } else {
-                 $this->viewingSubjects = [];
+                $this->viewingSubjects = [];
             }
             $this->viewingGroupName = $group->name;
             $this->showSubjectsModal = true;
@@ -112,7 +122,7 @@ class Index extends Component
         $this->selectedGroup = null;
         $this->showDetailsModal = false;
     }
-    
+
     public function generateSchedule($groupId)
     {
         if (Gate::denies('student.group.create')) {
@@ -153,7 +163,7 @@ class Index extends Component
                         'activation' => 1,
                         'is_off_day' => $isOffDay,
                     ]);
-                    
+
                     $startDate->addDay();
                 }
                 DB::commit();
@@ -169,8 +179,7 @@ class Index extends Component
 
     public function render()
     {
-        if (Gate::denies('student.group.index')) 
-        { 
+        if (Gate::denies('student.group.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
         //          $data = Student::groupBy('student_groups_id')->select('student_groups_id', DB::raw('count(*) as total'))->get();

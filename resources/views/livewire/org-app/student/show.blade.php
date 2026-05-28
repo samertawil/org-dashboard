@@ -567,9 +567,9 @@
                                                         }
                                                     @endphp
                                                     {{ $displayAnswerAr ?? '-' }}
-                                                    @if ($answer->answer_en_text)
+                                                    @if ($answer->answer_label)
                                                         <div class="text-xs text-zinc-500 mt-1 border-t border-zinc-100 pt-1 print:hidden">
-                                                            {{ $answer->answer_en_text }}
+                                                            {{ $answer->answer_label }}
                                                         </div>
                                                     @endif
                                                 </td>

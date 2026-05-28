@@ -47,11 +47,7 @@ trait EmployeeTrait
     #[Validate('nullable|exists:partner_institutions,id')]
     public $employee_in_partner_id = null;
 
-    
-    #[Validate('nullable|exists:statuses,id')]
-    public $job_title = null;
-    
-    
+
   
     public $activation = GlobalSystemConstant::ACTIVE->value;
 

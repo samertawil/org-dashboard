@@ -26,7 +26,7 @@ class Create extends Component
         $this->validate();
 
         $user = auth()->user();
-        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
             $hasSchedule = \App\Reposotries\EducationalActivityDetailRepo::getTeacherSchedulesQuery()
                 ->where('id', $this->educational_activity_id)
                 ->exists();
@@ -54,9 +54,8 @@ class Create extends Component
 
     public function render()
     {
-        if (Gate::denies('educational-activity-detail.create')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+
+        Gate::authorize('create', EducationalActivityDetail::class);
 
         return view('livewire.org-app.educational-activity-detail.create', [
             'heading' => __('Create Educational Activity Detail'),

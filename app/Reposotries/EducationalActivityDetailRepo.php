@@ -24,11 +24,17 @@ class EducationalActivityDetailRepo
             return $query;
         }
 
-        $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
+        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
+        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
         $employeeId = $user->employee?->id;
 
-        return $query->whereIn('group_id', $groupIds)
-            ->where('employee_id', $employeeId);
+        return $query->where(function ($q) use ($groupIds167, $groupIds166, $employeeId) {
+            $q->whereIn('group_id', $groupIds167)
+                ->orWhere(function ($sub) use ($groupIds166, $employeeId) {
+                    $sub->whereIn('group_id', $groupIds166)
+                        ->where('employee_id', $employeeId);
+                });
+        });
     }
 
     /**
@@ -60,12 +66,18 @@ class EducationalActivityDetailRepo
             return $query;
         }
 
-        $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
+        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
+        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
         $employeeId = $user->employee?->id;
 
-        return $query->whereHas('educationalActivity', function ($q) use ($groupIds, $employeeId) {
-            $q->whereIn('group_id', $groupIds)
-                ->where('employee_id', $employeeId);
+        return $query->whereHas('educationalActivity', function ($q) use ($groupIds167, $groupIds166, $employeeId) {
+            $q->where(function ($subQ) use ($groupIds167, $groupIds166, $employeeId) {
+                $subQ->whereIn('group_id', $groupIds167)
+                    ->orWhere(function ($sub) use ($groupIds166, $employeeId) {
+                        $sub->whereIn('group_id', $groupIds166)
+                            ->where('employee_id', $employeeId);
+                    });
+            });
         });
     }
 }

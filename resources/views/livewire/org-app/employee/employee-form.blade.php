@@ -124,14 +124,6 @@
             </flux:select>
             @endif
 
-              {{-- Job Title --}}
-              <flux:select  wire:model="job_title" :label="__('Job title')" :placeholder="__('Select Job title')">
-                <option value="">{{ __('Job Title') }}</option>
-                @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.job_title')) as $status)
-                <option value="{{ $status->id }}">{{ $status->status_name }}</option>
-                @endforeach
-            </flux:select>
-
             {{-- Type of Hire --}}
             @if (!$employee_in_partner_id)
             <flux:select wire:model="type_of_employee_hire" :label="__('Hire Type')">

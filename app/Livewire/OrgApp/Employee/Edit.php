@@ -45,7 +45,6 @@ class Edit extends Component
         $this->user_id = $employee->user_id;
         $this->activation = $employee->activation;
         $this->employee_in_partner_id = $employee->employee_in_partner_id;
-        $this->job_title = $employee->job_title;
     }
 
     public function update()
@@ -68,7 +67,6 @@ class Edit extends Component
             'user_id' => $this->user_id ?: null,
             'activation' => $this->activation,
             'employee_in_partner_id' => $this->employee_in_partner_id ?: null,
-            'job_title' => $this->job_title ?: null,
         ]);
 
         if ($this->employee->isDirty()) {

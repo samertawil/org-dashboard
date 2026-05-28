@@ -11,11 +11,13 @@ use App\Models\Status;
 use App\Models\StudentGroup;
 use App\Models\SurveyTable;
 use App\Reposotries\StudentGroupRepo;
+use App\Concerns\AccessibleGroupsTrait;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class ExportFiles extends Component
 {
+    use AccessibleGroupsTrait;
     public $surveyNo = '';
     public $surveyNoPivot = '';
     public $surveyLate = '';
@@ -53,12 +55,14 @@ class ExportFiles extends Component
 
     public function outerExportSurveyAnswers()
     {
-
+        if (Gate::denies('select.any_student')) {
+            abort(403, 'You do not have the necessary permissions.');
+        }
         $this->validate([
             'publicSurveyNo' => 'required',
         ]);
-        $surveyName = $this->publicSurveyNo 
-            ? SurveyTable::find($this->publicSurveyNo)?->survey_name 
+        $surveyName = $this->publicSurveyNo
+            ? SurveyTable::find($this->publicSurveyNo)?->survey_name
             : __('All Surveys');
 
         $filename = "Survey_Answers_List_{$surveyName}_" . now()->format('Y-m-d_H-i') . ".xlsx";
@@ -126,52 +130,49 @@ class ExportFiles extends Component
 
     public function render()
     {
-        
+
         if (Gate::denies('survey.export')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         $surveys = Status::whereIn('p_id_sub', [config('appConstant.survey_for')])
             ->orderBy('status_name')
-        ->get();
+            ->get();
 
 
-        $publicSurveys = SurveyTable::whereIn('survey_target', [config('appConstant.public_links'),config('appConstant.parent_links')])
-        ->orderBy('id','DESC')
-    ->get();
-        
-        $groupNames = StudentGroupRepo::studentGroups();
+        $publicSurveys = SurveyTable::whereIn('survey_target', [config('appConstant.public_links'), config('appConstant.parent_links')])
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        $groupNames = $this->accessibleGroups;
         $groupNamesPivot = $groupNames;
         $groupNamesLate = $groupNames;
         $groupNamesResults = $groupNames;
 
         if ($this->batchNo) {
-            $groupNames = StudentGroup::where('batch_no', $this->batchNo)
-                ->orderBy('name')
-                ->get(['id', 'name']);
+            $groupNames = $this->accessibleGroups
+                ->where('batch_no', $this->batchNo)
+                ->sortBy('name');
         }
 
         if ($this->batchNoPivot) {
-            $groupNamesPivot = StudentGroup::where('batch_no', $this->batchNoPivot)
-                ->orderBy('name')
-                ->get(['id', 'name']);
+            $groupNamesPivot = $this->accessibleGroups
+                ->where('batch_no', $this->batchNoPivot)
+                ->sortBy('name');
         }
 
         if ($this->batchNoLate) {
-            $groupNamesLate = StudentGroup::where('batch_no', $this->batchNoLate)
-                ->orderBy('name')
-                ->get(['id', 'name']);
+            $groupNamesLate = $this->accessibleGroups
+                ->where('batch_no', $this->batchNoLate)
+                ->sortBy('name');
         }
 
         if ($this->batchNoResults) {
-            $groupNamesResults = StudentGroup::where('batch_no', $this->batchNoResults)
-                ->orderBy('name')
-                ->get(['id', 'name']);
+            $groupNamesResults = $this->accessibleGroups
+                ->where('batch_no', $this->batchNoResults)
+                ->sortBy('name');
         }
 
-        $batchNumbers = StudentGroup::whereNotNull('batch_no')
-            ->distinct()
-            ->orderBy('batch_no')
-            ->pluck('batch_no');
+        $batchNumbers = $this->availableBatches;
 
         return view('livewire.org-app.survey-questions.export-files', [
             'surveys' => $surveys,

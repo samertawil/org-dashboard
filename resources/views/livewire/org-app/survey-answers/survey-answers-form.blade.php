@@ -36,7 +36,6 @@
                         <flux:select wire:model.live='surveyForSection'>
                             <option value="" class="text-gray-500">{{ __('Choose Section...') }}</option>
                             @foreach ($this->surveyFor as $section)
-                          
                                 @php
                                     $isFilled = in_array($section->id, $this->filledSurveys);
                                 @endphp
@@ -49,26 +48,29 @@
                         </flux:select>
                         <flux:error name="surveyForSection" />
                     </flux:field>
-                   
+
                 @endif
 
             </div>
             @if ($this->student)
-            <flux:subheading class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-               هذه التقيمات خاصة بهذا العمر , في حال عدم وجود تقيم معين يرجى اضافته من خلال جدول survery_table
-            </flux:subheading>
+                <flux:subheading class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    هذه التقيمات خاصة بهذا العمر , في حال عدم وجود تقيم معين يرجى اضافته من خلال جدول survery_table
+                </flux:subheading>
             @endif
         </div>
-        <div wire:loading wire:target="surveyForSection" class="text-blue-500 animate-pulse bg-white/50 dark:bg-zinc-800/50 flex items-center justify-center z-10">
+        <div wire:loading wire:target="surveyForSection"
+            class="text-blue-500 animate-pulse bg-white/50 dark:bg-zinc-800/50 flex items-center justify-center z-10">
             <flux:icon name="arrow-path" class="size-8 animate-spin text-indigo-500" />
         </div>
         {{-- Questions Loop --}}
         @if ($this->surveyForSection && $this->account_id)
             <div class="flex items-center gap-2 mt-4 text-sm font-medium text-zinc-600 dark:text-zinc-400">
                 <flux:icon name="chart-bar" class="size-4 text-indigo-500" />
-                <span>{{ __('عدد الأسئلة المجاب عليها:') }} <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ $this->calcAnswers['answersCount'] }}</span></span>
+                <span>{{ __('عدد الأسئلة المجاب عليها:') }} <span
+                        class="text-indigo-600 dark:text-indigo-400 font-bold">{{ $this->calcAnswers['answersCount'] }}</span></span>
                 <span class="text-zinc-300 dark:text-zinc-600 mx-1">|</span>
-                <span>{{ __('العدد الكلي للأسئلة:') }} <span class="text-zinc-800 dark:text-zinc-200 font-bold">{{ $this->calcAnswers['questionsCount'] }}</span></span>
+                <span>{{ __('العدد الكلي للأسئلة:') }} <span
+                        class="text-zinc-800 dark:text-zinc-200 font-bold">{{ $this->calcAnswers['questionsCount'] }}</span></span>
             </div>
         @endif
         @if ($this->surveyForSection && count($this->questionsBySurveyForSection) > 0)
@@ -76,11 +78,13 @@
                 <div class="border-b border-zinc-100 dark:border-zinc-700 pb-2 mb-4">
                     <flux:heading size="lg">{{ __('Survey Questions') }}</flux:heading>
                 </div>
- 
+
                 <div class="space-y-6">
                     @foreach ($this->questionsBySurveyForSection->unique('domain_id')->values() as $domainNames)
-                        <div class="my-4 border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-r-lg">
-                            <span class="text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-sm">
+                        <div
+                            class="my-4 border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-r-lg">
+                            <span
+                                class="text-indigo-700 dark:text-indigo-400 font-bold uppercase tracking-wider text-sm">
                                 {{ $domainNames->domainRel ? $domainNames->domainRel->status_name : __('General') }}
                             </span>
                         </div>
@@ -116,9 +120,8 @@
                                         @elseif($question->answer_input_type == 3)
                                             {{-- Type 3: Number --}}
                                             <flux:input type="number" wire:model="answers.{{ $question->id }}"
-                                                placeholder="{{ __('Enter number...') }}" 
-                                                min="{{ $question->min_score }}" 
-                                                max="{{ $question->max_score }}" />
+                                                placeholder="{{ __('Enter number...') }}"
+                                                min="{{ $question->min_score }}" max="{{ $question->max_score }}" />
                                         @elseif($question->answer_input_type == 4)
                                             {{-- Type 4: Long Text (Textarea) --}}
                                             <flux:textarea wire:model="answers.{{ $question->id }}" rows="4"
@@ -175,12 +178,6 @@
                 <flux:label>{{ __('Answer (AR)') }}</flux:label>
                 <flux:textarea wire:model="answer_ar_text" rows="3" />
                 <flux:error name="answer_ar_text" />
-            </flux:field>
-
-            <flux:field class="col-span-1 md:col-span-2">
-                <flux:label>{{ __('Answer (EN)') }}</flux:label>
-                <flux:textarea wire:model="answer_en_text" rows="3" />
-                <flux:error name="answer_en_text" />
             </flux:field>
         </div>
     @endif

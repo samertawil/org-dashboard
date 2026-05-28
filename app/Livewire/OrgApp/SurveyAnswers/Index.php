@@ -25,7 +25,7 @@ class Index extends Component
     public $sortDirection = 'asc';
     public $perPage = 10;
     public $readyToLoad = false;
- 
+
 
 
     protected $queryString = [
@@ -56,7 +56,7 @@ class Index extends Component
 
     public function clearFilters()
     {
-        $this->reset(['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt','searchAccountName']);
+        $this->reset(['searchAccountId', 'searchSurveyNo', 'searchCreatedBy', 'searchCreatedAt', 'searchAccountName']);
         $this->readyToLoad = false;
         $this->resetPage();
     }
@@ -70,7 +70,7 @@ class Index extends Component
     #[Computed()]
     public function answers()
     {
-        if ($this->readyToLoad && $this->searchAccountId !== '' || $this->searchAccountName!== '') {
+        if ($this->readyToLoad && $this->searchAccountId !== '' || $this->searchAccountName !== '') {
 
             return SurveyAnswer::query()
                 ->select('survey_answers.*')
@@ -107,7 +107,7 @@ class Index extends Component
 
     public function render()
     {
-        dd('index');
+
         if (Gate::denies('survey.index')) {
             abort(403, 'You do not have the necessary permissions');
         }
@@ -118,4 +118,3 @@ class Index extends Component
         ]);
     }
 }
- 

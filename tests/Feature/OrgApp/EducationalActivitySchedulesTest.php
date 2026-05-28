@@ -78,8 +78,8 @@ it('filters schedules by employee_id for regular teacher (job_title != 167)', fu
     $status150->status_name = 'Teacher';
     $status150->save();
 
-    // Set teacher's job title to something other than 167
-    $this->employee->update(['job_title' => 150]);
+    // Set teacher's job title in pivot to something other than 167
+    $this->teacherUser->teacher()->where('student_group_id', $this->group1->id)->update(['job_title' => 150]);
 
     // Create another employee
     $otherUser = User::factory()->create(['activation' => 1]);
@@ -135,8 +135,8 @@ it('does not filter schedules by employee_id for teacher with job_title 167', fu
     $status167->status_name = 'Coordinator';
     $status167->save();
 
-    // Set teacher's job title to 167
-    $this->employee->update(['job_title' => 167]);
+    // Set teacher's job title in pivot to 167
+    $this->teacherUser->teacher()->where('student_group_id', $this->group1->id)->update(['job_title' => 167]);
 
     // Create another employee
     $otherUser = User::factory()->create(['activation' => 1]);

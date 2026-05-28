@@ -1,0 +1,1 @@
+<?php echo $__env->make('livewire.org-app.subject-for-learn.subject-for-learn-form', ['type'=>'save','heading'=>'Create Subject'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\resources\views/livewire/org-app/subject-for-learn/create.blade.php ENDPATH**/ ?>

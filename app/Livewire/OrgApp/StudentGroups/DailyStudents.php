@@ -4,6 +4,8 @@ namespace App\Livewire\OrgApp\StudentGroups;
 
 use Livewire\Component;
 use App\Models\StudentGroup;
+use App\Models\ActivitySchedule;
+use App\Models\TeacherStudentGroup;
 use Carbon\Carbon;
 use App\Models\StudentDailyAttendance;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +33,7 @@ class DailyStudents extends Component
             ->where('attendance_date', $this->date)
             ->get()
             ->keyBy('student_id');
+
 
         // Initialize attendance keys for all scheduled students so Alpine entangle works properly
         $students = $this->getStudents();
@@ -63,29 +66,62 @@ class DailyStudents extends Component
         $enrollmentTypes = ['full_week'];
         $dayOfWeek = Carbon::parse($this->date)->dayOfWeek; // 0=Sun, 1=Mon, ..., 6=Sat
 
-        if ($dayOfWeek === 6) {
-            $enrollmentTypes[] = 'sat_mon_wed';
-        } // Saturday
-        if ($dayOfWeek === 0) {
-            $enrollmentTypes[] = 'sun_tue_thu';
-        } // Sunday
-        if ($dayOfWeek === 1) {
-            $enrollmentTypes[] = 'sat_mon_wed';
-        } // Monday
-        if ($dayOfWeek === 2) {
-            $enrollmentTypes[] = 'sun_tue_thu';
-        } // tuesday
-        if ($dayOfWeek === 3) {
-            $enrollmentTypes[] = 'sat_mon_wed';
-        } // Wednesday
-        if ($dayOfWeek === 4) {
-            $enrollmentTypes[] = 'sun_tue_thu';
-        } // Thursday
+        if ($dayOfWeek === 6) $enrollmentTypes[] = 'sat_mon_wed'; // Saturday
+        if ($dayOfWeek === 0) $enrollmentTypes[] = 'sun_tue_thu'; // Sunday
+        if ($dayOfWeek === 1) $enrollmentTypes[] = 'sat_mon_wed'; // Monday
+        if ($dayOfWeek === 2) $enrollmentTypes[] = 'sun_tue_thu'; // Tuesday
+        if ($dayOfWeek === 3) $enrollmentTypes[] = 'sat_mon_wed'; // Wednesday
+        if ($dayOfWeek === 4) $enrollmentTypes[] = 'sun_tue_thu'; // Thursday
 
-        return $this->group->students()
+        $user = auth()->user();
+
+        $isGroupSupervisor = TeacherStudentGroup::isGroupSupervisor($user, $this->group);
+
+        // --- Base student query builder ---
+        $baseQuery = fn() => $this->group->students()
             ->select('students.id', 'full_name', 'identity_number', 'enrollment_type', 'students.activation', 'students.status_id')
             ->with('status:id,status_name')
-            ->whereIn('enrollment_type', $enrollmentTypes)
+            ->whereIn('enrollment_type', $enrollmentTypes);
+
+        // Super admin or full-access permission → return all students in the group
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+            return $baseQuery()->get();
+        }
+
+        // --- Build schedule query for this group and date ---
+        $schedulesQuery = ActivitySchedule::query()
+            ->where('group_id', $this->group->id)
+            ->whereDate('period_start', $this->date)
+            ->whereNotNull('educational_period_groups');
+
+        if ($isGroupSupervisor) {
+            // Supervisor for this group: sees all students whose status_id matches
+            // any educational_period_groups scheduled for ANY teacher in this group today.
+            $periodGroupIds = (clone $schedulesQuery)
+                ->pluck('educational_period_groups')
+                ->unique()
+                ->filter()
+                ->values()
+                ->toArray();
+        } else {
+            // Regular teacher / facilitator: sees only the period group(s) assigned to THEM today.
+            $employee = $user->employee;
+            $periodGroupIds = (clone $schedulesQuery)
+                ->where('employee_id', $employee?->id)
+                ->pluck('educational_period_groups')
+                ->unique()
+                ->filter()
+                ->values()
+                ->toArray();
+        }
+
+        // No schedules found for today → show empty list
+        if (empty($periodGroupIds)) {
+            return collect([]);
+        }
+
+        return $baseQuery()
+            ->whereIn('students.status_id', $periodGroupIds)
             ->get();
     }
 

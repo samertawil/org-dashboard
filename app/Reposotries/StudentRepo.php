@@ -177,24 +177,24 @@ class StudentRepo
   }
   public static function studentGradingScaleTablesAll($studentId = null)
   {
-      // Base query (no GROUP BY, no domain filter)
-      $baseSub = DB::table('survey_answers as a')
-          ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
-          ->join('students as st', 'st.identity_number', '=', 'a.account_id')
-          ->join('student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
-          ->where('q.survey_for_section', '!=', 120)
-          ->whereNotNull('q.min_score')
-          ->whereNotNull('q.max_score')
-          ->whereColumn('q.batch_no', 'sgp.batch_no');  // يجب أن يكون للـ batch أسئلة فعليًا
-  
-      if ($studentId) {
-          // EARLY filter – best for performance
-          $baseSub->where('a.account_id', $studentId);
-      }
-  
-      // ---------- First subquery: with domain ----------
-      $firstSub = clone $baseSub;
-      $firstSub->selectRaw('
+    // Base query (no GROUP BY, no domain filter)
+    $baseSub = DB::table('survey_answers as a')
+      ->join('survey_questions as q', 'a.question_id', '=', 'q.id')
+      ->join('students as st', 'st.identity_number', '=', 'a.account_id')
+      ->join('student_groups as sgp', 'sgp.id', '=', 'st.student_groups_id')
+      ->where('q.survey_for_section', '!=', 120)
+      ->whereNotNull('q.min_score')
+      ->whereNotNull('q.max_score')
+      ->whereColumn('q.batch_no', 'sgp.batch_no');  // يجب أن يكون للـ batch أسئلة فعليًا
+
+    if ($studentId) {
+      // EARLY filter – best for performance
+      $baseSub->where('a.account_id', $studentId);
+    }
+
+    // ---------- First subquery: with domain ----------
+    $firstSub = clone $baseSub;
+    $firstSub->selectRaw('
               a.account_id as account_id,
               SUM(CAST(a.answer_ar_text AS DECIMAL(10,2))) as total_marks,
               SUM(q.max_score) as max_total_score,
@@ -204,29 +204,29 @@ class StudentRepo
               sgp.batch_no as batch_no,
               q.survey_for_section
           ')
-          ->whereNotNull('q.domain_id')
-          ->groupBy(
-              'a.account_id',
-              'q.domain_id',
-              'a.survey_no',
-              'sgp.batch_no',
-              'q.survey_for_section'
-          );
-  
-      $firstQuery = DB::query()->fromSub($firstSub, 'grades')
-          ->join('survey_grading_scale_tables as g', function ($join) {
-              $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
-                   ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage')
-                   ->where('g.type', '=', 150)
-                   ->whereColumn('g.batch_no', 'grades.batch_no')
-                   ->whereColumn('g.survey_for_section', 'grades.survey_for_section');
-          })
-          ->leftJoin('survey_grading_scale_descriptions as gd', function ($join) {
-              $join->on('gd.domain_id', '=', 'grades.domain_id')
-                   ->on('gd.survey_grading_scale_id', '=', 'g.id');
-          })
-          ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
-          ->selectRaw('
+      ->whereNotNull('q.domain_id')
+      ->groupBy(
+        'a.account_id',
+        'q.domain_id',
+        'a.survey_no',
+        'sgp.batch_no',
+        'q.survey_for_section'
+      );
+
+    $firstQuery = DB::query()->fromSub($firstSub, 'grades')
+      ->join('survey_grading_scale_tables as g', function ($join) {
+        $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
+          ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage')
+          ->where('g.type', '=', 150)
+          ->whereColumn('g.batch_no', 'grades.batch_no')
+          ->whereColumn('g.survey_for_section', 'grades.survey_for_section');
+      })
+      ->leftJoin('survey_grading_scale_descriptions as gd', function ($join) {
+        $join->on('gd.domain_id', '=', 'grades.domain_id')
+          ->on('gd.survey_grading_scale_id', '=', 'g.id');
+      })
+      ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
+      ->selectRaw('
               grades.account_id,
               grades.total_marks,
               grades.max_total_score,
@@ -238,10 +238,10 @@ class StudentRepo
               gd.need_processing,
               s.status_name
           ');
-  
-      // ---------- Second subquery: all questions, no domain ----------
-      $secondSub = clone $baseSub;
-      $secondSub->selectRaw('
+
+    // ---------- Second subquery: all questions, no domain ----------
+    $secondSub = clone $baseSub;
+    $secondSub->selectRaw('
               a.account_id as account_id,
               SUM(CAST(a.answer_ar_text AS DECIMAL(10,2))) as total_marks,
               SUM(q.max_score) as max_total_score,
@@ -251,23 +251,23 @@ class StudentRepo
               sgp.batch_no as batch_no,
               q.survey_for_section
           ')
-          ->groupBy(
-              'a.account_id',
-              'a.survey_no',
-              'sgp.batch_no',
-              'q.survey_for_section'
-          );
-  
-      $secondQuery = DB::query()->fromSub($secondSub, 'grades')
-          ->join('survey_grading_scale_tables as g', function ($join) {
-              $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
-                   ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage')
-                   ->where('g.type', '=', 151)
-                   ->whereColumn('g.batch_no', 'grades.batch_no')
-                   ->whereColumn('g.survey_for_section', 'grades.survey_for_section');
-          })
-          ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
-          ->selectRaw('
+      ->groupBy(
+        'a.account_id',
+        'a.survey_no',
+        'sgp.batch_no',
+        'q.survey_for_section'
+      );
+
+    $secondQuery = DB::query()->fromSub($secondSub, 'grades')
+      ->join('survey_grading_scale_tables as g', function ($join) {
+        $join->on(DB::raw('grades.grade'), '>=', 'g.from_percentage')
+          ->on(DB::raw('grades.grade'), '<=', 'g.to_percentage')
+          ->where('g.type', '=', 151)
+          ->whereColumn('g.batch_no', 'grades.batch_no')
+          ->whereColumn('g.survey_for_section', 'grades.survey_for_section');
+      })
+      ->leftJoin('statuses as s', 'grades.survey_no', '=', 's.id')
+      ->selectRaw('
               grades.account_id,
               grades.total_marks,
               grades.max_total_score,
@@ -279,13 +279,13 @@ class StudentRepo
               NULL as need_processing,
               s.status_name
           ');
-  
-      // UNION + ordering
-      return $firstQuery
-          ->union($secondQuery)
-          ->orderBy('account_id')
-          ->orderBy('domain_id')
-          ->get();
+
+    // UNION + ordering
+    return $firstQuery
+      ->union($secondQuery)
+      ->orderBy('account_id')
+      ->orderBy('domain_id')
+      ->get();
   }
   public static function studentsNames()
   {
@@ -293,5 +293,9 @@ class StudentRepo
     return Student::visibleToTeacher($user)->get();
   }
 
- 
+  public static function studentsName($identity_number)
+  {
+    $user = auth()->user();
+    return Student::visibleToTeacher($user)->where('identity_number', $identity_number)->first();
+  }
 }

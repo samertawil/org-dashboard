@@ -1,0 +1,1 @@
+detail-<?php echo e($detail->id); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/7d027904cbe6c4d7b5cbe2f3f37a2709.blade.php ENDPATH**/ ?>

@@ -7,6 +7,8 @@ use App\Models\Student;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Reposotries\StatusRepo;
+use App\Reposotries\StudentRepo;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -20,6 +22,7 @@ class Create extends Component
     public function mount()
     {
         $this->account_id = request()->query('account_id', $this->account_id);
+
         $this->loadAnswers();
     }
 
@@ -97,8 +100,7 @@ class Create extends Component
         if (!$this->account_id) {
             return null;
         }
-
-        return  Student::where('identity_number', $this->account_id)->first();
+        return StudentRepo::studentsName($this->account_id);
     }
 
     #[Computed()]
@@ -119,6 +121,7 @@ class Create extends Component
     // Triggered automatically by Livewire when account_id is changed
     public function updatedAccountId()
     {
+
         $this->loadAnswers();
     }
 
@@ -150,6 +153,7 @@ class Create extends Component
 
     public function save()
     {
+
         $this->validate([
             'surveyForSection' => 'required|integer',
             'account_id' => 'required|integer',
@@ -180,11 +184,43 @@ class Create extends Component
                     'question_id' => $question->id,
                 ]);
 
+                // Resolve answer_label if question has answer_options
+                $answerLabel = null;
+                $options = $question->answer_options;
+                if (!empty($options)) {
+                    if (is_string($options)) {
+                        $options = json_decode($options, true);
+                    }
+                    if (is_array($options)) {
+                        $decodedVal = json_decode($arText, true);
+                        $values = (json_last_error() === JSON_ERROR_NONE && is_array($decodedVal)) ? $decodedVal : [$arText];
+                        
+                        $labels = [];
+                        foreach ($values as $val) {
+                            $found = $val;
+                            foreach ($options as $option) {
+                                if (is_array($option) && isset($option['value']) && isset($option['label'])) {
+                                    if ((string) $option['value'] === (string) $val) {
+                                        $found = $option['label'];
+                                        break;
+                                    }
+                                } elseif (is_string($option)) {
+                                    if ((string) $option === (string) $val) {
+                                        $found = $option;
+                                        break;
+                                    }
+                                }
+                            }
+                            $labels[] = $found;
+                        }
+                        $answerLabel = implode('، ', $labels);
+                    }
+                }
+
                 $surveyAnswer->fill([
                     'answer_ar_text' => $arText,
-                    'answer_en_text' => null,
+                    'answer_label' => $answerLabel,
                     'created_by' => $employeeId,
-
                 ]);
 
                 if ($surveyAnswer->isDirty()) {
@@ -229,6 +265,7 @@ class Create extends Component
     }
     public function render()
     {
+
 
         if (Gate::denies('survey-answers.create')) {
             abort(403, 'You do not have the necessary permissions');

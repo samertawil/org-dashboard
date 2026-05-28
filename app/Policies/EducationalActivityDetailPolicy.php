@@ -43,7 +43,7 @@ class EducationalActivityDetailPolicy
 
     public function create(User $user): Response|bool
     {
-        if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create')) {
+        if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create') || $user->can('select.any.student')) {
             return Response::allow();
         }
         return Response::deny('You do not have permission to create educational activity report.');
@@ -52,7 +52,7 @@ class EducationalActivityDetailPolicy
 
     public function update(User $user, EducationalActivityDetail $educationalActivityDetail): Response|bool
     {
-        if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create')) {
+        if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create') || $user->can('select.any.student')) {
             return Response::allow();
         }
         return Response::deny('You do not have permission to create educational activity report.');

@@ -1,0 +1,1 @@
+activity-partner-<?php echo e($index); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/34ceb5154aae8bae50a05582b8965aaa.blade.php ENDPATH**/ ?>

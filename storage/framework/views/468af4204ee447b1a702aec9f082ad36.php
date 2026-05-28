@@ -1,0 +1,2 @@
+<?php echo $__env->make('livewire.org-app.teacher-student-group.teacher-student-group-form', ['type'=>'edit'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH C:\xampp\htdocs\feras\org-dashboard\resources\views/livewire/org-app/teacher-student-group/edit.blade.php ENDPATH**/ ?>

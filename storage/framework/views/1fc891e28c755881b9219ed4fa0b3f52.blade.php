@@ -1,0 +1,1 @@
+vendors-container-{{ count($this->partners) }}

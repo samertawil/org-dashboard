@@ -11,6 +11,7 @@ use App\Models\Status;
 use App\Models\StudentGroup;
 use App\Models\StudentGroupSchedule;
 use App\Models\User;
+use App\Models\Employee;
 use Carbon\Carbon;
 use Livewire\Livewire;
 
@@ -137,9 +138,48 @@ it('updates a student group', function () {
 it('renders index page', function () {
     StudentGroup::create(['name' => 'Group Index', 'batch_no' => 1]);
 
+    // $this->user has ID 1 by default since it is the first created user, so it is superadmin.
+    actingAs($this->user);
+
     Livewire::test(Index::class)
         ->assertStatus(200)
         ->assertSee('Group Index');
+});
+
+it('restricts groups list for a teacher to only their assigned groups', function () {
+    Gate::define('student.group.index', fn() => true);
+
+    // Create two groups
+    $group1 = StudentGroup::create(['name' => 'Group One', 'batch_no' => 1]);
+    $group2 = StudentGroup::create(['name' => 'Group Two', 'batch_no' => 2]);
+
+    // Create a teacher user and profile
+    $teacherUser = User::factory()->create(['activation' => 1]);
+    $employee = Employee::create([
+        'user_id' => $teacherUser->id,
+        'full_name' => 'Teacher One',
+        'employee_number' => 'EMP501',
+        'date_of_birth' => '1990-01-01',
+        'phone' => '0599000501',
+        'email' => $teacherUser->email,
+        'activation' => 1,
+        'gender' => 2,
+    ]);
+
+    // Assign teacher user to Group One
+    $teacherUser->teacher()->create([
+        'student_group_id' => $group1->id,
+    ]);
+
+    // Act as the teacher
+    actingAs($teacherUser);
+
+    $component = Livewire::test(Index::class)
+        ->assertStatus(200);
+
+    $groups = $component->instance()->groups;
+    expect($groups->items())->toHaveCount(1);
+    expect($groups->items()[0]->id)->toBe($group1->id);
 });
 
 it('can view group details in modal', function () {

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->tinyInteger('max_score')->nullable();
             $table->string('domain')->nullable();
             $table->tinyInteger('answer_input_type'); 
+            $table->text('answer_options')->nullable();
             $table->tinyInteger('require_detail')->default(0); 
             $table->text('detail')->nullable();; 
             $table->string('note')->nullable();

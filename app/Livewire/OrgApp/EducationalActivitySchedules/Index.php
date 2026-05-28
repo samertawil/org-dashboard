@@ -10,11 +10,13 @@ use Livewire\WithPagination;
 use App\Reposotries\StudentGroupRepo;
 use App\Exports\EducationalActivitySchedulesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Concerns\AccessibleGroupsTrait;
+use App\Models\TeacherStudentGroup;
 
 
 class Index extends Component
 {
-    use WithPagination;
+    use WithPagination, AccessibleGroupsTrait;
 
     public string $search         = '';
     public string $filterDomain   = '';
@@ -163,38 +165,7 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Get the student groups accessible by the current user.
-     */
-    #[Computed()]
-    public function accessibleGroups()
-    {
-        return StudentGroupRepo::educationPoints();
-    }
 
-    /**
-     * Get the student group IDs accessible by the current teacher.
-     * Returns null for super admins (no restriction).
-     */
-    #[Computed()]
-    public function accessibleGroupIds()
-    {
-
-        $user = auth()->user();
-        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
-            return null;
-        }
-        return $this->accessibleGroups->pluck('id')->toArray();
-    }
-
-    /**
-     * Available batches filtered by teacher's accessible groups.
-     */
-    #[Computed()]
-    public function availableBatches()
-    {
-        return $this->accessibleGroups->pluck('batch_no')->filter()->unique()->values()->toArray();
-    }
 
     /**
      * Available groups filtered by batch and teacher's accessible groups.
@@ -220,7 +191,7 @@ class Index extends Component
 
         $teacherGroupIds = $this->accessibleGroupIds;
         $employee = auth()->user()->employee;
-        $isJobTitle167 = $employee && $employee->job_title == 167;
+        $user = auth()->user();
 
 
         $query = ActivitySchedule::query()
@@ -230,11 +201,18 @@ class Index extends Component
             })
             ->when(
                 $teacherGroupIds !== null,
-                fn($q) =>
-                $q->whereIn('group_id', $teacherGroupIds)
-                    ->when(!$isJobTitle167, function ($query) use ($employee) {
-                        $query->where('employee_id', $employee?->id);
-                    })
+                function ($q) use ($user, $employee, $teacherGroupIds) {
+                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+
+                    $q->whereIn('group_id', $teacherGroupIds)
+                        ->where(function ($query) use ($supervisorGroupIds, $employee) {
+                            $query->whereIn('group_id', $supervisorGroupIds)
+                                ->orWhere(function ($sub) use ($employee) {
+                                    $sub->where('employee_id', $employee?->id)
+                                        ->orWhereNull('employee_id');
+                                });
+                        });
+                }
             )
             ->when(
                 $this->search,
@@ -341,19 +319,23 @@ class Index extends Component
 
         $teacherGroupIds = $this->accessibleGroupIds;
         $employee = auth()->user()->employee;
-        $isJobTitle167 = $employee && $employee->job_title == 167;
+        $user = auth()->user();
 
         $schedules = ActivitySchedule::where('group_id', $this->cloneSourceGroupId)
             ->whereBetween('period_start', [$startDate, $endDate])
             ->when(
                 $teacherGroupIds !== null,
-                fn($q) =>
-                $q->when(!$isJobTitle167, function ($query) use ($employee) {
-                    $query->where(function ($query) use ($employee) {
-                        $query->where('employee_id', $employee?->id)
-                            ->orWhereNull('employee_id');
+                function ($q) use ($user, $employee) {
+                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+
+                    $q->where(function ($query) use ($supervisorGroupIds, $employee) {
+                        $query->whereIn('group_id', $supervisorGroupIds)
+                            ->orWhere(function ($sub) use ($employee) {
+                                $sub->where('employee_id', $employee?->id)
+                                    ->orWhereNull('employee_id');
+                            });
                     });
-                })
+                }
             )
             ->get();
 
@@ -424,7 +406,7 @@ class Index extends Component
 
         $teacherGroupIds = $this->accessibleGroupIds;
         $employee = auth()->user()->employee;
-        $isJobTitle167 = $employee && $employee->job_title == 167;
+        $user = auth()->user();
 
         $query = ActivitySchedule::query()
             ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
@@ -433,14 +415,18 @@ class Index extends Component
             })
             ->when(
                 $teacherGroupIds !== null,
-                fn($q) =>
-                $q->whereIn('group_id', $teacherGroupIds)
-                    ->when(!$isJobTitle167, function ($query) use ($employee) {
-                        $query->where(function ($query) use ($employee) {
-                            $query->where('employee_id', $employee?->id)
-                                ->orWhereNull('employee_id');
+                function ($q) use ($user, $employee, $teacherGroupIds) {
+                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+
+                    $q->whereIn('group_id', $teacherGroupIds)
+                        ->where(function ($query) use ($supervisorGroupIds, $employee) {
+                            $query->whereIn('group_id', $supervisorGroupIds)
+                                ->orWhere(function ($sub) use ($employee) {
+                                    $sub->where('employee_id', $employee?->id)
+                                        ->orWhereNull('employee_id');
+                                });
                         });
-                    })
+                }
             )
             ->when(
                 $this->search,

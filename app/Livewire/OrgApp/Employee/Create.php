@@ -42,7 +42,6 @@ class Create extends Component
             'user_id' => $this->user_id ?: null,
             'activation' => $this->activation,
             'employee_in_partner_id'=> $this->employee_in_partner_id ?: null,
-            'job_title'=> $this->job_title ?: null,
         ]);
 
         session()->flash('message', __('Employee successfully created.'));
