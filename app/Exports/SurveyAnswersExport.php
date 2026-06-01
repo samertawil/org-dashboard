@@ -34,7 +34,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping, 
     public function collection()
     {
         return SurveyAnswer::query()
-            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator'])
+            ->with(['student.studentGroup', 'surveyfor', 'question', 'creator', 'student.group'])
             ->where('survey_no', $this->surveyNo)
             ->whereHas('student', function ($q) {
                 $q->where('student_groups_id', $this->groupId)
@@ -54,6 +54,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping, 
             'Survey Name',
             'Student ID',
             'Student Full Name',
+            'Student Point Name',
             'Student Group',
             'Question',
             'Answer',
@@ -84,6 +85,7 @@ class SurveyAnswersExport implements FromCollection, WithHeadings, WithMapping, 
             $isDuplicate ? '' : $answer->account_id,
             $isDuplicate ? '' : ($answer->student?->full_name ?? 'N/A'),
             $isDuplicate ? '' : ($answer->student?->studentGroup?->name ?? 'N/A'),
+            $answer->student?->group?->status_name ?? 'N/A',
             $answer->question?->question_ar_text ?? 'N/A',
             $answer->answer_ar_text,
             $answer->answer_label,

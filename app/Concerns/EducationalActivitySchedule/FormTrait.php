@@ -98,6 +98,13 @@ trait FormTrait
         return StatusRepo::statuses();
     }
 
+    #[Computed()]
+    public function assignedGroups()
+    {
+        return StatusRepo::statuses();
+    }
+
+
     /**
      * Dynamically returns teachers assigned to the selected student group.
      * Recomputes whenever $this->group_id changes.
@@ -140,6 +147,7 @@ trait FormTrait
     #[Computed()]
     public function periodGroups()
     {
+
         return $this->allStatuses()
             ->where('p_id_sub', config('appConstant.educational_period_groups'));
     }

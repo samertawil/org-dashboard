@@ -1,0 +1,1 @@
+day-<?php echo e($day['date']->format('Y-m-d')); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/2e848bea0d97610f53de7d5ff77602aa.blade.php ENDPATH**/ ?>

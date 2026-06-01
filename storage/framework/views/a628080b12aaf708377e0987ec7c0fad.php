@@ -979,14 +979,6 @@
                         </span>
                     </div>
 
-                    
-                    <div class="space-y-1">
-                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block"><?php echo e(__('Job Title')); ?></span>
-                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
-                            <?php echo e($this->selectedEmployee->jobTitle->status_name ?? '-'); ?>
-
-                        </span>
-                    </div>
 
                     
                     <div class="space-y-1">

@@ -35,7 +35,7 @@
                     @foreach ($this->activitySchedules as $schedule)
                         <option value="{{ $schedule->id }}"> {{ $schedule->period_start?->format('Y-m-d') }}
                             ({{ $schedule->activity_name }})
-                            (مجموعة {{ $schedule->periodGroups->status_name }})
+                            (مجموعة {{ $schedule->periodGroups->status_name ?? '' }})
 
                         </option>
                     @endforeach

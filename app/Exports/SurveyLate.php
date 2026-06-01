@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use App\Models\SurveyAnswer;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -30,11 +29,12 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
         $results = DB::select("
         SELECT DISTINCT
             s.id, s.identity_number, s.full_name, sg.name as group_name, sg.batch_no,
-             stat.status_name as survey_name,   s.activation
+             stat.status_name as survey_name, s_stat.status_name as status_group_name, s.activation
         FROM survey_table st
         JOIN students s ON s.student_groups_id IS NOT NULL
         JOIN student_groups sg ON s.student_groups_id = sg.id
         LEFT JOIN statuses stat ON st.survey_for_section = stat.id
+        LEFT JOIN statuses s_stat ON s.status_id = s_stat.id
         LEFT JOIN survey_answers sa 
             ON s.identity_number = sa.account_id 
            AND sa.survey_no = st.survey_for_section
@@ -67,6 +67,7 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
             'Identity Number',
             'Full Name',
             'Batch No',
+            'Point Name',
             'Group Name',
             'Survey Section',
             'Status',
@@ -74,9 +75,9 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
     }
 
     /**
-    * @param mixed $row
-    * @return array
-    */
+     * @param mixed $row
+     * @return array
+     */
     public function map($row): array
     {
         $this->rowNumber++;
@@ -87,6 +88,7 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
             $row->full_name,
             $row->batch_no,
             $row->group_name,
+            $row->status_group_name,
             $row->survey_name,
             $row->activation == 1 ? 'Active' : 'Inactive',
         ];

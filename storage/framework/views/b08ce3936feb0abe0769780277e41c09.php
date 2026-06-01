@@ -232,27 +232,9 @@ unset($__split);
 <?php $component->withAttributes(['icon' => 'map','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('operations.map')),'current' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('operations.map')),'wire:navigate' => true,'class' => 'text-indigo-600 dark:text-indigo-400 font-bold']); ?>
 <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
 
-                        <?php echo e(__('Operations Map')); ?> <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::badge.index','data' => ['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::badge'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']); ?>
-<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
-NEW <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $attributes = $__attributesOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $component = $__componentOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__componentOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
+                        <?php echo e(__('Operations Map')); ?>
+
+                        
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalfe86969babb72517ecf97426e7c9330d)): ?>
@@ -339,27 +321,9 @@ NEW <?php echo $__env->renderComponent(); ?>
 <?php $component->withAttributes(['icon' => 'document-chart-bar','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('reports.monthly.manager.report')),'current' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('reports.monthly.manager.report')),'wire:navigate' => true,'class' => 'text-emerald-600 dark:text-emerald-400 font-bold']); ?>
 <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
 
-                        <?php echo e(__('Monthly Manager Report')); ?> <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::badge.index','data' => ['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::badge'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']); ?>
-<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
-NEW <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $attributes = $__attributesOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $component = $__componentOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__componentOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
+                        <?php echo e(__('Monthly Manager Report')); ?>
+
+                        
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalfe86969babb72517ecf97426e7c9330d)): ?>
@@ -384,27 +348,9 @@ NEW <?php echo $__env->renderComponent(); ?>
 <?php $component->withAttributes(['icon' => 'list-bullet','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('reports.daily.log.report')),'current' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('reports.daily.log.report')),'wire:navigate' => true,'class' => 'text-indigo-600 dark:text-indigo-400 font-bold']); ?>
 <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
 
-                        <?php echo e(__('Daily Entries Log')); ?> <?php if (isset($component)) { $__componentOriginal4cc377eda9b63b796b6668ee7832d023 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4cc377eda9b63b796b6668ee7832d023 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::badge.index','data' => ['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::badge'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['size' => 'sm','color' => 'red','class' => 'ml-1 uppercase text-[10px]']); ?>
-<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
-NEW <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $attributes = $__attributesOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__attributesOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4cc377eda9b63b796b6668ee7832d023)): ?>
-<?php $component = $__componentOriginal4cc377eda9b63b796b6668ee7832d023; ?>
-<?php unset($__componentOriginal4cc377eda9b63b796b6668ee7832d023); ?>
-<?php endif; ?>
+                        <?php echo e(__('Daily Entries Log')); ?>
+
+                        
                      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalfe86969babb72517ecf97426e7c9330d)): ?>

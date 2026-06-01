@@ -105,6 +105,11 @@ class StudentGroup extends Model
         return $this->belongsToMany(Employee::class, 'teacher_student_group', 'student_group_id', 'teacher_id', 'id', 'user_id');
     }
 
+    public function teacherAssignments()
+    {
+        return $this->hasMany(TeacherStudentGroup::class, 'student_group_id');
+    }
+
     //  that means  
     //    student_groups
     // JOIN teacher_student_group

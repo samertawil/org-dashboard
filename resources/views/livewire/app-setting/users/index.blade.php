@@ -309,13 +309,6 @@
                         </span>
                     </div>
 
-                    {{-- Job Title --}}
-                    <div class="space-y-1">
-                        <span class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">{{ __('Job Title') }}</span>
-                        <span class="font-medium text-zinc-900 dark:text-zinc-100">
-                            {{ $this->selectedEmployee->jobTitle->status_name ?? '-' }}
-                        </span>
-                    </div>
 
                     {{-- Position Status --}}
                     <div class="space-y-1">

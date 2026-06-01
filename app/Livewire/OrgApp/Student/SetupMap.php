@@ -33,8 +33,8 @@ class SetupMap extends Component
         // 1. Get active group IDs for today and their max_students sum
         $activeGroupsQuery = StudentGroup::activeToday();
         $activeGroupsData = $activeGroupsQuery->with([
-            'teachers.user',
-            'teachers.jobTitle',
+            'teacherAssignments.teacher.user',
+            'teacherAssignments.jobTitle',
             'region',
             'city'
         ])->withCount([

@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\ActivityComments;
 use App\Models\CurrancyValue;
 use App\Models\EducationalActivityDetail;
+use App\Reposotries\EducationalActivityDetailRepo;
 use App\Models\StudentDailyAttendance;
 use App\Models\SurveyAnswer;
 use App\Notifications\MentionInCommentNotification;
@@ -83,7 +84,8 @@ class DailyLogReport extends Component
 
     public function getEducationalActivityDetailsProperty()
     {
-        return EducationalActivityDetail::query()
+
+        return EducationalActivityDetailRepo::getTeacherDetailsQuery()
             ->whereDate('created_at', $this->reportDate)
             ->with([
                 'educationalActivity.activityDomain',
@@ -145,7 +147,7 @@ class DailyLogReport extends Component
             ->get();
 
         // Key by "groupId_date_statusId" for precise per-card lookup
-        return $query->groupBy(fn ($row) => $row->student_group_id . '_' . $row->attendance_date . '_' . $row->status_id);
+        return $query->groupBy(fn($row) => $row->student_group_id . '_' . $row->attendance_date . '_' . $row->status_id);
     }
 
     public function sendToWhatsApp()
@@ -223,17 +225,16 @@ class DailyLogReport extends Component
 
     {
         if (Gate::allows('manager.reports.all') || Gate::allows('activity.index') || Gate::allows('student.index')) {
-          return view('livewire.org-app.reports.daily-log-report', [
-            'activities' => $this->activities,
-            'evaluations' => $this->evaluations,
-            'attendanceStats' => $this->attendanceStats,
-            'exchangeRate' => $this->exchangeRate,
-            'educationalActivityDetails' => $this->educationalActivityDetails,
-            'attendanceByGroup' => $this->attendanceByGroup,
-        ]);
-         
+            return view('livewire.org-app.reports.daily-log-report', [
+                'activities' => $this->activities,
+                'evaluations' => $this->evaluations,
+                'attendanceStats' => $this->attendanceStats,
+                'exchangeRate' => $this->exchangeRate,
+                'educationalActivityDetails' => $this->educationalActivityDetails,
+                'attendanceByGroup' => $this->attendanceByGroup,
+            ]);
         }
-         
-         abort(403, 'You do not have the necessary permissions.');
+
+        abort(403, 'You do not have the necessary permissions.');
     }
 }

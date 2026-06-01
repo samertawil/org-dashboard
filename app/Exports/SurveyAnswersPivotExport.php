@@ -33,7 +33,7 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
     {
         // Fetch answers and group by account_id (identity number)
         return SurveyAnswer::query()
-            ->with(['student.studentGroup', 'creator'])
+            ->with(['student.studentGroup', 'creator', 'student.group'])
             ->where('survey_no', $this->surveyNo)
             ->whereHas('student', function ($studentQuery) {
                 $studentQuery->where('student_groups_id', $this->groupIdPivot)
@@ -51,8 +51,10 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
             'Student ID',
             'Full Name',
             'Batch No',
+            'Group Point Name',
             'Group Name',
             'Created By',
+            'Created At',
         ];
 
         foreach ($this->questions as $question) {
@@ -63,8 +65,8 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
     }
 
     /**
-    * @var \Illuminate\Support\Collection $answersByStudent
-    */
+     * @var \Illuminate\Support\Collection $answersByStudent
+     */
     public function map($answersByStudent): array
     {
         $firstAnswer = $answersByStudent->first();
@@ -75,7 +77,9 @@ class SurveyAnswersPivotExport implements FromCollection, WithHeadings, WithMapp
             $student?->full_name ?? 'N/A',
             $student?->studentGroup?->batch_no ?? 'N/A',
             $student?->studentGroup?->name ?? 'N/A',
-            $firstAnswer->creator?->name ?? 'N/A',
+            $student?->group?->status_name ?? 'N/A',
+            $firstAnswer->creator?->full_name ?? 'N/A',
+            $firstAnswer->created_at ? $firstAnswer->created_at->format('Y-m-d H:i') : 'N/A',
         ];
 
         // Map answers back to each question column

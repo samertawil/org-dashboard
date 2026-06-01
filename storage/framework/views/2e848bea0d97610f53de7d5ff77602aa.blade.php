@@ -1,0 +1,1 @@
+day-{{ $day['date']->format('Y-m-d') }}

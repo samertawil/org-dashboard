@@ -136,7 +136,6 @@ class Index extends Component
         }
         return Employee::with([
             'department',
-            'jobTitle',
             'positionStatus',
             'maritalStatus',
             'region',

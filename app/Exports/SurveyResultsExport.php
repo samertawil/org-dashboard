@@ -57,17 +57,18 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
 
         // 2. Subquery G
         $gSub = DB::table('survey_grading_scale_tables as sg')
-            ->rightJoinSub($rawSub, 'raw', function($join) {
+            ->rightJoinSub($rawSub, 'raw', function ($join) {
                 $join->on('raw.grade', '>=', 'sg.from_percentage')
-                     ->on('raw.grade', '<=', 'sg.to_percentage')
-                     ->where('sg.type', '=', 150)
-                     ->whereColumn('sg.batch_no', 'raw.batch_no')
-                     ->whereColumn('sg.survey_for_section', 'raw.survey_for_section');
+                    ->on('raw.grade', '<=', 'sg.to_percentage')
+                    ->where('sg.type', '=', 150)
+                    ->whereColumn('sg.batch_no', 'raw.batch_no')
+                    ->whereColumn('sg.survey_for_section', 'raw.survey_for_section');
             })
             ->leftJoin('statuses as s', 'raw.survey_no', '=', 's.id')
             ->leftJoin('students as st', 'st.identity_number', '=', 'raw.account_id')
             ->leftJoin('student_groups as ep', 'ep.id', '=', 'st.student_groups_id')
             ->leftJoin('employees as e', 'e.id', '=', 'raw.created_by')
+            ->leftJoin('statuses as s_stat', 'st.status_id', '=', 's_stat.id')
             ->where('st.student_groups_id', $this->groupId)
             ->select(
                 'raw.account_id',
@@ -79,7 +80,8 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
                 's.status_name',
                 'st.full_name',
                 'ep.name as education_point_name',
-                'e.full_name as teacher_name'
+                'e.full_name as teacher_name',
+                's_stat.status_name as status_group_name'
             );
 
         // 3. Subquery P (Pivot)
@@ -105,7 +107,8 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
                 DB::raw('MAX(CASE WHEN g.domain_id = 160 THEN g.total_marks END) AS درجات_مادة_الحساب'),
                 DB::raw('MAX(CASE WHEN g.domain_id = 160 THEN g.evaluation END) AS تقييم_مادة_الحساب'),
                 DB::raw('SUM(g.total_marks) AS المجموع_الكلي'),
-                DB::raw('MAX(g.status_name) AS survey_name')
+                DB::raw('MAX(g.status_name) AS survey_name'),
+                DB::raw('MAX(g.status_group_name) AS status_group_name')
             ]);
 
         // 4. Subquery TOT
@@ -129,12 +132,12 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             ->groupBy('a.account_id', 'a.survey_no', 'sgp.batch_no', 'q.survey_for_section');
 
         $totQuery = DB::table('survey_grading_scale_tables as sg2')
-            ->rightJoinSub($tSub, 't', function($join) {
+            ->rightJoinSub($tSub, 't', function ($join) {
                 $join->on('t.total_grade', '>=', 'sg2.from_percentage')
-                     ->on('t.total_grade', '<=', 'sg2.to_percentage')
-                     ->where('sg2.type', '=', 151)
-                     ->whereColumn('sg2.batch_no', 't.batch_no')
-                     ->whereColumn('sg2.survey_for_section', 't.survey_for_section');
+                    ->on('t.total_grade', '<=', 'sg2.to_percentage')
+                    ->where('sg2.type', '=', 151)
+                    ->whereColumn('sg2.batch_no', 't.batch_no')
+                    ->whereColumn('sg2.survey_for_section', 't.survey_for_section');
             })
             ->select([
                 't.account_id',
@@ -145,13 +148,14 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
         // 5. Final Query
         return DB::table('p_alias')
             ->fromSub($pQuery, 'p')
-            ->leftJoinSub($totQuery, 'tot', function($join) {
+            ->leftJoinSub($totQuery, 'tot', function ($join) {
                 $join->on('tot.account_id', '=', 'p.account_id')
-                     ->on('tot.survey_no', '=', 'p.survey_no');
+                    ->on('tot.survey_no', '=', 'p.survey_no');
             })
             ->select([
                 'p.account_id',
                 'p.full_name',
+                'p.status_group_name',
                 'p.education_point_name',
                 'p.teacher_name',
                 'p.survey_no',
@@ -179,11 +183,28 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'account_id', 'full_name', 'batch_no', 'education_point_name', 'teacher_name', 'survey_no',
-            'درجات البعد العاطفي الانفعالي', 'تقييم البعد العاطفي الانفعالي',
-            'درجات البعد النفسي والعقلي', 'تقييم البعد النفسي والعقلي',
-            'درجات البعد الجسدي والاجتماعي', 'تقييم البعد الجسدي والاجتماعي', 'درجات اللغة العربية', 'تقييم اللغة العربية', 'درجات اللغة الانجليزية', 'تقييم اللغة الانجليزية', 'درجات مادة الحساب', 'تقييم مادة الحساب',
-            'المجموع الكلي', 'التقييم الكلي', 'اسم الاستبيان'
+            'account_id',
+            'full_name',
+            'batch_no',
+            'group_name',
+            'education_point_name',
+            'teacher_name',
+            'survey_no',
+            'درجات البعد العاطفي الانفعالي',
+            'تقييم البعد العاطفي الانفعالي',
+            'درجات البعد النفسي والعقلي',
+            'تقييم البعد النفسي والعقلي',
+            'درجات البعد الجسدي والاجتماعي',
+            'تقييم البعد الجسدي والاجتماعي',
+            'درجات اللغة العربية',
+            'تقييم اللغة العربية',
+            'درجات اللغة الانجليزية',
+            'تقييم اللغة الانجليزية',
+            'درجات مادة الحساب',
+            'تقييم مادة الحساب',
+            'المجموع الكلي',
+            'التقييم الكلي',
+            'اسم الاستبيان'
         ];
     }
 
@@ -196,6 +217,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             $row->account_id,
             $row->full_name,
             $batchNo,
+            $row->status_group_name,
             $row->education_point_name,
             $row->teacher_name,
             $row->survey_no,

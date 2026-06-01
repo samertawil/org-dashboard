@@ -1135,7 +1135,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                                 
                                 <div class="p-3 flex-1 space-y-2">
                                     
-                                    <h4 class="text-sm font-bold text-zinc-900 dark:text-white leading-tight truncate" title="<?php echo e($schedule->activity_name); ?>">
+                                    <h4 class="text-sm font-bold text-zinc-900 dark:text-white leading-tight truncate"
+                                        title="<?php echo e($schedule->activity_name); ?>">
                                         <?php echo e($schedule->activity_name ?? '-'); ?>
 
                                     </h4>
@@ -1143,28 +1144,45 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                                     
                                     <div class="grid grid-cols-3 gap-1.5">
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Domain')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->activityDomain?->status_name ?? '-'); ?></span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Domain')); ?></span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->activityDomain?->status_name ?? '-'); ?></span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Period')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->periodGroups?->status_name ?? '-'); ?> (<?php echo e($schedule->periodGroups?->description ?? '-'); ?>)</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Group')); ?></span>
+                                            
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->periodGroups?->description_name ?? '-'); ?>
+
+                                            </span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Time')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->period_start_formatted); ?> - <?php echo e($schedule->period_end_formatted); ?></span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Time')); ?></span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->period_start_formatted); ?>
+
+                                                - <?php echo e($schedule->period_end_formatted); ?></span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Group')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->group?->name ?? '-'); ?></span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Group')); ?></span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->group?->name ?? '-'); ?></span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Category')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->category_label); ?></span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Category')); ?></span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->category_label); ?></span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Employee')); ?></span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->employee?->full_name ?? '-'); ?></span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5"><?php echo e(__('Employee')); ?></span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight"><?php echo e($schedule->employee?->full_name ?? '-'); ?></span>
                                         </div>
                                     </div>
 
@@ -1194,7 +1212,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 <?php $component = $__componentOriginalc7d5f44bf2a2d803ed0b55f72f1f82e2; ?>
 <?php unset($__componentOriginalc7d5f44bf2a2d803ed0b55f72f1f82e2); ?>
 <?php endif; ?>
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400"><?php echo e(__('Consistent')); ?>:</span>
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400"><?php echo e(__('Consistent')); ?>:</span>
                                                 <?php echo e($detail->consistent); ?>
 
                                             </div>
@@ -1202,8 +1221,10 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($detail->what_learned): ?>
                                             <div>
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5"><?php echo e(__('What Learned')); ?>:</span>
-                                                <p class="text-zinc-700 dark:text-zinc-300 bg-emerald-50 dark:bg-emerald-900/10 rounded px-2 py-1.5 border border-emerald-100 dark:border-emerald-800/30 line-clamp-2">
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5"><?php echo e(__('What Learned')); ?>:</span>
+                                                <p
+                                                    class="text-zinc-700 dark:text-zinc-300 bg-emerald-50 dark:bg-emerald-900/10 rounded px-2 py-1.5 border border-emerald-100 dark:border-emerald-800/30 line-clamp-2">
                                                     <?php echo e($detail->what_learned); ?>
 
                                                 </p>
@@ -1212,8 +1233,10 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($detail->teacher_report_detail): ?>
                                             <div>
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5"><?php echo e(__('Teacher Report')); ?>:</span>
-                                                <p class="text-zinc-700 dark:text-zinc-300 bg-blue-50 dark:bg-blue-900/10 rounded px-2 py-1.5 border border-blue-100 dark:border-blue-800/30 line-clamp-2">
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5"><?php echo e(__('Teacher Report')); ?>:</span>
+                                                <p
+                                                    class="text-zinc-700 dark:text-zinc-300 bg-blue-50 dark:bg-blue-900/10 rounded px-2 py-1.5 border border-blue-100 dark:border-blue-800/30 line-clamp-2">
                                                     <?php echo e($detail->teacher_report_detail); ?>
 
                                                 </p>
@@ -1223,7 +1246,12 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                                     
                                     <?php
-                                        $attendanceKey = $schedule->group_id . '_' . $schedule->period_start?->format('Y-m-d') . '_' . $schedule->educational_period_groups;
+                                        $attendanceKey =
+                                            $schedule->group_id .
+                                            '_' .
+                                            $schedule->period_start?->format('Y-m-d') .
+                                            '_' .
+                                            $schedule->educational_period_groups;
                                         $groupAttendance = $attendanceByGroup[$attendanceKey] ?? collect();
                                     ?>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($groupAttendance->isNotEmpty()): ?>
@@ -1251,23 +1279,37 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 <?php $component = $__componentOriginalc7d5f44bf2a2d803ed0b55f72f1f82e2; ?>
 <?php unset($__componentOriginalc7d5f44bf2a2d803ed0b55f72f1f82e2); ?>
 <?php endif; ?>
-                                                <span class="font-bold text-zinc-600 dark:text-zinc-300"><?php echo e(__('Attendance')); ?></span>
+                                                <span
+                                                    class="font-bold text-zinc-600 dark:text-zinc-300"><?php echo e(__('Attendance')); ?></span>
                                             </div>
                                             <div class="space-y-1.5">
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $groupAttendance; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoop($loop->index); ?><?php endif; ?>
                                                     <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
                                                         <div class="flex items-center justify-between">
-                                                            <span class="text-zinc-400"><?php echo e($stat->total_count); ?> <?php echo e(__('students')); ?></span>
+                                                            <span class="text-zinc-400"><?php echo e($stat->total_count); ?>
+
+                                                                <?php echo e(__('students')); ?></span>
                                                         </div>
                                                         <div class="flex items-center gap-2 mt-0.5">
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                                            <span class="text-green-700 dark:text-green-400 font-medium"><?php echo e($stat->present_count); ?> <?php echo e(__('Present')); ?></span>
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                            <span class="text-red-700 dark:text-red-400 font-medium"><?php echo e($stat->absent_count); ?> <?php echo e(__('Absent')); ?></span>
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                            <span
+                                                                class="text-green-700 dark:text-green-400 font-medium"><?php echo e($stat->present_count); ?>
+
+                                                                <?php echo e(__('Present')); ?></span>
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                            <span
+                                                                class="text-red-700 dark:text-red-400 font-medium"><?php echo e($stat->absent_count); ?>
+
+                                                                <?php echo e(__('Absent')); ?></span>
                                                         </div>
                                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($stat->total_count > 0): ?>
-                                                            <div class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                                                                <div class="h-full bg-green-500 rounded-full" style="width: <?php echo e(round(($stat->present_count / $stat->total_count) * 100)); ?>%"></div>
+                                                            <div
+                                                                class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                                                <div class="h-full bg-green-500 rounded-full"
+                                                                    style="width: <?php echo e(round(($stat->present_count / $stat->total_count) * 100)); ?>%">
+                                                                </div>
                                                             </div>
                                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     </div>
@@ -1278,7 +1320,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                                 </div>
 
                                 
-                                <div class="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-700 flex items-center justify-between text-[10px] text-zinc-400">
+                                <div
+                                    class="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-700 flex items-center justify-between text-[10px] text-zinc-400">
                                     <span><?php echo e(__('Entered by')); ?>: <?php echo e($schedule->createdBy?->name ?? '-'); ?></span>
                                     <span><?php echo e($detail->created_at?->format('H:i')); ?></span>
                                 </div>

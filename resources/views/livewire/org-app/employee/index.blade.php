@@ -126,9 +126,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
-                         
-                                {{ $employee->positionStatus->status_name ?? '-' }}    <br>
-                                {{ $employee->jobTitle->status_name ?? '-' }}
+                                {{ $employee->positionStatus->status_name ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
                                 @php

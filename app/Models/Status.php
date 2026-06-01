@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
- 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -62,7 +62,7 @@ class Status extends Model
      */
     public function scopeSearchpId(Builder $query, string $value): Builder
     {
-      
+
         if ($value) {
             $query->where('p_id_sub', $value);
         }
@@ -83,5 +83,22 @@ class Status extends Model
         return $query;
     }
 
+    /**
+     * Get the status description concatenated with the status name.
+     *
+     * @return string
+     */
+    public function getDescriptionNameAttribute(): string
+    {
+        $statusName = $this->status_name ?? '';
+        $description = $this->description ?? '';
 
+        $label = "Group Name: " . $statusName;
+
+        if (!empty($description)) {
+            return trim("{$label} ({$description})");
+        }
+
+        return trim($label);
+    }
 }

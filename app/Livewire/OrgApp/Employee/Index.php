@@ -43,7 +43,7 @@ class Index extends Component
     #[\Livewire\Attributes\Computed]
     public function employees()
     {
-        return Employee::with(['department', 'positionStatus', 'partner', 'jobTitle'])
+        return Employee::with(['department', 'positionStatus', 'partner'])
             ->where(function($query) {
                 $query->where('full_name', 'like', '%' . $this->search . '%')
                     ->orWhereHas('department', function($q) {
@@ -52,7 +52,7 @@ class Index extends Component
                     ->orWhereHas('partner', function($q) {
                         $q->where('name', 'like', '%' . $this->search . '%');
                     })
-                    ->orWhereHas('jobTitle', function($q) {
+                    ->orWhereHas('positionStatus', function($q) {
                         $q->where('status_name', 'like', '%' . $this->search . '%');
                     })
                     ->orWhere('employee_number', 'like', '%' . $this->search . '%');

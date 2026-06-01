@@ -85,7 +85,7 @@
                     <flux:label>{{ __('Assigned Groups') }}</flux:label>
                     <flux:select wire:model="educational_period_groups">
                         <option value="">-- {{ __('Select Group') }} --</option>
-                        @foreach ($this->allStatuses->where('p_id_sub', config('appConstant.student_groups')) as $group)
+                        @foreach ($this->assignedGroups->where('p_id_sub', config('appConstant.student_groups')) as $group)
                             <option value="{{ $group->id }}">{{ $group->status_name }}</option>
                         @endforeach
                     </flux:select>

@@ -564,27 +564,27 @@
                                         <flux:separator />
 
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            @forelse($group->teachers as $teacher)
+                                            @forelse($group->teacherAssignments as $assignment)
                                                 <div
                                                     class="flex items-center gap-4 p-4 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-900/50 group/teacher">
                                                     <div
                                                         class="size-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-lg border border-emerald-100 dark:border-emerald-900/30 group-hover/teacher:bg-emerald-500 group-hover/teacher:text-white transition-colors">
-                                                        {{ Str::limit($teacher->user->name ?? '?', 1, '') }}
+                                                        {{ Str::limit($assignment->teacher?->user?->name ?? '?', 1, '') }}
                                                     </div>
 
                                                     <div class="min-w-0">
                                                         <flux:heading size="sm" class="truncate">
-                                                            {{ $teacher->user->name ?? __('غير معروف') }}
+                                                            {{ $assignment->teacher?->user?->name ?? __('غير معروف') }}
                                                         </flux:heading>
                                                         <flux:text size="xs" class="text-slate-500">
-                                                            {{ $teacher->jobTitle->status_name ?? __('معلم') }}
+                                                            {{ $assignment->jobTitle?->status_name ?? __('معلم') }}
                                                         </flux:text>
 
-                                                        @if ($teacher->user?->phone)
-                                                            <a href="tel:{{ $teacher->user->phone }}"
+                                                        @if ($assignment->teacher?->user?->phone)
+                                                            <a href="tel:{{ $assignment->teacher->user->phone }}"
                                                                 class="flex items-center gap-1 mt-1 text-slate-400 hover:text-emerald-600 transition-colors">
                                                                 <flux:icon icon="phone" size="3" />
-                                                                <flux:text size="xs">{{ $teacher->user->phone }}
+                                                                <flux:text size="xs">{{ $assignment->teacher->user->phone }}
                                                                 </flux:text>
                                                             </a>
                                                         @endif

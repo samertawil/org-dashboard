@@ -48,8 +48,9 @@
                     <flux:sidebar.item icon="map" :href="route('operations.map')"
                         :current="request()->routeIs('operations.map')" wire:navigate
                         class="text-indigo-600 dark:text-indigo-400 font-bold">
-                        {{ __('Operations Map') }} <flux:badge size="sm" color="red"
-                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                        {{ __('Operations Map') }}
+                        {{-- <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge> --}}
                     </flux:sidebar.item>
                 @endcanany
 
@@ -79,16 +80,18 @@
                     <flux:sidebar.item icon="document-chart-bar" :href="route('reports.monthly.manager.report')"
                         :current="request()->routeIs('reports.monthly.manager.report')" wire:navigate
                         class="text-emerald-600 dark:text-emerald-400 font-bold">
-                        {{ __('Monthly Manager Report') }} <flux:badge size="sm" color="red"
-                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                        {{ __('Monthly Manager Report') }}
+                        {{-- <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge> --}}
                     </flux:sidebar.item>
                 @endcan
                 @canany(['activity.index', 'activity.show', 'student.index', 'student.show', 'manager.reports.all'])
                     <flux:sidebar.item icon="list-bullet" :href="route('reports.daily.log.report')"
                         :current="request()->routeIs('reports.daily.log.report')" wire:navigate
                         class="text-indigo-600 dark:text-indigo-400 font-bold">
-                        {{ __('Daily Entries Log') }} <flux:badge size="sm" color="red"
-                            class="ml-1 uppercase text-[10px]">NEW</flux:badge>
+                        {{ __('Daily Entries Log') }}
+                        {{-- <flux:badge size="sm" color="red"
+                            class="ml-1 uppercase text-[10px]">NEW</flux:badge> --}}
                     </flux:sidebar.item>
                 @endcanany
             </flux:sidebar.group>

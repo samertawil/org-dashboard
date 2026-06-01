@@ -392,35 +392,51 @@
                                 {{-- Card Body --}}
                                 <div class="p-3 flex-1 space-y-2">
                                     {{-- Activity Name --}}
-                                    <h4 class="text-sm font-bold text-zinc-900 dark:text-white leading-tight truncate" title="{{ $schedule->activity_name }}">
+                                    <h4 class="text-sm font-bold text-zinc-900 dark:text-white leading-tight truncate"
+                                        title="{{ $schedule->activity_name }}">
                                         {{ $schedule->activity_name ?? '-' }}
                                     </h4>
 
                                     {{-- Schedule Info Grid --}}
                                     <div class="grid grid-cols-3 gap-1.5">
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Domain') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->activityDomain?->status_name ?? '-' }}</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Domain') }}</span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->activityDomain?->status_name ?? '-' }}</span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Period') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->periodGroups?->status_name ?? '-' }} ({{ $schedule->periodGroups?->description ?? '-' }})</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Group') }}</span>
+                                            {{-- <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->periodGroups?->status_name ?? '-' }} ({{ $schedule->periodGroups?->description ?? '-' }})</span> --}}
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->periodGroups?->description_name ?? '-' }}
+                                            </span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Time') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->period_start_formatted }} - {{ $schedule->period_end_formatted }}</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Time') }}</span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->period_start_formatted }}
+                                                - {{ $schedule->period_end_formatted }}</span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Group') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->group?->name ?? '-' }}</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Group') }}</span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->group?->name ?? '-' }}</span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Category') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->category_label }}</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Category') }}</span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->category_label }}</span>
                                         </div>
                                         <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
-                                            <span class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Employee') }}</span>
-                                            <span class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->employee?->full_name ?? '-' }}</span>
+                                            <span
+                                                class="block text-zinc-400 dark:text-zinc-500 font-medium leading-none mb-0.5">{{ __('Employee') }}</span>
+                                            <span
+                                                class="text-zinc-800 dark:text-zinc-200 font-semibold leading-tight">{{ $schedule->employee?->full_name ?? '-' }}</span>
                                         </div>
                                     </div>
 
@@ -428,16 +444,20 @@
                                     <div class="border-t border-zinc-100 dark:border-zinc-700 pt-2 space-y-1.5">
                                         @if ($detail->consistent !== null)
                                             <div class="flex items-center gap-1.5">
-                                                <flux:icon name="heart" variant="micro" class="size-3.5 text-rose-500" />
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Consistent') }}:</span>
+                                                <flux:icon name="heart" variant="micro"
+                                                    class="size-3.5 text-rose-500" />
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Consistent') }}:</span>
                                                 {{ $detail->consistent }}
                                             </div>
                                         @endif
 
                                         @if ($detail->what_learned)
                                             <div>
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('What Learned') }}:</span>
-                                                <p class="text-zinc-700 dark:text-zinc-300 bg-emerald-50 dark:bg-emerald-900/10 rounded px-2 py-1.5 border border-emerald-100 dark:border-emerald-800/30 line-clamp-2">
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('What Learned') }}:</span>
+                                                <p
+                                                    class="text-zinc-700 dark:text-zinc-300 bg-emerald-50 dark:bg-emerald-900/10 rounded px-2 py-1.5 border border-emerald-100 dark:border-emerald-800/30 line-clamp-2">
                                                     {{ $detail->what_learned }}
                                                 </p>
                                             </div>
@@ -445,8 +465,10 @@
 
                                         @if ($detail->teacher_report_detail)
                                             <div>
-                                                <span class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('Teacher Report') }}:</span>
-                                                <p class="text-zinc-700 dark:text-zinc-300 bg-blue-50 dark:bg-blue-900/10 rounded px-2 py-1.5 border border-blue-100 dark:border-blue-800/30 line-clamp-2">
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('Teacher Report') }}:</span>
+                                                <p
+                                                    class="text-zinc-700 dark:text-zinc-300 bg-blue-50 dark:bg-blue-900/10 rounded px-2 py-1.5 border border-blue-100 dark:border-blue-800/30 line-clamp-2">
                                                     {{ $detail->teacher_report_detail }}
                                                 </p>
                                             </div>
@@ -455,30 +477,47 @@
 
                                     {{-- Attendance Stats by Status --}}
                                     @php
-                                        $attendanceKey = $schedule->group_id . '_' . $schedule->period_start?->format('Y-m-d') . '_' . $schedule->educational_period_groups;
+                                        $attendanceKey =
+                                            $schedule->group_id .
+                                            '_' .
+                                            $schedule->period_start?->format('Y-m-d') .
+                                            '_' .
+                                            $schedule->educational_period_groups;
                                         $groupAttendance = $attendanceByGroup[$attendanceKey] ?? collect();
                                     @endphp
                                     @if ($groupAttendance->isNotEmpty())
                                         <div class="border-t border-zinc-100 dark:border-zinc-700 pt-2">
                                             <div class="flex items-center gap-1.5 mb-1.5">
-                                                <flux:icon name="users" variant="micro" class="size-3.5 text-indigo-500" />
-                                                <span class="font-bold text-zinc-600 dark:text-zinc-300">{{ __('Attendance') }}</span>
+                                                <flux:icon name="users" variant="micro"
+                                                    class="size-3.5 text-indigo-500" />
+                                                <span
+                                                    class="font-bold text-zinc-600 dark:text-zinc-300">{{ __('Attendance') }}</span>
                                             </div>
                                             <div class="space-y-1.5">
                                                 @foreach ($groupAttendance as $stat)
                                                     <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
                                                         <div class="flex items-center justify-between">
-                                                            <span class="text-zinc-400">{{ $stat->total_count }} {{ __('students') }}</span>
+                                                            <span class="text-zinc-400">{{ $stat->total_count }}
+                                                                {{ __('students') }}</span>
                                                         </div>
                                                         <div class="flex items-center gap-2 mt-0.5">
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                                            <span class="text-green-700 dark:text-green-400 font-medium">{{ $stat->present_count }} {{ __('Present') }}</span>
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                            <span class="text-red-700 dark:text-red-400 font-medium">{{ $stat->absent_count }} {{ __('Absent') }}</span>
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                            <span
+                                                                class="text-green-700 dark:text-green-400 font-medium">{{ $stat->present_count }}
+                                                                {{ __('Present') }}</span>
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                            <span
+                                                                class="text-red-700 dark:text-red-400 font-medium">{{ $stat->absent_count }}
+                                                                {{ __('Absent') }}</span>
                                                         </div>
                                                         @if ($stat->total_count > 0)
-                                                            <div class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                                                                <div class="h-full bg-green-500 rounded-full" style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%"></div>
+                                                            <div
+                                                                class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                                                <div class="h-full bg-green-500 rounded-full"
+                                                                    style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%">
+                                                                </div>
                                                             </div>
                                                         @endif
                                                     </div>
@@ -489,7 +528,8 @@
                                 </div>
 
                                 {{-- Card Footer --}}
-                                <div class="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-700 flex items-center justify-between text-[10px] text-zinc-400">
+                                <div
+                                    class="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-700 flex items-center justify-between text-[10px] text-zinc-400">
                                     <span>{{ __('Entered by') }}: {{ $schedule->createdBy?->name ?? '-' }}</span>
                                     <span>{{ $detail->created_at?->format('H:i') }}</span>
                                 </div>

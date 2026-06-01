@@ -200,8 +200,8 @@ class DailyStudents extends Component
         $groupedStudents = $students->groupBy('status_id');
 
         // Load status names for group headers
-        $statusNames = \App\Models\Status::whereIn('id', $groupedStudents->keys()->filter())
-            ->pluck('description', 'id');
+        $statusNames = \App\Models\Status::whereIn('id', $groupedStudents->keys()->filter())->get()
+            ->pluck('description_name', 'id');
 
         return view('livewire.org-app.student-groups.daily-students', [
             'students' => $students,

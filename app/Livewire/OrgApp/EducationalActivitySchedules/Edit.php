@@ -41,6 +41,16 @@ class Edit extends Component
     {
         $this->validate();
 
+        $scheduleDate = \Carbon\Carbon::parse($this->period_start)->toDateString();
+        $hasGroupSchedule = \App\Models\StudentGroupSchedule::where('student_group_id', $this->group_id)
+            ->whereDate('schedule_date', $scheduleDate)
+            ->exists();
+
+        if (!$hasGroupSchedule) {
+            $this->addError('period_start', __('Cannot add an educational schedule without a student attendance schedule for this day.'));
+            return;
+        }
+
         $exists = ActivitySchedule::where('group_id', $this->group_id)
             ->where('period_start', $this->period_start)
             ->where('educational_period_groups', $this->educational_period_groups)
