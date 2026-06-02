@@ -41,7 +41,12 @@ class Create extends Component
             'consistent'              => $this->consistent !== '' ? $this->consistent : null,
             'what_learned'            => $this->what_learned ?: null,
             'teacher_report_detail'   => $this->teacher_report_detail ?: null,
+            'status_id'               => $this->status_id ?: null,
+            'replaced_activity'       => $this->replaced_activity ?: null,
+            'replaced_reason'         => $this->replaced_reason ?: null,
         ]);
+
+        $this->dispatch('report-saved');
 
         if ($this->isModal) {
             $this->dispatch('modal-close', name: 'report-modal');

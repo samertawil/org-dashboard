@@ -44,4 +44,20 @@ class TeacherStudentGroup extends Model
             ->pluck('student_group_id')
             ->toArray();
     }
+
+    public static function employeesForEducationalTasks()
+    {
+
+        return TeacherStudentGroup::with('teacher')
+            ->get()
+            ->map(fn($item) => $item->teacher)
+            ->filter(
+                fn($employee) => $employee
+                // && (user->isSuperAdmin() || Gate::allows('select.any.student') )
+                // && $employee->activation == 1
+            )
+            ->unique('id')
+            ->sortBy('full_name')
+            ->values();
+    }
 }

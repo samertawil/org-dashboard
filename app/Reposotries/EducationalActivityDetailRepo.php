@@ -19,7 +19,7 @@ class EducationalActivityDetailRepo
         $user = auth()->user();
         $query = ActivitySchedule::query();
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
 
             return $query;
         }
@@ -59,7 +59,7 @@ class EducationalActivityDetailRepo
     public static function getTeacherDetailsQuery()
     {
         $user = auth()->user();
-        $query = EducationalActivityDetail::query()->with(['educationalActivity.periodGroups']);
+        $query = EducationalActivityDetail::query()->with(['educationalActivity.periodGroups', 'status']);
 
         if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
 

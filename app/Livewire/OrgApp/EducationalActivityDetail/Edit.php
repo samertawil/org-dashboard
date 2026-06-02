@@ -28,11 +28,14 @@ class Edit extends Component
 
         $this->detail = $detail;
         $this->isModal = $isModal;
-        
+
         $this->educational_activity_id = $detail->educational_activity_id;
         $this->consistent              = $detail->consistent;
         $this->what_learned            = $detail->what_learned;
         $this->teacher_report_detail   = $detail->teacher_report_detail;
+        $this->status_id               = $detail->status_id;
+        $this->replaced_activity       = $detail->replaced_activity;
+        $this->replaced_reason         = $detail->replaced_reason;
     }
 
     public function save()
@@ -63,7 +66,12 @@ class Edit extends Component
             'consistent'              => $this->consistent !== '' ? $this->consistent : null,
             'what_learned'            => $this->what_learned ?: null,
             'teacher_report_detail'   => $this->teacher_report_detail ?: null,
+            'status_id'               => $this->status_id,
+            'replaced_activity'       => $this->replaced_activity ?: null,
+            'replaced_reason'         => $this->replaced_reason ?: null,
         ]);
+
+        $this->dispatch('report-saved');
 
         if ($this->isModal) {
             $this->dispatch('modal-close', name: 'report-modal');

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\ActivitySchedule;
 use App\Models\User;
+use App\Reposotries\EducationalActivityDetailRepo;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Auth\Access\Response;
 
@@ -32,15 +33,22 @@ class ActivitySchedulePolicy
 
     public function view(User $user, ActivitySchedule $activitySchedule): Response|bool
     {
-
-        if ($user->isSuperAdmin() || $user->can('select.any.educational-activity-detail') || $user->can('select.any.student')) {
+        if ($user->isSuperAdmin() || $user->can('select.any.student')) {
             return Response::allow();
         }
-        // check if the user belong to group ip and activitySchedule
-        $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
-        $employeeId = $user->employee?->id;
 
-        if (in_array($activitySchedule->group_id, $groupIds) && $activitySchedule->employee_id === $employeeId) {
+        // Use the same filtering logic as EducationalActivityDetailRepo::getTeacherSchedulesQuery()
+        // job_title 167 → group membership is enough
+        // job_title 166 → group membership AND employee_id must match
+        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
+        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
+        $employeeId  = $user->employee?->id;
+
+        $allowed = EducationalActivityDetailRepo::getTeacherSchedulesQuery()
+            ->where('id', $activitySchedule->id)
+            ->exists();
+
+        if ($allowed) {
             return Response::allow();
         }
 

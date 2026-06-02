@@ -80,6 +80,8 @@ class Index extends Component
 
         Gate::authorize('viewAny', EducationalActivityDetail::class);
 
-        return view('livewire.org-app.educational-activity-detail.index');
+        return view('livewire.org-app.educational-activity-detail.index', [
+            'details' => $this->details,
+        ]);
     }
 }

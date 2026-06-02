@@ -1,1 +1,0 @@
-parcel-<?php echo e($index); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/55b873a32e308b3f6def766f3b9388c5.blade.php ENDPATH**/ ?>

@@ -122,6 +122,49 @@ class ActivitySchedule extends Model
     // ========================
 
     /**
+     * تصفية النشاطات المنجزة (التي لها تفاصيل تقرير)
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->whereHas('activityDetail');
+    }
+
+    /**
+     * تصفية النشاطات غير المكتملة
+     */
+    public function scopePending($query)
+    {
+        return $query->whereDoesntHave('activityDetail');
+    }
+
+    /**
+     * تصفية النشاطات المتأخرة
+     */
+    public function scopeDelayed($query)
+    {
+        return $query->pending()->where('period_start', '<', now());
+    }
+
+    /**
+     * تصفية الأنشطة المطلوبة الآن (اليوم ولم يتجاوز موعدها)
+     */
+    public function scopeRequiredNow($query)
+    {
+        return $query->pending()
+            ->whereDate('period_start', now()->toDateString())
+            ->where('period_start', '>=', now());
+    }
+
+    /**
+     * تصفية الأنشطة المخطط لها مستقبلاً
+     */
+    public function scopeUpcoming($query)
+    {
+        return $query->pending()
+            ->where('period_start', '>', now()->endOfDay());
+    }
+
+    /**
      * تصفية حسب الفترة الزمنية
      */
     public function scopeByPeriod($query, $start, $end)
@@ -172,6 +215,57 @@ class ActivitySchedule extends Model
     // ========================
     // Accessors (محولات القراءة)
     // ========================
+
+    /**
+     * تصنيف حالة المهمة ديناميكيًا
+     */
+    public function getTaskStatusAttribute(): string
+    {
+        $hasDetail = $this->relationLoaded('activityDetail') 
+            ? $this->activityDetail !== null 
+            : $this->activityDetail()->exists();
+
+        if ($hasDetail) {
+            return 'completed'; // منجزة
+        }
+
+        $now = now();
+        if ($now > $this->period_start) {
+            return 'delayed'; // متأخرة
+        }
+
+        if ($now->toDateString() === $this->period_start->toDateString()) {
+            return 'required_now'; // مطلوبة الآن
+        }
+
+        return 'upcoming'; // مخطط لها / قادمة
+    }
+
+    /**
+     * لون الحالة
+     */
+    public function getTaskStatusColorAttribute(): string
+    {
+        return match ($this->task_status) {
+            'completed' => 'green',
+            'required_now' => 'amber',
+            'delayed' => 'red',
+            default => 'zinc',
+        };
+    }
+
+    /**
+     * الاسم المعرب للحالة
+     */
+    public function getTaskStatusLabelAttribute(): string
+    {
+        return match ($this->task_status) {
+            'completed' => __('Completed'),
+            'required_now' => __('Required Now'),
+            'delayed' => __('Delayed'),
+            default => __('Upcoming'),
+        };
+    }
 
     /**
      * اسم الفئة المستهدفة المعروض

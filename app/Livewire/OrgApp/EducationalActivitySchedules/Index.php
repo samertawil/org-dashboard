@@ -18,6 +18,8 @@ class Index extends Component
 {
     use WithPagination, AccessibleGroupsTrait;
 
+    protected $listeners = ['report-saved' => '$refresh'];
+
     public string $search         = '';
     public string $filterDomain   = '';
     public string $filterCategory = '';

@@ -335,7 +335,7 @@
                     'teacher-student-groups.index', 'teacher-student-groups.create', 'student.group.date.students',
                     'reports.educational.progress', 'survey.manage', 'survey-questions.show'])
                     <flux:sidebar.group expandable
-                        :expanded="request()->routeIs(['student.setup.map', 'reports.*', 'survey-questions.show'])"
+                        :expanded="request()->routeIs(['student.setup.map', 'reports.*', 'survey-questions.show', 'educational-tasks.index'])"
                         :heading="__('Statistics & Reports')" icon="chart-pie" class="grid">
 
                         @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
@@ -365,6 +365,18 @@
                                     <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"
                                         :current="request()->routeIs('survey-questions.show')" wire:navigate>
                                         {{ __('Survey Tree View') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('create', \App\Models\EducationalActivityDetail::class)
+                                    <flux:sidebar.item icon="clipboard-document-list" :href="route('educational-tasks.index')"
+                                        :current="request()->routeIs('educational-tasks.index')" wire:navigate>
+                                        {{ __('Educational Tasks') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('select.any.student')
+                                    <flux:sidebar.item icon="chart-bar-square" :href="route('reports.educational-tasks-stats')"
+                                        :current="request()->routeIs('reports.educational-tasks-stats')" wire:navigate>
+                                        {{ __('Tasks Statistics') }}
                                     </flux:sidebar.item>
                                 @endcan
                             </flux:sidebar.group>
@@ -436,8 +448,8 @@
 
                 <!-- Employees Group -->
                 @can('employee.create')
-                    <flux:sidebar.group expandable :expanded="request()->routeIs('employee.*')" :heading="__('Employees')"
-                        icon="user-group" class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs('employee.*')"
+                        :heading="__('Employees')" icon="user-group" class="grid">
                         <flux:sidebar.item icon="plus" :href="route('employee.create')"
                             :current="request()->routeIs('employee.create')" wire:navigate>
                             {{ __('Create Employees') }}

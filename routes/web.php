@@ -285,10 +285,15 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
 
     // OrgApp - Educational Activity Details
     Route::get('/educational-activity-detail', EADIndex::class)->name('educational-activity-detail.index');
-    Route::get('/educational-activity-detail/create', EADCreate::class)->name('educational-activity-detail.create');
+    Route::get('/educational-activity-detail/create/{educational_activity_id?}', EADCreate::class)->name('educational-activity-detail.create');
     Route::get('/educational-activity-detail/{detail}/edit', EADEdit::class)->name('educational-activity-detail.edit');
     Route::get('/educational-activity-detail/{detail}/show', EADShow::class)->name('educational-activity-detail.show');
     Route::get('/educational-activity-detail/{detail}/gallery', EADGallery::class)->name('educational-activity-detail.gallery');
+
+    // New Educational Tasks route
+    Route::get('/educational-tasks', \App\Livewire\OrgApp\Dashboard\EducationalTasks::class)->name('educational-tasks.index');
+    // Educational Tasks Statistics (Management)
+    Route::get('/reports/educational-tasks-stats', \App\Livewire\OrgApp\Reports\EducationalTasksStats::class)->name('reports.educational-tasks-stats');
     // Export
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');

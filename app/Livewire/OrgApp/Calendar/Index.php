@@ -142,10 +142,8 @@ class Index extends Component
                     // Extract group names and shorten them
                     $groupNames = [];
                     foreach ($groupSchedules as $s) {
-                        $fullGroupName = $s->group?->name ?? '';
-                        if ($fullGroupName) {
-                            $parts = array_map('trim', explode(' - ', $fullGroupName));
-                            $groupNames[] = count($parts) > 2 ? implode(' - ', array_slice($parts, -2)) : $fullGroupName;
+                        if ($s->group) {
+                            $groupNames[] = $s->group->short_name;
                         }
                     }
                     $groupNames = array_unique(array_filter($groupNames));

@@ -84,6 +84,24 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 text-xs">
+                        @if ($detail->status)
+                            <div>
+                                <span
+                                    class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-0.5">{{ __('Status') }}</span>
+                                <div class="text-xs text-zinc-700 dark:text-zinc-205 font-medium leading-tight">
+                                    {{ $detail->status->status_name }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($detail->replaced_activity)
+                            <div>
+                                <span
+                                    class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-0.5">{{ __('Replaced Activity') }}</span>
+                                <div class="text-xs text-zinc-700 dark:text-zinc-205 leading-tight">
+                                    {{ $detail->replaced_activity }}
+                                </div>
+                            </div>
+                        @endif
                         <div>
                             <span
                                 class="text-[10px] uppercase tracking-wider text-zinc-400 block mb-0.5">{{ __('What Learned') }}</span>
@@ -155,6 +173,14 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Status') }}
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Replaced Activity') }}
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('What Learned') }}
                         </th>
                         <th scope="col"
@@ -191,6 +217,12 @@
                                         </span>
                                     @endif
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                {{ $detail->status?->status_name ?? '—' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-300">
+                                {{ $detail->replaced_activity ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ str($detail->what_learned)->limit(50) }}
@@ -229,7 +261,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-zinc-500">
+                            <td colspan="7" class="px-6 py-8 text-center text-zinc-500">
                                 <div class="flex flex-col items-center justify-center gap-2">
                                     <flux:icon icon="inbox" class="size-8 text-zinc-400" />
                                     <p>{{ __('No records found.') }}</p>
@@ -305,6 +337,27 @@
                         <flux:label>{{ __('Consistent') }}</flux:label>
                         <div class="text-sm text-zinc-900 dark:text-white mt-1">
                             {{ $selectedDetail->consistent ?? '-' }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:label>{{ __('Status') }}</flux:label>
+                        <div class="text-sm text-zinc-900 dark:text-white mt-1">
+                            {{ $selectedDetail->status?->status_name ?? '-' }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:label>{{ __('Replaced Activity') }}</flux:label>
+                        <div class="text-sm text-zinc-900 dark:text-white mt-1">
+                            {{ $selectedDetail->replaced_activity ?? '-' }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <flux:label>{{ __('Reason') }}</flux:label>
+                        <div class="text-sm text-zinc-900 dark:text-white mt-1">
+                            {{ $selectedDetail->replaced_reason ?? '-' }}
                         </div>
                     </div>
 

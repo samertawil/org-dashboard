@@ -60,6 +60,21 @@ class Index extends Component
 
         // 4. My Tasks
         $myTasks = EventAssigneeRepo::eventAssignees();
+
+        // 5. Educational Activity Tasks (Delayed and Required Now)
+        $employeeId = auth()->user()->employee?->id;
+        $educationalTasksQuery = \App\Models\ActivitySchedule::query()
+            ->with(['activityDetail', 'employee', 'activityDomain', 'periodGroups', 'group'])
+            ->active()
+            ->where(function ($q) {
+                $q->delayed()->orWhere(fn($sub) => $sub->requiredNow());
+            });
+
+        if (!(auth()->user()->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student'))) {
+            $educationalTasksQuery->where('employee_id', $employeeId);
+        }
+
+        $educationalTasks = $educationalTasksQuery->ordered()->take(5)->get();
  
         return view('livewire.org-app.dashboard.index', [
             'activeActivitiesCount' => $activeActivitiesCount,
@@ -69,6 +84,7 @@ class Index extends Component
             'pendingRequests' => $pendingRequests,
             'plannedActivities' => $plannedActivities,
             'myTasks' => $myTasks,
+            'educationalTasks' => $educationalTasks,
             'hasActivityAccess' => $hasActivityAccess,
         ]);
     }

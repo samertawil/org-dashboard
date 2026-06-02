@@ -377,12 +377,24 @@
                                 {{-- Card Header: Day & Date --}}
                                 <div
                                     class="px-3 py-2 bg-teal-50 dark:bg-teal-900/20 border-b border-teal-100 dark:border-teal-800/30 flex items-center justify-between">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <flux:icon icon="calendar" variant="micro"
                                             class="size-3.5 text-teal-600 dark:text-teal-400" />
                                         <span class="text-xs font-bold text-teal-700 dark:text-teal-300">
                                             {{ $schedule->day_name }}
                                         </span>
+                                        @if($detail->status)
+                                            @php
+                                                $badgeColor = match((int)$detail->status_id) {
+                                                    195 => 'red',
+                                                    194 => 'amber',
+                                                    default => 'sky'
+                                                };
+                                            @endphp
+                                            <flux:badge size="sm" color="{{ $badgeColor }}" class="ml-2 font-semibold">
+                                                {{ $detail->status->status_name }}
+                                            </flux:badge>
+                                        @endif
                                     </div>
                                     <span class="text-[10px] text-teal-600 dark:text-teal-400 font-medium">
                                         {{ $schedule->period_start?->format('Y-m-d') }}
@@ -447,15 +459,38 @@
                                                 <flux:icon name="heart" variant="micro"
                                                     class="size-3.5 text-rose-500" />
                                                 <span
-                                                    class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Consistent') }}:</span>
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400">{{ $schedule->target_category !== 'children' ? __('Turnout') : __('Consistent') }}:</span>
                                                 {{ $detail->consistent }}
+                                            </div>
+                                        @endif
+
+                                        @if ($detail->replaced_activity)
+                                            <div class="flex items-center gap-1.5">
+                                                <flux:icon name="arrow-path" variant="micro"
+                                                    class="size-3.5 text-indigo-500" />
+                                                <span
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400">{{ __('Replaced Activity') }}:</span>
+                                                <span class="text-zinc-800 dark:text-zinc-200 font-semibold">{{ $detail->replaced_activity }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if ($detail->replaced_reason)
+                                            <div class="flex items-start gap-1.5">
+                                                <flux:icon name="information-circle" variant="micro"
+                                                    class="size-3.5 text-zinc-500 mt-0.5" />
+                                                <div>
+                                                    <span class="font-medium text-zinc-500 dark:text-zinc-400">
+                                                        {{ $schedule->target_category !== 'children' ? __('Reason') : __('Replaced Reason') }}:
+                                                    </span>
+                                                    <span class="text-zinc-700 dark:text-zinc-300">{{ $detail->replaced_reason }}</span>
+                                                </div>
                                             </div>
                                         @endif
 
                                         @if ($detail->what_learned)
                                             <div>
                                                 <span
-                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('What Learned') }}:</span>
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ $schedule->target_category !== 'children' ? __('Goals') : __('What Learned') }}:</span>
                                                 <p
                                                     class="text-zinc-700 dark:text-zinc-300 bg-emerald-50 dark:bg-emerald-900/10 rounded px-2 py-1.5 border border-emerald-100 dark:border-emerald-800/30 line-clamp-2">
                                                     {{ $detail->what_learned }}
@@ -466,7 +501,7 @@
                                         @if ($detail->teacher_report_detail)
                                             <div>
                                                 <span
-                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ __('Teacher Report') }}:</span>
+                                                    class="font-medium text-zinc-500 dark:text-zinc-400 block mb-0.5">{{ $schedule->target_category !== 'children' ? __('Recommendations') : __('Teacher Report') }}:</span>
                                                 <p
                                                     class="text-zinc-700 dark:text-zinc-300 bg-blue-50 dark:bg-blue-900/10 rounded px-2 py-1.5 border border-blue-100 dark:border-blue-800/30 line-clamp-2">
                                                     {{ $detail->teacher_report_detail }}

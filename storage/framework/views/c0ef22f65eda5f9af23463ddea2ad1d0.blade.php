@@ -1,1 +1,0 @@
-detail-mobile-{{ $detail->id }}

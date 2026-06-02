@@ -33,6 +33,21 @@
                 <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $detail->consistent ?? '-' }}</dd>
             </div>
 
+            <div class="{{ $this->isModal ? 'col-span-1' : 'sm:col-span-1' }}">
+                <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Status') }}</dt>
+                <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $detail->status?->status_name ?? '-' }}</dd>
+            </div>
+
+            <div class="{{ $this->isModal ? 'col-span-1' : 'sm:col-span-1' }}">
+                <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Replaced Activity') }}</dt>
+                <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $detail->replaced_activity ?? '-' }}</dd>
+            </div>
+
+            <div class="{{ $this->isModal ? 'col-span-1' : 'sm:col-span-1' }}">
+                <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Reason') }}</dt>
+                <dd class="mt-1 text-sm text-zinc-900 dark:text-white">{{ $detail->replaced_reason ?? '-' }}</dd>
+            </div>
+
             <div class="{{ $this->isModal ? 'col-span-1' : 'sm:col-span-2' }}">
                 <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('What Learned') }}</dt>
                 <dd class="mt-1 text-sm text-zinc-900 dark:text-white whitespace-pre-wrap">

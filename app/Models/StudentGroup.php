@@ -122,4 +122,23 @@ class StudentGroup extends Model
     {
         return $this->hasMany(Student::class, 'student_groups_id');
     }
+
+    /**
+     * الحصول على الاسم المختصر للمجموعة التعليمية.
+     *
+     * @return string
+     */
+    public function getShortNameAttribute(): string
+    {
+        $fullName = $this->name ?? '';
+        if (empty($fullName)) {
+            return '';
+        }
+
+        $parts = array_map('trim', explode(' - ', $fullName));
+
+        return count($parts) > 2
+            ? implode(' - ', array_slice($parts, -2))
+            : $fullName;
+    }
 }

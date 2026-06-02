@@ -454,12 +454,12 @@
                                                 @can('viewAny', \App\Models\EducationalActivityDetail::class)
                                                     <flux:dropdown>
                                                         <flux:button variant="ghost" size="sm" icon="document-text"
-                                                            style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
+                                                            style="{{ $schedule->activityDetail?->status_id == 195 ? 'color: #ef4444 !important;' : ($schedule->activityDetail?->status_id == 194 ? 'color: #eab308 !important;' : ($schedule->activityDetail ? 'color: #3b82f6 !important;' : '')) }}"
                                                             class="relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
                                                             {{ __('Report') }}
                                                             @if ($schedule->activityDetail)
                                                                 <span
-                                                                    class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                                                    class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-{{ $schedule->activityDetail?->status_id == 195 ? 'red-500' : ($schedule->activityDetail?->status_id == 194 ? 'yellow-500' : 'blue-500') }} ring-1 ring-white dark:ring-zinc-900"></span>
                                                             @endif
                                                         </flux:button>
                                                         <flux:menu>
@@ -809,12 +809,12 @@
                                                                                                     variant="ghost"
                                                                                                     size="xs"
                                                                                                     icon="document-text"
-                                                                                                    style="{{ $schedule->activityDetail ? 'color: #3b82f6 !important;' : '' }}"
+                                                                                                    style="{{ $schedule->activityDetail?->status_id == 195 ? 'color: #ef4444 !important;' : ($schedule->activityDetail?->status_id == 194 ? 'color: #eab308 !important;' : ($schedule->activityDetail ? 'color: #3b82f6 !important;' : '')) }}"
                                                                                                     class="px-2 flex items-center gap-1 relative {{ !$schedule->activityDetail ? 'text-zinc-500 dark:text-zinc-400' : '' }}">
                                                                                                     {{ __('Report') }}
                                                                                                     @if ($schedule->activityDetail)
                                                                                                         <span
-                                                                                                            class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-1 ring-white dark:ring-zinc-900"></span>
+                                                                                                            class="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-{{ $schedule->activityDetail?->status_id == 195 ? 'red-500' : ($schedule->activityDetail?->status_id == 194 ? 'yellow-500' : 'blue-500') }} ring-1 ring-white dark:ring-zinc-900"></span>
                                                                                                     @endif
                                                                                                 </flux:button>
                                                                                                 <flux:menu>

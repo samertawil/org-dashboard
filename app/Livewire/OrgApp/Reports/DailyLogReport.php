@@ -88,6 +88,7 @@ class DailyLogReport extends Component
         return EducationalActivityDetailRepo::getTeacherDetailsQuery()
             ->whereDate('created_at', $this->reportDate)
             ->with([
+                'status',
                 'educationalActivity.activityDomain',
                 'educationalActivity.periodGroups',
                 'educationalActivity.group',

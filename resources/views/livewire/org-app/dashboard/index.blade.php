@@ -150,6 +150,84 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- Main Content Area (Charts/Tasks) --}}
         <div class="lg:col-span-2 flex flex-col gap-8">
+            {{-- Educational Activity Tasks Section --}}
+            <flux:card class="space-y-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <flux:icon icon="academic-cap" class="size-5 text-teal-600 dark:text-teal-400" />
+                        <flux:heading size="lg">{{ __('Educational Activity Tasks') }}</flux:heading>
+                    </div>
+                    <flux:button href="{{ route('educational-tasks.index') }}" wire:navigate variant="ghost"
+                        size="sm" class="text-zinc-500 hover:text-zinc-800">{{ __('View All') }}</flux:button>
+                </div>
+
+                @if ($educationalTasks->isEmpty())
+                    <div class="text-center py-8 text-zinc-500">
+                        <flux:icon icon="check-circle" class="mx-auto size-12 mb-2 text-zinc-300" />
+                        <p>{{ __('No pending educational activity tasks.') }}</p>
+                    </div>
+                @else
+                    <div class="space-y-3">
+                        @foreach ($educationalTasks as $task)
+                            <div
+                                class="p-3 border rounded-xl bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all duration-150 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex-1 min-w-0 space-y-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="font-bold text-sm text-zinc-800 dark:text-zinc-100 leading-snug">
+                                            {{ $task->activity_name }}
+                                        </h4>
+                                        <flux:badge size="sm" color="{{ $task->task_status_color }}"
+                                            class="font-semibold rounded-full px-2.5">
+                                            {{ $task->task_status_label }}
+                                        </flux:badge>
+                                    </div>
+
+                                    <div
+                                        class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+                                        <div>
+                                            <span class="font-medium text-zinc-400">{{ __('Domain') }}:</span>
+                                            {{ $task->activityDomain?->status_name ?? '-' }}
+                                        </div>
+
+                                        <div>
+                                            <span class="font-medium text-zinc-400">{{ __('Category') }}:</span>
+                                            {{ $task->category_label }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-zinc-400">{{ __('Time') }}:</span>
+                                            {{ $task->period_start_formatted }} - {{ $task->period_end_formatted }}
+                                        </div>
+
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1 text-[10px] text-zinc-400">
+
+                                        <span class="font-medium text-zinc-400">{{ __('Group') }}:</span>
+                                        {{ $task->group?->name ?? '-' }}
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1 text-[10px] text-zinc-400">
+                                        <flux:icon icon="calendar" class="size-3 text-zinc-400" />
+                                        <span>{{ $task->day_name }}
+                                            ({{ $task->period_start?->format('Y-m-d') }})
+                                        </span>
+                                        @if (auth()->user()->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))
+                                            <span class="text-zinc-300 dark:text-zinc-600">•</span>
+                                            <span
+                                                class="font-semibold text-indigo-600 dark:text-indigo-400">{{ $task->employee?->full_name ?? __('Unassigned') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="shrink-0 flex items-center justify-end">
+                                    <flux:button href="{{ route('educational-activity-detail.create', $task->id) }}"
+                                        wire:navigate size="sm" variant="primary" icon="plus"
+                                        class="bg-teal-600 hover:bg-teal-700 text-white shadow-sm w-full sm:w-auto">
+                                        {{ __('Add Report') }}
+                                    </flux:button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </flux:card>
 
             {{-- My Tasks Section --}}
             <flux:card>

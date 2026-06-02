@@ -1,1 +1,0 @@
-teaching-group-<?php echo e($index); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/01dcf47789b588d9b669c67a80f6d1d8.blade.php ENDPATH**/ ?>

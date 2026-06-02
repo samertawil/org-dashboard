@@ -20,6 +20,37 @@ beforeEach(function () {
     Gate::define('educational-activity-detail.index', fn() => true);
     Gate::define('educational-activity-detail.create', fn() => true);
 
+    // Seed statuses
+    \App\Models\Status::forceCreate([
+        'id' => 193,
+        'status_name' => 'Done',
+        'p_id_sub' => 192,
+    ]);
+
+    \App\Models\Status::forceCreate([
+        'id' => 194,
+        'status_name' => 'Postponed',
+        'p_id_sub' => 192,
+    ]);
+
+    \App\Models\Status::forceCreate([
+        'id' => 195,
+        'status_name' => 'Cancelled',
+        'p_id_sub' => 192,
+    ]);
+
+    \App\Models\Status::forceCreate([
+        'id' => 166,
+        'status_name' => 'Teacher',
+        'p_id_sub' => 165,
+    ]);
+
+    \App\Models\Status::forceCreate([
+        'id' => 167,
+        'status_name' => 'Supervisor',
+        'p_id_sub' => 165,
+    ]);
+
     // Create user with explicit non-admin ID and activation = 1 to pass gate checks
     $this->user = User::factory()->create([
         'id' => 999,
@@ -50,6 +81,22 @@ beforeEach(function () {
         'activation' => 1,
         'gender' => 2,
     ]);
+
+    // Create Student Group
+    $this->studentGroup = \App\Models\StudentGroup::create([
+        'id' => 1,
+        'name' => 'Group A',
+        'batch_no' => 1,
+        'max_students' => 20,
+        'activation' => 1,
+    ]);
+
+    // Create Teacher Student Group assignment for job_title 166 (Teacher)
+    \App\Models\TeacherStudentGroup::create([
+        'teacher_id' => $this->user->id,
+        'student_group_id' => $this->studentGroup->id,
+        'job_title' => 166,
+    ]);
 });
 
 it('renders the index component showing only details assigned to the employee', function () {
@@ -59,6 +106,7 @@ it('renders the index component showing only details assigned to the employee', 
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -74,6 +122,7 @@ it('renders the index component showing only details assigned to the employee', 
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -103,6 +152,7 @@ it('allows super admin to see all details', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -117,6 +167,7 @@ it('allows super admin to see all details', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -140,6 +191,7 @@ it('filters available schedules in create component dropdown', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -149,6 +201,7 @@ it('filters available schedules in create component dropdown', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -168,6 +221,7 @@ it('validates employee ownership when saving new details', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -176,6 +230,7 @@ it('validates employee ownership when saving new details', function () {
 
     $component = Livewire::test(Create::class)
         ->set('educational_activity_id', $scheduleOther->id)
+        ->set('status_id', 193)
         ->set('what_learned', 'Test text');
 
     expect(fn() => $component->instance()->save())
@@ -188,6 +243,7 @@ it('validates employee ownership in edit route access', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -210,6 +266,7 @@ it('validates employee ownership in show route access', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -232,6 +289,7 @@ it('validates employee ownership in gallery route access', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -254,6 +312,7 @@ it('authorizes deletion only for owner', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -268,6 +327,7 @@ it('authorizes deletion only for owner', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -288,7 +348,7 @@ it('authorizes deletion only for owner', function () {
     // Delete other detail should fail
     $component = Livewire::test(Index::class);
     expect(fn() => $component->instance()->delete($detail2->id))
-        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class, 'You do not have permission to delete this record.');
+        ->toThrow(\Illuminate\Auth\Access\AuthorizationException::class, 'You do not have permission to for this report.');
 
     $this->assertDatabaseHas('educational_activity_details', ['id' => $detail2->id]);
 });
@@ -302,6 +362,7 @@ it('can search and filter by activity date', function () {
         'period_start' => \Carbon\Carbon::parse($targetDate . ' 10:00:00'),
         'period_end' => \Carbon\Carbon::parse($targetDate . ' 11:00:00'),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -316,6 +377,7 @@ it('can search and filter by activity date', function () {
         'period_start' => \Carbon\Carbon::parse($otherDate . ' 10:00:00'),
         'period_end' => \Carbon\Carbon::parse($otherDate . ' 11:00:00'),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -348,6 +410,7 @@ it('colors gallery button blue when attachments exist', function () {
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -384,6 +447,7 @@ it('allows user with select.any.educational-activity-detail permission to see al
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->user->id,
     ]);
@@ -398,6 +462,7 @@ it('allows user with select.any.educational-activity-detail permission to see al
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -423,6 +488,7 @@ it('allows user with select.any.educational-activity-detail permission to save n
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -431,6 +497,7 @@ it('allows user with select.any.educational-activity-detail permission to save n
 
     Livewire::test(Create::class)
         ->set('educational_activity_id', $scheduleOther->id)
+        ->set('status_id', 193)
         ->set('what_learned', 'Test text')
         ->call('save')
         ->assertHasNoErrors();
@@ -449,6 +516,7 @@ it('allows user with select.any.educational-activity-detail permission to edit d
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -470,12 +538,14 @@ it('allows user with select.any.educational-activity-detail permission to edit d
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
+        'group_id' => $this->studentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
 
     Livewire::test(Edit::class, ['detail' => $detailOther])
         ->set('educational_activity_id', $scheduleOther2->id)
+        ->set('status_id', 193)
         ->set('what_learned', 'Updated text')
         ->call('save')
         ->assertHasNoErrors();
@@ -485,5 +555,121 @@ it('allows user with select.any.educational-activity-detail permission to edit d
         'educational_activity_id' => $scheduleOther2->id,
         'what_learned' => 'Updated text',
     ]);
+});
+
+it('requires status_id', function () {
+    $schedule = ActivitySchedule::create([
+        'activity_name' => 'My Schedule',
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $schedule->id)
+        ->set('status_id', '')
+        ->call('save')
+        ->assertHasErrors(['status_id' => 'required']);
+});
+
+it('does not require replaced_activity and replaced_reason if status_id is 193', function () {
+    $schedule = ActivitySchedule::create([
+        'activity_name' => 'My Schedule',
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $schedule->id)
+        ->set('status_id', 193)
+        ->set('replaced_activity', '')
+        ->set('replaced_reason', '')
+        ->call('save')
+        ->assertHasNoErrors();
+});
+
+it('requires replaced_activity and replaced_reason if status_id is not 193', function () {
+    $schedule = ActivitySchedule::create([
+        'activity_name' => 'My Schedule',
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $schedule->id)
+        ->set('status_id', 194)
+        ->set('replaced_activity', '')
+        ->set('replaced_reason', '')
+        ->call('save')
+        ->assertHasErrors(['replaced_activity' => 'required', 'replaced_reason' => 'required']);
+});
+
+it('displays dynamic labels in the form based on target_category', function () {
+    $scheduleChildren = ActivitySchedule::create([
+        'activity_name' => 'Children Schedule',
+        'target_category' => 'children',
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    $scheduleParents = ActivitySchedule::create([
+        'activity_name' => 'Parents Schedule',
+        'target_category' => 'parents',
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    // 1. Initially empty/not selected: should show defaults
+    Livewire::test(Create::class)
+        ->assertSee('Consistent')
+        ->assertSee('What Learned')
+        ->assertSee('Teacher Report Detail');
+
+    // 2. Select schedule with target_category = children: should show defaults
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $scheduleChildren->id)
+        ->assertSee('Consistent')
+        ->assertSee('What Learned')
+        ->assertSee('Teacher Report Detail')
+        ->assertDontSee('Turnout')
+        ->assertDontSee('Goals')
+        ->assertDontSee('Recommendations');
+
+    // 3. Select schedule with target_category = parents (not children): should show custom labels
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $scheduleParents->id)
+        ->assertSee('Turnout')
+        ->assertSee('Goals')
+        ->assertSee('Recommendations')
+        ->assertDontSee('Consistent')
+        ->assertDontSee('What Learned')
+        ->assertDontSee('Teacher Report Detail');
 });
 
