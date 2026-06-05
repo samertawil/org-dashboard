@@ -28,7 +28,8 @@ class User extends Authenticatable
         'password',
         'activation',
         'google_id',
-        'avatar'
+        'avatar',
+        'needs_password_reset',
     ];
 
     /**

@@ -187,3 +187,41 @@ it('does not filter schedules by employee_id for teacher with job_title 167', fu
     expect($ids)->toContain($schedule2->id);
 });
 
+it('renders the educational activity schedule show page and displays the report details when it exists', function () {
+    // Create status to avoid FK constraint violation
+    $status193 = new \App\Models\Status();
+    $status193->id = 193;
+    $status193->status_name = 'Done';
+    $status193->save();
+
+    // Create a schedule
+    $schedule = \App\Models\ActivitySchedule::create([
+        'activity_name' => 'Activity to Show',
+        'group_id' => $this->group1->id,
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'activation' => 1,
+        'created_by' => $this->adminUser->id,
+    ]);
+
+    // Create educational activity detail (report)
+    $detail = \App\Models\EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule->id,
+        'consistent' => 'Yes',
+        'status_id' => 193,
+        'what_learned' => 'They learned spelling',
+        'teacher_report_detail' => 'Great details here',
+    ]);
+
+    actingAs($this->adminUser);
+
+    Livewire::test(App\Livewire\OrgApp\EducationalActivitySchedules\Show::class, ['schedule' => $schedule])
+        ->assertStatus(200)
+        ->assertSee('Activity to Show')
+        ->assertSee('Yes')
+        ->assertSee('They learned spelling')
+        ->assertSee('Great details here');
+});
+
+

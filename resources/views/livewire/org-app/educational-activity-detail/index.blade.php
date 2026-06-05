@@ -126,10 +126,13 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-1.5">
-                            @can('viewAny', App\Models\EducationalActivityDetail::class)
-                                <flux:button wire:click="showDetails({{ $detail->id }})" size="sm" variant="ghost"
-                                    icon="eye" class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
-                            @endcan
+                            @if ($detail->educationalActivity)
+                                @can('view', $detail->educationalActivity)
+                                    <flux:button wire:click="openScheduleShowModal({{ $detail->educational_activity_id }})"
+                                        size="sm" variant="ghost"
+                                        icon="eye" class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
+                                @endcan
+                            @endif
                             @can('update', $detail)
                                 <flux:button href="{{ route('educational-activity-detail.edit', $detail->id) }}"
                                     wire:navigate size="sm" variant="ghost" icon="pencil-square"
@@ -232,11 +235,13 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
-                                    @can('viewAny', App\Models\EducationalActivityDetail::class)
-                                        <flux:button wire:click="showDetails({{ $detail->id }})" size="sm"
-                                            variant="ghost" icon="eye" class="text-zinc-500 hover:text-zinc-700"
-                                            title="{{ __('View') }}" />
-                                    @endcan
+                                    @if ($detail->educationalActivity)
+                                        @can('view', $detail->educationalActivity)
+                                            <flux:button wire:click="openScheduleShowModal({{ $detail->educational_activity_id }})"
+                                                size="sm" variant="ghost"
+                                                icon="eye" class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
+                                        @endcan
+                                    @endif
                                     @can('update', $detail)
                                         <flux:button href="{{ route('educational-activity-detail.edit', $detail->id) }}"
                                             wire:navigate size="sm" variant="ghost" icon="pencil-square"
@@ -447,6 +452,21 @@
                     <flux:button x-on:click="$dispatch('modal-close', { name: 'show-detail-modal' })">
                         {{ __('Close') }}</flux:button>
                 </div>
+            @endif
+        </div>
+    </flux:modal>
+
+    {{-- Schedule Show Modal --}}
+    <flux:modal name="schedule-show-modal" class="w-full md:w-[900px] h-[90vh] overflow-y-auto">
+        <div class="space-y-4">
+            @if ($selectedScheduleToShowId)
+                @php
+                    $scheduleModelToShow = \App\Models\ActivitySchedule::find($selectedScheduleToShowId);
+                @endphp
+                @if ($scheduleModelToShow)
+                    <livewire:org-app.educational-activity-schedules.show :schedule="$scheduleModelToShow" :isModal="true"
+                        wire:key="show-schedule-{{ $selectedScheduleToShowId }}" />
+                @endif
             @endif
         </div>
     </flux:modal>

@@ -12,7 +12,7 @@ class EducationalActivityDetailPolicy
 
     public function viewAny(User $user): Response|bool
     {
-        if ($user->isSuperAdmin() || $user->can('select.any.educational-activity-detail') || $user->can('select.any.student') || $user->can('educational-activity-detail.index') || $user->can('educational-activity-detail.create')) {
+        if ($user->isSuperAdmin() || $user->can('select.any.student') || $user->can('educational-activity-detail.index') || $user->can('educational-activity-detail.create')) {
             return Response::allow();
         }
         return Response::deny('You do not have the necessary permissions to view any educational activity report.');
@@ -21,7 +21,7 @@ class EducationalActivityDetailPolicy
 
     public function view(User $user, $detail = null): Response|bool
     {
-        if ($user->isSuperAdmin() || $user->can('select.any.educational-activity-detail') || $user->can('select.any.student')) {
+        if ($user->isSuperAdmin() ||  $user->can('select.any.student')) {
             return Response::allow();
         }
 
@@ -33,7 +33,7 @@ class EducationalActivityDetailPolicy
         $groupId = $detail->educationalActivity?->group_id;
         $groupIds = $user->teacher()->pluck('student_group_id')->toArray();
 
-        if ($detail->educationalActivity?->employee_id == $employeeId && in_array($groupId, $groupIds)) {
+        if ($detail->educationalActivity?->employee_id == $employeeId || in_array($groupId, $groupIds)) {
             return Response::allow();
         }
 

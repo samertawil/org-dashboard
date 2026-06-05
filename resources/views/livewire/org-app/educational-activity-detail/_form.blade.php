@@ -44,8 +44,11 @@
             </flux:field>
 
             <flux:field>
-                <flux:label>{{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Turnout') : __('Consistent') }}</flux:label>
-                <flux:input type="number" wire:model="consistent" :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Enter turnout value') : __('Enter consistent value')" />
+                <flux:label>
+                    {{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Turnout') : __('Consistent') }}
+                </flux:label>
+                <flux:input type="number" wire:model="consistent"
+                    :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Enter turnout value') : __('Enter consistent value')" />
                 <flux:error name="consistent" />
             </flux:field>
 
@@ -61,22 +64,29 @@
                 </flux:field>
             </div>
 
-            <flux:field>
-                <flux:label :badge="$status_id != 193 && $status_id != '' ? 'Required' : null" badgeColor="text-red-600">{{ __('Replaced Activity') }}</flux:label>
-                <flux:input type="text" wire:model="replaced_activity" :placeholder="__('Enter replaced activity')" />
-                <flux:error name="replaced_activity" />
-            </flux:field>
+            <div wire:show="status_id != '' && status_id != 193" class="contents">
+                <flux:field>
+                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Replaced Activity') }}</flux:label>
+                    <flux:input type="text" wire:model="replaced_activity"
+                        :placeholder="__('Enter replaced activity')" />
+                    <flux:error name="replaced_activity" />
+                </flux:field>
 
-            <flux:field>
-                <flux:label :badge="$status_id != 193 && $status_id != '' ? 'Required' : null" badgeColor="text-red-600">{{ __('Reason') }}</flux:label>
-                <flux:input type="text" wire:model="replaced_reason" :placeholder="__('Enter reason for replacement')" />
-                <flux:error name="replaced_reason" />
-            </flux:field>
+                <flux:field>
+                    <flux:label badge="Required" badgeColor="text-red-600">{{ __('Reason') }}</flux:label>
+                    <flux:input type="text" wire:model="replaced_reason"
+                        :placeholder="__('Enter reason for replacement')" />
+                    <flux:error name="replaced_reason" />
+                </flux:field>
+            </div>
 
             <div class="{{ $this->isModal ? 'col-span-1' : 'md:col-span-2 lg:col-span-3' }}">
                 <flux:field>
-                    <flux:label>{{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Goals') : __('What Learned') }}</flux:label>
-                    <flux:textarea wire:model="what_learned" :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Describe goals') : __('Describe what was learned')"
+                    <flux:label badge="Required" badgeColor="text-red-600">
+                        {{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Goals') : __('What Learned') }}
+                    </flux:label>
+                    <flux:textarea wire:model="what_learned"
+                        :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Describe goals') : __('Describe what was learned')"
                         rows="3" />
                     <flux:error name="what_learned" />
                 </flux:field>
@@ -84,8 +94,11 @@
 
             <div class="{{ $this->isModal ? 'col-span-1' : 'md:col-span-2 lg:col-span-3' }}">
                 <flux:field>
-                    <flux:label>{{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Recommendations') : __('Teacher Report Detail') }}</flux:label>
-                    <flux:textarea wire:model="teacher_report_detail" :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Recommendations details') : __('Teacher report details')"
+                    <flux:label badge="Required" badgeColor="text-red-600">
+                        {{ $this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Recommendations') : __('Teacher Report Detail') }}
+                    </flux:label>
+                    <flux:textarea wire:model="teacher_report_detail"
+                        :placeholder="$this->selectedActivitySchedule && $this->selectedActivitySchedule->target_category !== 'children' ? __('Recommendations details') : __('Teacher report details')"
                         rows="3" />
                     <flux:error name="teacher_report_detail" />
                 </flux:field>
@@ -110,5 +123,9 @@
                 </div>
             </div>
         </form>
+    </div>
+
+    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
+        <livewire:org-app.educational-activity-detail.gallery :detail="isset($this->detail) ? $this->detail : null" :isModal="true" wire:key="form-attachments-gallery" />
     </div>
 </div>

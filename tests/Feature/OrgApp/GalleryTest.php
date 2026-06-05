@@ -44,6 +44,7 @@ it('loads and merges attachments from various sources when user has all permissi
     Gate::define('activity.index', fn() => true);
     Gate::define('purchase_request.index', fn() => true);
     Gate::define('educational-activity-detail.index', fn() => true);
+    Gate::define('select.any.educational-activity-detail', fn() => true);
 
     // Create Activity and ActivityAttachment
     $activity = Activity::create([

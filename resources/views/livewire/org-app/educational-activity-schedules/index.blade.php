@@ -433,9 +433,9 @@
 
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-1.5">
-                                                <flux:button target="_blank"
-                                                    href="{{ route('educational-activity-schedules.show', $schedule) }}"
-                                                    wire:navigate variant="ghost" size="sm" icon="eye" />
+                                                <flux:button
+                                                    wire:click="openScheduleShowModal({{ $schedule->id }})"
+                                                    variant="ghost" size="sm" icon="eye" />
                                                 @can('educational-activity-schedules.create')
                                                     <flux:button
                                                         href="{{ route('educational-activity-schedules.create', ['copy_from' => $schedule->id]) }}"
@@ -773,9 +773,8 @@
                                                                                 <td class="px-4 py-3 text-left">
                                                                                     <div
                                                                                         class="flex items-center gap-1 justify-end">
-                                                                                        <flux:button target="_blank"
-                                                                                            href="{{ route('educational-activity-schedules.show', $schedule) }}"
-                                                                                            wire:navigate
+                                                                                        <flux:button
+                                                                                            wire:click="openScheduleShowModal({{ $schedule->id }})"
                                                                                             variant="ghost"
                                                                                             size="xs"
                                                                                             icon="eye" />
@@ -989,6 +988,21 @@
                         <livewire:org-app.educational-activity-detail.gallery :detail="$detailModel" :isModal="true"
                             wire:key="gallery-{{ $selectedDetailId }}" />
                     </div>
+                @endif
+            </div>
+        </flux:modal>
+
+        {{-- Schedule Show Modal --}}
+        <flux:modal name="schedule-show-modal" class="w-full md:w-[900px] h-[90vh] overflow-y-auto">
+            <div class="space-y-4">
+                @if ($selectedScheduleToShowId)
+                    @php
+                        $scheduleModelToShow = \App\Models\ActivitySchedule::find($selectedScheduleToShowId);
+                    @endphp
+                    @if ($scheduleModelToShow)
+                        <livewire:org-app.educational-activity-schedules.show :schedule="$scheduleModelToShow" :isModal="true"
+                            wire:key="show-schedule-{{ $selectedScheduleToShowId }}" />
+                    @endif
                 @endif
             </div>
         </flux:modal>

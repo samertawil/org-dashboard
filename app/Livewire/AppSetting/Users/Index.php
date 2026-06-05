@@ -9,14 +9,15 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Index extends Component
 {
 
-    use WithPagination; 
+    use WithPagination;
 
-    
+
     // Search properties
     public string $search = '';
     public string $searchEmail = '';
@@ -59,13 +60,13 @@ class Index extends Component
     }
 
     public function updatingSearchEmail(): void
-    {    
+    {
         $this->resetPage();
     }
 
     public function updatingSearchActivation(): void
     {
-      
+
         $this->resetPage();
     }
 
@@ -73,15 +74,15 @@ class Index extends Component
     {
         $this->resetPage();
     }
-  
+
     #[Computed()]
     public function users(): LengthAwarePaginator
     {
         return User::query()
             ->with(['employee', 'rolesRelation'])
             ->SearchName($this->search)
-            ->SearchEmail($this->searchEmail) 
-            ->SearchActivation($this->searchActivation) 
+            ->SearchEmail($this->searchEmail)
+            ->SearchActivation($this->searchActivation)
             ->when($this->searchRole, function ($query) {
                 $query->whereHas('rolesRelation', function ($q) {
                     $q->where('roles.id', $this->searchRole);
@@ -94,9 +95,18 @@ class Index extends Component
     public function resetPass(int $userId): void
     {
         $user = User::findOrFail($userId);
-         
+
         $user->password = 'password'; // Set default password
+        $user->needs_password_reset = 1;
         $user->save();
+
+        if (Auth::id() === $user->id) {
+            Auth::guard('web')->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+            $this->redirect('/', navigate: true);
+            return;
+        }
 
         session()->flash('message', 'Password has been reset to default.');
     }
@@ -104,14 +114,15 @@ class Index extends Component
     // public function test(User $user ) {
     //     dd($user);
     // }
-    public function switchActivation(User $user) {
-        
+    public function switchActivation(User $user)
+    {
+
         if ($user->activation == 0) {
             $user->activation = 1;
         } elseif ($user->activation == 1) {
             $user->activation = 0;
         }
-        
+
         $user->save();
 
         session()->flash('message', 'User has been switched.');

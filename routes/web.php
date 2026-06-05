@@ -48,8 +48,8 @@ use App\Livewire\OrgApp\Employee\Index as EmployeeIndex;
 use App\Livewire\OrgApp\Partner\Create as PartnerCreate;
 use App\Livewire\OrgApp\Partner\Edit as PartnerEdit;
 use App\Livewire\OrgApp\Partner\Index as PartnerIndex;
-use App\Livewire\OrgApp\PurchaseRequest\Create as PurchaseRequestCreate ;
-use App\Livewire\OrgApp\PurchaseRequest\Index as PurchaseRequestIndex ;
+use App\Livewire\OrgApp\PurchaseRequest\Create as PurchaseRequestCreate;
+use App\Livewire\OrgApp\PurchaseRequest\Index as PurchaseRequestIndex;
 use App\Livewire\OrgApp\Student\Create as StudentCreat;
 use App\Livewire\OrgApp\Student\Edit as StudentEdit;
 use App\Livewire\OrgApp\Student\ImportedFiles;
@@ -68,6 +68,7 @@ use App\Livewire\OrgApp\SurveyAnswers\Create as SurveyAnswersCreate;
 use App\Livewire\OrgApp\SurveyAnswers\Edit as SurveyAnswersEdit;
 use App\Livewire\OrgApp\SurveyAnswers\Index as SurveyAnswersIndex;
 use App\Livewire\OrgApp\SurveyQuestions\ExportFiles;
+use App\Livewire\OrgApp\SurveyQuestions\Statistics as SurveyStatistics;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Create as GradingScaleCreate;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Edit as GradingScaleEdit;
 use App\Livewire\OrgApp\SurveyQuestions\GradingScale\Index as GradingScaleIndex;
@@ -90,6 +91,7 @@ use App\Livewire\OrgApp\EducationalActivityDetail\Show as EADShow;
 use App\Livewire\OrgApp\EducationalActivityDetail\Gallery as EADGallery;
 use App\Livewire\SocialLogin;
 use App\Mail\SendQuotationMail;
+use App\Http\Middleware\ForcePasswordReset;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -108,60 +110,60 @@ Route::get('/survey/{id}', \App\Livewire\OrgApp\Survey\PublicResponse::class)->n
 Route::get('/q/{token}/{vendor_id}', \App\Livewire\OrgApp\PurchaseRequest\PublicQuotation::class)->name('quotation.public');
 
 Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', ForcePasswordReset::class])
     ->name('dashboard');
+// 
+Route::get('/send-test-email', function () {
+    $data = ['name' => 'John Doe'];
 
-    Route::get('/send-test-email', function () {
-        $data = ['name' => 'John Doe'];
-    
-        Mail::to('eng.samertawil@gmail.com')->send(new SendQuotationMail($data));
-    
-        return "Email sent!";
-    });
+    Mail::to('eng.samertawil@gmail.com')->send(new SendQuotationMail($data));
 
-require __DIR__.'/settings.php';
+    return "Email sent!";
+});
+
+require __DIR__ . '/settings.php';
 
 Route::get('{provider}/social-redirect', [SocialLogin::class, 'socialRedirect'])->name('social.redirect');
 Route::get('{provider}/social-callback', [SocialLogin::class, 'socialCallback'])->name('social.callback');
 
 // Users
-Route::middleware(['auth'])->prefix('dashboard')->group(function () {
-   
-    Route::get('/users/create',UsersCreate::class)->name('user.create');
-    Route::get('/users/index',UsersIndex::class)->name('user.index');
-    Route::get('/grant-role-to/{userID?}',GrantUserRole::class)->name('grant.role.user');
-    
+Route::middleware(['auth',  ForcePasswordReset::class])->prefix('dashboard')->group(function () {
+
+    Route::get('/users/create', UsersCreate::class)->name('user.create');
+    Route::get('/users/index', UsersIndex::class)->name('user.index');
+    Route::get('/grant-role-to/{userID?}', GrantUserRole::class)->name('grant.role.user');
+
     // Status
-    Route::get('/system-names/create',SystemNamesCreate::class)->name('system.names.create');
-    Route::get('/system-names',SystemNamesIndex::class)->name('system.names.index');
-    Route::get('/status/create',StatusCreate::class)->name('status.create');
-    Route::get('/status',StatusIndex::class)->name('status.index');
-    Route::get('/{status}/edit',StatusEdit::class)->name('status.edit');
-    
+    Route::get('/system-names/create', SystemNamesCreate::class)->name('system.names.create');
+    Route::get('/system-names', SystemNamesIndex::class)->name('system.names.index');
+    Route::get('/status/create', StatusCreate::class)->name('status.create');
+    Route::get('/status', StatusIndex::class)->name('status.index');
+    Route::get('/{status}/edit', StatusEdit::class)->name('status.edit');
+
     // Ability
-    Route::get('/ability/create',AbilityCreate::class)->name('ability.create');
-    Route::get('/ability/{ability}/edit',AbilityEdit::class)->name('ability.edit');
-    Route::get('/ability',AbilityIndex::class)->name('ability.index');
-    
+    Route::get('/ability/create', AbilityCreate::class)->name('ability.create');
+    Route::get('/ability/{ability}/edit', AbilityEdit::class)->name('ability.edit');
+    Route::get('/ability', AbilityIndex::class)->name('ability.index');
+
     // Role
-    Route::get('/role-module/create',RoleModuleNameCreate::class)->name('role.module.create');
-    Route::get('/role/create',RoleCreate::class)->name('role.create');
-    Route::get('/role',RoleIndex::class)->name('role.index');
-    Route::get('/role/{id?}/edit',RoleEdit::class)->name('role.edit');
-    
-    
-    
-    
+    Route::get('/role-module/create', RoleModuleNameCreate::class)->name('role.module.create');
+    Route::get('/role/create', RoleCreate::class)->name('role.create');
+    Route::get('/role', RoleIndex::class)->name('role.index');
+    Route::get('/role/{id?}/edit', RoleEdit::class)->name('role.edit');
+
+
+
+
     // OrgApp - Department
     Route::get('/department', DepartmentIndex::class)->name('department.index');
     Route::get('/department/create', DepartmentCreate::class)->name('department.create');
     Route::get('/department/{department}/edit', DepartmentEdit::class)->name('department.edit');
-    
+
     // OrgApp - Employee
     Route::get('/employee', EmployeeIndex::class)->name('employee.index');
     Route::get('/employee/create', EmployeeCreate::class)->name('employee.create');
     Route::get('/employee/{employee}/edit', EmployeeEdit::class)->name('employee.edit');
-    
+
     // OrgApp - activity
     Route::get('/activity', ActivityIndex::class)->name('activity.index');
     Route::get('/activity/create', ActivityCreate::class)->name('activity.create');
@@ -170,13 +172,13 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/activity/{activity}/gallery', \App\Livewire\OrgApp\Activity\Gallery::class)->name('activity.gallery');
     Route::get('/activity-feed', \App\Livewire\OrgApp\Activity\Feed::class)->name('activity.feed');
 
-    
+
     Route::get('/sectors', ActivitySectorIndex::class)->name('sector.show');
-    
+
     Route::get('/partner/create', PartnerCreate::class)->name('partner.create');
     Route::get('/partner/{partner}/edit', PartnerEdit::class)->name('partner.edit');
     Route::get('/partner', PartnerIndex::class)->name('partner.index');
-    
+
     Route::get('/student-group', StudentGroupIndex::class)->name('student.group.index');
     Route::get('/student-group/create', StudentGroupCreate::class)->name('student.group.create');
     Route::get('/student-group/{group}/edit', StudentGroupEdit::class)->name('student.group.edit');
@@ -190,80 +192,81 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/reports/educational-progress', \App\Livewire\OrgApp\Reports\EducationalProgress::class)->name('reports.educational.progress');
     Route::get('/reports/feedback-analysis', \App\Livewire\OrgApp\Reports\FeedbackAnalysis::class)->name('reports.feedback.analysis');
     Route::get('/calendar', \App\Livewire\OrgApp\Calendar\Index::class)->name('calendar.index');
-    
-    
-    
-    Route::get('/student-setup-map',StudentSetupMap::class)->name('student.setup.map');
-    Route::get('/student',StudentIndex::class)->name('student.index');
-    Route::get('/student/imported-files',ImportedFiles::class)->name('student.imported-files');
-    Route::get('/student/create',StudentCreat::class)->name('student.create');
-    Route::get('/student/{student}/edit',StudentEdit::class)->name('student.edit');
-    Route::get('/student/{student}/show',StudentShow::class)->name('student.show');
-    Route::get('/teaching-group',TeachingGroupIndex::class)->name('teaching.group.index');
-    Route::get('/teaching-group/create',TeachingGroupCreate::class)->name('teaching.group.create');
-    Route::get('/teaching-group/{group}/edit',TeachingGroupEdit::class)->name('teaching.group.edit');
-    
+
+
+
+    Route::get('/student-setup-map', StudentSetupMap::class)->name('student.setup.map');
+    Route::get('/student', StudentIndex::class)->name('student.index');
+    Route::get('/student/imported-files', ImportedFiles::class)->name('student.imported-files');
+    Route::get('/student/create', StudentCreat::class)->name('student.create');
+    Route::get('/student/{student}/edit', StudentEdit::class)->name('student.edit');
+    Route::get('/student/{student}/show', StudentShow::class)->name('student.show');
+    Route::get('/teaching-group', TeachingGroupIndex::class)->name('teaching.group.index');
+    Route::get('/teaching-group/create', TeachingGroupCreate::class)->name('teaching.group.create');
+    Route::get('/teaching-group/{group}/edit', TeachingGroupEdit::class)->name('teaching.group.edit');
+
     Route::get('/teacher-student-groups', TeacherStudentGroupIndex::class)->name('teacher-student-groups.index');
     Route::get('/teacher-student-groups/create', TeacherStudentGroupCreate::class)->name('teacher-student-groups.create');
-    Route::get('/teacher-student-groups/{teacherStudentGroup}/edit', TeacherStudentGroupEdit::class)->name('teacher-student-groups.edit');    
+    Route::get('/teacher-student-groups/{teacherStudentGroup}/edit', TeacherStudentGroupEdit::class)->name('teacher-student-groups.edit');
     Route::get('/currency', CurrencyIndex::class)->name('currency.index');
     Route::get('/currency/create', CurrencyCreate::class)->name('currency.create');
     Route::get('/currency/{currency}/edit', CurrencyEdit::class)->name('currency.edit');
-    
-    Route::get('/learnin-subject/create',SubjectCreate::class)->name('subject.create');
-    Route::get('/learnin-subject/{subject}/edit',SubjectEdit::class)->name('subject.edit');
-    Route::get('/learnin-subject',SubjectIndex::class)->name('subject.index');
-     
+
+    Route::get('/learnin-subject/create', SubjectCreate::class)->name('subject.create');
+    Route::get('/learnin-subject/{subject}/edit', SubjectEdit::class)->name('subject.edit');
+    Route::get('/learnin-subject', SubjectIndex::class)->name('subject.index');
+
     Route::get('/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
-     
-    
+
+
     Route::get('/my-tasks', MyTasks::class)->name('my.tasks');
-    
+
     // OrgApp - Purchase Request
-    Route::get('/purchase-request',PurchaseRequestIndex::class)->name('purchase_request.index');
+    Route::get('/purchase-request', PurchaseRequestIndex::class)->name('purchase_request.index');
     Route::get('/purchase-request/create', PurchaseRequestCreate::class)->name('purchase_request.create');
     Route::get('/purchase-request/{purchaseRequisition}/edit', \App\Livewire\OrgApp\PurchaseRequest\Edit::class)->name('purchase_request.edit');
     Route::get('/purchase-request/{purchaseRequisition}/show', \App\Livewire\OrgApp\PurchaseRequest\Show::class)->name('purchase_request.show');
     Route::get('/purchase-request/{purchaseRequisition}/gallery', \App\Livewire\OrgApp\PurchaseRequest\Gallery::class)->name('purchase_request.gallery');
-    
+
     // Quotation Management (Full Pages)
     Route::get('/quotations', \App\Livewire\OrgApp\PurchaseRequest\QuotationIndex::class)->name('quotation.index');
     Route::get('/quotations/{quotation}', \App\Livewire\OrgApp\PurchaseRequest\QuotationShow::class)->name('quotation.show');
     Route::get('/purchase-requisitions/{id}/comparison', \App\Livewire\OrgApp\Financial\QuotationComparison::class)->name('purchase_request.comparison');
 
     // OrgApp - Displacement Camps
-    Route::get('/displacement-camps',DisplacementCampsIndex::class)->name('displacement.camps.index');
-    Route::get('/displacement-camps/create',DisplacementCampsCreate::class)->name('displacement.camps.create');
-    Route::get('/displacement-camps/{displacementCamp}/edit',DisplacementCampsEdit::class)->name('displacement.camps.edit');
+    Route::get('/displacement-camps', DisplacementCampsIndex::class)->name('displacement.camps.index');
+    Route::get('/displacement-camps/create', DisplacementCampsCreate::class)->name('displacement.camps.create');
+    Route::get('/displacement-camps/{displacementCamp}/edit', DisplacementCampsEdit::class)->name('displacement.camps.edit');
     Route::get('/displacement-camps/{displacementCamp}/gallery', DisplacementCampsGallery::class)->name('displacement.camps.gallery');
 
     // OrgApp - Camps Residents
-    Route::get('/camps-residents',CampsResidentsIndex::class)->name('camps.residents.index');
-    Route::get('/camps-residents/create',CampsResidentsCreate::class)->name('camps.residents.create');
-    Route::get('/camps-residents/{campsResident}/edit',CampsResidentsEdit::class)->name('camps.residents.edit');
+    Route::get('/camps-residents', CampsResidentsIndex::class)->name('camps.residents.index');
+    Route::get('/camps-residents/create', CampsResidentsCreate::class)->name('camps.residents.create');
+    Route::get('/camps-residents/{campsResident}/edit', CampsResidentsEdit::class)->name('camps.residents.edit');
 
     // OrgApp - Activity Beneficiaries
-    Route::get('/activity-beneficiaries',ActivityBeneficiaryNameIndex::class)->name('activity.beneficiaries.index');
-    Route::get('/activity-beneficiaries/create',ActivityBeneficiaryNameCreate::class)->name('activity.beneficiaries.create');
-    Route::get('/activity-beneficiaries/{activityBeneficiaryName}/edit',ActivityBeneficiaryNameEdit::class)->name('activity.beneficiaries.edit');
+    Route::get('/activity-beneficiaries', ActivityBeneficiaryNameIndex::class)->name('activity.beneficiaries.index');
+    Route::get('/activity-beneficiaries/create', ActivityBeneficiaryNameCreate::class)->name('activity.beneficiaries.create');
+    Route::get('/activity-beneficiaries/{activityBeneficiaryName}/edit', ActivityBeneficiaryNameEdit::class)->name('activity.beneficiaries.edit');
 
-    Route::get('/settings/create',SettingCreate::class)->name('setting.create');
-    Route::get('/settings',SettingIndex::class)->name('setting.index');
-    
+    Route::get('/settings/create', SettingCreate::class)->name('setting.create');
+    Route::get('/settings', SettingIndex::class)->name('setting.index');
+
 
     // ai 
 
     Route::get('ai-copilot', FullPageChat::class)->name('ai_copilot');
-    
+
     //Survey
     Route::get('/surveys', \App\Livewire\OrgApp\Survey\Index::class)->name('survey.index');
-    Route::get('/survey-manage/{survey_table_id?}',SurveyQuestionsManage::class)->name('survey.manage');
+    Route::get('/survey-manage/{survey_table_id?}', SurveyQuestionsManage::class)->name('survey.manage');
     Route::get('/survey-questions/show', \App\Livewire\OrgApp\SurveyQuestions\Show::class)->name('survey-questions.show');
-    Route::get('/survey-answers',SurveyAnswersIndex::class)->name('survey-answers.index');
+    Route::get('/survey-answers', SurveyAnswersIndex::class)->name('survey-answers.index');
     Route::get('/survey-answers/create', SurveyAnswersCreate::class)->name('survey-answers.create');
-    Route::get('/survey-answers/{surveyAnswer}/edit',SurveyAnswersEdit::class)->name('survey-answers.edit');
-    Route::get('/survey-export',ExportFiles::class)->name('survey.export');
-    
+    Route::get('/survey-answers/{surveyAnswer}/edit', SurveyAnswersEdit::class)->name('survey-answers.edit');
+    Route::get('/survey-export', ExportFiles::class)->name('survey.export');
+    Route::get('/survey-statistics', SurveyStatistics::class)->name('survey.statistics');
+
     Route::get('/survey-grading-scale', GradingScaleIndex::class)->name('survey.grading.scale.index');
     Route::get('/survey-grading-scale/create', GradingScaleCreate::class)->name('survey.grading.scale.create');
     Route::get('/survey-grading-scale/manage-descriptions', GradingScaleManageDescriptions::class)->name('survey.grading.scale.manage-descriptions');
@@ -276,7 +279,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/reports/survey-comparison', \App\Livewire\OrgApp\Reports\SurveyComparisonReport::class)->name('reports.survey-comparison');
     Route::get('/reports/monthly-manager-report', \App\Livewire\OrgApp\Reports\MonthlyManagerReport::class)->name('reports.monthly.manager.report');
     Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
-    
+
     // OrgApp - Educational Activity Schedules
     Route::get('/educational-activity-schedules', EASIndex::class)->name('educational-activity-schedules.index');
     Route::get('/educational-activity-schedules/create', EASCreate::class)->name('educational-activity-schedules.create');
@@ -291,13 +294,12 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/educational-activity-detail/{detail}/gallery', EADGallery::class)->name('educational-activity-detail.gallery');
 
     // New Educational Tasks route
-    Route::get('/educational-tasks', \App\Livewire\OrgApp\Dashboard\EducationalTasks::class)->name('educational-tasks.index');
+    Route::get('/educational-tasks', \App\Livewire\OrgApp\EducationalActivitySchedules\EducationalTasks::class)->name('educational-tasks.index');
     // Educational Tasks Statistics (Management)
     Route::get('/reports/educational-tasks-stats', \App\Livewire\OrgApp\Reports\EducationalTasksStats::class)->name('reports.educational-tasks-stats');
     // Export
 
     Route::get('/export-students/{params}', [ExportController::class, 'exportStudentFiltter'])->name('export.filtter.students');
-    Route::get('map',Map::class);
+    Route::get('map', Map::class);
     Route::get('/operations-map', \App\Livewire\OrgApp\Maps\OperationsMap::class)->name('operations.map');
-    });
-    
+});

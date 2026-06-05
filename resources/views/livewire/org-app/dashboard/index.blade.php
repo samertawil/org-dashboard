@@ -161,14 +161,14 @@
                         size="sm" class="text-zinc-500 hover:text-zinc-800">{{ __('View All') }}</flux:button>
                 </div>
 
-                @if ($educationalTasks->isEmpty())
+                @if ($this->educationalTasksQuery->isEmpty())
                     <div class="text-center py-8 text-zinc-500">
                         <flux:icon icon="check-circle" class="mx-auto size-12 mb-2 text-zinc-300" />
                         <p>{{ __('No pending educational activity tasks.') }}</p>
                     </div>
                 @else
                     <div class="space-y-3">
-                        @foreach ($educationalTasks as $task)
+                        @foreach ($this->educationalTasksQuery as $task)
                             <div
                                 class="p-3 border rounded-xl bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all duration-150 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div class="flex-1 min-w-0 space-y-1">
@@ -359,7 +359,7 @@
                 <flux:card>
                     <flux:heading size="lg" class="mb-4">{{ __('Activities by Sector') }}</flux:heading>
                     <div class="space-y-4">
-                        @foreach ($this->activities as $index => $sector)
+                        @foreach ($activitiesBySector as $index => $sector)
                             @php
                                 $colors = [
                                     'bg-blue-500',
@@ -369,7 +369,7 @@
                                     'bg-pink-500',
                                 ];
                                 $color = $colors[$index % count($colors)];
-                                $width = ($sector['value'] / max(1, $this->activities->sum('value'))) * 100;
+                                $width = ($sector['value'] / max(1, $activitiesBySector->sum('value'))) * 100;
                             @endphp
                             <div>
                                 <div class="flex justify-between text-xs mb-1.5 font-medium">
@@ -388,9 +388,10 @@
 
         </div>
     </div>
-
-    @livewire('org-app.dashboard.a-i-chatbot')
-    @canany(['activity.index', 'displacement.camps.index'])
+    @can('ai_copilot')
+        @livewire('org-app.dashboard.a-i-chatbot')
+    @endcan
+    @canany(['dashboard.relief.statistics'])
         @livewire('org-app.maps.operations-map', ['isDashboard' => true])
     @endcanany
 </div>

@@ -44,6 +44,7 @@ class Create extends Component
             'status_id'               => $this->status_id ?: null,
             'replaced_activity'       => $this->replaced_activity ?: null,
             'replaced_reason'         => $this->replaced_reason ?: null,
+            'attchments'              => $this->existingAttachments,
         ]);
 
         $this->dispatch('report-saved');

@@ -35,10 +35,19 @@ class Password extends Component
 
         Auth::user()->update([
             'password' => $validated['password'],
+            'needs_password_reset' => false,
         ]);
 
-        $this->reset('current_password', 'password', 'password_confirmation');
+        // تسجيل خروج كافة الأجهزة الأخرى
+        Auth::logoutOtherDevices($validated['password']);
 
-        $this->dispatch('password-updated');
+        // تسجيل خروج المتصفح الحالي
+        Auth::guard('web')->logout();
+
+        session()->invalidate();
+        session()->regenerateToken();
+
+        // التوجيه لصفحة تسجيل الدخول
+        $this->redirect('/', navigate: true);
     }
 }

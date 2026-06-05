@@ -274,9 +274,26 @@
                     @endcan
                     @foreach ($newAttachments as $index => $item)
                         <div wire:key="new-attachment-{{ $index }}"
-                            class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4">
+                            class="p-4 border rounded-lg border-zinc-200 dark:border-zinc-700 space-y-4"
+                            x-data="{ isUploading: false, progress: 0 }"
+                            x-on:livewire-upload-start="isUploading = true"
+                            x-on:livewire-upload-finish="isUploading = false"
+                            x-on:livewire-upload-error="isUploading = false"
+                            x-on:livewire-upload-progress="progress = $event.detail.progress">
+                            
                             <flux:input type="file" wire:model="newAttachments.{{ $index }}.file"
                                 :label="__('Choose File')" />
+
+                            <div x-show="isUploading" class="mt-2" x-cloak>
+                                <div class="w-full bg-zinc-200 dark:bg-zinc-750 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-blue-600 h-full rounded-full transition-all duration-150" x-bind:style="'width: ' + progress + '%'"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                    <span>{{ __('Uploading...') }}</span>
+                                    <span x-text="progress + '%'"></span>
+                                </div>
+                            </div>
+
                             <flux:select wire:model="newAttachments.{{ $index }}.attchment_type"
                                 :label="__('Type')">
                                 <option value="">{{ __('Select Type') }}</option>

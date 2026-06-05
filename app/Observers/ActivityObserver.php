@@ -12,8 +12,9 @@ class ActivityObserver
      */
     public function created(Activity $activity): void
     {
-      Cache::forget('activites-all');
-      Cache::forget('lastEducationalActivity');
+        Cache::forget('activites-all');
+        Cache::forget('lastEducationalActivity');
+        Cache::forget('activites-by-sector');
     }
 
     /**
@@ -23,6 +24,7 @@ class ActivityObserver
     {
         Cache::forget('activites-all');
         Cache::forget('lastEducationalActivity');
+        Cache::forget('activites-by-sector');
     }
 
     /**
@@ -32,21 +34,6 @@ class ActivityObserver
     {
         Cache::forget('activites-all');
         Cache::forget('lastEducationalActivity');
-    }
-
-    /**
-     * Handle the Activity "restored" event.
-     */
-    public function restored(Activity $activity): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Activity "force deleted" event.
-     */
-    public function forceDeleted(Activity $activity): void
-    {
-        //
+        Cache::forget('activites-by-sector');
     }
 }

@@ -59,15 +59,15 @@ class Index extends Component
         if ($shouldQuery) {
             $query = ActivityAttchment::select('id', 'activity_id', 'subject_learning_id', 'attchment_path', 'notes', 'attchment_type', 'created_at')
                 ->with([
-                    'activity' => function($q) {
+                    'activity' => function ($q) {
                         $q->select('id', 'name');
                     },
-                    'subjectLearning' => function($q) {
+                    'subjectLearning' => function ($q) {
                         $q->select('id', 'name');
                     }
                 ])
                 ->latest();
-            
+
             if ($this->filterSource === 'activity') {
                 $query->whereNotNull('activity_id');
             } elseif ($this->filterSource === 'subject_learning') {
@@ -163,14 +163,15 @@ class Index extends Component
         }
         // 3. Fetch Educational Activity Detail Attachments (JSON)
         $eduAttachments = collect();
-        if (Gate::allows('educational-activity-detail.index') || Gate::allows('educational-activity-detail.create') || Gate::allows('manager.reports.all')) {
+        if (Gate::allows('educational-activity-detail.index') || Gate::allows('educational-activity-detail.create') || Gate::allows('manager.reports.all') || Gate::allows('select.any.student')) {
             if ($this->filterSource === '' || $this->filterSource === 'educational_activity') {
-                $eduDetails = EducationalActivityDetail::select('id', 'educational_activity_id', 'created_at', 'attchments')
+                $eduDetails = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+                    ->select('id', 'educational_activity_id', 'created_at', 'attchments')
                     ->with([
-                        'educationalActivity' => function($q) {
+                        'educationalActivity' => function ($q) {
                             $q->select('id', 'activity_name', 'group_id', 'period_start');
                         },
-                        'educationalActivity.group' => function($q) {
+                        'educationalActivity.group' => function ($q) {
                             $q->select('id', 'name');
                         }
                     ])
@@ -220,8 +221,8 @@ class Index extends Component
         // Search
         if ($this->search) {
             $all = $all->filter(function ($item) {
-                return stripos($item['name'], $this->search) !== false || 
-                       stripos($item['source_title'], $this->search) !== false;
+                return stripos($item['name'], $this->search) !== false ||
+                    stripos($item['source_title'], $this->search) !== false;
             });
         }
 
@@ -237,7 +238,7 @@ class Index extends Component
 
     public function render()
     {
-      
+
         // Custom Pagination for merged collection
         $items = $this->genericAttachments;
         $perPage = 24;

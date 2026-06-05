@@ -43,8 +43,9 @@
                 <flux:select wire:model.live="filterStatus" class="w-full">
                     <option value="">{{ __('All Statuses') }}</option>
                     <option value="completed">{{ __('Completed') }}</option>
+                    <option value="happen_now">{{ __('Happen Now') }}</option>
                     <option value="delayed">{{ __('Delayed') }}</option>
-                    <option value="required_now">{{ __('Required Now') }}</option>
+                    <option value="require_today">{{ __('Require Today') }}</option>
                     <option value="upcoming">{{ __('Upcoming') }}</option>
                 </flux:select>
             </flux:field>

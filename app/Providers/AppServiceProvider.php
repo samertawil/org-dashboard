@@ -19,6 +19,8 @@ use App\Models\TeacherStudentGroup;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyQuestion;
 use App\Models\User;
+use App\Models\ActivitySchedule;
+use App\Models\EducationalActivityDetail;
 use App\Observers\AbilitieObserver;
 use App\Observers\ActivityObserver;
 use App\Observers\DepartmentObserver;
@@ -34,6 +36,8 @@ use App\Observers\StudentObserver;
 use App\Observers\SurveyAnswerObserver;
 use App\Observers\SurveyQuestionObserver;
 use App\Observers\UserObserver;
+use App\Observers\ActivityScheduleObserver;
+use App\Observers\EducationalActivityDetailObserver;
 use App\Reposotries\ActivityBeneficiaryRepo;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
@@ -43,6 +47,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -62,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Validator::extend('global_validation', function ($attribute, $value, $parameters, $validator) {
-            $type = $parameters[0] ?? 'status'; 
+            $type = $parameters[0] ?? 'status';
             $enum = GlobalSystemConstant::tryFrom((int)$value);
             return $enum && $enum->getType() === $type;
         });
@@ -83,12 +89,14 @@ class AppServiceProvider extends ServiceProvider
         SurveyAnswer::observe(SurveyAnswerObserver::class);
         Student::observe(StudentObserver::class);
         User::observe(UserObserver::class);
-        
+        ActivitySchedule::observe(ActivityScheduleObserver::class);
+        EducationalActivityDetail::observe(EducationalActivityDetailObserver::class);
+
 
 
         date_default_timezone_set('Asia/Gaza');
 
-        
+
         Gate::before(function ($user, $ability) {
             if (!$user) return null;
 
@@ -120,17 +128,17 @@ class AppServiceProvider extends ServiceProvider
             // We use a static variable to hold the permissions for the *current request*
             // so we don't loop through roles for every single @can check on the page.
             static $userPermissions = [];
-            
+
             // Check if user permissions are already loaded for the current user ID to avoid conflict if user changes (rare but safe)
             static $lastUserId = null;
 
             if ($lastUserId !== $user->id) {
                 $userPermissions = [];
                 $lastUserId = $user->id;
-                
+
                 // Eager load roles if possible, or access relation
                 foreach ($user->rolesRelation as $role) {
-                     // Assuming 'abilities' is a JSON casted array on the Role model
+                    // Assuming 'abilities' is a JSON casted array on the Role model
                     if (!empty($role->abilities) && is_array($role->abilities)) {
                         $userPermissions = array_merge($userPermissions, $role->abilities);
                     }
@@ -152,11 +160,11 @@ class AppServiceProvider extends ServiceProvider
 
         Password::defaults(
             fn(): ?Password => app()->isProduction()
-                ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
+                ? Password::min(6)
+                // ->mixedCase()
+                // ->letters()
+                // ->numbers()
+                // ->symbols()
                 ->uncompromised()
                 : null
         );

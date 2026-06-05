@@ -203,7 +203,13 @@
                                 <textarea wire:model="general_notes" rows="3" class="block w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="اكتب أي ملاحظات إضافية هنا..."></textarea>
                             </div>
 
-                            <div>
+                            <div
+                                x-data="{ isUploading: false, progress: 0 }"
+                                x-on:livewire-upload-start="isUploading = true"
+                                x-on:livewire-upload-finish="isUploading = false"
+                                x-on:livewire-upload-error="isUploading = false"
+                                x-on:livewire-upload-progress="progress = $event.detail.progress"
+                            >
                                 <label class="block text-sm font-medium text-gray-700 mb-2">إرفاق عرض السعر الرسمي (PDF/Image)</label>
                                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-indigo-400 transition-colors cursor-pointer bg-gray-50/30">
                                     <div class="space-y-1 text-center">
@@ -219,7 +225,15 @@
                                         <p class="text-xs text-gray-500">PDF, PNG, JPG حتى 10 ميجابايت</p>
                                     </div>
                                 </div>
-                                <div wire:loading wire:target="attachments" class="text-xs text-indigo-600 mt-2">جاري الرفع...</div>
+                                <div x-show="isUploading" class="mt-3" x-cloak>
+                                    <div class="w-full bg-zinc-200 dark:bg-zinc-700 h-2 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-600 h-full rounded-full transition-all duration-150" x-bind:style="'width: ' + progress + '%'"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                        <span>جاري الرفع...</span>
+                                        <span x-text="progress + '%'"></span>
+                                    </div>
+                                </div>
                                 @if($attachments)
                                     <div class="mt-4 flex flex-wrap gap-2">
                                         @foreach($attachments as $index => $file)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\OrgApp\Dashboard;
+namespace App\Livewire\OrgApp\EducationalActivitySchedules;
 
 
 use App\Models\TeacherStudentGroup;
@@ -114,8 +114,9 @@ class EducationalTasks extends Component
         if ($this->filterStatus !== '') {
             match ($this->filterStatus) {
                 'completed' => $query->completed(),
+                'happen_now' => $query->happenNow(),
                 'delayed' => $query->delayed(),
-                'required_now' => $query->requiredNow(),
+                'require_today' => $query->requireToday(),
                 'upcoming' => $query->upcoming(),
                 default => null,
             };
@@ -149,9 +150,10 @@ class EducationalTasks extends Component
     #[Title('Educational Activity Tasks')]
     public function render()
     {
+
         Gate::authorize('create', EducationalActivityDetail::class);
         $isManager = auth()->user()->isSuperAdmin() || Gate::allows('select.any.student');
-        return view('livewire.org-app.dashboard.educational-tasks', [
+        return view('livewire.org-app.educational-activity-schedules.educational-tasks', [
             'tasks'     => $this->tasks,
             'employees' => $this->employees,
             'isManager' => $isManager,

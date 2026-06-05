@@ -13,7 +13,7 @@ class Gallery extends Component
 {
     use WithFileUploads;
 
-    public EducationalActivityDetail $detail;
+    public ?EducationalActivityDetail $detail = null;
     public $search = '';
     public $uploadFiles = [];
     public $uploadNotes = '';
@@ -21,21 +21,24 @@ class Gallery extends Component
     public $filterType = '';
     public $isModal = false;
 
-    public function mount(EducationalActivityDetail $detail, $isModal = false)
+    public function mount(?EducationalActivityDetail $detail = null, $isModal = false)
     {
-        $user = auth()->user();
-        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
-            $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
-                ->where('id', $detail->id)
-                ->exists();
-            if (!$hasDetail) {
-                abort(403, 'You do not have permission to view/edit this record.');
+        if ($detail && $detail->exists) {
+            $user = auth()->user();
+            if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+                $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
+                    ->where('id', $detail->id)
+                    ->exists();
+                if (!$hasDetail) {
+                    abort(403, 'You do not have permission to view/edit this record.');
+                }
             }
+
+            $this->detail = $detail;
+            $this->loadAttachments();
         }
 
-        $this->detail = $detail;
         $this->isModal = $isModal;
-        $this->loadAttachments();
     }
 
     public function loadAttachments()
@@ -83,21 +86,25 @@ class Gallery extends Component
                 'size' => $size,
                 'type_id' => $typeId,
                 // Additional metadata for UI display
-                'group_name' => $this->detail->educationalActivity?->group?->name ?? '',
-                'period_start' => $this->detail->educationalActivity?->period_start ? $this->detail->educationalActivity->period_start->format('Y-m-d') : '',
+                'group_name' => $this->detail?->educationalActivity?->group?->name ?? '',
+                'period_start' => $this->detail?->educationalActivity?->period_start ? $this->detail->educationalActivity->period_start->format('Y-m-d') : '',
             ];
         }
 
         if (!empty($newAttachmentsData)) {
             $finalAttachments = array_merge($this->existingAttachments, $newAttachmentsData);
             
-            $this->detail->update([
-                'attchments' => $finalAttachments
-            ]);
+            if ($this->detail && $this->detail->exists) {
+                $this->detail->update([
+                    'attchments' => $finalAttachments
+                ]);
+            }
             
             $this->existingAttachments = $finalAttachments;
             $this->uploadFiles = [];
             $this->uploadNotes = '';
+            
+            $this->dispatch('attachments-updated', attachments: $finalAttachments);
             
             $this->dispatch('modal-close', name: 'upload-modal');
             $this->dispatch('flux-toast', variant: 'success', title: __('Attachments uploaded successfully.'));
@@ -118,9 +125,13 @@ class Gallery extends Component
             unset($this->existingAttachments[$index]);
             $this->existingAttachments = array_values($this->existingAttachments);
             
-            $this->detail->update([
-                'attchments' => $this->existingAttachments
-            ]);
+            if ($this->detail && $this->detail->exists) {
+                $this->detail->update([
+                    'attchments' => $this->existingAttachments
+                ]);
+            }
+            
+            $this->dispatch('attachments-updated', attachments: $this->existingAttachments);
             
             $this->dispatch('flux-toast', variant: 'success', title: __('Attachment deleted successfully.'));
         }
@@ -133,7 +144,7 @@ class Gallery extends Component
 
     public function render()
     {
-        if (Gate::denies('view', $this->detail)) {
+        if ($this->detail && Gate::denies('view', $this->detail)) {
             abort(403, 'You do not have the necessary permissions.');
         }
         $attachments = collect($this->existingAttachments)->map(function ($item) {

@@ -10,9 +10,11 @@ use Livewire\Component;
 class Show extends Component
 {
     public ActivitySchedule $schedule;
+    public bool $isModal = false;
 
-    public function mount(ActivitySchedule $schedule)
+    public function mount(ActivitySchedule $schedule, bool $isModal = false)
     {
+        $this->isModal = $isModal;
 
         Gate::authorize('view', $schedule);
 
@@ -24,6 +26,7 @@ class Show extends Component
             'employee',
             'createdBy',
             'updatedBy',
+            'educationalActivity.status',
         ]);
     }
 

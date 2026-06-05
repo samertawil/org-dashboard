@@ -3,7 +3,7 @@
 namespace App\Concerns\Student;
 
 use App\Enums\GlobalSystemConstant;
-use App\Models\StudentGroup;
+use App\Reposotries\StudentGroupRepo;
 use App\Reposotries\StatusRepo;
 use App\Services\CivilRegistryApiServices;
 use Illuminate\Validation\ValidationException;
@@ -67,7 +67,7 @@ trait StudentTrait
         $this->activations = GlobalSystemConstant::options()->where('type', 'status');
         $this->genders = GlobalSystemConstant::options()->where('type', 'gender');
         $this->statuses = StatusRepo::statuses()->where('p_id_sub', config('appConstant.student_groups'));
-        $this->studentGroups = StudentGroup::all();
+        $this->studentGroups = StudentGroupRepo::activateEducationPointsWithEmployee();
     }
 
     public function getData(CivilRegistryApiServices $CivilRegistryApiServices)

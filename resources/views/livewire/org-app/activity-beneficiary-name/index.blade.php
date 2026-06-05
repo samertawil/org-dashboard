@@ -212,7 +212,12 @@
             </div>
 
             <form wire:submit="import">
-                <flux:field>
+                <flux:field
+                    x-data="{ isUploading: false, progress: 0 }"
+                    x-on:livewire-upload-start="isUploading = true"
+                    x-on:livewire-upload-finish="isUploading = false"
+                    x-on:livewire-upload-error="isUploading = false"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress">
                     <flux:label>{{ __('Excel File') }}</flux:label>
                     <input type="file" wire:model="excelFile"
                         class="block w-full text-sm text-zinc-500
@@ -222,6 +227,17 @@
                         file:bg-blue-50 file:text-blue-700
                         hover:file:bg-blue-100
                     " />
+                    
+                    <div x-show="isUploading" class="mt-2" x-cloak>
+                        <div class="w-full bg-zinc-200 dark:bg-zinc-705 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-blue-600 h-full rounded-full transition-all duration-150" x-bind:style="'width: ' + progress + '%'"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                            <span>{{ __('Uploading...') }}</span>
+                            <span x-text="progress + '%'"></span>
+                        </div>
+                    </div>
+                    
                     <flux:error name="excelFile" />
                 </flux:field>
 

@@ -15,10 +15,11 @@ test('authenticated users can visit the dashboard', function () {
     $this->get('/dashboard')->assertOk();
 });
 
-test('dashboard detects activity.index permission and displays activity cards', function () {
+test('dashboard detects dashboard.relief.statistics permission and displays activity cards', function () {
     $user = User::factory()->create(['id' => 999, 'activation' => 1]);
     $this->actingAs($user);
 
+    Gate::define('dashboard.relief.statistics', fn() => true);
     Gate::define('activity.index', fn() => true);
     Gate::define('displacement.camps.index', fn() => true);
 
@@ -26,11 +27,11 @@ test('dashboard detects activity.index permission and displays activity cards', 
         ->assertSee(__('Total Activities'));
 });
 
-test('dashboard detects lack of activity.index permission and hides activity cards', function () {
+test('dashboard detects lack of dashboard.relief.statistics permission and hides activity cards', function () {
     $user = User::factory()->create(['id' => 999, 'activation' => 1]);
     $this->actingAs($user);
 
-    Gate::define('activity.index', fn() => false);
+    Gate::define('dashboard.relief.statistics', fn() => false);
     Gate::define('displacement.camps.index', fn() => false);
 
     Livewire::test(Index::class)

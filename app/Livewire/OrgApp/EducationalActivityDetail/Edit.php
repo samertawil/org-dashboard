@@ -36,6 +36,7 @@ class Edit extends Component
         $this->status_id               = $detail->status_id;
         $this->replaced_activity       = $detail->replaced_activity;
         $this->replaced_reason         = $detail->replaced_reason;
+        $this->existingAttachments     = $detail->attchments ?? [];
     }
 
     public function save()
@@ -69,6 +70,7 @@ class Edit extends Component
             'status_id'               => $this->status_id,
             'replaced_activity'       => $this->replaced_activity ?: null,
             'replaced_reason'         => $this->replaced_reason ?: null,
+            'attchments'              => $this->existingAttachments,
         ]);
 
         $this->dispatch('report-saved');

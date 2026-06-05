@@ -17,6 +17,13 @@ class Index extends Component
     public string $search = '';
     public string $filterDate = '';
     public ?EducationalActivityDetail $selectedDetail = null;
+    public $selectedScheduleToShowId = null;
+
+    public function openScheduleShowModal($id)
+    {
+        $this->selectedScheduleToShowId = $id;
+        $this->dispatch('modal-show', name: 'schedule-show-modal');
+    }
 
     protected $queryString = [
         'search'     => ['except' => ''],

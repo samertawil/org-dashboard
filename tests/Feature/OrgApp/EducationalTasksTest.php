@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\OrgApp\Dashboard\EducationalTasks;
+use App\Livewire\OrgApp\EducationalActivitySchedules\EducationalTasks;
 use App\Models\Employee;
 use App\Models\ActivitySchedule;
 use App\Models\EducationalActivityDetail;
@@ -86,19 +86,19 @@ it('classifies task status correctly', function () {
         'what_learned' => 'Learned mathematics',
     ]);
 
-    // 2. Delayed Task
+    // 2. Delayed Task (Scheduled for yesterday and not completed)
     $delayedSchedule = ActivitySchedule::create([
         'activity_name' => 'Delayed Task',
         'target_category' => 'children',
-        'period_start' => now()->subHour(),
-        'period_end' => now()->subHour()->addMinutes(30),
+        'period_start' => now()->subDay(),
+        'period_end' => now()->subDay()->addHour(),
         'employee_id' => $this->employee->id,
         'activation' => 1,
     ]);
 
-    // 3. Required Now Task
-    $requiredNowSchedule = ActivitySchedule::create([
-        'activity_name' => 'Required Now Task',
+    // 3. Require Today Task (Scheduled for today, but in the future)
+    $requireTodaySchedule = ActivitySchedule::create([
+        'activity_name' => 'Require Today Task',
         'target_category' => 'children',
         'period_start' => now()->addHour(),
         'period_end' => now()->addHours(2),
@@ -106,7 +106,7 @@ it('classifies task status correctly', function () {
         'activation' => 1,
     ]);
 
-    // 4. Upcoming Task
+    // 4. Upcoming Task (Scheduled for a future day)
     $upcomingSchedule = ActivitySchedule::create([
         'activity_name' => 'Upcoming Task',
         'target_category' => 'children',
@@ -116,10 +116,21 @@ it('classifies task status correctly', function () {
         'activation' => 1,
     ]);
 
+    // 5. Happen Now Task (Current time is within the scheduled period)
+    $happenNowSchedule = ActivitySchedule::create([
+        'activity_name' => 'Happen Now Task',
+        'target_category' => 'children',
+        'period_start' => now()->subMinutes(15),
+        'period_end' => now()->addMinutes(15),
+        'employee_id' => $this->employee->id,
+        'activation' => 1,
+    ]);
+
     expect($completedSchedule->fresh()->task_status)->toBe('completed');
     expect($delayedSchedule->fresh()->task_status)->toBe('delayed');
-    expect($requiredNowSchedule->fresh()->task_status)->toBe('required_now');
+    expect($requireTodaySchedule->fresh()->task_status)->toBe('require_today');
     expect($upcomingSchedule->fresh()->task_status)->toBe('upcoming');
+    expect($happenNowSchedule->fresh()->task_status)->toBe('happen_now');
 });
 
 it('scopes tasks for regular employee to only their own in assigned groups (Job Title 166)', function () {

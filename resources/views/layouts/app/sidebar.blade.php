@@ -335,7 +335,7 @@
                     'teacher-student-groups.index', 'teacher-student-groups.create', 'student.group.date.students',
                     'reports.educational.progress', 'survey.manage', 'survey-questions.show'])
                     <flux:sidebar.group expandable
-                        :expanded="request()->routeIs(['student.setup.map', 'reports.*', 'survey-questions.show', 'educational-tasks.index'])"
+                        :expanded="request()->routeIs(['student.setup.map', 'reports.*', 'survey-questions.show', 'educational-tasks.index', 'survey.statistics'])"
                         :heading="__('Statistics & Reports')" icon="chart-pie" class="grid">
 
                         @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
@@ -377,6 +377,12 @@
                                     <flux:sidebar.item icon="chart-bar-square" :href="route('reports.educational-tasks-stats')"
                                         :current="request()->routeIs('reports.educational-tasks-stats')" wire:navigate>
                                         {{ __('Tasks Statistics') }}
+                                    </flux:sidebar.item>
+                                @endcan
+                                @can('survey.export')
+                                    <flux:sidebar.item icon="chart-bar" :href="route('survey.statistics')"
+                                        :current="request()->routeIs('survey.statistics')" wire:navigate>
+                                        {{ __('Survey Statistics') }}
                                     </flux:sidebar.item>
                                 @endcan
                             </flux:sidebar.group>

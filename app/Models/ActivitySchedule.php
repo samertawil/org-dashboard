@@ -70,6 +70,14 @@ class ActivitySchedule extends Model
     }
 
     /**
+     * تفاصيل التقرير للنشاط (باستخدام العلاقة educationalActivity)
+     */
+    public function educationalActivity(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EducationalActivityDetail::class, 'educational_activity_id');
+    }
+
+    /**
      * المجموعة الدراسية المرتبطة
      */
     public function group(): BelongsTo
@@ -138,21 +146,35 @@ class ActivitySchedule extends Model
     }
 
     /**
+     * تصفية الأنشطة التي تحدث الآن
+     */
+    public function scopeHappenNow($query)
+    {
+        return $query->pending()
+            ->where('period_start', '<=', now())
+            ->where('period_end', '>=', now());
+    }
+
+    /**
      * تصفية النشاطات المتأخرة
      */
     public function scopeDelayed($query)
     {
-        return $query->pending()->where('period_start', '<', now());
+        return $query->pending()->where('period_end', '<', now()->startOfDay());
     }
 
     /**
-     * تصفية الأنشطة المطلوبة الآن (اليوم ولم يتجاوز موعدها)
+     * تصفية الأنشطة المطلوبة اليوم
      */
-    public function scopeRequiredNow($query)
+    public function scopeRequireToday($query)
     {
         return $query->pending()
-            ->whereDate('period_start', now()->toDateString())
-            ->where('period_start', '>=', now());
+            ->where('period_start', '>=', now()->startOfDay())
+            ->where('period_end', '<=', now()->endOfDay())
+            ->where(function ($q) {
+                $q->where('period_start', '>', now())
+                  ->orWhere('period_end', '<', now());
+            });
     }
 
     /**
@@ -221,8 +243,8 @@ class ActivitySchedule extends Model
      */
     public function getTaskStatusAttribute(): string
     {
-        $hasDetail = $this->relationLoaded('activityDetail') 
-            ? $this->activityDetail !== null 
+        $hasDetail = $this->relationLoaded('activityDetail')
+            ? $this->activityDetail !== null
             : $this->activityDetail()->exists();
 
         if ($hasDetail) {
@@ -230,12 +252,17 @@ class ActivitySchedule extends Model
         }
 
         $now = now();
-        if ($now > $this->period_start) {
-            return 'delayed'; // متأخرة
+
+        if ($now->greaterThanOrEqualTo($this->period_start) && $now->lessThanOrEqualTo($this->period_end)) {
+            return 'happen_now'; // يحدث الآن
         }
 
-        if ($now->toDateString() === $this->period_start->toDateString()) {
-            return 'required_now'; // مطلوبة الآن
+        if ($this->period_start->greaterThanOrEqualTo($now->startOfDay()) && $this->period_end->lessThanOrEqualTo($now->endOfDay())) {
+            return 'require_today'; // مطلوبة اليوم
+        }
+
+        if ($now->greaterThan($this->period_end)) {
+            return 'delayed'; // متأخرة
         }
 
         return 'upcoming'; // مخطط لها / قادمة
@@ -248,7 +275,8 @@ class ActivitySchedule extends Model
     {
         return match ($this->task_status) {
             'completed' => 'green',
-            'required_now' => 'amber',
+            'happen_now' => 'purple',
+            'require_today' => 'amber',
             'delayed' => 'red',
             default => 'zinc',
         };
@@ -261,7 +289,8 @@ class ActivitySchedule extends Model
     {
         return match ($this->task_status) {
             'completed' => __('Completed'),
-            'required_now' => __('Required Now'),
+            'happen_now' => __('Happen Now'),
+            'require_today' => __('Required Today'),
             'delayed' => __('Delayed'),
             default => __('Upcoming'),
         };

@@ -14,7 +14,7 @@ class Show extends Component
     public function mount(EducationalActivityDetail $detail, $isModal = false)
     {
         $user = auth()->user();
-        if (!($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail'))) {
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
             $hasDetail = \App\Reposotries\EducationalActivityDetailRepo::getTeacherDetailsQuery()
                 ->where('id', $detail->id)
                 ->exists();
@@ -30,9 +30,8 @@ class Show extends Component
     public function render()
     {
 
-        if (Gate::denies('view', $this->detail)) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        Gate::authorize('view', $this->detail);
+
 
         return view('livewire.org-app.educational-activity-detail.show', [
             'heading' => __('Educational Activity Detail'),

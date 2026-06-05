@@ -152,10 +152,26 @@
                                 <flux:textarea wire:model="answers.{{ $question->id }}.answer" rows="3" />
                             @elseif($question->answer_input_type == 6)
                                 {{-- File Upload --}}
-                                <input type="file" wire:model="answers.{{ $question->id }}.answer"
-                                    class="block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-zinc-400 dark:file:bg-zinc-800 dark:file:text-blue-400" />
-                                <div wire:loading wire:target="answers.{{ $question->id }}.answer"
-                                    class="text-sm text-blue-500 mt-1">جاري الرفع...</div>
+                                <div
+                                    x-data="{ isUploading: false, progress: 0 }"
+                                    x-on:livewire-upload-start="isUploading = true"
+                                    x-on:livewire-upload-finish="isUploading = false"
+                                    x-on:livewire-upload-error="isUploading = false"
+                                    x-on:livewire-upload-progress="progress = $event.detail.progress"
+                                >
+                                    <input type="file" wire:model="answers.{{ $question->id }}.answer"
+                                        class="block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-zinc-400 dark:file:bg-zinc-800 dark:file:text-blue-400" />
+                                    
+                                    <div x-show="isUploading" class="mt-2" x-cloak>
+                                        <div class="w-full bg-zinc-200 dark:bg-zinc-700 h-1.5 rounded-full overflow-hidden">
+                                            <div class="bg-blue-600 h-full rounded-full transition-all duration-150" x-bind:style="'width: ' + progress + '%'"></div>
+                                        </div>
+                                        <div class="flex justify-between text-[10px] text-zinc-500 mt-1">
+                                            <span>جاري الرفع...</span>
+                                            <span x-text="progress + '%'"></span>
+                                        </div>
+                                    </div>
+                                </div>
                                 @if (isset($answers[$question->id]['answer']) &&
                                         is_string($answers[$question->id]['answer']) &&
                                         $answers[$question->id]['answer'] != '')

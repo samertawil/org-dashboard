@@ -32,18 +32,19 @@ class EducationalTasksStats extends Component
         foreach ($schedules as $schedule) {
             $batch     = $schedule->group?->batch_no ?? __('No Batch');
             $monthKey  = $schedule->period_start?->format('Y-m') ?? __('No Date');
-            $groupId   = $schedule->group_id ?? 0;
-            $groupName = $schedule->group?->name ?? __('No Group');
+            $groupId        = $schedule->group_id ?? 0;
+            $groupName      = $schedule->group?->name ?? __('No Group');
+            $groupShortName = $schedule->group?->short_name ?? $groupName;
 
             // Initialise nodes
             if (!isset($tree[$batch])) {
-                $tree[$batch] = ['total' => 0, 'completed' => 0, 'delayed' => 0, 'required_now' => 0, 'upcoming' => 0, 'months' => []];
+                $tree[$batch] = ['total' => 0, 'completed' => 0, 'happen_now' => 0, 'delayed' => 0, 'require_today' => 0, 'upcoming' => 0, 'months' => []];
             }
             if (!isset($tree[$batch]['months'][$monthKey])) {
-                $tree[$batch]['months'][$monthKey] = ['total' => 0, 'completed' => 0, 'delayed' => 0, 'required_now' => 0, 'upcoming' => 0, 'groups' => []];
+                $tree[$batch]['months'][$monthKey] = ['total' => 0, 'completed' => 0, 'happen_now' => 0, 'delayed' => 0, 'require_today' => 0, 'upcoming' => 0, 'groups' => []];
             }
             if (!isset($tree[$batch]['months'][$monthKey]['groups'][$groupId])) {
-                $tree[$batch]['months'][$monthKey]['groups'][$groupId] = ['name' => $groupName, 'total' => 0, 'completed' => 0, 'delayed' => 0, 'required_now' => 0, 'upcoming' => 0];
+                $tree[$batch]['months'][$monthKey]['groups'][$groupId] = ['name' => $groupName, 'short_name' => $groupShortName, 'total' => 0, 'completed' => 0, 'happen_now' => 0, 'delayed' => 0, 'require_today' => 0, 'upcoming' => 0];
             }
 
             $status = $schedule->task_status; // uses accessor on ActivitySchedule
