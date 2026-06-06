@@ -35,10 +35,19 @@ trait FormTrait
     #[Validate('nullable|string')]
     public $activity_description = '';
 
-    #[Validate('required|date_format:Y-m-d\TH:i')]
+    #[Validate([
+        'required',
+        'date_format:Y-m-d\TH:i',
+        new \App\Rules\TimeBetween('08:00', '16:00')
+    ])]
     public $period_start = '';
 
-    #[Validate('required|date_format:Y-m-d\TH:i|after_or_equal:period_start')]
+    #[Validate([
+        'required',
+        'date_format:Y-m-d\TH:i',
+        'after_or_equal:period_start',
+        new \App\Rules\TimeBetween('08:00', '16:00')
+    ])]
     public $period_end = '';
 
     // المجموعات الزمنية (A, B, C...)
@@ -184,5 +193,44 @@ trait FormTrait
         $this->saveStateToSession($periodStart);
 
         return $this->redirect(route('educational-activity-schedules.index'), navigate: true);
+    }
+
+    public function checkAttendanceSchedule(): bool // فحص اذا كان يوجد حضور وغياب لليوم المراد عمل جدوله له
+    {
+        if ($this->target_category != 'children') {
+            return true;
+        }
+        $scheduleDate = \Carbon\Carbon::parse($this->period_start)->toDateString();
+        $hasGroupSchedule = \App\Models\StudentGroupSchedule::where('student_group_id', $this->group_id)
+            ->whereDate('schedule_date', $scheduleDate)
+            ->exists();
+
+        if (!$hasGroupSchedule) {
+            $this->addError('period_start', __('Cannot add an educational schedule without a student attendance schedule for this day. لا يمكن اضافة هذا البيانات بسبب عدم وجود جدولة حضور وغياب بنفس التاريخ'));
+            return false;
+        }
+
+        return true;
+    }
+
+    public function checkDuplicateSchedule(): bool // فحص إذا كان الجدول موجود مسبقاً لنفس المجموعة والوقت
+    {
+        $query =  \App\Models\ActivitySchedule::where('group_id', $this->group_id)
+            ->where('period_start', $this->period_start)
+            ->where('educational_period_groups', $this->educational_period_groups);
+
+        // إذا كان المتغير schedule موجوداً وهو مسجل في قاعدة البيانات (في حالة التعديل Edit)
+        if (property_exists($this, 'schedule') && isset($this->schedule) && $this->schedule->exists) {
+            $query->where('id', '!=', $this->schedule->id);
+        }
+
+        $exists = $query->exists();
+
+        if ($exists) {
+            $this->addError('group_id', __('This schedule already exists for the selected group, period, and time.'));
+            return false;
+        }
+
+        return true;
     }
 }

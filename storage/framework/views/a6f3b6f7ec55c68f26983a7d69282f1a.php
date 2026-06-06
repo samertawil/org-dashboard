@@ -1,0 +1,1 @@
+detail-mobile-<?php echo e($detail->id); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/c0ef22f65eda5f9af23463ddea2ad1d0.blade.php ENDPATH**/ ?>

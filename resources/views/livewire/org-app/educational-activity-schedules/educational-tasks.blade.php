@@ -159,6 +159,44 @@
                         </div>
                     </div>
 
+                    {{-- Attendance Stats for Mobile --}}
+                    @php
+                        $attKey = $task->group_id . '_' . $task->period_start?->format('Y-m-d') . '_' . $task->educational_period_groups;
+                        $taskAttendance = $attendanceByGroup[$attKey] ?? collect();
+                    @endphp
+                    @if ($taskAttendance->isNotEmpty())
+                        <div class="border-t border-zinc-100 dark:border-zinc-700 pt-2 space-y-1.5">
+                            <div class="flex items-center gap-1.5">
+                                <flux:icon name="users" variant="micro" class="size-3.5 text-indigo-500" />
+                                <span class="text-[10px] uppercase tracking-wider font-bold text-zinc-500">{{ __('Attendance') }}</span>
+                            </div>
+                            @foreach ($taskAttendance as $stat)
+                                <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-zinc-400">{{ $stat->total_count }} {{ __('students') }}</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-medium">
+                                                <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                {{ $stat->present_count }}
+                                            </span>
+                                            <span class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-medium">
+                                                <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                {{ $stat->absent_count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    @if ($stat->total_count > 0)
+                                        <div class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                            <div class="h-full bg-green-500 rounded-full"
+                                                style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%">
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div
                         class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
                         <div
@@ -216,6 +254,10 @@
                             {{ __('Status') }}
                         </th>
                         <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                            {{ __('Attendance') }}
+                        </th>
+                        <th scope="col"
                             class="px-6 py-3 text-right text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                             {{ __('Actions') }}
                         </th>
@@ -233,25 +275,29 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-6 py-4 text-sm">
                                 <div class="flex flex-col gap-0.5">
                                     <span class="font-medium text-zinc-800 dark:text-zinc-200">
                                         {{ $task->activityDomain?->status_name ?? '-' }}
                                     </span>
-                                    <span class="text-xs text-zinc-400">
+                                    <span class="text-xs text-zinc-500">
                                         {{ $task->group?->short_name ?? '-' }}
-                                        ({{ $task->periodGroups?->description_name ?? '-' }})
+                                    </span>
+                                    <span class="text-xs text-zinc-400">
+                                        {{ $task->periodGroups?->description_name ?? '-' }}
                                     </span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-6 py-4 text-sm">
                                 <div class="flex flex-col gap-0.5 text-zinc-800 dark:text-zinc-200">
                                     <span class="font-medium">
                                         {{ $task->day_name }}
                                     </span>
-                                    <span class="text-xs text-zinc-400">
+                                    <span class="text-xs text-zinc-500">
                                         {{ $task->period_start?->format('Y-m-d') }}
-                                        ({{ $task->period_start_formatted }} - {{ $task->period_end_formatted }})
+                                    </span>
+                                    <span class="text-xs text-zinc-400">
+                                        {{ $task->period_start_formatted }} - {{ $task->period_end_formatted }}
                                     </span>
                                 </div>
                             </td>
@@ -259,11 +305,49 @@
                                 class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
                                 {{ $task->employee?->full_name ?? __('Unassigned') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm"
+                                >
                                 <flux:badge size="sm" color="{{ $task->task_status_color }}"
                                     class="font-semibold rounded-full px-2.5">
                                     {{ $task->task_status_label }}
                                 </flux:badge>
+                            </td>
+                            {{-- Attendance Column --}}
+                            @php
+                                $attKey = $task->group_id . '_' . $task->period_start?->format('Y-m-d') . '_' . $task->educational_period_groups;
+                                $taskAttendance = $attendanceByGroup[$attKey] ?? collect();
+                            @endphp
+                            <td class="px-6 py-4 text-sm">
+                                @if ($taskAttendance->isNotEmpty())
+                                    <div class="space-y-1.5 min-w-[120px]">
+                                        @foreach ($taskAttendance as $stat)
+                                            <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
+                                                <div class="flex items-center justify-between text-[11px] mb-0.5">
+                                                    <span class="text-zinc-400">{{ $stat->total_count }} {{ __('total') }}</span>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
+                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                            {{ $stat->present_count }}
+                                                        </span>
+                                                        <span class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-semibold">
+                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                            {{ $stat->absent_count }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @if ($stat->total_count > 0)
+                                                    <div class="w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                                        <div class="h-full bg-green-500 rounded-full"
+                                                            style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%">
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-xs text-zinc-400 italic">{{ __('No data') }}</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
@@ -288,7 +372,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-zinc-500">
+                            <td colspan="7" class="px-6 py-8 text-center text-zinc-500">
                                 <div class="flex flex-col items-center justify-center gap-2">
                                     <flux:icon icon="inbox" class="size-8 text-zinc-400" />
                                     <p>{{ __('No tasks found matching these filters.') }}</p>

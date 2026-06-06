@@ -110,7 +110,7 @@ Route::get('/survey/{id}', \App\Livewire\OrgApp\Survey\PublicResponse::class)->n
 Route::get('/q/{token}/{vendor_id}', \App\Livewire\OrgApp\PurchaseRequest\PublicQuotation::class)->name('quotation.public');
 
 Route::get('dashboard', \App\Livewire\OrgApp\Dashboard\Index::class)
-    ->middleware(['auth', 'verified', ForcePasswordReset::class])
+    ->middleware(['auth', 'verified', ForcePasswordReset::class, 'employee'])
     ->name('dashboard');
 // 
 Route::get('/send-test-email', function () {

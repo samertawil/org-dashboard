@@ -41,24 +41,13 @@ class Edit extends Component
     {
         $this->validate();
 
-        $scheduleDate = \Carbon\Carbon::parse($this->period_start)->toDateString();
-        $hasGroupSchedule = \App\Models\StudentGroupSchedule::where('student_group_id', $this->group_id)
-            ->whereDate('schedule_date', $scheduleDate)
-            ->exists();
-
-        if (!$hasGroupSchedule) {
-            $this->addError('period_start', __('Cannot add an educational schedule without a student attendance schedule for this day.'));
+        // فحص اذا كان يوجد حضور وغياب لليوم المراد عمل جدوله له
+        if (!$this->checkAttendanceSchedule()) {
             return;
         }
 
-        $exists = ActivitySchedule::where('group_id', $this->group_id)
-            ->where('period_start', $this->period_start)
-            ->where('educational_period_groups', $this->educational_period_groups)
-            ->where('id', '!=', $this->schedule->id)
-            ->exists();
-
-        if ($exists) {
-            $this->addError('group_id', __('This schedule already exists for the selected group, period, and time.'));
+        // فحص تكرار الجدول
+        if (!$this->checkDuplicateSchedule()) {
             return;
         }
 
@@ -73,7 +62,7 @@ class Edit extends Component
             'period_end'                  => $this->period_end,
             'educational_period_groups'   => $this->educational_period_groups ?: null,
             'notes'                       => $this->notes ?: null,
-            'sort_order'                  =>(int) ($this->sort_order ?? 0),
+            'sort_order'                  => (int) ($this->sort_order ?? 0),
             'activation'                  => $this->activation,
             'employee_id'                 => $this->employee_id ?: null,
             'updated_by'                  => Auth::id(),

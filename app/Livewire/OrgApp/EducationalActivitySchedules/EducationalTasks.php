@@ -7,6 +7,7 @@ use App\Models\TeacherStudentGroup;
 use App\Models\EducationalActivityDetail;
 use App\Reposotries\StudentGroupRepo;
 use App\Reposotries\EducationalActivityDetailRepo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -144,7 +145,61 @@ class EducationalTasks extends Component
             $query->whereDate('period_start', $this->filterDate);
         }
 
-        return $query->ordered()->paginate(10);
+        return $query->ordered()->paginate(30);
+    }
+
+    #[Computed]
+    public function attendanceByGroup()
+    {
+        // Build (group_id, date, period_group) triples from the current page of tasks
+        $pairs = [];
+        foreach ($this->tasks as $task) {
+            if ($task->group_id && $task->period_start && $task->educational_period_groups) {
+                $dateStr = $task->period_start->format('Y-m-d');
+                $key = $task->group_id . '_' . $dateStr . '_' . $task->educational_period_groups;
+                $pairs[$key] = [
+                    'group_id'     => $task->group_id,
+                    'date'         => $dateStr,
+                    'period_group' => $task->educational_period_groups,
+                ];
+            }
+        }
+
+        if (empty($pairs)) {
+            return collect();
+        }
+
+        $query = DB::table('student_daily_attendances')
+            ->join('students', 'student_daily_attendances.student_id', '=', 'students.id')
+            ->join('statuses', 'students.status_id', '=', 'statuses.id')
+            ->where(function ($q) use ($pairs) {
+                foreach ($pairs as $pair) {
+                    $q->orWhere(function ($sub) use ($pair) {
+                        $sub->where('student_daily_attendances.student_group_id', $pair['group_id'])
+                            ->whereDate('student_daily_attendances.attendance_date', $pair['date'])
+                            ->where('students.status_id', $pair['period_group']);
+                    });
+                }
+            })
+            ->select(
+                'student_daily_attendances.student_group_id',
+                DB::raw("DATE(student_daily_attendances.attendance_date) as attendance_date"),
+                'students.status_id',
+                'statuses.status_name',
+                DB::raw("SUM(CASE WHEN student_daily_attendances.status = 'present' THEN 1 ELSE 0 END) as present_count"),
+                DB::raw("SUM(CASE WHEN student_daily_attendances.status = 'absent' THEN 1 ELSE 0 END) as absent_count"),
+                DB::raw("COUNT(*) as total_count")
+            )
+            ->groupBy(
+                'student_daily_attendances.student_group_id',
+                DB::raw("DATE(student_daily_attendances.attendance_date)"),
+                'students.status_id',
+                'statuses.status_name'
+            )
+            ->get();
+
+        // Key by "groupId_date_statusId" for precise per-task lookup
+        return $query->groupBy(fn($row) => $row->student_group_id . '_' . $row->attendance_date . '_' . $row->status_id);
     }
 
     #[Title('Educational Activity Tasks')]
@@ -154,9 +209,10 @@ class EducationalTasks extends Component
         Gate::authorize('create', EducationalActivityDetail::class);
         $isManager = auth()->user()->isSuperAdmin() || Gate::allows('select.any.student');
         return view('livewire.org-app.educational-activity-schedules.educational-tasks', [
-            'tasks'     => $this->tasks,
-            'employees' => $this->employees,
-            'isManager' => $isManager,
+            'tasks'          => $this->tasks,
+            'employees'      => $this->employees,
+            'isManager'      => $isManager,
+            'attendanceByGroup' => $this->attendanceByGroup,
         ]);
     }
 }

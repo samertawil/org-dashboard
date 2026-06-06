@@ -673,3 +673,73 @@ it('displays dynamic labels in the form based on target_category', function () {
         ->assertDontSee('Teacher Report Detail');
 });
 
+it('applies custom validation rules for short activity schedules of 15 minutes or less', function () {
+    $now = \Carbon\Carbon::now();
+    $shortSchedule = ActivitySchedule::create([
+        'activity_name' => '15 min Activity',
+        'period_start' => $now,
+        'period_end' => $now->copy()->addMinutes(15),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    // If duration is 15 minutes:
+    // 1. consistent is nullable (so no error for consistent when not provided)
+    // 2. existingAttachments requires size 1
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $shortSchedule->id)
+        ->set('status_id', 193)
+        ->set('what_learned', 'Learned something')
+        ->set('teacher_report_detail', 'Detail report')
+        ->set('consistent', '') // empty/nullable
+        ->set('existingAttachments', [['name' => 'test.jpg', 'path' => 'test.jpg']]) // 1 attachment
+        ->call('save')
+        ->assertHasNoErrors();
+});
+
+it('applies standard validation rules for activity schedules longer than 15 minutes', function () {
+    $now = \Carbon\Carbon::now();
+    $longSchedule = ActivitySchedule::create([
+        'activity_name' => '30 min Activity',
+        'period_start' => $now,
+        'period_end' => $now->copy()->addMinutes(30),
+        'employee_id' => $this->employee->id,
+        'group_id' => $this->studentGroup->id,
+        'activation' => 1,
+        'created_by' => $this->user->id,
+    ]);
+
+    actingAs($this->user);
+
+    // If duration is > 15 minutes:
+    // 1. consistent is required (should have error when empty)
+    // 2. existingAttachments requires size 2 (should have error when size is 1)
+    Livewire::test(Create::class)
+        ->set('educational_activity_id', $longSchedule->id)
+        ->set('status_id', 193)
+        ->set('what_learned', 'Learned something')
+        ->set('teacher_report_detail', 'Detail report')
+        ->set('consistent', '') // empty but required
+        ->set('existingAttachments', [['name' => 'test.jpg', 'path' => 'test.jpg']]) // only 1 attachment, but 2 are required
+        ->call('save')
+        ->assertHasErrors(['consistent' => 'required', 'existingAttachments' => 'size']);
+});
+
+it('redirects teacher to educational-tasks when accessing dashboard', function () {
+    actingAs($this->user);
+
+    get('/dashboard')
+        ->assertRedirect(route('educational-tasks.index'));
+});
+
+it('does not redirect non-teacher when accessing dashboard', function () {
+    actingAs($this->otherUser);
+
+    get('/dashboard')
+        ->assertStatus(200);
+});
+

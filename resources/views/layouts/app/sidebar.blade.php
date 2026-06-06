@@ -169,6 +169,12 @@
                                 {{ __('Teacher Report') }}
                             </flux:sidebar.item>
                         @endcan
+                        @can('create', \App\Models\EducationalActivityDetail::class)
+                            <flux:sidebar.item icon="clipboard-document-list" :href="route('educational-tasks.index')"
+                                :current="request()->routeIs('educational-tasks.index')" wire:navigate>
+                                {{ __('Educational Tasks') }}
+                            </flux:sidebar.item>
+                        @endcan
                         {{-- 
                         @can('educational-activity-schedules.create')
                             <flux:sidebar.item icon="plus"
@@ -367,12 +373,7 @@
                                         {{ __('Survey Tree View') }}
                                     </flux:sidebar.item>
                                 @endcan
-                                @can('create', \App\Models\EducationalActivityDetail::class)
-                                    <flux:sidebar.item icon="clipboard-document-list" :href="route('educational-tasks.index')"
-                                        :current="request()->routeIs('educational-tasks.index')" wire:navigate>
-                                        {{ __('Educational Tasks') }}
-                                    </flux:sidebar.item>
-                                @endcan
+
                                 @can('select.any.student')
                                     <flux:sidebar.item icon="chart-bar-square" :href="route('reports.educational-tasks-stats')"
                                         :current="request()->routeIs('reports.educational-tasks-stats')" wire:navigate>

@@ -1,0 +1,2 @@
+<?php echo $__env->make('livewire.org-app.educational-activity-schedules.educational-activity-form', ['type' => 'save'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH C:\xampp\htdocs\feras\org-dashboard\resources\views/livewire/org-app/educational-activity-schedules/create.blade.php ENDPATH**/ ?>
