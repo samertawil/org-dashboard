@@ -9,7 +9,6 @@ use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -18,7 +17,6 @@ class Create extends Component
 
     use StudentTrait;
 
-    #[Validate('required|integer|min_digits:9|max_digits:9|unique:students,identity_number')]
     public $identity_number = '';
 
     #[Validate('required|in:full_week,sat_mon_wed,sun_tue_thu')]
@@ -27,6 +25,19 @@ class Create extends Component
     public function rules()
     {
         return [
+            'identity_number' => [
+                'required',
+                'integer',
+                'min_digits:9',
+                'max_digits:9',
+                function ($attribute, $value, $fail) {
+                    $existingStudent = Student::where('identity_number', $value)->first();
+                    if ($existingStudent) {
+                        $groupName = $existingStudent->studentGroup?->name ?? __('No Group. لا توجد مجموعة');
+                        $fail(__('  هذا الطالب موجود بالفعل في مركز :group', ['group' => $groupName]));
+                    }
+                }
+            ],
             'birth_date' => 'required|date|before_or_equal:' . Student::maxBirthDate() . '|after_or_equal:' . Student::minBirthDate(),
 
             'gender' => [
@@ -63,7 +74,6 @@ class Create extends Component
             DB::commit();
             session()->flash('message', __('Student successfully Created.'));
             return $this->redirect(route('student.index'), navigate: true);
-           
         } catch (\Throwable $th) {
             DB::rollBack();
             session()->flash('error', __('Student creation failed.'));

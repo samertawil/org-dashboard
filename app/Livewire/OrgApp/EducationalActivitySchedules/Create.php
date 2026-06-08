@@ -29,7 +29,7 @@ class Create extends Component
                 $this->group_id                    = $source->group_id ?? '';
                 $this->educational_activity_domain = $source->educational_activity_domain ?? '';
                 $this->target_category             = $source->target_category ?? '';
-                $this->activity_name               = $source->activity_name ?? '';
+                $this->activity_name               = $source->getRawOriginal('activity_name') ?? '';
                 $this->activity_description        = $source->activity_description ?? '';
                 $this->educational_period_groups   = $source->educational_period_groups ?? '';
                 $this->notes                       = $source->notes ?? '';

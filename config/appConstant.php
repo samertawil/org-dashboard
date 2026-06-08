@@ -28,6 +28,9 @@ return [
     'currencies' => 168,
     'educational_activity_domains' => 185,
     'activity_report_statuses' => 192,
+    'educational_activity_names' => 197,
+
+
 
 
 ];

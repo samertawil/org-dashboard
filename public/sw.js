@@ -1,4 +1,4 @@
-const CACHE_NAME = "afsc-dashboard-v4";
+const CACHE_NAME = "afsc-dashboard-v5";
 const STATIC_ASSETS = ["/offline.html", "/logo2.png", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -46,11 +46,11 @@ self.addEventListener("fetch", (event) => {
 
     // Cache Strategy: Network First, falling back to cache
     // Applies to:
-    // 1. Student Group pages (navigation)
+    // 1. Student Group pages (navigation / wire:navigate)
     // 2. Offline Attendance JS (script)
     if (
         (url.pathname.includes("/student-group") &&
-            event.request.mode === "navigate") ||
+            (event.request.mode === "navigate" || isLivewire)) ||
         url.pathname === "/js/offline-attendance.js"
     ) {
         event.respondWith(
@@ -67,15 +67,24 @@ self.addEventListener("fetch", (event) => {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
+                        // Also cache under direct URL string key to support cross-header matching
+                        try {
+                            cache.put(event.request.url, responseClone.clone());
+                        } catch (e) {
+                            console.warn("Failed to cache under direct URL key", e);
+                        }
                     });
 
                     return response;
                 })
                 .catch(async () => {
-                    const cacheResponse = await caches.match(event.request);
+                    let cacheResponse = await caches.match(event.request);
+                    if (!cacheResponse) {
+                        cacheResponse = await caches.match(event.request.url);
+                    }
                     if (cacheResponse) return cacheResponse;
 
-                    if (event.request.mode === "navigate") {
+                    if (event.request.mode === "navigate" || isLivewire) {
                         return (await caches.match("/offline.html")) || 
                                new Response("Offline page not available", { status: 503, headers: { "Content-Type": "text/plain" } });
                     }
@@ -90,7 +99,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Don't cache Livewire fragments as they can break full-page reloads
+                // Don't cache standard Livewire fragments as they can break full-page reloads
                 if (isLivewire) return response;
 
                 const responseClone = response.clone();
@@ -106,10 +115,13 @@ self.addEventListener("fetch", (event) => {
                 return response;
             })
             .catch(async () => {
-                const cacheResponse = await caches.match(event.request);
+                let cacheResponse = await caches.match(event.request);
+                if (!cacheResponse && isLivewire) {
+                    cacheResponse = await caches.match(event.request.url);
+                }
                 if (cacheResponse) return cacheResponse;
 
-                if (event.request.mode === "navigate") {
+                if (event.request.mode === "navigate" || isLivewire) {
                     return (await caches.match("/offline.html")) || 
                            new Response("Offline page not available", { status: 503, headers: { "Content-Type": "text/plain" } });
                 }

@@ -50,15 +50,6 @@ class Index extends Component
     public $selectedScheduleId = null;
     public $selectedDetailId = null;
 
-    // Schedule Show Modal
-    public $selectedScheduleToShowId = null;
-
-    public function openScheduleShowModal($id)
-    {
-        $this->selectedScheduleToShowId = $id;
-        $this->dispatch('modal-show', name: 'schedule-show-modal');
-    }
-
     protected $queryString = [
         'search'         => ['except' => ''],
         'filterDomain'   => ['except' => ''],
@@ -194,7 +185,7 @@ class Index extends Component
     #[Computed()]
     public function schedules()
     {
-        if (empty($this->filterBatch)) {
+        if (empty($this->filterBatch) || empty($this->filterGroup)) {
             $emptyQuery = ActivitySchedule::query()->where('id', '<', 0);
             $limit = $this->viewType === 'tree' ? 1000 : $this->perPage;
             return $emptyQuery->paginate($limit);
@@ -206,7 +197,7 @@ class Index extends Component
 
 
         $query = ActivitySchedule::query()
-            ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
+            ->with(['activityDomain', 'activityNameStatus', 'group', 'employee', 'periodGroups', 'activityDetail'])
             ->whereHas('group', function ($q) {
                 $q->where('batch_no', $this->filterBatch);
             })
@@ -228,9 +219,13 @@ class Index extends Component
             ->when(
                 $this->search,
                 fn($q) =>
-                $q->where('activity_name', 'like', '%' . $this->search . '%')
+                $q->where(function ($subQuery) {
+                    $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
+                        $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                    })
                     ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                    ->orWhere('notes', 'like', '%' . $this->search . '%')
+                    ->orWhere('notes', 'like', '%' . $this->search . '%');
+                })
             )
             ->when(
                 $this->filterDomain,
@@ -242,11 +237,7 @@ class Index extends Component
                 fn($q) =>
                 $q->where('target_category', $this->filterCategory)
             )
-            ->when(
-                $this->filterGroup,
-                fn($q) =>
-                $q->where('group_id', $this->filterGroup)
-            )
+            ->where('group_id', $this->filterGroup)
             ->when(
                 $this->filterDateFrom,
                 fn($q) =>
@@ -410,8 +401,8 @@ class Index extends Component
     public function export()
     {
         Gate::authorize('export', ActivitySchedule::class);
-        if (empty($this->filterBatch)) {
-            session()->flash('error', __('Please select a Batch before exporting.'));
+        if (empty($this->filterBatch) || empty($this->filterGroup)) {
+            session()->flash('error', __('Please select both a Batch and a Student Group before exporting.'));
             return;
         }
 
@@ -420,7 +411,7 @@ class Index extends Component
         $user = auth()->user();
 
         $query = ActivitySchedule::query()
-            ->with(['activityDomain', 'group', 'employee', 'periodGroups', 'activityDetail'])
+            ->with(['activityDomain', 'activityNameStatus', 'group', 'employee', 'periodGroups', 'activityDetail'])
             ->whereHas('group', function ($q) {
                 $q->where('batch_no', $this->filterBatch);
             })
@@ -442,9 +433,13 @@ class Index extends Component
             ->when(
                 $this->search,
                 fn($q) =>
-                $q->where('activity_name', 'like', '%' . $this->search . '%')
+                $q->where(function ($subQuery) {
+                    $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
+                        $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                    })
                     ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                    ->orWhere('notes', 'like', '%' . $this->search . '%')
+                    ->orWhere('notes', 'like', '%' . $this->search . '%');
+                })
             )
             ->when(
                 $this->filterDomain,
@@ -456,11 +451,7 @@ class Index extends Component
                 fn($q) =>
                 $q->where('target_category', $this->filterCategory)
             )
-            ->when(
-                $this->filterGroup,
-                fn($q) =>
-                $q->where('group_id', $this->filterGroup)
-            )
+            ->where('group_id', $this->filterGroup)
             ->when(
                 $this->filterDateFrom,
                 fn($q) =>
@@ -474,6 +465,70 @@ class Index extends Component
             ->orderBy($this->sortField, $this->sortDirection);
 
         return Excel::download(new EducationalActivitySchedulesExport($query), 'educational-activity-schedules.xlsx');
+    }
+
+    // --- Cached Gate/Policy Checks ---
+
+    #[Computed()]
+    public function canCreateSchedule(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create'));
+    }
+
+    #[Computed()]
+    public function canUpdateSchedule(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create'));
+    }
+
+    #[Computed()]
+    public function canDeleteSchedule(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('educational-activity-schedules.create'));
+    }
+
+    #[Computed()]
+    public function canViewAnyReport(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || $user->can('select.any.student') || $user->can('educational-activity-detail.index') || $user->can('educational-activity-detail.create'));
+    }
+
+    #[Computed()]
+    public function canCreateReport(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || $user->can('educational-activity-detail.create') || $user->can('select.any.student'));
+    }
+
+    #[Computed()]
+    public function canUpdateReport(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || $user->can('educational-activity-detail.create') || $user->can('select.any.student'));
+    }
+
+    #[Computed()]
+    public function isSuperAdminOrSelectAnyStudent(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || $user->can('select.any.student'));
+    }
+
+    #[Computed()]
+    public function userEmployeeId()
+    {
+        return auth()->user()?->employee?->id;
+    }
+
+    #[Computed()]
+    public function userGroupIds(): array
+    {
+        $user = auth()->user();
+        return $user ? $user->teacher()->pluck('student_group_id')->toArray() : [];
     }
 
     public function render()

@@ -15,6 +15,7 @@ This skill provides a systematic approach to analyzing and optimizing Livewire v
 - [ ] **Loading**: Can this component be lazy loaded? (Use `#[Lazy]`)
 - [ ] **Navigation**: Are you using `wire:navigate` for links?
 - [ ] **Events**: Are you over-fetching data on every update?
+- [ ] **Filtering**: Are heavy lists/schedules loaded by default? (Use compulsory filters to prevent massive initial queries)
 
 ## Deep Dive Strategies
 
@@ -119,6 +120,66 @@ class RevenueChart extends Component
 ### 6. Validation Optimization
 
 - **Atomic Validation**: When validating a single field (e.g., on `updatedEmail`), use `$this->validateOnly('email')` instead of `$this->validate()` to avoid running rules for the entire form.
+
+### 7. Loop Rendering & Component Optimization (Views Count Reduction)
+
+- **Problem**: Rendering custom Blade components or UI library components (like `<flux:icon>`, `<flux:badge>`, and `<flux:button>`) inside nested loops (`foreach`) causes Laravel to boot and compile separate View templates for every single item, easily inflating the View render count to tens of thousands (e.g., 15,000+ views).
+- **Solution**: Inside loop bodies (such as tables or tree lists), replace custom Blade components with standard HTML elements and inline SVGs:
+  - Replace `<flux:icon>` with raw inline `<svg>` blocks.
+  - Replace `<flux:badge>` with standard HTML `<span>` styled with Tailwind.
+  - Replace `<flux:button>` with standard `<button>` or `<a>` styled with Tailwind.
+- **Result**: Drastically reduces View rendering count, CPU execution time, and memory usage.
+
+### 8. Authorization Check Optimization (Gate Caching in Loops)
+
+- **Problem**: Running `@can` or `Gate::allows()` checks inside loops (e.g., per-row action buttons) triggers repetitive evaluation of policies and permission checks (e.g., 2,000+ Gate checks), adding massive CPU overhead.
+- **Solution**:
+  1. **Cache Class-Level Checks**: Cache static or class-level permissions once per request using Livewire computed properties (`#[Computed]`) and access them via `@if ($this->canEdit)` in the view.
+     ```php
+     #[Computed]
+     public function canEdit(): bool
+     {
+         return auth()->user()->isSuperAdmin() || Gate::allows('posts.edit');
+     }
+     ```
+  2. **In-Memory Row Checks**: For row-level instance checks (e.g. checking if the record belongs to the user), evaluate the logic in-memory directly in the Blade template or within a custom model method instead of invoking policies:
+     ```html
+     @if ($isSuperAdmin || $post->user_id === $currentUserId)
+         <!-- Edit Action Button -->
+     @endif
+     ```
+
+### 9. Compulsory (Mandatory) Filtering for Heavy Datasets
+
+- **Problem**: When a page renders a large dataset (e.g., activity schedules, transactions, or log sheets) by default on initial load, the server executes heavy queries, dehydrates thousands of models, and compiles huge views. This leads to slow loading times, database bottlenecks, PHP timeout issues, or memory exhaustion.
+- **Solution**: Force the user to select specific filters (e.g., a Batch and a Group) before executing any queries or compiling complex lists.
+  1. **Early Return in Livewire**: In the query or computed property, check if the mandatory filters are empty. If so, return an empty paginated result immediately without hitting the database:
+     ```php
+     #[Computed]
+     public function items()
+     {
+         if (empty($this->filterBatch) || empty($this->filterGroup)) {
+             return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+         }
+
+         return Item::where('batch_id', $this->filterBatch)
+             ->where('group_id', $this->filterGroup)
+             ->paginate(15);
+     }
+     ```
+  2. **Clean View Prompts**: In the blade template, conditionalize the table/list rendering. If the mandatory filters are empty, display a clean, user-friendly instructions page or skeleton prompt instead of rendering an empty table:
+     ```html
+     @if (empty($filterBatch) || empty($filterGroup))
+         <div class="flex flex-col items-center justify-center p-8 border border-dashed rounded-lg border-zinc-200 dark:border-zinc-800 text-zinc-500">
+             <!-- Instruction Icon -->
+             <svg class="w-12 h-12 mb-3 text-zinc-400" ...></svg>
+             <h3 class="text-sm font-medium text-zinc-900 dark:text-white">Filters Required</h3>
+             <p class="mt-1 text-sm">Please select a Batch and a Group to display the schedules.</p>
+         </div>
+     @else
+         <!-- Render the actual complex list/table layout -->
+     @endif
+     ```
 
 ## Diagnostic Tools
 

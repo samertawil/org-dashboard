@@ -17,13 +17,6 @@ class Index extends Component
     public string $search = '';
     public string $filterDate = '';
     public ?EducationalActivityDetail $selectedDetail = null;
-    public $selectedScheduleToShowId = null;
-
-    public function openScheduleShowModal($id)
-    {
-        $this->selectedScheduleToShowId = $id;
-        $this->dispatch('modal-show', name: 'schedule-show-modal');
-    }
 
     protected $queryString = [
         'search'     => ['except' => ''],
@@ -66,7 +59,9 @@ class Index extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->whereHas('educationalActivity', function ($sub) {
-                        $sub->where('activity_name', 'like', '%' . $this->search . '%')
+                        $sub->whereHas('activityNameStatus', function ($statusQuery) {
+                            $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                        })
                             ->orWhere('period_start', 'like', '%' . $this->search . '%');
                     })
                         ->orWhere('what_learned', 'like', '%' . $this->search . '%')

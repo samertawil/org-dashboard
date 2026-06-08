@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
     
     {{-- Browser Print (Fixed URL) --}}
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-browser-print@1.0.6/dist/leaflet.browser.print.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.browser.print@1.0.6/dist/leaflet.browser.print.min.js"></script>
 
     {{-- Measure --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
@@ -147,8 +147,8 @@
                     });
                 };
 
-                var campIcon = createPin('#3b82f6'); // Blue Pin
-                var activityDefaultIcon = createPin('#ef4444'); // Red Pin
+                var campIcon = null;
+                var activityDefaultIcon = null;
 
                 function getSectorIcon(sectorId) {
                     var color = '#ef4444';
@@ -239,6 +239,10 @@
                     if (!container || typeof L === 'undefined') return;
                     if (container._leaflet_id && map) return;
                     if (container._leaflet_id && !map) { container._leaflet_id = null; }
+
+                    // Initialize pin icons lazily when Leaflet is available
+                    if (!campIcon) campIcon = createPin('#3b82f6');
+                    if (!activityDefaultIcon) activityDefaultIcon = createPin('#ef4444');
 
                     try {
                         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');

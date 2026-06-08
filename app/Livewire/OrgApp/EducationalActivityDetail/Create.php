@@ -26,7 +26,7 @@ class Create extends Component
         $this->validate();
 
         $user = auth()->user();
-        if (!($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
+        if (!($user->isSuperAdmin() || Gate::allows('select.any.student') || Gate::allows('select.any.educational-activity-detail'))) {
             $hasSchedule = \App\Reposotries\EducationalActivityDetailRepo::getTeacherSchedulesQuery()
                 ->where('id', $this->educational_activity_id)
                 ->exists();

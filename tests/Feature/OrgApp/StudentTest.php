@@ -18,6 +18,15 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     actingAs($this->user);
 
+    // Create employee for the user
+    $this->employee = \App\Models\Employee::create([
+        'user_id' => $this->user->id,
+        'employee_number' => '123456789',
+        'full_name' => 'Test Employee',
+        'gender' => 2,
+        'activation' => 1,
+    ]);
+
     // Seed necessary statuses
     $this->status = Status::create(['status_name' => 'Active', 'p_id' => 1]);
     $this->livingParentStatus = Status::create(['status_name' => 'Father', 'p_id' => 2]);
@@ -79,7 +88,7 @@ it('creates a student', function () {
         ->set('identity_number', 123456789)
         ->set('full_name', 'John Doe')
         ->set('birth_date', $validBirthDate)
-        ->set('gender', 'Male')
+        ->set('gender', 2) // MALE
         ->set('enrollment_type', 'full_week')
         ->set('parent_phone', '0599123456')
         ->set('status_id', $this->status->id)
@@ -99,7 +108,7 @@ it('updates a student', function () {
         'identity_number' => 987654321,
         'full_name' => 'Jane Doe',
         'birth_date' => now()->subYears(9)->format('Y-m-d'),
-        'gender' => 'Female',
+        'gender' => 3, // FEMALE
         'enrollment_type' => 'sat_mon_wed',
         'activation' => 1,
         'created_by' => $this->user->id,
@@ -107,6 +116,7 @@ it('updates a student', function () {
 
     Livewire::test(Edit::class, ['student' => $student])
         ->set('full_name', 'Jane Updated')
+        ->set('gender', 3) // FEMALE
         ->set('enrollment_type', 'sun_tue_thu')
         ->call('save')
         ->assertHasNoErrors()
@@ -124,7 +134,7 @@ it('renders index page and searches students', function () {
         'identity_number' => 111111111,
         'full_name' => 'Alpha Student',
         'birth_date' => now()->subYears(10)->format('Y-m-d'),
-        'gender' => 'Male',
+        'gender' => 2, // MALE
         'created_by' => $this->user->id,
     ]);
     
@@ -132,15 +142,50 @@ it('renders index page and searches students', function () {
         'identity_number' => 222222222,
         'full_name' => 'Beta Student',
         'birth_date' => now()->subYears(10)->format('Y-m-d'),
-        'gender' => 'Female',
+        'gender' => 3, // FEMALE
         'created_by' => $this->user->id,
     ]);
 
-    Livewire::test(Index::class)
+    $test = Livewire::test(Index::class)
         ->assertStatus(200)
-        ->set('search', 'Alpha')
-        ->assertSee('Alpha Student')
-        ->assertDontSee('Beta Student');
+        ->set('searchIdentityNumber', '111111111')
+        ->call('searchData');
+
+    expect($test->get('students')->pluck('full_name'))
+        ->toContain('Alpha Student')
+        ->not->toContain('Beta Student');
+});
+
+it('filters students by status_id', function () {
+    $statusA = Status::create(['status_name' => 'Status A', 'p_id' => 10, 'p_id_sub' => 124]);
+    $statusB = Status::create(['status_name' => 'Status B', 'p_id' => 10, 'p_id_sub' => 124]);
+
+    Student::create([
+        'identity_number' => 333333333,
+        'full_name' => 'Status A Student',
+        'birth_date' => now()->subYears(10)->format('Y-m-d'),
+        'gender' => 2,
+        'status_id' => $statusA->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    Student::create([
+        'identity_number' => 444444444,
+        'full_name' => 'Status B Student',
+        'birth_date' => now()->subYears(10)->format('Y-m-d'),
+        'gender' => 3,
+        'status_id' => $statusB->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $test = Livewire::test(Index::class)
+        ->assertStatus(200)
+        ->set('searchStatusId', $statusA->id)
+        ->call('searchData');
+
+    expect($test->get('students')->pluck('full_name'))
+        ->toContain('Status A Student')
+        ->not->toContain('Status B Student');
 });
 
 it('imports students from excel', function () {
@@ -156,5 +201,34 @@ it('imports students from excel', function () {
     Excel::assertImported('students.xlsx', function(StudentsImport $import) {
         return true;
     });
+});
+
+it('shows group name if unique identity number validation fails', function () {
+    $group = \App\Models\StudentGroup::create([
+        'name' => 'First Grade Group',
+        'batch_no' => 1,
+    ]);
+
+    Student::create([
+        'identity_number' => 123123123,
+        'full_name' => 'Existing Student',
+        'birth_date' => now()->subYears(8)->format('Y-m-d'),
+        'gender' => 2,
+        'student_groups_id' => $group->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $validBirthDate = now()->subYears(8)->format('Y-m-d');
+
+    $component = Livewire::test(Create::class)
+        ->set('identity_number', 123123123)
+        ->set('full_name', 'John Doe')
+        ->set('birth_date', $validBirthDate)
+        ->set('gender', 2)
+        ->set('enrollment_type', 'full_week')
+        ->call('save');
+
+    $errors = $component->errors()->get('identity_number');
+    expect($errors[0])->toContain('First Grade Group');
 });
 

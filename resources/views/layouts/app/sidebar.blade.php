@@ -13,7 +13,11 @@
     $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
 @endphp
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body x-data="{ isOffline: !navigator.onLine, currentPath: window.location.pathname }"
+      @online.window="isOffline = false"
+      @offline.window="isOffline = true"
+      x-on:livewire:navigated.window="currentPath = window.location.pathname"
+      class="min-h-screen bg-white dark:bg-zinc-800">
     <flux:sidebar sticky stashable="false" :collapsible="true"
         class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header class="flex items-center justify-between gap-2">
@@ -27,7 +31,7 @@
             </div>
         </flux:sidebar.header>
 
-        <flux:sidebar.nav>
+        <flux:sidebar.nav x-show="!isOffline">
             <flux:sidebar.group :heading="__('Platform')" class="grid">
 
                 @auth
@@ -99,7 +103,7 @@
         </flux:sidebar.nav>
 
 
-        <flux:sidebar.nav>
+        <flux:sidebar.nav x-show="!isOffline">
             <flux:sidebar.group :heading="__('App')" class="grid">
 
 
@@ -427,7 +431,7 @@
 
         <flux:spacer />
 
-        <flux:sidebar.nav>
+        <flux:sidebar.nav x-show="!isOffline">
 
             @canany(['department.index', 'department.create', 'employee.index', 'employee.create', 'partner.index',
                 'partner.create', 'status.index', 'status.create', 'system.names.index', 'system.names.create',
@@ -589,6 +593,25 @@
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
+        <flux:sidebar.nav x-show="isOffline" x-cloak>
+            <div class="px-2 py-2 mb-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
+                <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                    <flux:icon name="wifi" variant="micro" class="size-4 animate-pulse" />
+                    {{ __('Offline Mode') }}
+                </span>
+            </div>
+            
+            <flux:sidebar.group :heading="__('Available Offline')" class="grid">
+                @can('student.group.index')
+                    <flux:sidebar.item icon="rectangle-group" :href="route('student.group.index')"
+                        :current="request()->routeIs(['student.group.index', 'student.group.date.students', 'student.group.schedule'])" wire:navigate
+                        class="text-amber-600 dark:text-amber-400 font-bold bg-amber-500/5 dark:bg-amber-500/10">
+                        {{ __('Education Points List') }}
+                    </flux:sidebar.item>
+                @endcan
+            </flux:sidebar.group>
+        </flux:sidebar.nav>
+
         <flux:spacer />
 
 
@@ -598,6 +621,11 @@
     <!-- Mobile User Menu -->
     <flux:header class="lg:hidden">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+
+        <div x-show="isOffline" x-cloak class="ml-2 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-1.5">
+            <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{{ __('Offline') }}</span>
+        </div>
 
         <flux:spacer />
 
@@ -678,12 +706,13 @@
         });
     </script>
 
+    <livewire:org-app.educational-activity-schedules.show-schedule-modal />
     @stack('scripts')
     @fluxScripts
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js?v=4')
+                navigator.serviceWorker.register('/sw.js?v=5')
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })

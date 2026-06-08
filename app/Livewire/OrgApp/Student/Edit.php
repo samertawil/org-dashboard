@@ -7,7 +7,6 @@ use App\Models\Student;
 use App\Rules\GlobalValidation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class Edit extends Component
@@ -20,12 +19,26 @@ class Edit extends Component
     public function rules()
     {
         return [
-            'identity_number' => 'required|integer|min_digits:9|max_digits:9|unique:students,identity_number,' . $this->student->id,
+            'identity_number' => [
+                'required',
+                'integer',
+                'min_digits:9',
+                'max_digits:9',
+                function ($attribute, $value, $fail) {
+                    $existingStudent = Student::where('identity_number', $value)
+                        ->where('id', '!=', $this->student->id)
+                        ->first();
+                    if ($existingStudent) {
+                        $groupName = $existingStudent->studentGroup?->name ?? __('No Group. لا توجد مجموعة');
+                        $fail(__('  هذا الطالب موجود بالفعل في مركز :group', ['group' => $groupName]));
+                    }
+                }
+            ],
             'birth_date' => 'required|date|before_or_equal:' . Student::maxBirthDate() . '|after_or_equal:' . Student::minBirthDate(),
-            'enrollment_type' => 'required|in:full_week,sat_mon_wed,sun_tue_thu', 
-          
+            'enrollment_type' => 'required|in:full_week,sat_mon_wed,sun_tue_thu',
+
             'gender' => [
-               'required',
+                'required',
                 new GlobalValidation('gender'),
             ],
         ];
@@ -45,15 +58,14 @@ class Edit extends Component
         $this->parent_phone = $student->parent_phone;
         $this->living_parent_id = $student->living_parent_id;
         $this->notes = $student->notes;
-
     }
 
 
     public function save()
     {
-        
+
         $this->validate();
- 
+
         $this->student->fill([
             'identity_number' => $this->identity_number,
             'full_name' => $this->full_name,
@@ -77,7 +89,7 @@ class Edit extends Component
             session()->flash('message', __('No changes were made!'));
         }
 
-       
+
 
         return $this->redirect(route('student.index'), navigate: true);
     }
@@ -85,7 +97,7 @@ class Edit extends Component
 
     public function render()
     {
-        if(Gate::denies('student.create')) {
+        if (Gate::denies('student.create')) {
             abort(403, 'You do not have the necessary permissions.');
         }
         return view('livewire.org-app.student.edit', [

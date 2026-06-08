@@ -47,17 +47,12 @@ class TeacherStudentGroup extends Model
 
     public static function employeesForEducationalTasks()
     {
-
-        return TeacherStudentGroup::with('teacher')
-            ->get()
-            ->map(fn($item) => $item->teacher)
-            ->filter(
-                fn($employee) => $employee
-                // && (user->isSuperAdmin() || Gate::allows('select.any.student') )
-                // && $employee->activation == 1
-            )
-            ->unique('id')
-            ->sortBy('full_name')
-            ->values();
+        return Employee::whereIn('user_id', function ($query) {
+            $query->select('teacher_id')
+                ->from('teacher_student_group')
+                ->whereNotNull('teacher_id');
+        })
+        ->orderBy('full_name')
+        ->get();
     }
 }

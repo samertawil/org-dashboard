@@ -26,7 +26,11 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        $results = DB::select("
+        $params = [
+            'batchNo' => $this->batchNo,
+        ];
+
+        $sql = "
         SELECT DISTINCT
             s.id, s.identity_number, s.full_name, sg.name as group_name, sg.batch_no,
              stat.status_name as survey_name, s_stat.status_name as status_group_name, s.activation
@@ -48,14 +52,20 @@ class SurveyLate implements FromCollection, WithHeadings, WithMapping
                     AND CURDATE() <= sg.end_date)
               )
           AND sa.account_id IS NULL
-          AND st.survey_for_section = :surveyNo
-          AND s.student_groups_id = :groupId
           AND sg.batch_no = :batchNo
-        ", [
-            'surveyNo'  => $this->surveyNo,
-            'groupId'   => $this->groupId,
-            'batchNo'   => $this->batchNo,
-        ]);
+        ";
+
+        if ($this->surveyNo) {
+            $sql .= " AND st.survey_for_section = :surveyNo";
+            $params['surveyNo'] = $this->surveyNo;
+        }
+
+        if ($this->groupId) {
+            $sql .= " AND s.student_groups_id = :groupId";
+            $params['groupId'] = $this->groupId;
+        }
+
+        $results = DB::select($sql, $params);
 
         return collect($results);
     }

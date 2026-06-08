@@ -40,6 +40,28 @@ class ActivitySchedule extends Model
         'sort_order'   => 'integer',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($schedule) {
+            if (isset($schedule->activity_name) && !is_numeric($schedule->activity_name) && !empty($schedule->activity_name)) {
+                $name = trim($schedule->activity_name);
+
+                $status = \App\Models\Status::firstOrCreate([
+                    'status_name' => $name,
+                    'p_id_sub' => 197,
+                ], [
+                    'used_in_system_id' => 1,
+                ]);
+
+                $schedule->activity_name = $status->id;
+            }
+        });
+    }
+
+
+
+
+
     /**
      * الفئات المستهدفة
      */
@@ -60,6 +82,8 @@ class ActivitySchedule extends Model
     {
         return $this->belongsTo(Activity::class, 'activity_id');
     }
+
+
 
     /**
      * تفاصيل التقرير للنشاط
@@ -91,6 +115,14 @@ class ActivitySchedule extends Model
     public function activityDomain(): BelongsTo
     {
         return $this->belongsTo(Status::class, 'educational_activity_domain');
+    }
+
+    /**
+     * اسم النشاط من جدول الثوابت
+     */
+    public function activityNameStatus(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'activity_name');
     }
 
     /**
@@ -173,7 +205,7 @@ class ActivitySchedule extends Model
             ->where('period_end', '<=', now()->endOfDay())
             ->where(function ($q) {
                 $q->where('period_start', '>', now())
-                  ->orWhere('period_end', '<', now());
+                    ->orWhere('period_end', '<', now());
             });
     }
 
@@ -232,6 +264,24 @@ class ActivitySchedule extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('period_start')->orderBy('sort_order');
+    }
+
+    /**
+     * تحميل العلاقات اللازمة لعرض تفاصيل النشاط
+     */
+    public function scopeWithShowDetails($query)
+    {
+        return $query->with([
+            'activity',
+            'group',
+            'activityDomain',
+            'activityNameStatus',
+            'periodGroups',
+            'employee',
+            'createdBy',
+            'updatedBy',
+            'educationalActivity.status',
+        ]);
     }
 
     // ========================

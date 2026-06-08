@@ -1,4 +1,5 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-on:modal-show.window="Flux.modal($event.detail.name).show()"
+    x-on:modal-close.window="Flux.modal($event.detail.name).hide()">
     {{-- Page Header --}}
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
@@ -8,7 +9,8 @@
         </div>
 
         <span title="{{ __('Back to Dashboard') }}" class="w-full sm:w-auto">
-            <flux:button href="{{ route('dashboard') }}" wire:navigate variant="ghost" icon="chevron-left" class="w-full">
+            <flux:button href="{{ route('dashboard') }}" wire:navigate variant="ghost" icon="chevron-left"
+                class="w-full">
                 {{ __('Dashboard') }}
             </flux:button>
         </span>
@@ -120,7 +122,7 @@
                     <div class="flex justify-between items-start gap-4">
                         <div class="flex flex-col gap-0.5 min-w-0">
                             <span
-                                class="text-sm font-bold text-zinc-900 dark:text-white truncate">{{ $task->activity_name }}</span>
+                                class="text-sm font-bold text-zinc-900 dark:text-white truncate">{{ $task->activityNameStatus?->status_name ?? $task->activity_name }}</span>
                             <span class="text-[10px] text-zinc-500 font-medium">
                                 {{ $task->day_name }} ({{ $task->period_start?->format('Y-m-d') }})
                             </span>
@@ -161,32 +163,42 @@
 
                     {{-- Attendance Stats for Mobile --}}
                     @php
-                        $attKey = $task->group_id . '_' . $task->period_start?->format('Y-m-d') . '_' . $task->educational_period_groups;
+                        $attKey =
+                            $task->group_id .
+                            '_' .
+                            $task->period_start?->format('Y-m-d') .
+                            '_' .
+                            $task->educational_period_groups;
                         $taskAttendance = $attendanceByGroup[$attKey] ?? collect();
                     @endphp
                     @if ($taskAttendance->isNotEmpty())
                         <div class="border-t border-zinc-100 dark:border-zinc-700 pt-2 space-y-1.5">
                             <div class="flex items-center gap-1.5">
                                 <flux:icon name="users" variant="micro" class="size-3.5 text-indigo-500" />
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-zinc-500">{{ __('Attendance') }}</span>
+                                <span
+                                    class="text-[10px] uppercase tracking-wider font-bold text-zinc-500">{{ __('Attendance') }}</span>
                             </div>
                             @foreach ($taskAttendance as $stat)
                                 <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
                                     <div class="flex items-center justify-between text-xs">
-                                        <span class="text-zinc-400">{{ $stat->total_count }} {{ __('students') }}</span>
+                                        <span class="text-zinc-400">{{ $stat->total_count }}
+                                            {{ __('students') }}</span>
                                         <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-medium">
+                                            <span
+                                                class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-medium">
                                                 <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
                                                 {{ $stat->present_count }}
                                             </span>
-                                            <span class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-medium">
+                                            <span
+                                                class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-medium">
                                                 <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                                 {{ $stat->absent_count }}
                                             </span>
                                         </div>
                                     </div>
                                     @if ($stat->total_count > 0)
-                                        <div class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                        <div
+                                            class="mt-1 w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                                             <div class="h-full bg-green-500 rounded-full"
                                                 style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%">
                                             </div>
@@ -205,15 +217,22 @@
                         </div>
                         <div class="flex items-center gap-1.5">
                             @if ($task->task_status === 'completed' && $task->activityDetail)
+                                {{-- Optimized: Tasks list is pre-scoped by getTeacherSchedulesQuery(), so viewing is always allowed --}}
                                 <flux:button
-                                    href="{{ route('educational-activity-detail.show', $task->activityDetail->id) }}"
-                                    wire:navigate size="sm" variant="ghost" icon="eye"
-                                    class="text-zinc-500 hover:text-zinc-700" title="{{ __('View Detail') }}">
-                                    {{ __('View') }}
-                                </flux:button>
+                                    x-on:click="$dispatch('open-schedule-details', { id: {{ $task->id }} })"
+                                    size="sm" variant="ghost" icon="eye"
+                                    class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
                             @else
-                                <flux:button href="{{ route('educational-activity-detail.create', $task->id) }}"
-                                    wire:navigate size="sm" variant="primary" icon="plus"
+                                @if ($task->group_id)
+                                    <flux:button
+                                        wire:click="openAttendance({{ $task->group_id }}, '{{ $task->period_start->format('Y-m-d') }}')"
+                                        size="sm" variant="ghost" icon="users"
+                                        class="text-zinc-500 hover:text-zinc-700" title="{{ __('Attendance') }}">
+                                        {{ __('Attendance') }}
+                                    </flux:button>
+                                @endif
+                                <flux:button wire:click="openReport({{ $task->id }})" size="sm"
+                                    variant="primary" icon="plus"
                                     class="bg-teal-600 hover:bg-teal-700 text-white shadow-xs">
                                     {{ __('Add Report') }}
                                 </flux:button>
@@ -269,7 +288,7 @@
                             class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 font-bold text-zinc-900 dark:text-white text-sm">
                                 <div class="flex flex-col">
-                                    <span>{{ $task->activity_name }}</span>
+                                    <span>{{ $task->activityNameStatus?->status_name ?? $task->activity_name }}</span>
                                     <span class="text-[10px] text-zinc-400 font-normal mt-0.5">
                                         {{ $task->category_label }}
                                     </span>
@@ -305,8 +324,7 @@
                                 class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
                                 {{ $task->employee?->full_name ?? __('Unassigned') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm"
-                                >
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <flux:badge size="sm" color="{{ $task->task_status_color }}"
                                     class="font-semibold rounded-full px-2.5">
                                     {{ $task->task_status_label }}
@@ -314,7 +332,12 @@
                             </td>
                             {{-- Attendance Column --}}
                             @php
-                                $attKey = $task->group_id . '_' . $task->period_start?->format('Y-m-d') . '_' . $task->educational_period_groups;
+                                $attKey =
+                                    $task->group_id .
+                                    '_' .
+                                    $task->period_start?->format('Y-m-d') .
+                                    '_' .
+                                    $task->educational_period_groups;
                                 $taskAttendance = $attendanceByGroup[$attKey] ?? collect();
                             @endphp
                             <td class="px-6 py-4 text-sm">
@@ -323,20 +346,26 @@
                                         @foreach ($taskAttendance as $stat)
                                             <div class="bg-zinc-50 dark:bg-zinc-900/50 rounded px-2 py-1.5">
                                                 <div class="flex items-center justify-between text-[11px] mb-0.5">
-                                                    <span class="text-zinc-400">{{ $stat->total_count }} {{ __('total') }}</span>
+                                                    <span class="text-zinc-400">{{ $stat->total_count }}
+                                                        {{ __('total') }}</span>
                                                     <div class="flex items-center gap-2">
-                                                        <span class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                        <span
+                                                            class="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
                                                             {{ $stat->present_count }}
                                                         </span>
-                                                        <span class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-semibold">
-                                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                        <span
+                                                            class="inline-flex items-center gap-1 text-red-700 dark:text-red-400 font-semibold">
+                                                            <span
+                                                                class="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                                             {{ $stat->absent_count }}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 @if ($stat->total_count > 0)
-                                                    <div class="w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        class="w-full h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                                                         <div class="h-full bg-green-500 rounded-full"
                                                             style="width: {{ round(($stat->present_count / $stat->total_count) * 100) }}%">
                                                         </div>
@@ -352,17 +381,23 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     @if ($task->task_status === 'completed' && $task->activityDetail)
+                                        {{-- Optimized: Tasks list is pre-scoped by getTeacherSchedulesQuery(), so viewing is always allowed --}}
                                         <flux:button
-                                            href="{{ route('educational-activity-detail.show', $task->activityDetail->id) }}"
-                                            wire:navigate size="sm" variant="ghost" icon="eye"
-                                            class="text-zinc-500 hover:text-zinc-700"
-                                            title="{{ __('View Detail') }}">
-                                            {{ __('View Detail') }}
-                                        </flux:button>
+                                            x-on:click="$dispatch('open-schedule-details', { id: {{ $task->id }} })"
+                                            size="sm" variant="ghost" icon="eye"
+                                            class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
                                     @else
-                                        <flux:button
-                                            href="{{ route('educational-activity-detail.create', $task->id) }}"
-                                            wire:navigate size="sm" variant="primary" icon="plus"
+                                        @if ($task->group_id)
+                                            <flux:button
+                                                wire:click="openAttendance({{ $task->group_id }}, '{{ $task->period_start->format('Y-m-d') }}')"
+                                                size="sm" variant="ghost" icon="users"
+                                                class="text-zinc-500 hover:text-zinc-700"
+                                                title="{{ __('Attendance') }}">
+                                                {{ __('Attendance') }}
+                                            </flux:button>
+                                        @endif
+                                        <flux:button wire:click="openReport({{ $task->id }})" size="sm"
+                                            variant="primary" icon="plus"
                                             class="bg-teal-600 hover:bg-teal-700 text-white shadow-xs">
                                             {{ __('Add Report') }}
                                         </flux:button>
@@ -389,4 +424,40 @@
             {{ $tasks->links() }}
         </div>
     </div>
+
+    {{-- Attendance Modal --}}
+    <flux:modal wire:model="showAttendanceModal" class="w-full max-w-5xl">
+        <div class="p-4 sm:p-6">
+            @if ($this->selectedGroup && $selectedDate)
+                <div class="max-h-[65vh] overflow-y-auto pr-1">
+                    <livewire:org-app.student-groups.daily-students :group="$this->selectedGroup" :date="$selectedDate"
+                        :isModal="true" :key="'attendance-modal-' . $this->selectedGroup->id . '-' . $selectedDate" />
+                </div>
+            @endif
+
+            <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700/50">
+                <flux:button wire:click="closeAttendanceModal" variant="ghost" class="w-full sm:w-auto">
+                    {{ __('Close') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
+    {{-- Report Modal --}}
+    <flux:modal name="report-modal" wire:model="showReportModal" class="w-full max-w-5xl">
+        <div class="p-4 sm:p-6">
+            @if ($selectedTaskIdForReport)
+                <div class="max-h-[70vh] overflow-y-auto pr-1">
+                    <livewire:org-app.educational-activity-detail.create :educational_activity_id="$selectedTaskIdForReport" :isModal="true"
+                        :key="'report-modal-' . $selectedTaskIdForReport" />
+                </div>
+            @endif
+
+            <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700/50">
+                <flux:button wire:click="closeReportModal" variant="ghost" class="w-full sm:w-auto">
+                    {{ __('Close') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

@@ -45,6 +45,7 @@ class Index extends Component
     public $searchBatchNo = '';
     public $searchRegionId = '';
     public $searchCityId = '';
+    public $searchStatusId = '';
     public $readyToLoad = false;
 
     protected $queryString = [
@@ -57,6 +58,7 @@ class Index extends Component
         'searchBatchNo' => ['except' => ''],
         'searchRegionId' => ['except' => ''],
         'searchCityId' => ['except' => ''],
+        'searchStatusId' => ['except' => ''],
     ];
 
     public function sortBy($field): void
@@ -72,7 +74,7 @@ class Index extends Component
 
     public function updating($property)
     {
-        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId'])) {
+        if (in_array($property, ['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId', 'searchStatusId'])) {
             $this->resetPage();
             $this->readyToLoad = false;
         }
@@ -81,7 +83,7 @@ class Index extends Component
 
     public function clearFilters()
     {
-        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId']);
+        $this->reset(['searchIdentityNumber', 'searchStudentName', 'searchStudentGroupName', 'searchEnrollment', 'searchActivation', 'searchBatchNo', 'searchRegionId', 'searchCityId', 'searchStatusId']);
         $this->readyToLoad = false;
         $this->resetPage();
     }
@@ -125,6 +127,7 @@ class Index extends Component
                 ->when($this->searchBatchNo !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('batch_no', $this->searchBatchNo)))
                 ->when($this->searchRegionId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('region_id', $this->searchRegionId)))
                 ->when($this->searchCityId !== '', fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('city_id', $this->searchCityId)))
+                ->when($this->searchStatusId !== '', fn($q) => $q->where('status_id', $this->searchStatusId))
 
 
 
@@ -282,6 +285,7 @@ class Index extends Component
             'searchBatchNo' => $this->searchBatchNo,
             'searchRegionId' => $this->searchRegionId,
             'searchCityId' => $this->searchCityId,
+            'searchStatusId' => $this->searchStatusId,
         ];
 
         return base64_encode(json_encode($filters));
@@ -296,11 +300,13 @@ class Index extends Component
         $activations = GlobalSystemConstant::options()->where('type', 'status');
         $regions = RegionRepo::regions();
         $cities = CityRepo::cities()->where('region_id', $this->searchRegionId);
+        $statuses = StatusRepo::statuses()->where('p_id_sub', config('appConstant.student_groups'));
 
         return view('livewire.org-app.student.index', [
             'activations' => $activations,
             'regions' => $regions,
             'cities' => $cities,
+            'statuses' => $statuses,
         ]);
     }
 }

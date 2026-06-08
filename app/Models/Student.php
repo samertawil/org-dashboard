@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
+use App\Models\StudentGroup;
+use App\Reposotries\StudentGroupRepo;
+use App\Enums\GlobalSystemConstant;
 use Carbon\Carbon;
 use DateTime;
-use Illuminate\Database\Eloquent\Model;
+
 
 class Student extends Model
 {
@@ -27,9 +31,26 @@ class Student extends Model
 
     protected $appends = ['student_age_when_join'];
 
+    protected static ?string $latestActiveGroupStartDate = null;
+
+    public static function getLatestActiveGroupStartDate(): ?string
+    {
+        if (self::$latestActiveGroupStartDate === null) {
+            $group = StudentGroupRepo::studentGroups()
+                ->where('activation', GlobalSystemConstant::ACTIVE)
+                ->sortByDesc('batch_no')
+                ->first();
+            self::$latestActiveGroupStartDate = $group?->start_date ?? '';
+        }
+
+        return self::$latestActiveGroupStartDate !== '' ? self::$latestActiveGroupStartDate : null;
+    }
+
     public static function maxBirthDate()
     {
-        $from = new DateTime();
+        $startDate = self::getLatestActiveGroupStartDate();
+
+        $from = $startDate ? new DateTime($startDate) : new DateTime();
         $y = $from->modify(config('malRules.allowDate1.fromDate'));
         $from = $y->modify(config('malRules.allowDate1.min_date'));
         $from =  $from->format('Y-m-d');  // birthdate not grater than $from date  "6 years old"
@@ -39,7 +60,9 @@ class Student extends Model
 
     public static function minBirthDate()
     {
-        $to = new DateTime();
+        $startDate = self::getLatestActiveGroupStartDate();
+
+        $to = $startDate ? new DateTime($startDate) : new DateTime();
         $x =  $to->modify(config('malRules.allowDate1.toDate'));
         $to = $x->modify(config('malRules.allowDate1.plus_date'));
         $to =  $to->format('Y-m-d');   // birthdate not less than $from date  "6 years old"

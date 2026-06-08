@@ -47,7 +47,7 @@ class ActivitySchedules
 
         return Cache::rememberForever($cacheKey, function () use ($user, $employeeId) {
             $educationalTasksQuery = \App\Models\ActivitySchedule::query()
-                ->with(['activityDetail', 'employee', 'activityDomain', 'periodGroups', 'group'])
+                ->with(['activityDetail', 'employee', 'activityDomain', 'activityNameStatus', 'periodGroups', 'group'])
                 ->active()
                 ->where(function ($q) {
                     $q->delayed()

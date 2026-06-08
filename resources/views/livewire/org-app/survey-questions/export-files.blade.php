@@ -203,10 +203,9 @@
 
                 <div class="pt-2 space-y-4">
                     <flux:field>
-                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">
-                            {{ __('Select Survey Group') }}</flux:label>
+                        <flux:label>{{ __('Select Survey Group') }}</flux:label>
                         <flux:select wire:model="surveyLate">
-                            <option value="">{{ __('Select Survey...') }}</option>
+                            <option value="">{{ __('All Surveys') }}</option>
                             @foreach ($surveys as $survey)
                                 <option value="{{ $survey->id }}">{{ $survey->status_name }}</option>
                             @endforeach
@@ -227,10 +226,9 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="{{ __('Required') }}" badgeColor="text-red-600">
-                            {{ __('Select Education Point Name') }}</flux:label>
+                        <flux:label>{{ __('Select Education Point Name') }}</flux:label>
                         <flux:select wire:model="groupIdLate">
-                            <option value="">{{ __('Select Point...') }}</option>
+                            <option value="">{{ __('All Points') }}</option>
                             @foreach ($groupNamesLate as $groupName)
                                 <option value="{{ $groupName->id }}">{{ $groupName->name }}</option>
                             @endforeach

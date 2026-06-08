@@ -124,7 +124,7 @@ class Index extends Component
         // Educational Activity Schedules
         if (Gate::allows('manager.reports.all') || Gate::allows('calendar.education.sector')) {
 
-            $schedules = ActivitySchedule::with(['group', 'activityDomain', 'employee'])
+            $schedules = ActivitySchedule::with(['group', 'activityDomain', 'activityNameStatus', 'employee', 'periodGroups'])
                 ->whereNotNull('period_start')
                 ->whereNotNull('period_end')
                 ->where('activation', 1)
@@ -152,7 +152,7 @@ class Index extends Component
                     $domainName   = $firstSchedule->activityDomain?->status_name ?? '';
                     $employeeNames = $groupSchedules->map(fn($s) => $s->employee?->full_name)->filter()->unique()->implode(', ');
 
-                    $title = $firstSchedule->activity_name .  ' - ' . $firstSchedule->periodGroups?->description ?? '';
+                    $title = ($firstSchedule->activityNameStatus?->status_name ?? '') .  ' - ' . ($firstSchedule->periodGroups?->description ?? '');
                     if ($allGroupsStr) {
                         $title .= ' | ' . $allGroupsStr;
                     }

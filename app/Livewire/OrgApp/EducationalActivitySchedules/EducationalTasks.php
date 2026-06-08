@@ -23,6 +23,24 @@ class EducationalTasks extends Component
     public string $filterStatus = '';
     public string $filterEmployee = '';
     public string $filterGroup = '';
+    
+    public ?int $selectedGroupId = null;
+    public ?string $selectedDate = null;
+    public bool $showAttendanceModal = false;
+
+    public ?int $selectedTaskIdForReport = null;
+    public bool $showReportModal = false;
+
+    protected $listeners = [
+        'report-saved' => 'handleReportSaved',
+        'attendance-saved' => '$refresh',
+    ];
+
+    public function handleReportSaved(): void
+    {
+        $this->showReportModal = false;
+        $this->selectedTaskIdForReport = null;
+    }
 
     protected $queryString = [
         'search'         => ['except' => ''],
@@ -34,11 +52,8 @@ class EducationalTasks extends Component
 
     public function mount()
     {
-        $user = auth()->user();
-        $isManager = $user->isSuperAdmin() || Gate::allows('select.any.student');
-
-        if (!$isManager) {
-            $this->filterEmployee = (string) ($user->employee?->id ?? '');
+        if (!$this->isManager) {
+            $this->filterEmployee = (string) (auth()->user()->employee?->id ?? '');
         }
     }
 
@@ -74,9 +89,7 @@ class EducationalTasks extends Component
         $this->filterStatus = '';
         $this->filterGroup = '';
 
-        $user = auth()->user();
-        $isManager = $user->isSuperAdmin() || Gate::allows('select.any.student');
-        if ($isManager) {
+        if ($this->isManager) {
             $this->filterEmployee = '';
         }
 
@@ -97,13 +110,18 @@ class EducationalTasks extends Component
     }
 
     #[Computed]
+    public function selectedGroup()
+    {
+        return $this->selectedGroupId ? \App\Models\StudentGroup::find($this->selectedGroupId) : null;
+    }
+
+    #[Computed]
     public function tasks()
     {
-        $user = auth()->user();
-        $isManager = $user->isSuperAdmin() || Gate::allows('select.any.student');
+        $isManager = $this->isManager;
 
         $query = EducationalActivityDetailRepo::getTeacherSchedulesQuery()
-            ->with(['activityDetail', 'employee', 'activityDomain', 'periodGroups', 'group'])
+            ->with(['activityDetail', 'employee', 'activityDomain', 'activityNameStatus', 'periodGroups', 'group'])
             ->active();
 
         // 1. Employee Scoping
@@ -131,7 +149,9 @@ class EducationalTasks extends Component
         // 4. Search Scoping
         if ($this->search !== '') {
             $query->where(function ($q) {
-                $q->where('activity_name', 'like', '%' . $this->search . '%')
+                $q->whereHas('activityNameStatus', function ($statusQuery) {
+                    $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                })
                     ->orWhere('activity_description', 'like', '%' . $this->search . '%')
                     ->orWhere('notes', 'like', '%' . $this->search . '%')
                     ->orWhereHas('group', function ($sub) {
@@ -176,7 +196,7 @@ class EducationalTasks extends Component
                 foreach ($pairs as $pair) {
                     $q->orWhere(function ($sub) use ($pair) {
                         $sub->where('student_daily_attendances.student_group_id', $pair['group_id'])
-                            ->whereDate('student_daily_attendances.attendance_date', $pair['date'])
+                            ->where('student_daily_attendances.attendance_date', $pair['date'])
                             ->where('students.status_id', $pair['period_group']);
                     });
                 }
@@ -202,16 +222,47 @@ class EducationalTasks extends Component
         return $query->groupBy(fn($row) => $row->student_group_id . '_' . $row->attendance_date . '_' . $row->status_id);
     }
 
+    public function openAttendance(int $groupId, string $date): void
+    {
+        $this->selectedGroupId = $groupId;
+        $this->selectedDate = $date;
+        $this->showAttendanceModal = true;
+    }
+
+    public function closeAttendanceModal(): void
+    {
+        $this->showAttendanceModal = false;
+        $this->selectedGroupId = null;
+        $this->selectedDate = null;
+    }
+
+    public function openReport(int $taskId): void
+    {
+        $this->selectedTaskIdForReport = $taskId;
+        $this->showReportModal = true;
+    }
+
+    public function closeReportModal(): void
+    {
+        $this->showReportModal = false;
+        $this->selectedTaskIdForReport = null;
+    }
+
+    #[Computed]
+    public function isManager(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isSuperAdmin() || Gate::allows('select.any.student'));
+    }
+
     #[Title('Educational Activity Tasks')]
     public function render()
     {
-
         Gate::authorize('create', EducationalActivityDetail::class);
-        $isManager = auth()->user()->isSuperAdmin() || Gate::allows('select.any.student');
         return view('livewire.org-app.educational-activity-schedules.educational-tasks', [
             'tasks'          => $this->tasks,
             'employees'      => $this->employees,
-            'isManager'      => $isManager,
+            'isManager'      => $this->isManager,
             'attendanceByGroup' => $this->attendanceByGroup,
         ]);
     }

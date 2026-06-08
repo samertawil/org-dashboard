@@ -1,13 +1,18 @@
 <div x-data="offlineAttendance({
     groupId: '{{ $group->id }}',
     date: '{{ $date }}',
-    students: @js($students->pluck('id'))
+    students: @js($students->pluck('id')),
+    attendance: @entangle('attendance'),
+    attendanceStatus: @entangle('attendanceStatus')
 })" class="flex flex-col gap-6 landscape-force">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col gap-1">
-            <flux:heading level="1" size="xl">{{ __('Daily Attendance') }}: {{ $group->name }}</flux:heading>
-            <flux:subheading>{{ __('Students scheduled for') }} {{ $formattedDate }} ({{ $dayName }})
-            </flux:subheading>
+            @if(!$isModal)
+                <flux:heading level="1" size="xl">{{ __('Daily Attendance') }}: {{ $group->name }}</flux:heading>
+                <flux:subheading>{{ __('Students scheduled for') }} {{ $formattedDate }} ({{ $dayName }})</flux:subheading>
+            @else
+                <flux:heading level="1" size="lg" class="text-zinc-900 dark:text-white">{{ __('Students scheduled for') }} {{ $formattedDate }} ({{ $dayName }})</flux:heading>
+            @endif
             <div x-show="!online" x-cloak
                 class="text-amber-600 dark:text-amber-400 text-sm font-medium flex items-center gap-2">
                 <flux:icon name="wifi" variant="micro" class="size-4" />
@@ -19,24 +24,38 @@
                 <span x-text="'Syncing ' + unsyncedCount + ' record(s)...'"></span>
             </div>
         </div>
-        <span title="{{ __('Return to the weekly group schedule') }}">
-            <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate variant="ghost"
-                icon="arrow-left" class="w-full sm:w-auto">
-                {{ __('Back to Schedule') }}
-            </flux:button>
-        </span>
+        @if(!$isModal)
+            <span title="{{ __('Return to the weekly group schedule') }}">
+                <flux:button href="{{ route('student.group.schedule', $group) }}" wire:navigate variant="ghost"
+                    icon="arrow-left" class="w-full sm:w-auto">
+                    {{ __('Back to Schedule') }}
+                </flux:button>
+            </span>
+        @endif
     </div>
 
     <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm gap-4">
-        <h2 class="text-lg font-medium text-zinc-900 dark:text-white">{{ __('Students List') }}</h2>
-        <div class="flex gap-2 w-full sm:w-auto">
-            <span title="{{ __('Mark all students as present for today') }}" class="flex-1 sm:flex-none">
+        class="sticky top-0 z-30 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/95 dark:bg-zinc-800/95 backdrop-blur-xs p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-md gap-4">
+        @if(!$isModal)
+            <h2 class="text-lg font-medium text-zinc-900 dark:text-white">{{ __('Students List') }}</h2>
+        @endif
+        <div @class([
+            'flex gap-2',
+            'w-full' => $isModal,
+            'w-full sm:w-auto' => !$isModal
+        ])>
+            <span title="{{ __('Mark all students as present for today') }}" @class([
+                'flex-1' => $isModal,
+                'flex-1 sm:flex-none' => !$isModal
+            ])>
                 <flux:button @click="markAllPresent" variant="ghost" size="sm" class="w-full">
                     {{ __('Mark All Present') }}
                 </flux:button>
             </span>
-            <span title="{{ __('Commit attendance changes to the server') }}" class="flex-1 sm:flex-none">
+            <span title="{{ __('Commit attendance changes to the server') }}" @class([
+                'flex-1' => $isModal,
+                'flex-1 sm:flex-none' => !$isModal
+            ])>
                 <flux:button @click="save" variant="primary" x-bind:disabled="saving" class="w-full">
                     <span x-show="!saving">{{ __('Save Attendance') }}</span>
                     <span x-show="saving">{{ __('Saving...') }}</span>
@@ -225,7 +244,7 @@
         </div>
     @endforelse
 
-    @push('scripts')
+    @assets
         <script src="/js/offline-attendance.js"></script>
         <script>
             function registerOfflineAttendance() {
@@ -236,8 +255,8 @@
                     groupId: config.groupId,
                     date: config.date,
                     students: config.students,
-                    attendance: @entangle('attendance'),
-                    attendanceStatus: @entangle('attendanceStatus'),
+                    attendance: config.attendance,
+                    attendanceStatus: config.attendanceStatus,
                     online: navigator.onLine,
                     saving: false,
                     unsyncedCount: 0,
@@ -342,5 +361,5 @@
                 document.addEventListener('alpine:init', registerOfflineAttendance);
             }
         </script>
-    @endpush
+    @endassets
 </div>

@@ -110,23 +110,26 @@ class UploadingFilesServices
             switch ($extension) {
                 case 'jpg':
                 case 'jpeg':
-
-                    $imageData = $image->encodeByMediaType('image/jpg', quality: $quality);
-
+                    $imageData = $image->encodeByMediaType('image/jpeg', quality: $quality);
                     break;
                 case 'png':
                     $imageData = $image->encodeByMediaType('image/png'); // PNG لا يدعم تقليل الجودة بنفس طريقة JPG
-
                     break;
                 case 'webp':
-
                     $imageData = $image->encodeByMediaType('image/webp', quality: $quality);
                     break;
+                case 'gif':
+                    $imageData = $image->encodeByMediaType('image/gif');
+                    break;
                 default:
-                    $imageData = $image;
+                    try {
+                        $imageData = $image->encodeByMediaType(quality: $quality);
+                    } catch (\Exception $e) {
+                        $imageData = $image->encodeByMediaType('image/jpeg', quality: $quality);
+                    }
             }
             // @phpstan-ignore-next-line
-            $size = strlen($imageData); // حجم الصورة الناتجة
+            $size = strlen((string) $imageData); // حجم الصورة الناتجة
 
             if ($size > $sizeLimit && $quality > 30) {
                 $quality -= 10; // قلل الجودة كل مرة
@@ -136,7 +139,7 @@ class UploadingFilesServices
         } while ($size > $sizeLimit);
 
         // @phpstan-ignore-next-line
-        Storage::disk($disk)->put($folderName . '/' . $fileName, $imageData); // حفظ الصورة النهائية على Storage
+        Storage::disk($disk)->put($folderName . '/' . $fileName, (string) $imageData); // حفظ الصورة النهائية على Storage
 
         return $folderName . '/' . $fileName;
     }

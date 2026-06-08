@@ -67,7 +67,7 @@
                     <div class="flex justify-between items-start gap-4">
                         <div class="flex flex-col">
                             <span
-                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $detail->educationalActivity?->activity_name }}</span>
+                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $detail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}</span>
                             <span class="text-xs text-zinc-500">
                                 {{ $detail->educationalActivity?->period_start?->format('Y-m-d') }}
                                 <span class="text-indigo-600 dark:text-indigo-400 font-semibold ml-1">
@@ -128,9 +128,10 @@
                         <div class="flex items-center gap-1.5">
                             @if ($detail->educationalActivity)
                                 @can('view', $detail->educationalActivity)
-                                    <flux:button wire:click="openScheduleShowModal({{ $detail->educational_activity_id }})"
-                                        size="sm" variant="ghost"
-                                        icon="eye" class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
+                                    <flux:button
+                                        x-on:click="$dispatch('open-schedule-details', { id: {{ $detail->educational_activity_id }} })"
+                                        size="sm" variant="ghost" icon="eye"
+                                        class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
                                 @endcan
                             @endif
                             @can('update', $detail)
@@ -201,7 +202,7 @@
                         <tr wire:key="detail-{{ $detail->id }}"
                             class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap text-sm">
-                                {{ $detail->educationalActivity?->activity_name }}
+                                {{ $detail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex flex-col gap-0.5">
@@ -237,9 +238,10 @@
                                 <div class="flex items-center justify-end gap-2">
                                     @if ($detail->educationalActivity)
                                         @can('view', $detail->educationalActivity)
-                                            <flux:button wire:click="openScheduleShowModal({{ $detail->educational_activity_id }})"
-                                                size="sm" variant="ghost"
-                                                icon="eye" class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
+                                            <flux:button
+                                                x-on:click="$dispatch('open-schedule-details', { id: {{ $detail->educational_activity_id }} })"
+                                                size="sm" variant="ghost" icon="eye"
+                                                class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
                                         @endcan
                                     @endif
                                     @can('update', $detail)
@@ -312,7 +314,7 @@
                     <div>
                         <flux:label>{{ __('Activity Name') }}</flux:label>
                         <div class="text-sm text-zinc-900 dark:text-white font-medium mt-1">
-                            {{ $selectedDetail->educationalActivity?->activity_name }}
+                            {{ $selectedDetail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}
                         </div>
                     </div>
 
@@ -452,21 +454,6 @@
                     <flux:button x-on:click="$dispatch('modal-close', { name: 'show-detail-modal' })">
                         {{ __('Close') }}</flux:button>
                 </div>
-            @endif
-        </div>
-    </flux:modal>
-
-    {{-- Schedule Show Modal --}}
-    <flux:modal name="schedule-show-modal" class="w-full md:w-[900px] h-[90vh] overflow-y-auto">
-        <div class="space-y-4">
-            @if ($selectedScheduleToShowId)
-                @php
-                    $scheduleModelToShow = \App\Models\ActivitySchedule::find($selectedScheduleToShowId);
-                @endphp
-                @if ($scheduleModelToShow)
-                    <livewire:org-app.educational-activity-schedules.show :schedule="$scheduleModelToShow" :isModal="true"
-                        wire:key="show-schedule-{{ $selectedScheduleToShowId }}" />
-                @endif
             @endif
         </div>
     </flux:modal>

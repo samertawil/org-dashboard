@@ -32,6 +32,7 @@ class StudentFiltterExport implements FromCollection, WithHeadings
             ->when(!empty($this->filters['searchBatchNo']), fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('batch_no', $this->filters['searchBatchNo'])))
             ->when(!empty($this->filters['searchRegionId']), fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('region_id', $this->filters['searchRegionId'])))
             ->when(!empty($this->filters['searchCityId']), fn($q) => $q->whereHas('studentGroup', fn($sq) => $sq->where('city_id', $this->filters['searchCityId'])))
+            ->when(!empty($this->filters['searchStatusId']), fn($q) => $q->where('status_id', $this->filters['searchStatusId']))
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($student) {

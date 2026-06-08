@@ -23,7 +23,7 @@ class Edit extends Component
         $this->group_id                    = $schedule->group_id;
         $this->educational_activity_domain = $schedule->educational_activity_domain;
         $this->target_category             = $schedule->target_category;
-        $this->activity_name               = $schedule->activity_name;
+        $this->activity_name               = $schedule->getRawOriginal('activity_name');
         $this->activity_description        = $schedule->activity_description;
         $this->period_start                = $schedule->period_start?->format('Y-m-d\TH:i');
         $this->period_end                  = $schedule->period_end?->format('Y-m-d\TH:i');

@@ -19,13 +19,14 @@ class EducationalActivityDetailRepo
         $user = auth()->user();
         $query = ActivitySchedule::query();
 
-        if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
+        if ($user->isSuperAdmin() || Gate::allows('select.any.student') || Gate::allows('select.any.educational-activity-detail')) {
 
             return $query;
         }
 
-        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
-        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
+        $teacherGroups = $user->teacher()->select('student_group_id', 'job_title')->get();
+        $groupIds167 = $teacherGroups->where('job_title', 167)->pluck('student_group_id')->toArray();
+        $groupIds166 = $teacherGroups->where('job_title', 166)->pluck('student_group_id')->toArray();
         $employeeId = $user->employee?->id;
 
         return $query->where(function ($q) use ($groupIds167, $groupIds166, $employeeId) {
@@ -66,8 +67,9 @@ class EducationalActivityDetailRepo
             return $query;
         }
 
-        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
-        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
+        $teacherGroups = $user->teacher()->select('student_group_id', 'job_title')->get();
+        $groupIds167 = $teacherGroups->where('job_title', 167)->pluck('student_group_id')->toArray();
+        $groupIds166 = $teacherGroups->where('job_title', 166)->pluck('student_group_id')->toArray();
         $employeeId = $user->employee?->id;
 
         return $query->whereHas('educationalActivity', function ($q) use ($groupIds167, $groupIds166, $employeeId) {

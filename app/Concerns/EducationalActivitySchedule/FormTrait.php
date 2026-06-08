@@ -29,7 +29,7 @@ trait FormTrait
     #[Validate('required|string|max:100')]
     public $target_category = '';
 
-    #[Validate('required|string|max:255')]
+    #[Validate('required|exists:statuses,id')]
     public $activity_name = '';
 
     #[Validate('nullable|string')]
@@ -147,6 +147,17 @@ trait FormTrait
     {
         return $this->allStatuses()
             ->where('p_id_sub', config('appConstant.educational_activity_domains'));
+    }
+
+    /**
+     * أسماء الأنشطة التعليمية من جدول الحالات
+     * p_id_sub = appConstant.educational_activity_names
+     */
+    #[Computed()]
+    public function activityNames()
+    {
+        return $this->allStatuses()
+            ->where('p_id_sub', config('appConstant.educational_activity_names'));
     }
 
     /**

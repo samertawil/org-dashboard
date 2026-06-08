@@ -174,7 +174,7 @@
                                 <div class="flex-1 min-w-0 space-y-1">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <h4 class="font-bold text-sm text-zinc-800 dark:text-zinc-100 leading-snug">
-                                            {{ $task->activity_name }}
+                                            {{ $task->activityNameStatus?->status_name ?? '—' }}
                                         </h4>
                                         <flux:badge size="sm" color="{{ $task->task_status_color }}"
                                             class="font-semibold rounded-full px-2.5">

@@ -103,12 +103,12 @@ class ExportFiles extends Component
     public function exportSurveyLate()
     {
         $this->validate([
-            'surveyLate' => 'required|exists:statuses,id',
+            'surveyLate' => 'nullable|exists:statuses,id',
             'batchNoLate' => 'required',
-            'groupIdLate' => 'required|exists:student_groups,id',
+            'groupIdLate' => 'nullable|exists:student_groups,id',
         ]);
 
-        $surveyName = Status::find($this->surveyLate)?->status_name;
+        $surveyName = $this->surveyLate ? (Status::find($this->surveyLate)?->status_name ?? '') : __('All_Surveys');
         $filename = "Survey_Late_{$surveyName}_Batch_{$this->batchNoLate}_" . now()->format('Y-m-d_H-i') . ".xlsx";
 
         return (new SurveyLate($this->surveyLate, $this->groupIdLate, $this->batchNoLate))->download($filename);

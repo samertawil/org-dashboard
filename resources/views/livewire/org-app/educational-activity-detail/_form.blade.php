@@ -103,7 +103,10 @@
                     <flux:error name="teacher_report_detail" />
                 </flux:field>
             </div>
-
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
+                <livewire:org-app.educational-activity-detail.gallery :detail="isset($this->detail) ? $this->detail : null" :isModal="true"
+                    wire:key="form-attachments-gallery" />
+            </div>
             <div
                 class="{{ $this->isModal ? 'col-span-1 flex-col sm:flex-row' : 'md:col-span-2 lg:col-span-3' }} flex items-center justify-end gap-2 mt-6 relative z-0">
                 <span title="{{ isset($type) && $type === 'save' ? __('Create') : __('Update') }}">
@@ -125,7 +128,5 @@
         </form>
     </div>
 
-    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm p-6">
-        <livewire:org-app.educational-activity-detail.gallery :detail="isset($this->detail) ? $this->detail : null" :isModal="true" wire:key="form-attachments-gallery" />
-    </div>
+
 </div>

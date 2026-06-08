@@ -6,14 +6,14 @@ use App\Models\StudentGroup;
 use App\Enums\GlobalSystemConstant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Gate;
+
 
 class StudentGroupRepo
 {
     public static function studentGroups()
     {
         return Cache::rememberForever('StudentGroup-all', function () {
-            return StudentGroup::select('id', 'name', 'batch_no')->get();
+            return StudentGroup::select('id', 'name', 'batch_no', 'start_date', 'end_date', 'activation')->get();
         });
     }
     public static function activeToday()

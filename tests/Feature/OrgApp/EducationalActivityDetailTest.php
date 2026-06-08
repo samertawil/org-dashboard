@@ -231,7 +231,13 @@ it('validates employee ownership when saving new details', function () {
     $component = Livewire::test(Create::class)
         ->set('educational_activity_id', $scheduleOther->id)
         ->set('status_id', 193)
-        ->set('what_learned', 'Test text');
+        ->set('what_learned', 'Test text')
+        ->set('consistent', 5)
+        ->set('teacher_report_detail', 'Some report detail')
+        ->set('existingAttachments', [
+            ['name' => 'test1.jpg', 'path' => 'test1.jpg'],
+            ['name' => 'test2.jpg', 'path' => 'test2.jpg'],
+        ]);
 
     expect(fn() => $component->instance()->save())
         ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class, 'You do not have permission to use this educational activity.');
@@ -322,12 +328,20 @@ it('authorizes deletion only for owner', function () {
         'what_learned' => 'Learned A',
     ]);
 
+    $otherStudentGroup = \App\Models\StudentGroup::create([
+        'id' => 2,
+        'name' => 'Group B',
+        'batch_no' => 1,
+        'max_students' => 20,
+        'activation' => 1,
+    ]);
+
     $schedule2 = ActivitySchedule::create([
         'activity_name' => 'Other Activity',
         'period_start' => now(),
         'period_end' => now()->addHour(),
         'employee_id' => $this->otherEmployee->id,
-        'group_id' => $this->studentGroup->id,
+        'group_id' => $otherStudentGroup->id,
         'activation' => 1,
         'created_by' => $this->otherUser->id,
     ]);
@@ -499,6 +513,12 @@ it('allows user with select.any.educational-activity-detail permission to save n
         ->set('educational_activity_id', $scheduleOther->id)
         ->set('status_id', 193)
         ->set('what_learned', 'Test text')
+        ->set('consistent', 5)
+        ->set('teacher_report_detail', 'Some report detail')
+        ->set('existingAttachments', [
+            ['name' => 'test1.jpg', 'path' => 'test1.jpg'],
+            ['name' => 'test2.jpg', 'path' => 'test2.jpg'],
+        ])
         ->call('save')
         ->assertHasNoErrors();
 
@@ -547,6 +567,12 @@ it('allows user with select.any.educational-activity-detail permission to edit d
         ->set('educational_activity_id', $scheduleOther2->id)
         ->set('status_id', 193)
         ->set('what_learned', 'Updated text')
+        ->set('consistent', 5)
+        ->set('teacher_report_detail', 'Some report detail')
+        ->set('existingAttachments', [
+            ['name' => 'test1.jpg', 'path' => 'test1.jpg'],
+            ['name' => 'test2.jpg', 'path' => 'test2.jpg'],
+        ])
         ->call('save')
         ->assertHasNoErrors();
 
@@ -595,6 +621,13 @@ it('does not require replaced_activity and replaced_reason if status_id is 193',
         ->set('status_id', 193)
         ->set('replaced_activity', '')
         ->set('replaced_reason', '')
+        ->set('what_learned', 'Some learning')
+        ->set('consistent', 5)
+        ->set('teacher_report_detail', 'Some report detail')
+        ->set('existingAttachments', [
+            ['name' => 'test1.jpg', 'path' => 'test1.jpg'],
+            ['name' => 'test2.jpg', 'path' => 'test2.jpg'],
+        ])
         ->call('save')
         ->assertHasNoErrors();
 });

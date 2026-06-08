@@ -14,6 +14,7 @@ use Livewire\Attributes\Layout;
 class DailyStudents extends Component
 {
     public StudentGroup $group;
+    public bool $isModal = false;
     public $date;
     public $formattedDate;
     public $dayName;

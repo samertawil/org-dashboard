@@ -1,1 +1,0 @@
-task-mobile-{{ $task->id }}

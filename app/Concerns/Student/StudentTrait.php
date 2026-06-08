@@ -76,6 +76,7 @@ trait StudentTrait
         $this->selected_relation = null;
 
         $identity_number =  $this->validateOnly('identity_number')['identity_number'];
+
         try {
             $response =  $CivilRegistryApiServices->getData($identity_number);
 

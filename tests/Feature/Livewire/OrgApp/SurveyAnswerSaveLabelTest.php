@@ -186,16 +186,18 @@ it('exports survey answers and groups repeated student metadata correctly', func
     expect($row1[1])->toBe(777888999);
     expect($row1[2])->toBe('Export Student');
     expect($row1[3])->toBe('Export Group');
-    expect($row1[4])->toBe('Q1');
-    expect($row1[5])->toBe('Ans 1');
+    expect($row1[4])->toBe('N/A');
+    expect($row1[5])->toBe('Q1');
+    expect($row1[6])->toBe('Ans 1');
 
     // Row 2 is for the same student and survey, so student metadata should be blank
     expect($row2[0])->toBe('');
     expect($row2[1])->toBe('');
     expect($row2[2])->toBe('');
     expect($row2[3])->toBe('');
-    expect($row2[4])->toBe('Q2');
-    expect($row2[5])->toBe('Ans 2');
+    expect($row2[4])->toBe('N/A');
+    expect($row2[5])->toBe('Q2');
+    expect($row2[6])->toBe('Ans 2');
 });
 
 it('ExportFiles component correctly lists accessible batches and groups using AccessibleGroupsTrait', function () {

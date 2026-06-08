@@ -119,7 +119,8 @@ it('filters schedules by employee_id for regular teacher (job_title != 167)', fu
     actingAs($this->teacherUser);
 
     $component = Livewire::test(Index::class)
-        ->set('filterBatch', '3'); // Set batch to match group1
+        ->set('filterBatch', '3') // Set batch to match group1
+        ->set('filterGroup', (string)$this->group1->id);
 
     $schedules = $component->instance()->schedules;
     
@@ -176,7 +177,8 @@ it('does not filter schedules by employee_id for teacher with job_title 167', fu
     actingAs($this->teacherUser);
 
     $component = Livewire::test(Index::class)
-        ->set('filterBatch', '3'); // Set batch to match group1
+        ->set('filterBatch', '3') // Set batch to match group1
+        ->set('filterGroup', (string)$this->group1->id);
 
     $schedules = $component->instance()->schedules;
     
