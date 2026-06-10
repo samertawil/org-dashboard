@@ -72,6 +72,9 @@ it('renders groups attendance report', function () {
         'name' => 'Reporting Group',
         'max_students' => 20,
         'activation' => 1,
+        'batch_no' => '1',
+        'start_date' => now()->subDay()->toDateString(),
+        'end_date' => now()->addDay()->toDateString(),
     ]);
 
     Livewire::test(GroupsAttendance::class)

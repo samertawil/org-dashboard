@@ -152,7 +152,7 @@ class Index extends Component
                     $domainName   = $firstSchedule->activityDomain?->status_name ?? '';
                     $employeeNames = $groupSchedules->map(fn($s) => $s->employee?->full_name)->filter()->unique()->implode(', ');
 
-                    $title = ($firstSchedule->activityNameStatus?->status_name ?? '') .  ' - ' . ($firstSchedule->periodGroups?->description ?? '');
+                    $title = ($firstSchedule->activityNameStatus?->activity_name ?? '') .  ' - ' . ($firstSchedule->periodGroups?->description ?? '');
                     if ($allGroupsStr) {
                         $title .= ' | ' . $allGroupsStr;
                     }

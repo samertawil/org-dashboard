@@ -221,10 +221,10 @@ class Index extends Component
                 fn($q) =>
                 $q->where(function ($subQuery) {
                     $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
-                        $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                        $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
                     })
-                    ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                    ->orWhere('notes', 'like', '%' . $this->search . '%');
+                        ->orWhere('target_category', 'like', '%' . $this->search . '%')
+                        ->orWhere('notes', 'like', '%' . $this->search . '%');
                 })
             )
             ->when(
@@ -435,10 +435,10 @@ class Index extends Component
                 fn($q) =>
                 $q->where(function ($subQuery) {
                     $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
-                        $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                        $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
                     })
-                    ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                    ->orWhere('notes', 'like', '%' . $this->search . '%');
+                        ->orWhere('target_category', 'like', '%' . $this->search . '%')
+                        ->orWhere('notes', 'like', '%' . $this->search . '%');
                 })
             )
             ->when(

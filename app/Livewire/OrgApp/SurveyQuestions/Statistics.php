@@ -66,11 +66,31 @@ class Statistics extends Component
         $groupIds = $groups->pluck('id')->toArray();
 
         // ── استعلام 1: عدد المستجيبين (distinct account_id) لكل مجموعة ───────
-        $respondentsByGroup = SurveyAnswer::where('survey_no', $this->surveyNo)
-            ->join('students', function ($join) {
-                $join->on('survey_answers.account_id', '=', 'students.identity_number');
-            })
-            ->whereIn('students.student_groups_id', $groupIds)
+        $surveyConfig = \App\Models\SurveyTable::where('survey_for_section', $this->surveyNo)->first();
+        $fromAge = $surveyConfig ? $surveyConfig->from_age : null;
+        $toAge = $surveyConfig ? $surveyConfig->to_age : null;
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+
+        $respondentsQuery = SurveyAnswer::where('survey_answers.survey_no', $this->surveyNo)
+            ->join('students', 'survey_answers.account_id', '=', 'students.identity_number')
+            ->join('student_groups', 'students.student_groups_id', '=', 'student_groups.id')
+            ->whereIn('students.student_groups_id', $groupIds);
+
+        if ($fromAge !== null || $toAge !== null) {
+            if ($isSqlite) {
+                $respondentsQuery->whereRaw(
+                    '(strftime("%Y", student_groups.start_date) - strftime("%Y", students.birth_date)) BETWEEN ? AND ?',
+                    [$fromAge ?? 0, $toAge ?? 999]
+                );
+            } else {
+                $respondentsQuery->whereRaw(
+                    'TIMESTAMPDIFF(YEAR, students.birth_date, student_groups.start_date) BETWEEN ? AND ?',
+                    [$fromAge ?? 0, $toAge ?? 999]
+                );
+            }
+        }
+
+        $respondentsByGroup = $respondentsQuery
             ->select(
                 'students.student_groups_id',
                 DB::raw('COUNT(DISTINCT survey_answers.account_id) as respondents')
@@ -79,9 +99,26 @@ class Statistics extends Component
             ->pluck('respondents', 'student_groups_id');
 
         // ── استعلام 2: إجمالي الطلاب في كل مجموعة ───────────────────────────
-        $totalByGroup = Student::whereIn('student_groups_id', $groupIds)
-            ->select('student_groups_id', DB::raw('COUNT(*) as total'))
-            ->groupBy('student_groups_id')
+        $totalQuery = Student::whereIn('students.student_groups_id', $groupIds)
+            ->join('student_groups', 'students.student_groups_id', '=', 'student_groups.id');
+
+        if ($fromAge !== null || $toAge !== null) {
+            if ($isSqlite) {
+                $totalQuery->whereRaw(
+                    '(strftime("%Y", student_groups.start_date) - strftime("%Y", students.birth_date)) BETWEEN ? AND ?',
+                    [$fromAge ?? 0, $toAge ?? 999]
+                );
+            } else {
+                $totalQuery->whereRaw(
+                    'TIMESTAMPDIFF(YEAR, students.birth_date, student_groups.start_date) BETWEEN ? AND ?',
+                    [$fromAge ?? 0, $toAge ?? 999]
+                );
+            }
+        }
+
+        $totalByGroup = $totalQuery
+            ->select('students.student_groups_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('students.student_groups_id')
             ->pluck('total', 'student_groups_id');
 
         // ── تجميع النتائج ─────────────────────────────────────────────────────

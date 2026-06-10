@@ -62,6 +62,33 @@ Use `wire:loading` to toggle visibility or attributes based on network requests.
     <div wire:loading wire:target="delete({{ $id }})">Deleting...</div>
     ```
 
+#### C. Backdrop Blur Loading Overlay (Polished Container Loading)
+
+For dashboard cards, panels, or content grids where data updates dynamically (e.g., when filtering metrics or refreshing charts), use a backdrop-blur overlay over a relative container. This provides a premium, modern feel (frosted glass effect) and signals loading state without completely hiding content or freezing the page.
+
+##### Design Pattern Requirements:
+1. **Relative Anchor**: The outer container must be styled with `relative` positioning.
+2. **Absolute Overlay**: The overlay div must be styled with `absolute inset-0 z-10 bg-white/50 dark:bg-zinc-800/50 backdrop-blur-sm flex items-center justify-center`.
+3. **Livewire Integration**: Use `wire:loading.delay` (to prevent flickering on very fast responses) and `wire:target="..."` specifying the bound filter properties to restrict the overlay to specific interactions.
+4. **Visual Indicator**: Place an animated icon (e.g. `<flux:icon name="arrow-path" class="size-8 animate-spin text-zinc-500" />`) in the center.
+
+##### Implementation Example:
+```html
+<div class="relative">
+    <!-- Loading Overlay with Backdrop Blur -->
+    <div wire:loading.delay
+         wire:target="selectedBatch, selectedRegion, selectedGroup"
+         class="absolute inset-0 z-10 bg-white/50 dark:bg-zinc-800/50 backdrop-blur-sm flex items-center justify-center">
+        <flux:icon name="arrow-path" class="size-8 animate-spin text-zinc-500" />
+    </div>
+
+    <!-- The content container that will be overlaid during load -->
+    <div class="space-y-6">
+        <!-- KPI Cards, Charts, Tables, etc. -->
+    </div>
+</div>
+```
+
 #### B. Alpine.js Loading (`x-show`)
 
 For standard form submissions (non-Livewire), use Alpine.js to manage local state.

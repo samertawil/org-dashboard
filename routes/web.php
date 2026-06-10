@@ -89,6 +89,9 @@ use App\Livewire\OrgApp\EducationalActivityDetail\Edit as EADEdit;
 use App\Livewire\OrgApp\EducationalActivityDetail\Index as EADIndex;
 use App\Livewire\OrgApp\EducationalActivityDetail\Show as EADShow;
 use App\Livewire\OrgApp\EducationalActivityDetail\Gallery as EADGallery;
+use App\Livewire\OrgApp\EducationalActivityNames\Create as EANCreate;
+use App\Livewire\OrgApp\EducationalActivityNames\Edit as EANEdit;
+use App\Livewire\OrgApp\EducationalActivityNames\Index as EANIndex;
 use App\Livewire\SocialLogin;
 use App\Mail\SendQuotationMail;
 use App\Http\Middleware\ForcePasswordReset;
@@ -216,6 +219,10 @@ Route::middleware(['auth',  ForcePasswordReset::class])->prefix('dashboard')->gr
     Route::get('/learnin-subject/{subject}/edit', SubjectEdit::class)->name('subject.edit');
     Route::get('/learnin-subject', SubjectIndex::class)->name('subject.index');
 
+    Route::get('/educational-activity-names/create', EANCreate::class)->name('educational-activity-names.create');
+    Route::get('/educational-activity-names/{educationalActivityName}/edit', EANEdit::class)->name('educational-activity-names.edit');
+    Route::get('/educational-activity-names', EANIndex::class)->name('educational-activity-names.index');
+
     Route::get('/gallery', \App\Livewire\OrgApp\Gallery\Index::class)->name('gallery.index');
 
 
@@ -279,6 +286,7 @@ Route::middleware(['auth',  ForcePasswordReset::class])->prefix('dashboard')->gr
     Route::get('/reports/survey-comparison', \App\Livewire\OrgApp\Reports\SurveyComparisonReport::class)->name('reports.survey-comparison');
     Route::get('/reports/monthly-manager-report', \App\Livewire\OrgApp\Reports\MonthlyManagerReport::class)->name('reports.monthly.manager.report');
     Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
+    Route::get('/reports/supervisor-activities-report', \App\Livewire\OrgApp\Reports\SupervisorActivitiesReport::class)->name('reports.supervisor.activities.report');
 
     // OrgApp - Educational Activity Schedules
     Route::get('/educational-activity-schedules', EASIndex::class)->name('educational-activity-schedules.index');

@@ -64,8 +64,14 @@ class StudentRepo
       LEFT JOIN survey_answers sa 
           ON s.identity_number = sa.account_id 
          AND sa.survey_no = st.survey_for_section
-      WHERE TIMESTAMPDIFF(YEAR, s.birth_date, sg.start_date) 
-          BETWEEN COALESCE(st.from_age, 0) AND COALESCE(st.to_age, 999)
+      WHERE (
+            CASE 
+                WHEN TIMESTAMPDIFF(YEAR, s.birth_date, sg.start_date) = 9 
+                     AND TIMESTAMPDIFF(MONTH, s.birth_date, sg.start_date) % 12 >= 9 
+                THEN 10
+                ELSE TIMESTAMPDIFF(YEAR, s.birth_date, sg.start_date)
+            END
+          ) BETWEEN COALESCE(st.from_age, 0) AND COALESCE(st.to_age, 999)
         AND (
               st.semester IN (0, 1)
               OR (st.semester = 2 AND CURDATE() BETWEEN sg.start_date AND sg.end_date)

@@ -71,7 +71,7 @@ class Index extends Component
         $survey = SurveyTable::findOrFail($id);
         $survey->is_active = !$survey->is_active;
         $survey->save();
-        
+
         session()->flash('message', __('Status updated successfully.'));
     }
 
@@ -119,18 +119,18 @@ class Index extends Component
         }
 
         $survey->delete();
-        
+
         session()->flash('message', __('Survey deleted successfully.'));
     }
 
     public function render()
     {
-        
-        if (Gate::denies('outer.servey.list')) {
+
+        if (Gate::denies('survey.manage')) {
             abort(403, 'You do not have the necessary permissions');
         }
 
-        
+
         $surveys = SurveyTable::with(['targetRel', 'sectionRel'])
             ->when($this->search, function ($query) {
                 $query->where('survey_name', 'like', '%' . $this->search . '%');

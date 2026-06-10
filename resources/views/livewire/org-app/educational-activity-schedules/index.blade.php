@@ -175,7 +175,7 @@
                                     <div class="flex justify-between items-start">
                                         <div class="flex flex-col">
                                             <span
-                                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $schedule->activityNameStatus?->status_name ?? '—' }}</span>
+                                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $schedule->activityNameStatus?->activity_name ?? '—' }}</span>
                                             @if ($schedule->activity_description)
                                                 <span
                                                     class="text-xs text-zinc-500 truncate max-w-[200px]">{{ $schedule->activity_description }}</span>
@@ -360,7 +360,7 @@
                                             class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
                                             <div class="flex flex-col gap-1 max-w-[220px]">
                                                 <span class="font-semibold truncate text-zinc-900 dark:text-zinc-100"
-                                                    title="{{ $schedule->activityNameStatus?->status_name ?? '' }}">{{ $schedule->activityNameStatus?->status_name ?? '—' }}</span>
+                                                    title="{{ $schedule->activityNameStatus?->activity_name ?? '' }}">{{ $schedule->activityNameStatus?->activity_name ?? '—' }}</span>
                                                 @if ($schedule->activity_description)
                                                     <span class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
                                                         title="{{ $schedule->activity_description }}">
@@ -723,7 +723,7 @@
                                                                                 {{-- Activity Name --}}
                                                                                 <td
                                                                                     class="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">
-                                                                                    {{ $schedule->activityNameStatus?->status_name ?? '—' }}
+                                                                                    {{ $schedule->activityNameStatus?->activity_name ?? '—' }}
                                                                                 </td>
                                                                                 {{-- Domain --}}
                                                                                 <td class="px-4 py-3">

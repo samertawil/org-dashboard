@@ -136,8 +136,42 @@ class Student extends Model
 
         $birth = Carbon::parse($birthDate);
         $join = Carbon::parse($joinDate);
+        $diff = $birth->diff($join); // DateInterval
+        $years = $diff->y;
+        $months = $diff->m;
+
+        // إذا كان العمر أقل من 10 سنوات بشهرين أو أقل (9 سنوات و 10 أشهر فأكثر) يتم احتسابه 10 سنوات
+        if ($years == 9 && $months >= 9) {
+            $years = 10;
+            $months = 0;
+            return 10;
+        }
+
+        //   return "$years years and $months months";
 
         return $birth->diffInYears($join);
+    }
+
+    public function getStudentExactAgeWhenJoinAttribute(): mixed
+    {
+
+        $birthDate = $this->birth_date;
+        $joinDate = StudentGroup::where('id', $this->student_groups_id)->first()->start_date ?? null;
+
+        $this->join_date;
+
+        if (!$birthDate || !$joinDate) {
+            return 0;
+        }
+
+        $birth = Carbon::parse($birthDate);
+        $join = Carbon::parse($joinDate);
+        $diff = $birth->diff($join); // DateInterval
+        $years = $diff->y;
+        $months = $diff->m;
+
+
+        return "$years years and $months months";
     }
 
 

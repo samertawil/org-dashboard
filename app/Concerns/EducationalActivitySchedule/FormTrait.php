@@ -29,7 +29,7 @@ trait FormTrait
     #[Validate('required|string|max:100')]
     public $target_category = '';
 
-    #[Validate('required|exists:statuses,id')]
+    #[Validate('required|exists:educational_activity_names,id')]
     public $activity_name = '';
 
     #[Validate('nullable|string')]
@@ -156,8 +156,9 @@ trait FormTrait
     #[Computed()]
     public function activityNames()
     {
-        return $this->allStatuses()
-            ->where('p_id_sub', config('appConstant.educational_activity_names'));
+        return \App\Models\EducationalActivityName::where('activation', 1)
+            ->orderBy('activity_name')
+            ->get();
     }
 
     /**

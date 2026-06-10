@@ -107,6 +107,7 @@ class Create extends Component
     public function surveyFor()
     {
         if ($this->account_id  && $this->student()) {
+
             return StatusRepo::studentBySurveyByAge($this->student());
         }
     }
@@ -194,7 +195,7 @@ class Create extends Component
                     if (is_array($options)) {
                         $decodedVal = json_decode($arText, true);
                         $values = (json_last_error() === JSON_ERROR_NONE && is_array($decodedVal)) ? $decodedVal : [$arText];
-                        
+
                         $labels = [];
                         foreach ($values as $val) {
                             $found = $val;
@@ -265,7 +266,6 @@ class Create extends Component
     }
     public function render()
     {
-
 
         if (Gate::denies('survey-answers.create')) {
             abort(403, 'You do not have the necessary permissions');

@@ -186,7 +186,7 @@ class SurveyResultsExport implements FromQuery, WithHeadings, WithMapping
             'account_id',
             'full_name',
             'batch_no',
-            'group_name',
+            'status_group_name',
             'education_point_name',
             'teacher_name',
             'survey_no',

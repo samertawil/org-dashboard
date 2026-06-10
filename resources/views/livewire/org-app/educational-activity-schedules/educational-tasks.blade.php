@@ -122,7 +122,7 @@
                     <div class="flex justify-between items-start gap-4">
                         <div class="flex flex-col gap-0.5 min-w-0">
                             <span
-                                class="text-sm font-bold text-zinc-900 dark:text-white truncate">{{ $task->activityNameStatus?->status_name ?? $task->activity_name }}</span>
+                                class="text-sm font-bold text-zinc-900 dark:text-white truncate">{{ $task->activityNameStatus?->activity_name ?? $task->activity_name }}</span>
                             <span class="text-[10px] text-zinc-500 font-medium">
                                 {{ $task->day_name }} ({{ $task->period_start?->format('Y-m-d') }})
                             </span>
@@ -288,7 +288,7 @@
                             class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 font-bold text-zinc-900 dark:text-white text-sm">
                                 <div class="flex flex-col">
-                                    <span>{{ $task->activityNameStatus?->status_name ?? $task->activity_name }}</span>
+                                    <span>{{ $task->activityNameStatus?->activity_name ?? $task->activity_name }}</span>
                                     <span class="text-[10px] text-zinc-400 font-normal mt-0.5">
                                         {{ $task->category_label }}
                                     </span>

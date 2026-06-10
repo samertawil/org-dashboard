@@ -223,7 +223,7 @@
                 <div>
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                         {{ __('Activity Name') }}</p>
-                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $schedule->activityNameStatus?->status_name ?? $schedule->activity_name }}</p>
+                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $schedule->activityNameStatus?->activity_name ?? $schedule->activity_name }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">

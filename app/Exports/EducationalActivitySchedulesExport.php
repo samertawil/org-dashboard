@@ -113,7 +113,7 @@ class EducationalActivitySchedulesExport implements FromArray, ShouldAutoSize, W
                     . $schedule->period_end->format('H:i');
 
                 // If multiple activities share the same slot in the same row, join with " / "
-                $activityNameText = $schedule->activityNameStatus?->status_name ?? '';
+                $activityNameText = $schedule->activityNameStatus?->activity_name ?? '';
                 if (isset($grouped[$rowKey]['slots'][$slot]) && $grouped[$rowKey]['slots'][$slot] !== '') {
                     $grouped[$rowKey]['slots'][$slot] .= ' / ' . $activityNameText;
                 } else {

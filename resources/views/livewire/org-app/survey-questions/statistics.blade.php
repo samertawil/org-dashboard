@@ -66,8 +66,16 @@
         </div>
     </div>
 
-    {{-- Results --}}
-    @php $stats = $this->statsPerGroup; @endphp
+    <div class="relative min-h-[300px] flex flex-col gap-6">
+        {{-- Loading Overlay --}}
+        <div wire:loading.delay
+            wire:target="surveyNo, batchNo, groupId"
+            class="absolute inset-0 z-10 bg-white/50 dark:bg-zinc-800/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
+            <flux:icon name="arrow-path" class="size-8 animate-spin text-zinc-500" />
+        </div>
+
+        {{-- Results --}}
+        @php $stats = $this->statsPerGroup; @endphp
 
     @if (!empty($stats))
 
@@ -374,5 +382,6 @@
             </div>
         </div>
     @endif
+    </div>
 
 </div>

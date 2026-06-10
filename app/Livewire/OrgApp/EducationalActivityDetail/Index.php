@@ -60,7 +60,7 @@ class Index extends Component
                 $query->where(function ($q) {
                     $q->whereHas('educationalActivity', function ($sub) {
                         $sub->whereHas('activityNameStatus', function ($statusQuery) {
-                            $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                            $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
                         })
                             ->orWhere('period_start', 'like', '%' . $this->search . '%');
                     })

@@ -5,6 +5,7 @@ namespace App\Livewire\OrgApp\Reports;
 use App\Models\Region;
 use App\Models\Student;
 use App\Models\StudentGroup;
+use App\Enums\GlobalSystemConstant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -13,18 +14,50 @@ class EducationalProgress extends Component
 {
     public $selectedRegion;
     public $selectedGroup;
+    public $selectedBatch;
+
+    public array $genderChartData = ['labels' => [], 'series' => []];
+    public array $groupChartData = ['labels' => [], 'series' => []];
+    public array $ageChartData = ['labels' => [], 'series' => []];
+
+    public function updatedSelectedBatch(): void
+    {
+        $this->selectedGroup = '';
+    }
+
+    public function updatedSelectedRegion(): void
+    {
+        $this->selectedGroup = '';
+    }
 
     public function render()
     {
         if (Gate::denies('reports.educational.progress')) {
             abort(403, 'You do not have the necessary permissions.');
         }
+
+        // Fetch distinct available batch numbers from active student groups
+        $batches = StudentGroup::where('activation', 1)
+            ->whereNotNull('batch_no')
+            ->distinct()
+            ->pluck('batch_no')
+            ->sort()
+            ->values();
+
         // 1. Base Query for Students
         $studentQuery = Student::query()
             ->where('activation', 1);
 
         if ($this->selectedRegion) {
-            $studentQuery->where('region_id', $this->selectedRegion);
+            $studentQuery->whereHas('studentGroup', function ($q) {
+                $q->where('region_id', $this->selectedRegion);
+            });
+        }
+
+        if ($this->selectedBatch) {
+            $studentQuery->whereHas('studentGroup', function ($q) {
+                $q->where('batch_no', $this->selectedBatch);
+            });
         }
 
         if ($this->selectedGroup) {
@@ -38,31 +71,30 @@ class EducationalProgress extends Component
         if ($this->selectedRegion) {
             $groupQuery->where('region_id', $this->selectedRegion);
         }
+        if ($this->selectedBatch) {
+            $groupQuery->where('batch_no', $this->selectedBatch);
+        }
         if ($this->selectedGroup) {
             $groupQuery->where('id', $this->selectedGroup);
         }
         $groups = $groupQuery->get();
 
+        // Get groups filtered by region & batch for the dropdown selection
+        $dropdownGroupsQuery = StudentGroup::where('activation', 1);
+        if ($this->selectedRegion) {
+            $dropdownGroupsQuery->where('region_id', $this->selectedRegion);
+        }
+        if ($this->selectedBatch) {
+            $dropdownGroupsQuery->where('batch_no', $this->selectedBatch);
+        }
+        $studentGroups = $dropdownGroupsQuery->get();
 
         // 3. KPIs
         $totalStudents = $students->count();
         $totalGroups = $groups->count();
         $totalCapacity = $groups->sum('max_students');
 
-        // Calculate Enrollment Rate directly from current_student_count in groups for accuracy over raw student list if filtered
-        // OR filtering the students list is better if filters applied.
-        // Let's us Students list to be dynamic with filters.
         $occupancyRate = $totalCapacity > 0 ? ($totalStudents / $totalCapacity) * 100 : 0;
-
-        // Attendance Rate (Dummy logic for now as DailyAttendance model structure wasn't fully inspected but assumed exists)
-        // If StudentDailyAttendance exists and linked to student, we can count 'present' days.
-        // For simplicity in this iteration without deep diving into attendance tables, we'll placeholder or simple count if relation exists.
-        // Assuming 'dailyAttendances' relation exists on Student as checked.
-        $totalAttendanceRecords = 0;
-        $presentRecords = 0;
-
-        // To avoid N+1, ideally we'd load this count. For now, let's skip complex attendance calc to avoid SQL errors if table empty/different.
-        // We will show Gender and Age distribution instead which are reliable on Student model.
 
         // 4. Chart Data
 
@@ -70,10 +102,16 @@ class EducationalProgress extends Component
         $genderDistribution = $students->groupBy('gender')
             ->map->count();
 
-        // Map common values 1=Male, 2=Female if integers, or strings. Assuming strings or standard ID.
-        // Let's just use keys.
-        $genderChartData = [
-            'labels' => $genderDistribution->keys()->map(fn($k) => $k == 1 ? __('Male') : ($k == 2 ? __('Female') : $k))->toArray(),
+        // Map keys to Male/Female from GlobalSystemConstant
+        $this->genderChartData = [
+            'labels' => $genderDistribution->keys()->map(function ($k) {
+                if ($k == GlobalSystemConstant::MALE->value) {
+                    return __('Male');
+                } elseif ($k == GlobalSystemConstant::FEMALE->value) {
+                    return __('Female');
+                }
+                return $k;
+            })->toArray(),
             'series' => $genderDistribution->values()->toArray()
         ];
 
@@ -83,25 +121,36 @@ class EducationalProgress extends Component
             ->sortDesc()
             ->take(10);
 
-        $groupChartData = [
+        $this->groupChartData = [
             'labels' => $groupCounts->keys()->toArray(),
             'series' => $groupCounts->values()->toArray()
         ];
 
-        // Chart 3: Age Distribution (Calculated from birth_date)
+        // Chart 3: Age Distribution (Calculated from student_age_when_join logic)
         $ageDistribution = $students->map(function ($student) {
-            if (!$student->birth_date) return 'Unknown';
-            return Carbon::parse($student->birth_date)->age;
+            $birthDate = $student->birth_date;
+            $joinDate = $student->studentGroup->start_date ?? null;
+            if (!$birthDate || !$joinDate) {
+                return 'Unknown';
+            }
+            try {
+                $birth = Carbon::parse($birthDate);
+                $join = Carbon::parse($joinDate);
+                return $birth->diffInYears($join);
+            } catch (\Exception $e) {
+                return 'Unknown';
+            }
         })->groupBy(function ($age) {
-            if ($age === 'Unknown') return 'Unknown';
+            if ($age === 'Unknown' || $age < 0) return 'Unknown';
             if ($age < 6) return '< 6';
-            if ($age <= 12) return '6-12';
+            if ($age <= 9) return '6-9';
+            if ($age <= 12) return '10-12';
             if ($age <= 18) return '13-18';
             return '18+';
         })->map->count();
 
         // Ensure consistent order
-        $ageOrder = ['< 6', '6-12', '13-18', '18+', 'Unknown'];
+        $ageOrder = ['< 6', '6-9', '10-12', '13-18', '18+', 'Unknown'];
         $sortedAgeData = [];
         foreach ($ageOrder as $key) {
             if (isset($ageDistribution[$key])) {
@@ -109,19 +158,24 @@ class EducationalProgress extends Component
             }
         }
 
-        $ageChartData = [
+        $this->ageChartData = [
             'labels' => array_keys($sortedAgeData),
             'series' => array_values($sortedAgeData)
         ];
 
+        // Fetch only regions that have active student groups
+        $activeRegions = Region::whereIn('id', function ($q) {
+            $q->select('region_id')
+                ->from('student_groups')
+                ->where('activation', 1)
+                ->whereNotNull('region_id');
+        })->get();
 
         return view('livewire.org-app.reports.educational-progress', [
-            'regions' => Region::all(),
-            'studentGroups' => StudentGroup::where('activation', 1)->get(),
+            'regions' => $activeRegions,
+            'studentGroups' => $studentGroups,
+            'batches' => $batches,
             'kpis' => compact('totalStudents', 'totalGroups', 'occupancyRate'),
-            'genderChartData' => $genderChartData,
-            'groupChartData' => $groupChartData,
-            'ageChartData' => $ageChartData
         ]);
     }
 }

@@ -18,7 +18,7 @@ beforeEach(function () {
     Status::unguard();
     $this->pendingStatus = Status::firstOrCreate(['id' => 1], ['status_name' => 'Pending']);
     $this->awardedPrStatus = Status::firstOrCreate(['id' => 109], ['status_name' => 'Awarded PR']);
-    $this->awardedQuoteStatus = Status::firstOrCreate(['id' => 172], ['status_name' => 'Winner']);
+    $this->awardedQuoteStatus = Status::firstOrCreate(['id' => 176], ['status_name' => 'Winner']);
     $this->currencyStatus = Status::firstOrCreate(['id' => 3], ['status_name' => 'USD']);
     Status::reguard();
 

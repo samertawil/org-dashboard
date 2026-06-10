@@ -67,7 +67,7 @@
                     <div class="flex justify-between items-start gap-4">
                         <div class="flex flex-col">
                             <span
-                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $detail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}</span>
+                                class="text-sm font-bold text-zinc-900 dark:text-white">{{ $detail->educationalActivity?->activityNameStatus?->activity_name ?? '—' }}</span>
                             <span class="text-xs text-zinc-500">
                                 {{ $detail->educationalActivity?->period_start?->format('Y-m-d') }}
                                 <span class="text-indigo-600 dark:text-indigo-400 font-semibold ml-1">
@@ -202,7 +202,7 @@
                         <tr wire:key="detail-{{ $detail->id }}"
                             class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
                             <td class="px-6 py-4 font-medium text-zinc-900 dark:text-white whitespace-nowrap text-sm">
-                                {{ $detail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}
+                                {{ $detail->educationalActivity?->activityNameStatus?->activity_name ?? '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex flex-col gap-0.5">
@@ -314,7 +314,7 @@
                     <div>
                         <flux:label>{{ __('Activity Name') }}</flux:label>
                         <div class="text-sm text-zinc-900 dark:text-white font-medium mt-1">
-                            {{ $selectedDetail->educationalActivity?->activityNameStatus?->status_name ?? '—' }}
+                            {{ $selectedDetail->educationalActivity?->activityNameStatus?->activity_name ?? '—' }}
                         </div>
                     </div>
 

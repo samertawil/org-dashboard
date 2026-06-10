@@ -44,7 +44,7 @@
                         selectedLabel: '',
                         options: [
                             @foreach ($this->activityNames as $actName)
-                                { id: '{{ $actName->id }}', name: '{{ addslashes($actName->status_name) }}' },
+                                { id: '{{ $actName->id }}', name: '{{ addslashes($actName->activity_name) }}' },
                             @endforeach
                         ],
                         get filteredOptions() {

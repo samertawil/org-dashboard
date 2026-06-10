@@ -13,11 +13,9 @@
     $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
 @endphp
 
-<body x-data="{ isOffline: !navigator.onLine, currentPath: window.location.pathname }"
-      @online.window="isOffline = false"
-      @offline.window="isOffline = true"
-      x-on:livewire:navigated.window="currentPath = window.location.pathname"
-      class="min-h-screen bg-white dark:bg-zinc-800">
+<body x-data="{ isOffline: !navigator.onLine, currentPath: window.location.pathname }" @online.window="isOffline = false" @offline.window="isOffline = true"
+    x-on:livewire:navigated.window="currentPath = window.location.pathname"
+    class="min-h-screen bg-white dark:bg-zinc-800">
     <flux:sidebar sticky stashable="false" :collapsible="true"
         class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header class="flex items-center justify-between gap-2">
@@ -105,12 +103,11 @@
 
         <flux:sidebar.nav x-show="!isOffline">
             <flux:sidebar.group :heading="__('App')" class="grid">
-
-
                 @canany(['subject.index', 'subject.create', 'student.group.index', 'student.group.create',
-                    'student.index', 'student.create', 'teacher-student-groups.index', 'teacher-student-groups.create'])
+                    'student.index', 'student.create', 'teacher-student-groups.index', 'teacher-student-groups.create',
+                    'educational-activity-names.index'])
                     <flux:sidebar.group expandable
-                        :expanded="request()->routeIs(['subject.*', 'student.group.*', 'student.index', 'student.create', 'student.edit', 'student.show', 'student.imported-files', 'teacher-student-groups.*'])"
+                        :expanded="request()->routeIs(['subject.*', 'student.group.*', 'student.index', 'student.create', 'student.edit', 'student.show', 'student.imported-files', 'teacher-student-groups.*', 'educational-activity-names.*'])"
                         :heading="__('Education')" icon="book-open-text" class="grid">
 
                         @can('subject.index')
@@ -134,11 +131,17 @@
                             </flux:sidebar.item>
                         @endcan
 
-
                         @can('teacher-student-groups.index')
                             <flux:sidebar.item icon="document-text" :href="route('teacher-student-groups.index')"
                                 :current="request()->routeIs('teacher-student-groups.index')" wire:navigate>
                                 {{ __('Teachers Assignment') }}
+                            </flux:sidebar.item>
+                        @endcan
+
+                        @can('educational-activity-names.index')
+                            <flux:sidebar.item icon="puzzle-piece" :href="route('educational-activity-names.index')"
+                                :current="request()->routeIs('educational-activity-names.*')" wire:navigate>
+                                {{ __('Educational Activity Names') }}
                             </flux:sidebar.item>
                         @endcan
 
@@ -198,20 +201,33 @@
 
                 @canany(['survey.index', 'survey.create', 'survey.manage', 'survey.export', 'survey-answers.create',
                     'survey.grading.scale.index', 'outer.servey.list'])
-                    <flux:sidebar.group expandable :expanded="request()->routeIs(['survey.*'])" icon="calendar-days"
-                        class="grid">
+                    <flux:sidebar.group expandable :expanded="request()->routeIs(['survey.*', 'survey-answers.*'])"
+                        icon="calendar-days" class="grid">
                         <x-slot:heading>
                             {{ __('Surveys') }}
 
                         </x-slot:heading>
 
+                        @can('survey-answers.create')
+                            <flux:sidebar.item icon="plus" :href="route('survey-answers.create')"
+                                :current="request()->routeIs('survey-answers.create')" wire:navigate>
+                                {{ __('Answer Survey') }}
+                            </flux:sidebar.item>
+                        @endcan
+
+                        @canany(['survey.index', 'survey-answers.create'])
+                            <flux:sidebar.item icon="list-bullet" :href="route('survey-answers.index')"
+                                :current="request()->routeIs('survey-answers.index')" wire:navigate>
+                                {{ __('Survey List') }}
+                            </flux:sidebar.item>
+                        @endcanany
                         @can('survey.manage')
                             <flux:sidebar.item icon="list-bullet" :href="route('survey.manage')"
                                 :current="request()->routeIs('survey.manage')" wire:navigate>
-                                {{ __('Student Surveys') }}
+                                {{ __('Manage Surveys') }}
                             </flux:sidebar.item>
                         @endcan
-                        @can('outer.servey.list')
+                        @can('survey.manage')
                             <flux:sidebar.item icon="list-bullet" :href="route('survey.index')"
                                 :current="request()->routeIs('survey.index')" wire:navigate>
                                 {{ __('Manage Outer Surveys') }}
@@ -238,12 +254,7 @@
                             </flux:sidebar.item>
                         @endcan
 
-                        @can('survey-answers.create')
-                            <flux:sidebar.item icon="plus" :href="route('survey-answers.create')"
-                                :current="request()->routeIs('survey-answers.create')" wire:navigate>
-                                {{ __('Answers Survey') }}
-                            </flux:sidebar.item>
-                        @endcan
+
 
                         @can('survey.export')
                             <flux:sidebar.item icon="document-arrow-down" :href="route('survey.export')"
@@ -368,9 +379,19 @@
                                 @can('reports.educational.progress')
                                     <flux:sidebar.item icon="academic-cap" :href="route('reports.educational.progress')"
                                         :current="request()->routeIs('reports.educational.progress')" wire:navigate>
-                                        {{ __('Educational Reports') }}
+                                        {{ __('Student Groups Report') }}
                                     </flux:sidebar.item>
                                 @endcan
+                                @if (auth()->user()->isSuperAdmin() ||
+                                        Gate::allows('reports.all') ||
+                                        Gate::allows('reports.groups.attendance') ||
+                                        auth()->user()->teacher()->where('job_title', 167)->exists())
+                                    <flux:sidebar.item icon="document-text"
+                                        :href="route('reports.supervisor.activities.report')"
+                                        :current="request()->routeIs('reports.supervisor.activities.report')" wire:navigate>
+                                        {{ __('Supervisor Activities Report') }}
+                                    </flux:sidebar.item>
+                                @endif
                                 @can('survey-questions.show')
                                     <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"
                                         :current="request()->routeIs('survey-questions.show')" wire:navigate>
@@ -595,16 +616,18 @@
 
         <flux:sidebar.nav x-show="isOffline" x-cloak>
             <div class="px-2 py-2 mb-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
-                <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                <span
+                    class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
                     <flux:icon name="wifi" variant="micro" class="size-4 animate-pulse" />
                     {{ __('Offline Mode') }}
                 </span>
             </div>
-            
+
             <flux:sidebar.group :heading="__('Available Offline')" class="grid">
                 @can('student.group.index')
                     <flux:sidebar.item icon="rectangle-group" :href="route('student.group.index')"
-                        :current="request()->routeIs(['student.group.index', 'student.group.date.students', 'student.group.schedule'])" wire:navigate
+                        :current="request()->routeIs(['student.group.index', 'student.group.date.students', 'student.group.schedule'])"
+                        wire:navigate
                         class="text-amber-600 dark:text-amber-400 font-bold bg-amber-500/5 dark:bg-amber-500/10">
                         {{ __('Education Points List') }}
                     </flux:sidebar.item>
@@ -622,9 +645,11 @@
     <flux:header class="lg:hidden">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-        <div x-show="isOffline" x-cloak class="ml-2 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-1.5">
+        <div x-show="isOffline" x-cloak
+            class="ml-2 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-1.5">
             <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-            <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{{ __('Offline') }}</span>
+            <span
+                class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{{ __('Offline') }}</span>
         </div>
 
         <flux:spacer />

@@ -2,13 +2,13 @@
 
 namespace App\Concerns\SurveyAnswers;
 
-use App\Models\Employee;
-use App\Models\Student;
 use App\Models\SurveyQuestion;
 use App\Reposotries\employeeRepo;
 use App\Reposotries\StudentRepo;
+use App\Reposotries\SurveyTableRepo;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
+
 
 trait SurveyAnswersTrait
 {
@@ -46,5 +46,11 @@ trait SurveyAnswersTrait
     public function students()
     {
         return StudentRepo::students();
+    }
+
+    #[Computed()]
+    public function surveys()
+    {
+        return SurveyTableRepo::surveys();
     }
 }

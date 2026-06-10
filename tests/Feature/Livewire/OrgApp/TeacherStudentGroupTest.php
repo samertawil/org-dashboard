@@ -13,6 +13,19 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
     $this->partner = \App\Models\PartnerInstitution::create(['name' => 'Partner A']);
+
+    // Seed job title statuses
+    $this->teacherStatus = \App\Models\Status::forceCreate([
+        'id' => 166,
+        'status_name' => 'Teacher',
+        'p_id_sub' => 165,
+    ]);
+    
+    $this->supervisorStatus = \App\Models\Status::forceCreate([
+        'id' => 167,
+        'status_name' => 'Supervisor',
+        'p_id_sub' => 165,
+    ]);
 });
 
 it('renders the teacher student group index page', function () {
@@ -22,7 +35,6 @@ it('renders the teacher student group index page', function () {
 });
 
 it('can create a teacher student group assignment', function () {
-    // We may need foreign keys like Status but let's suppress that if not strictly required, or create them.
     $teacherUser = User::factory()->create();
     $employee = Employee::forceCreate([
         'user_id' => $teacherUser->id,
@@ -41,7 +53,7 @@ it('can create a teacher student group assignment', function () {
     Livewire::test(Create::class)
         ->set('teacher_id', $teacherUser->id)
         ->set('student_group_id', $studentGroup->id)
-        ->set('job_title', 'Teacher')
+        ->set('job_title', $this->teacherStatus->id)
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route('teacher-student-groups.index'));
@@ -71,6 +83,7 @@ it('can edit a teacher student group assignment', function () {
     $mapping = TeacherStudentGroup::forceCreate([
         'teacher_id' => $teacherUser->id,
         'student_group_id' => $studentGroup->id,
+        'job_title' => $this->teacherStatus->id,
     ]);
 
     $newStudentGroup = StudentGroup::forceCreate([
@@ -81,7 +94,7 @@ it('can edit a teacher student group assignment', function () {
 
     Livewire::test(Edit::class, ['teacherStudentGroup' => $mapping])
         ->set('student_group_id', $newStudentGroup->id)
-        ->set('job_title', 'Teacher')
+        ->set('job_title', $this->teacherStatus->id)
         ->call('edit')
         ->assertHasNoErrors()
         ->assertRedirect(route('teacher-student-groups.index'));

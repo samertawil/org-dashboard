@@ -74,13 +74,7 @@ return new class extends Migration
             $table->renameColumn('temp_activity_name', 'activity_name');
         });
 
-        // 7. Add foreign key constraint
-        Schema::table('educational_activity_schedules', function (Blueprint $table) {
-            $table->foreign('activity_name')
-                ->references('id')
-                ->on('statuses')
-                ->nullOnDelete();
-        });
+
     }
 
     /**
@@ -88,10 +82,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // 1. Add temp string column
-        Schema::table('educational_activity_schedules', function (Blueprint $table) {
-            $table->string('temp_activity_name')->nullable();
-        });
+        // 1. Add temp string column if it doesn't exist
+        if (!Schema::hasColumn('educational_activity_schedules', 'temp_activity_name')) {
+            Schema::table('educational_activity_schedules', function (Blueprint $table) {
+                $table->string('temp_activity_name')->nullable();
+            });
+        }
 
         // 2. Fetch all statuses for p_id_sub = 197
         $statuses = DB::table('statuses')
@@ -100,32 +96,49 @@ return new class extends Migration
             ->toArray();
 
         // 3. Update temp string column with the status name
-        $schedules = DB::table('educational_activity_schedules')->select('id', 'activity_name')->get();
-        foreach ($schedules as $schedule) {
-            if ($schedule->activity_name && isset($statuses[$schedule->activity_name])) {
-                DB::table('educational_activity_schedules')
-                    ->where('id', $schedule->id)
-                    ->update(['temp_activity_name' => $statuses[$schedule->activity_name]]);
+        if (Schema::hasColumn('educational_activity_schedules', 'activity_name')) {
+            $schedules = DB::table('educational_activity_schedules')->select('id', 'activity_name')->get();
+            foreach ($schedules as $schedule) {
+                if ($schedule->activity_name && isset($statuses[$schedule->activity_name])) {
+                    DB::table('educational_activity_schedules')
+                        ->where('id', $schedule->id)
+                        ->update(['temp_activity_name' => $statuses[$schedule->activity_name]]);
+                }
             }
         }
 
-        // 4. Drop the foreign key and the ID column
-        Schema::table('educational_activity_schedules', function (Blueprint $table) {
-            if (DB::getDriverName() !== 'sqlite') {
-                $table->dropForeign(['activity_name']);
+        // 4. Drop the ID column
+        if (Schema::hasColumn('educational_activity_schedules', 'activity_name')) {
+            try {
+                Schema::table('educational_activity_schedules', function (Blueprint $table) {
+                    $table->dropForeign('educational_activity_schedules_activity_name_foreign');
+                });
+            } catch (\Throwable $e) {
+                // Ignore if foreign key constraint does not exist
             }
-            $table->dropColumn('activity_name');
-        });
+
+            Schema::table('educational_activity_schedules', function (Blueprint $table) {
+                $table->dropColumn('activity_name');
+            });
+        }
 
         // 5. Rename temp column to activity_name
-        Schema::table('educational_activity_schedules', function (Blueprint $table) {
-            $table->renameColumn('temp_activity_name', 'activity_name');
-        });
+        if (Schema::hasColumn('educational_activity_schedules', 'temp_activity_name') && !Schema::hasColumn('educational_activity_schedules', 'activity_name')) {
+            Schema::table('educational_activity_schedules', function (Blueprint $table) {
+                $table->renameColumn('temp_activity_name', 'activity_name');
+            });
+        }
 
         // 6. Make activity_name non-nullable as it was originally
-        Schema::table('educational_activity_schedules', function (Blueprint $table) {
-            $table->string('activity_name')->nullable(false)->change();
-        });
+        if (Schema::hasColumn('educational_activity_schedules', 'activity_name')) {
+            DB::table('educational_activity_schedules')
+                ->whereNull('activity_name')
+                ->update(['activity_name' => '']);
+
+            Schema::table('educational_activity_schedules', function (Blueprint $table) {
+                $table->string('activity_name')->nullable(false)->change();
+            });
+        }
 
         // Forget the status cache
         Cache::forget('statuses-all');

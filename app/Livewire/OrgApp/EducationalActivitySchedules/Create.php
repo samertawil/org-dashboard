@@ -53,6 +53,7 @@ class Create extends Component
 
     public function save()
     {
+
         $this->validate();
 
         // فحص اذا كان يوجد حضور وغياب لليوم المراد عمل جدوله له

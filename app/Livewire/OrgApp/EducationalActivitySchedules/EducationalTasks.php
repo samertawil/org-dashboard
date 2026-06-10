@@ -150,7 +150,7 @@ class EducationalTasks extends Component
         if ($this->search !== '') {
             $query->where(function ($q) {
                 $q->whereHas('activityNameStatus', function ($statusQuery) {
-                    $statusQuery->where('status_name', 'like', '%' . $this->search . '%');
+                    $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
                 })
                     ->orWhere('activity_description', 'like', '%' . $this->search . '%')
                     ->orWhere('notes', 'like', '%' . $this->search . '%')

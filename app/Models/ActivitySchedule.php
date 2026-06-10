@@ -44,16 +44,31 @@ class ActivitySchedule extends Model
     {
         static::saving(function ($schedule) {
             if (isset($schedule->activity_name) && !is_numeric($schedule->activity_name) && !empty($schedule->activity_name)) {
-                $name = trim($schedule->activity_name);
+                // Normalize the raw text before lookup/insert
+                $name = \App\Models\EducationalActivityName::normalizeName($schedule->activity_name);
+                $coreName = \App\Models\EducationalActivityName::extractCoreName($name);
 
-                $status = \App\Models\Status::firstOrCreate([
-                    'status_name' => $name,
-                    'p_id_sub' => 197,
-                ], [
-                    'used_in_system_id' => 1,
-                ]);
+                // First, try to find an existing record with the same core content
+                // This prevents near-duplicates like "(Hello abc) المهارة" and "المهارة"
+                $existing = \App\Models\EducationalActivityName::all(['id', 'activity_name'])
+                    ->first(function ($record) use ($coreName) {
+                        return \App\Models\EducationalActivityName::extractCoreName(
+                            $record->getRawOriginal('activity_name')
+                        ) === $coreName;
+                    });
 
-                $schedule->activity_name = $status->id;
+                if ($existing) {
+                    $schedule->activity_name = $existing->id;
+                } else {
+                    $activityNameRecord = \App\Models\EducationalActivityName::firstOrCreate([
+                        'activity_name' => $name,
+                    ], [
+                        'activity_domain' => $schedule->educational_activity_domain ?: null,
+                        'activation' => 1,
+                    ]);
+
+                    $schedule->activity_name = $activityNameRecord->id;
+                }
             }
         });
     }
@@ -122,7 +137,7 @@ class ActivitySchedule extends Model
      */
     public function activityNameStatus(): BelongsTo
     {
-        return $this->belongsTo(Status::class, 'activity_name');
+        return $this->belongsTo(EducationalActivityName::class, 'activity_name');
     }
 
     /**

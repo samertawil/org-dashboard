@@ -16,6 +16,9 @@ beforeEach(function () {
     Gate::define('educational-activity-detail.index', fn() => true);
     Gate::define('educational-activity-detail.create', fn() => true);
 
+    // Set fixed test now to avoid day/night time dependency in status checks
+    \Illuminate\Support\Carbon::setTestNow('2026-06-08 10:00:00');
+
     // Seed statuses
     \App\Models\Status::forceCreate([
         'id' => 166,
@@ -66,6 +69,10 @@ beforeEach(function () {
         'id' => 1,
         'activation' => 1,
     ]);
+});
+
+afterEach(function () {
+    \Illuminate\Support\Carbon::setTestNow();
 });
 
 it('classifies task status correctly', function () {
@@ -175,7 +182,7 @@ it('scopes tasks for regular employee to only their own in assigned groups (Job 
 
     Livewire::test(EducationalTasks::class)
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'My Task 1';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'My Task 1';
         });
 });
 
@@ -257,7 +264,7 @@ it('allows manager/admin to see all tasks and filter by employee', function () {
         // Set filter to employee 1 only
         ->set('filterEmployee', (string) $this->employee->id)
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'Employee 1 Task';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'Employee 1 Task';
         });
 });
 
@@ -304,21 +311,21 @@ it('can filter tasks by search query, date, and status', function () {
     Livewire::test(EducationalTasks::class)
         ->set('search', 'Science')
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'Science Lab';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'Science Lab';
         });
 
     // Test Status Filter (Completed)
     Livewire::test(EducationalTasks::class)
         ->set('filterStatus', 'completed')
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'Math Class';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'Math Class';
         });
 
     // Test Date Filter
     Livewire::test(EducationalTasks::class)
         ->set('filterDate', $specificDate->toDateString())
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'History Lecture';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'History Lecture';
         });
 });
 
@@ -366,6 +373,6 @@ it('can filter tasks by student group', function () {
     Livewire::test(EducationalTasks::class)
         ->set('filterGroup', (string) $groupA->id)
         ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->status_name ?? $tasks->first()->activity_name) === 'Alpha Schedule';
+            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'Alpha Schedule';
         });
 });

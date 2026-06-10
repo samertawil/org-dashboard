@@ -47,6 +47,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Models\SurveyTable;
+use App\Observers\SurveyTableObserver;
 
 
 
@@ -91,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
         ActivitySchedule::observe(ActivityScheduleObserver::class);
         EducationalActivityDetail::observe(EducationalActivityDetailObserver::class);
+        SurveyTable::observe(SurveyTableObserver::class);
 
 
 
@@ -154,9 +157,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
-        DB::prohibitDestructiveCommands(
-            app()->isProduction(),
-        );
+        // DB::prohibitDestructiveCommands(
+        //     app()->isProduction(),
+        // );
 
         Password::defaults(
             fn(): ?Password => app()->isProduction()
