@@ -24,13 +24,14 @@
     <div class="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             {{-- Search Filter --}}
-            <flux:field class="relative">
-                <flux:label>{{ __('Search') }}</flux:label>
-                <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search activity, group...')"
-                    icon="magnifying-glass" class="w-full" />
-                <div wire:loading wire:target="search" class="absolute right-3 bottom-2.5">
-                    <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
-                </div>
+            <flux:field>
+                <flux:label>{{ __('Activity Name') }}</flux:label>
+                <flux:select wire:model.live="search" class="w-full">
+                    <option value="">{{ __('All Activities') }}</option>
+                    @foreach ($this->activityNames as $activity)
+                        <option value="{{ $activity->id }}">{{ $activity->activity_name }}</option>
+                    @endforeach
+                </flux:select>
             </flux:field>
 
             {{-- Date Filter --}}

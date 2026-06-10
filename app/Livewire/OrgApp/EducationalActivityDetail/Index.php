@@ -9,7 +9,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Lazy;
 
+#[Lazy]
 class Index extends Component
 {
     use WithPagination;

@@ -226,4 +226,52 @@ it('renders the educational activity schedule show page and displays the report 
         ->assertSee('Great details here');
 });
 
+it('filters schedules by selected activity name ID using search parameter', function () {
+    // Create activity names
+    $act1 = \App\Models\EducationalActivityName::create([
+        'activity_name' => 'Math Fun',
+        'activation' => 1,
+    ]);
+
+    $act2 = \App\Models\EducationalActivityName::create([
+        'activity_name' => 'Science Lab',
+        'activation' => 1,
+    ]);
+
+    // Create schedules
+    $schedule1 = \App\Models\ActivitySchedule::create([
+        'activity_name' => $act1->id,
+        'group_id' => $this->group1->id,
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'activation' => 1,
+        'created_by' => $this->adminUser->id,
+    ]);
+
+    $schedule2 = \App\Models\ActivitySchedule::create([
+        'activity_name' => $act2->id,
+        'group_id' => $this->group1->id,
+        'period_start' => now(),
+        'period_end' => now()->addHour(),
+        'employee_id' => $this->employee->id,
+        'activation' => 1,
+        'created_by' => $this->adminUser->id,
+    ]);
+
+    actingAs($this->adminUser);
+
+    // Test with act1 ID as search filter
+    $component = Livewire::test(Index::class)
+        ->set('filterBatch', '3')
+        ->set('filterGroup', (string)$this->group1->id)
+        ->set('search', (string)$act1->id);
+
+    $schedules = $component->instance()->schedules;
+    $ids = collect($schedules->items())->pluck('id')->toArray();
+    expect($ids)->toContain($schedule1->id);
+    expect($ids)->not->toContain($schedule2->id);
+});
+
+
 

@@ -60,7 +60,7 @@ class Index extends Component
         if (!$this->isManager) {
             $this->searchCreatedBy = (string) (auth()->user()->employee?->id ?? '');
         }
-        $this->filterBatch = StudentGroupRepo::studentGroups()->sortByDesc('batch_no')->pluck('batch_no')->first() ?? '';
+        $this->filterBatch = StudentGroupRepo::activeToday()->sortByDesc('batch_no')->pluck('batch_no')->first() ?? '';
         $groupIds = $this->accessibleGroupIds;
         $this->filterGroup = is_array($groupIds) && count($groupIds) === 1 ? (string) $groupIds[0] : '';
     }
@@ -379,8 +379,8 @@ class Index extends Component
                     ->whereIn('student_group_id', $supervisorGroupIds)
                     ->whereNotNull('teacher_id');
             })
-            ->orderBy('full_name')
-            ->get();
+                ->orderBy('full_name')
+                ->get();
         }
 
         return view('livewire.org-app.survey-answers.index', [

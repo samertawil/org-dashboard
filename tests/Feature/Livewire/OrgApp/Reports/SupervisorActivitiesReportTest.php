@@ -154,3 +154,217 @@ it('filters reports based on batch, group, activity name, and dates', function (
             return count($activities) === 1 && $activities[0]['activity_name'] === 'Reading Skill';
         });
 });
+
+it('openCreateReport stores draft in session and redirects to reports.create', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $group = StudentGroup::create([
+        'name'       => 'Test Group Draft',
+        'batch_no'   => 'B-Draft',
+        'activation' => 1,
+    ]);
+
+    $activityName = EducationalActivityName::create([
+        'activity_name' => 'Draft Activity',
+        'activation'    => 1,
+    ]);
+
+    $schedule = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName->id,
+        'period_start'  => now(),
+        'period_end'    => now()->addHour(),
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule->id,
+        'consistent'              => 3,
+        'what_learned'            => 'Draft what learned',
+        'teacher_report_detail'   => 'Draft teacher notes',
+    ]);
+
+    $compoundKey = $group->id . '_' . $activityName->id;
+
+    Livewire::test(SupervisorActivitiesReport::class)
+        ->set('selectedActivities', [$compoundKey])
+        ->call('openCreateReport')
+        ->assertRedirect(route('reports.create'));
+
+    // Verify session contains the draft
+    expect(session()->has('report_draft'))->toBeTrue();
+    $draft = session('report_draft');
+    expect($draft['source'])->toBe('supervisor_activities');
+    expect($draft['items'])->toHaveCount(1);
+    expect($draft['items'][0]['title'])->toContain('Draft Activity');
+    expect($draft['items'][0]['content'])->toContain('عدد الحضور للنشاط هو 0');
+    expect($draft['items'][0]['content'])->toContain('عدد الاطفال المنسجمين بالنشاط هو 3');
+});
+
+it('marks activities as reported when a report has been submitted previously', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $group = StudentGroup::create([
+        'name'       => 'Test Group Reported',
+        'batch_no'   => 'B-Reported',
+        'activation' => 1,
+    ]);
+
+    $activityName = EducationalActivityName::create([
+        'activity_name' => 'Reported Activity',
+        'activation'    => 1,
+    ]);
+
+    $schedule = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName->id,
+        'period_start'  => now(),
+        'period_end'    => now()->addHour(),
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule->id,
+        'consistent'              => 3,
+        'what_learned'            => 'Reported what learned',
+        'teacher_report_detail'   => 'Reported teacher notes',
+    ]);
+
+    // Initially it should not be reported
+    $component = Livewire::test(SupervisorActivitiesReport::class);
+    $component->assertViewHas('activities', function ($activities) {
+        return count($activities) === 1 && $activities[0]['is_reported'] === false;
+    });
+
+    // Create a valid employee first to satisfy foreign keys
+    $employee = \App\Models\Employee::create([
+        'user_id'         => $adminUser->id,
+        'full_name'       => 'Admin Employee',
+        'employee_number' => 'ADM101',
+        'date_of_birth'   => '1990-01-01',
+        'phone'           => '0599000109',
+        'email'           => $adminUser->email,
+        'activation'      => 1,
+        'gender'          => 2,
+    ]);
+
+    // Create a report containing the schedule ID directly in DB
+    DB::table('reports')->insert([
+        'report_name' => 'Test Report',
+        'report_period_type' => 166,
+        'report_main_type' => 166,
+        'report_date' => now(),
+        'date_from' => now()->subDays(5),
+        'date_to' => now(),
+        'employee_id' => $employee->id,
+        'addressed_to_dept_types' => json_encode([]),
+        'addressed_to_employees' => $employee->id,
+        'covered_educational_activity_schedules_ids' => json_encode([$schedule->id]),
+    ]);
+
+    // Now it should show as reported
+    $component = Livewire::test(SupervisorActivitiesReport::class);
+    $component->assertViewHas('activities', function ($activities) {
+        return count($activities) === 1 && $activities[0]['is_reported'] === true;
+    });
+});
+
+it('filters activities based on report status (reported / unreported)', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $group = StudentGroup::create([
+        'name'       => 'Test Group Reported Filter',
+        'batch_no'   => 'B-Filter',
+        'activation' => 1,
+    ]);
+
+    $activityName1 = EducationalActivityName::create([
+        'activity_name' => 'First Activity Filter',
+        'activation'    => 1,
+    ]);
+
+    $activityName2 = EducationalActivityName::create([
+        'activity_name' => 'Second Activity Filter',
+        'activation'    => 1,
+    ]);
+
+    $schedule1 = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName1->id,
+        'period_start'  => now(),
+        'period_end'    => now()->addHour(),
+        'activation'    => 1,
+    ]);
+
+    $schedule2 = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName2->id,
+        'period_start'  => now(),
+        'period_end'    => now()->addHour(),
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule1->id,
+        'consistent'              => 3,
+        'what_learned'            => 'First what learned',
+        'teacher_report_detail'   => 'First notes',
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule2->id,
+        'consistent'              => 3,
+        'what_learned'            => 'Second what learned',
+        'teacher_report_detail'   => 'Second notes',
+    ]);
+
+    $employee = \App\Models\Employee::create([
+        'user_id'         => $adminUser->id,
+        'full_name'       => 'Admin Employee Filter',
+        'employee_number' => 'ADM102',
+        'date_of_birth'   => '1990-01-01',
+        'phone'           => '0599000110',
+        'email'           => $adminUser->email,
+        'activation'      => 1,
+        'gender'          => 2,
+    ]);
+
+    // Create a report containing only schedule1
+    DB::table('reports')->insert([
+        'report_name' => 'Test Filter Report',
+        'report_period_type' => 166,
+        'report_main_type' => 166,
+        'report_date' => now(),
+        'date_from' => now()->subDays(5),
+        'date_to' => now(),
+        'employee_id' => $employee->id,
+        'addressed_to_dept_types' => json_encode([]),
+        'addressed_to_employees' => $employee->id,
+        'covered_educational_activity_schedules_ids' => json_encode([$schedule1->id]),
+    ]);
+
+    $component = Livewire::test(SupervisorActivitiesReport::class);
+
+    // With status = empty, we see both activities
+    $component->assertViewHas('activities', function ($activities) {
+        return count($activities) === 2;
+    });
+
+    // Filter by reported
+    $component->set('selectedReportStatus', 'reported')
+        ->assertViewHas('activities', function ($activities) {
+            return count($activities) === 1 && $activities[0]['activity_name'] === 'First Activity Filter';
+        });
+
+    // Filter by unreported
+    $component->set('selectedReportStatus', 'unreported')
+        ->assertViewHas('activities', function ($activities) {
+            return count($activities) === 1 && $activities[0]['activity_name'] === 'Second Activity Filter';
+        });
+});
+
+
+

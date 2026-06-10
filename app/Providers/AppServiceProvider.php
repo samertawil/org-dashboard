@@ -49,6 +49,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use App\Models\SurveyTable;
 use App\Observers\SurveyTableObserver;
+use App\Models\EducationalActivityName;
+use App\Observers\EducationActiviteNamesObserver;
 
 
 
@@ -94,6 +96,7 @@ class AppServiceProvider extends ServiceProvider
         ActivitySchedule::observe(ActivityScheduleObserver::class);
         EducationalActivityDetail::observe(EducationalActivityDetailObserver::class);
         SurveyTable::observe(SurveyTableObserver::class);
+        EducationalActivityName::observe(EducationActiviteNamesObserver::class);
 
 
 

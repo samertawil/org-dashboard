@@ -287,6 +287,9 @@ Route::middleware(['auth',  ForcePasswordReset::class])->prefix('dashboard')->gr
     Route::get('/reports/monthly-manager-report', \App\Livewire\OrgApp\Reports\MonthlyManagerReport::class)->name('reports.monthly.manager.report');
     Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
     Route::get('/reports/supervisor-activities-report', \App\Livewire\OrgApp\Reports\SupervisorActivitiesReport::class)->name('reports.supervisor.activities.report');
+    Route::get('/reports/saved-reports', \App\Livewire\OrgApp\Reports\SavedReports::class)->name('reports.saved-reports');
+    Route::get('/reports/create', \App\Livewire\OrgApp\Reports\CreateReport::class)->name('reports.create');
+    Route::get('/reports/{report}/show', \App\Livewire\OrgApp\Reports\ShowReport::class)->name('reports.show');
 
     // OrgApp - Educational Activity Schedules
     Route::get('/educational-activity-schedules', EASIndex::class)->name('educational-activity-schedules.index');

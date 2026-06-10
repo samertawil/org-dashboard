@@ -16,6 +16,9 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 beforeEach(function () {
+    // Disable lazy loading in tests
+    Livewire::withoutLazyLoading();
+
     // Setup permissions
     Gate::define('educational-activity-detail.index', fn() => true);
     Gate::define('educational-activity-detail.create', fn() => true);

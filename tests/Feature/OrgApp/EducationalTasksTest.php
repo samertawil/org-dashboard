@@ -309,9 +309,9 @@ it('can filter tasks by search query, date, and status', function () {
 
     // Test Search Filter
     Livewire::test(EducationalTasks::class)
-        ->set('search', 'Science')
-        ->assertViewHas('tasks', function ($tasks) {
-            return $tasks->count() === 1 && ($tasks->first()->activityNameStatus?->activity_name ?? $tasks->first()->activity_name) === 'Science Lab';
+        ->set('search', (string) $delayed->activity_name)
+        ->assertViewHas('tasks', function ($tasks) use ($delayed) {
+            return $tasks->count() === 1 && $tasks->first()->id === $delayed->id;
         });
 
     // Test Status Filter (Completed)

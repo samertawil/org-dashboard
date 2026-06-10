@@ -392,6 +392,12 @@
                                         {{ __('Supervisor Activities Report') }}
                                     </flux:sidebar.item>
                                 @endif
+
+                                <flux:sidebar.item icon="clipboard-document-list"
+                                    :href="route('reports.saved-reports')"
+                                    :current="request()->routeIs('reports.saved-reports')" wire:navigate>
+                                    {{ __('Saved Reports') }}
+                                </flux:sidebar.item>
                                 @can('survey-questions.show')
                                     <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"
                                         :current="request()->routeIs('survey-questions.show')" wire:navigate>

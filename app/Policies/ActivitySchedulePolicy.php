@@ -86,6 +86,13 @@ class ActivitySchedulePolicy
 
     public function update(User $user, ActivitySchedule $activitySchedule): Response|bool
     {
+        $isLocked = \Illuminate\Support\Facades\DB::table('reports')
+            ->whereJsonContains('covered_educational_activity_schedules_ids', $activitySchedule->id)
+            ->exists();
+        if ($isLocked) {
+            return Response::deny(__('This schedule is locked because it has been included in a supervisor consolidated report.'));
+        }
+
         if ($user->isSuperAdmin() || Gate::allows('educational-activity-schedules.create')) {
             return Response::allow();
         }
@@ -95,6 +102,13 @@ class ActivitySchedulePolicy
 
     public function delete(User $user, ActivitySchedule $activitySchedule): Response|bool
     {
+        $isLocked = \Illuminate\Support\Facades\DB::table('reports')
+            ->whereJsonContains('covered_educational_activity_schedules_ids', $activitySchedule->id)
+            ->exists();
+        if ($isLocked) {
+            return Response::deny(__('This schedule is locked because it has been included in a supervisor consolidated report.'));
+        }
+
         if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('educational-activity-schedules.create')) {
 
             return Response::allow();

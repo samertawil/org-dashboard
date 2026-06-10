@@ -52,6 +52,13 @@ class EducationalActivityDetailPolicy
 
     public function update(User $user, EducationalActivityDetail $educationalActivityDetail): Response|bool
     {
+        $isLocked = \Illuminate\Support\Facades\DB::table('reports')
+            ->whereJsonContains('covered_educational_activity_details_ids', $educationalActivityDetail->id)
+            ->exists();
+        if ($isLocked) {
+            return Response::deny(__('This report detail is locked because it has been included in a supervisor consolidated report.'));
+        }
+
         if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create') || $user->can('select.any.student')) {
             return Response::allow();
         }
@@ -61,6 +68,13 @@ class EducationalActivityDetailPolicy
 
     public function delete(User $user, EducationalActivityDetail $educationalActivityDetail): Response|bool
     {
+        $isLocked = \Illuminate\Support\Facades\DB::table('reports')
+            ->whereJsonContains('covered_educational_activity_details_ids', $educationalActivityDetail->id)
+            ->exists();
+        if ($isLocked) {
+            return Response::deny(__('This report detail is locked because it has been included in a supervisor consolidated report.'));
+        }
+
         if ($user->isSuperAdmin() || $user->can('educational-activity-detail.create')) {
             return Response::allow();
         }

@@ -7,6 +7,7 @@ use App\Models\TeacherStudentGroup;
 use App\Models\EducationalActivityDetail;
 use App\Reposotries\StudentGroupRepo;
 use App\Reposotries\EducationalActivityDetailRepo;
+use App\Reposotries\EducationalActivityNameRepo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -23,7 +24,7 @@ class EducationalTasks extends Component
     public string $filterStatus = '';
     public string $filterEmployee = '';
     public string $filterGroup = '';
-    
+
     public ?int $selectedGroupId = null;
     public ?string $selectedDate = null;
     public bool $showAttendanceModal = false;
@@ -103,6 +104,14 @@ class EducationalTasks extends Component
     }
 
     #[Computed]
+    public function activityNames()
+    {
+        return EducationalActivityNameRepo::EducationActiviteNames()
+            ->where('activation', 1)
+            ->values();
+    }
+
+    #[Computed]
     public function groups()
     {
 
@@ -148,16 +157,7 @@ class EducationalTasks extends Component
 
         // 4. Search Scoping
         if ($this->search !== '') {
-            $query->where(function ($q) {
-                $q->whereHas('activityNameStatus', function ($statusQuery) {
-                    $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
-                })
-                    ->orWhere('activity_description', 'like', '%' . $this->search . '%')
-                    ->orWhere('notes', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('group', function ($sub) {
-                        $sub->where('name', 'like', '%' . $this->search . '%');
-                    });
-            });
+            $query->where('activity_name', $this->search);
         }
 
         // 5. Date Scoping
@@ -258,6 +258,7 @@ class EducationalTasks extends Component
     #[Title('Educational Activity Tasks')]
     public function render()
     {
+
         Gate::authorize('create', EducationalActivityDetail::class);
         return view('livewire.org-app.educational-activity-schedules.educational-tasks', [
             'tasks'          => $this->tasks,

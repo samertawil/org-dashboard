@@ -57,12 +57,13 @@
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3 relative">
 
                 {{-- Search --}}
-                <div class="md:col-span-1 relative">
-                    <flux:input wire:model.live="search" :placeholder="__('Search by activity name or notes...')"
-                        icon="magnifying-glass" />
-                    <div wire:loading wire:target="search" class="absolute right-3 top-1/2 -translate-y-1/2">
-                        <flux:icon name="arrow-path" class="size-4 animate-spin text-zinc-400" />
-                    </div>
+                <div>
+                    <flux:select wire:model.live="search">
+                        <option value="">-- {{ __('All Activities') }} --</option>
+                        @foreach ($this->activityNames as $activity)
+                            <option value="{{ $activity->id }}">{{ $activity->activity_name }}</option>
+                        @endforeach
+                    </flux:select>
                 </div>
 
                 {{-- Batch Filter --}}

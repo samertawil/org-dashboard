@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Reposotries\StudentGroupRepo;
 use App\Exports\EducationalActivitySchedulesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Concerns\AccessibleGroupsTrait;
 use App\Models\TeacherStudentGroup;
+use App\Reposotries\EducationalActivityNameRepo;
 
 
 class Index extends Component
@@ -183,6 +183,14 @@ class Index extends Component
     }
 
     #[Computed()]
+    public function activityNames()
+    {
+        return EducationalActivityNameRepo::EducationActiviteNames()
+            ->where('activation', 1)
+            ->values();
+    }
+
+    #[Computed()]
     public function schedules()
     {
         if (empty($this->filterBatch) || empty($this->filterGroup)) {
@@ -219,13 +227,7 @@ class Index extends Component
             ->when(
                 $this->search,
                 fn($q) =>
-                $q->where(function ($subQuery) {
-                    $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
-                        $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
-                    })
-                        ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                        ->orWhere('notes', 'like', '%' . $this->search . '%');
-                })
+                $q->where('activity_name', $this->search)
             )
             ->when(
                 $this->filterDomain,
@@ -433,13 +435,7 @@ class Index extends Component
             ->when(
                 $this->search,
                 fn($q) =>
-                $q->where(function ($subQuery) {
-                    $subQuery->whereHas('activityNameStatus', function ($statusQuery) {
-                        $statusQuery->where('activity_name', 'like', '%' . $this->search . '%');
-                    })
-                        ->orWhere('target_category', 'like', '%' . $this->search . '%')
-                        ->orWhere('notes', 'like', '%' . $this->search . '%');
-                })
+                $q->where('activity_name', $this->search)
             )
             ->when(
                 $this->filterDomain,
