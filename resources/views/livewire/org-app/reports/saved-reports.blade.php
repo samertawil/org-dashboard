@@ -22,22 +22,106 @@
 
     {{-- Filters Card --}}
     <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {{-- Search by name --}}
-            <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search report name...') }}" icon="magnifying-glass" />
-            
-            {{-- Date From --}}
-            <flux:input type="date" wire:model.live="dateFrom" placeholder="{{ __('Report Date From') }}" />
+        <div class="flex flex-col gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {{-- Search by name --}}
+                <flux:input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search report name...') }}" icon="magnifying-glass" />
+                
+                {{-- Date From --}}
+                <flux:input type="date" wire:model.live="dateFrom" placeholder="{{ __('Report Date From') }}" />
 
-            {{-- Date To --}}
-            <flux:input type="date" wire:model.live="dateTo" placeholder="{{ __('Report Date To') }}" />
+                {{-- Date To --}}
+                <flux:input type="date" wire:model.live="dateTo" placeholder="{{ __('Report Date To') }}" />
 
-            {{-- Is Read Filter --}}
-            <flux:select wire:model.live="isReadFilter" placeholder="{{ __('All Statuses') }}">
-                <flux:select.option value="">{{ __('All Statuses') }}</flux:select.option>
-                <flux:select.option value="unread">{{ __('Unread') }}</flux:select.option>
-                <flux:select.option value="read">{{ __('Read') }}</flux:select.option>
-            </flux:select>
+                {{-- Is Read Filter --}}
+                <flux:select wire:model.live="isReadFilter" placeholder="{{ __('All Statuses') }}">
+                    <flux:select.option value="">{{ __('All Statuses') }}</flux:select.option>
+                    <flux:select.option value="unread">{{ __('Unread') }}</flux:select.option>
+                    <flux:select.option value="read">{{ __('Read') }}</flux:select.option>
+                </flux:select>
+
+                {{-- Creator Filter --}}
+                <div class="relative w-full" x-data="{
+                    open: false,
+                    search: '',
+                    selectedId: @entangle('creatorId').live,
+                    selectedLabel: '',
+                    options: [
+                        @foreach ($allEmployees as $employee)
+                            { id: '{{ $employee->id }}', name: '{{ addslashes($employee->full_name) }}' },
+                        @endforeach
+                    ],
+                    get filteredOptions() {
+                        if (!this.search) return this.options;
+                        return this.options.filter(opt => opt.name.toLowerCase().includes(this.search.toLowerCase()));
+                    },
+                    select(id, name) {
+                        this.selectedId = id;
+                        this.selectedLabel = name;
+                        this.open = false;
+                        this.search = '';
+                    },
+                    init() {
+                        let updateLabel = () => {
+                            let selected = this.options.find(opt => opt.id == this.selectedId);
+                            this.selectedLabel = selected ? selected.name : '';
+                        };
+                        updateLabel();
+                        this.$watch('selectedId', () => updateLabel());
+                    }
+                }" @click.outside="open = false" x-init="init()">
+                    
+                    <!-- Trigger Button -->
+                    <button type="button" @click="open = !open" 
+                        class="flex h-10 w-full items-center justify-between rounded-lg border border-zinc-200 border-b-zinc-300/80 bg-white dark:bg-zinc-800 dark:border-zinc-700 px-3 py-2 text-left text-base sm:text-sm leading-[1.375rem] text-zinc-700 dark:text-zinc-300 shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                        <span x-text="selectedLabel || '{{ __('All Creators') }}'"></span>
+                        <svg class="size-4 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" x-transition 
+                        class="absolute left-0 right-0 z-50 mt-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2 shadow-md max-h-72 flex flex-col"
+                        style="display: none;">
+                        <!-- Search Field -->
+                        <div class="relative mb-2 shrink-0">
+                            <input type="text" x-model="search" placeholder="{{ __('Search creator...') }}"
+                                class="w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 py-1.5 px-3 text-sm text-zinc-700 dark:text-zinc-300 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                @keydown.escape="open = false">
+                        </div>
+
+                        <!-- Options List -->
+                        <div class="overflow-y-auto space-y-1 flex-1">
+                            <button type="button" @click="select('', '')"
+                                class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                                {{ __('All Creators') }}
+                            </button>
+                            <template x-for="opt in filteredOptions" :key="opt.id">
+                                <button type="button" @click="select(opt.id, opt.name)"
+                                    class="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/50 dark:hover:text-indigo-400"
+                                    :class="selectedId == opt.id ? 'bg-indigo-50 text-indigo-600 font-medium dark:bg-indigo-900/50 dark:text-indigo-400' : ''">
+                                    <span x-text="opt.name"></span>
+                                    <svg x-show="selectedId == opt.id" class="h-4 w-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </button>
+                            </template>
+                            <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-zinc-400 italic">
+                                {{ __('No results found.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if ($search !== '' || $dateFrom !== '' || $dateTo !== '' || $isReadFilter !== '' || $creatorId !== '')
+                <div class="flex items-center justify-end">
+                    <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">
+                        {{ __('Clear Filters') }}
+                    </flux:button>
+                </div>
+            @endif
         </div>
     </div>
 

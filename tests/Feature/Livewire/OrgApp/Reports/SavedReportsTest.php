@@ -222,3 +222,64 @@ it('restricts saved reports list to creator, recipient, or admin', function () {
             return $reports->pluck('id')->contains($report->id);
         });
 });
+
+it('allows filtering by creator', function () {
+    $adminUser = User::factory()->create(['id' => 1]); // Super admin
+    $this->actingAs($adminUser);
+
+    $reportA = Report::create([
+        'report_name' => 'Report with Creator A',
+        'report_date' => now(),
+        'date_from' => now()->subDays(5),
+        'date_to' => now(),
+        'employee_id' => $this->empA->id,
+        'addressed_to_employees' => $this->empB->id,
+        'addressed_to_dept_types' => ['management'],
+        'report_period_type' => $this->periodType->id,
+        'report_main_type' => $this->mainType->id,
+    ]);
+
+    $reportB = Report::create([
+        'report_name' => 'Report by Emp B',
+        'report_date' => now(),
+        'date_from' => now()->subDays(5),
+        'date_to' => now(),
+        'employee_id' => $this->empB->id,
+        'addressed_to_employees' => $this->empA->id,
+        'addressed_to_dept_types' => ['management'],
+        'report_period_type' => $this->periodType->id,
+        'report_main_type' => $this->mainType->id,
+    ]);
+
+    // 1. Check allEmployees is passed to view
+    Livewire::test(SavedReports::class)
+        ->assertViewHas('allEmployees', function ($employees) {
+            return $employees->pluck('id')->contains($this->empA->id) && $employees->pluck('id')->contains($this->empB->id);
+        });
+
+    // 2. Filter by creator
+    Livewire::test(SavedReports::class)
+        ->set('creatorId', $this->empB->id)
+        ->assertViewHas('reports', function ($reports) use ($reportB) {
+            return $reports->count() === 1 && $reports->first()->id === $reportB->id;
+        });
+});
+
+it('can clear all filters', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Livewire::test(SavedReports::class)
+        ->set('search', 'Test Report')
+        ->set('dateFrom', '2026-06-01')
+        ->set('dateTo', '2026-06-30')
+        ->set('isReadFilter', 'unread')
+        ->set('creatorId', 1)
+        ->call('clearFilters')
+        ->assertSet('search', '')
+        ->assertSet('dateFrom', '')
+        ->assertSet('dateTo', '')
+        ->assertSet('isReadFilter', '')
+        ->assertSet('creatorId', '');
+});
+

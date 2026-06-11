@@ -52,8 +52,40 @@ class SupervisorActivitiesReport extends Component
         }
     }
 
+    public function clearFilters()
+    {
+        $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateTo = Carbon::now()->format('Y-m-d');
+        $this->selectedBatch = '';
+        $this->selectedGroup = '';
+        $this->selectedActivityName = '';
+        $this->selectedReportStatus = '';
+
+        $user = auth()->user();
+        $isAdmin = $user->isSuperAdmin() || Gate::allows('reports.all') || Gate::allows('select.any.student');
+        if ($isAdmin) {
+            $this->selectedSupervisorId = '';
+        } else {
+            $this->selectedSupervisorId = $user->id;
+            $groupIds = $this->accessibleGroupIds;
+            $this->selectedBatch = StudentGroup::whereIn('id', is_array($groupIds) ? $groupIds : [])
+                ->whereNotNull('batch_no')
+                ->orderByDesc('batch_no')
+                ->value('batch_no') ?? '';
+            $this->selectedGroup = is_array($groupIds) && count($groupIds) === 1 ? (string) $groupIds[0] : '';
+        }
+        $this->selectedActivities = [];
+    }
+
+
     public function updatedSelectedBatch()
     {
+        $this->selectedGroup = '';
+    }
+
+    public function updatedSelectedSupervisorId()
+    {
+        $this->selectedBatch = '';
         $this->selectedGroup = '';
     }
 
@@ -74,6 +106,10 @@ class SupervisorActivitiesReport extends Component
         if ($isAdmin) {
             if ($this->selectedSupervisorId) {
                 $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $this->selectedSupervisorId)
+                    ->where('job_title', 167)
+                    ->whereHas('studentGroup', function ($q) {
+                        $q->where('activation', 1);
+                    })
                     ->pluck('student_group_id')
                     ->unique()
                     ->toArray();
@@ -82,6 +118,10 @@ class SupervisorActivitiesReport extends Component
             }
         } else {
             $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $user->id)
+                ->where('job_title', 167)
+                ->whereHas('studentGroup', function ($q) {
+                    $q->where('activation', 1);
+                })
                 ->pluck('student_group_id')
                 ->unique()
                 ->toArray();
@@ -397,9 +437,9 @@ class SupervisorActivitiesReport extends Component
 
     public function render()
     {
-        if (Gate::denies('reports.supervisor.activities.report')) {
-            abort(403, 'You do not have the necessary permissions.');
-        }
+        // if (Gate::denies('reports.supervisor.activities.report')) {
+        //     abort(403, 'You do not have the necessary permissions.');
+        // }
         $groupedActivities = $this->getGroupedActivities();
 
         // Sort grouped activities by batch_no and group_name
@@ -419,6 +459,10 @@ class SupervisorActivitiesReport extends Component
         if ($isAdmin) {
             if ($this->selectedSupervisorId) {
                 $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $this->selectedSupervisorId)
+                    ->where('job_title', 167)
+                    ->whereHas('studentGroup', function ($q) {
+                        $q->where('activation', 1);
+                    })
                     ->pluck('student_group_id')
                     ->unique()
                     ->toArray();
@@ -427,6 +471,10 @@ class SupervisorActivitiesReport extends Component
             }
         } else {
             $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $user->id)
+                ->where('job_title', 167)
+                ->whereHas('studentGroup', function ($q) {
+                    $q->where('activation', 1);
+                })
                 ->pluck('student_group_id')
                 ->unique()
                 ->toArray();
@@ -434,7 +482,7 @@ class SupervisorActivitiesReport extends Component
 
         // Build distinct batch_no list for the filter dropdown from groups visible to this user
         $batchGroupQuery = StudentGroup::where('activation', 1)->whereNotNull('batch_no');
-        if (!$isAdmin && !empty($allowedGroupIds)) {
+        if (!empty($allowedGroupIds)) {
             $batchGroupQuery->whereIn('id', $allowedGroupIds);
         }
         $batches = $batchGroupQuery->distinct()->orderBy('batch_no')->pluck('batch_no');

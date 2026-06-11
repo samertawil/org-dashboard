@@ -288,6 +288,7 @@ Route::middleware(['auth',  ForcePasswordReset::class])->prefix('dashboard')->gr
     Route::get('/reports/daily-log-report', \App\Livewire\OrgApp\Reports\DailyLogReport::class)->name('reports.daily.log.report');
     Route::get('/reports/supervisor-activities-report', \App\Livewire\OrgApp\Reports\SupervisorActivitiesReport::class)->name('reports.supervisor.activities.report');
     Route::get('/reports/saved-reports', \App\Livewire\OrgApp\Reports\SavedReports::class)->name('reports.saved-reports');
+    Route::get('/reports/education-director-dashboard', \App\Livewire\OrgApp\Reports\EducationDirectorDashboard::class)->name('reports.education.director.dashboard');
     Route::get('/reports/create', \App\Livewire\OrgApp\Reports\CreateReport::class)->name('reports.create');
     Route::get('/reports/{report}/show', \App\Livewire\OrgApp\Reports\ShowReport::class)->name('reports.show');
 

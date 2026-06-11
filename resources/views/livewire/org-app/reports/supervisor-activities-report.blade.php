@@ -26,76 +26,86 @@
     <!-- Filters Section -->
     <div
         class="bg-white dark:bg-zinc-800 p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm print:hidden">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-            <!-- Date From -->
-            <flux:input type="date" wire:model.live.debounce.500ms="dateFrom" label="{{ __('Date From') }}"
-                class="w-full" />
+        <div class="flex flex-col gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                <!-- Date From -->
+                <flux:input type="date" wire:model.live.debounce.500ms="dateFrom" label="{{ __('Date From') }}"
+                    class="w-full" />
 
-            <!-- Date To -->
-            <flux:input type="date" wire:model.live.debounce.500ms="dateTo" label="{{ __('Date To') }}"
-                class="w-full" />
+                <!-- Date To -->
+                <flux:input type="date" wire:model.live.debounce.500ms="dateTo" label="{{ __('Date To') }}"
+                    class="w-full" />
 
-            <!-- Batch No -->
-            <div class="flex flex-col gap-1">
-                <flux:label>{{ __('Batch Number') }}</flux:label>
-                <flux:select wire:model.live="selectedBatch" class="w-full">
-                    <option value="">-- {{ __('All Batches') }} --</option>
-                    @foreach ($batches as $batch)
-                        <option value="{{ $batch }}">{{ $batch }}</option>
-                    @endforeach
-                </flux:select>
-            </div>
-
-            <!-- Student Group -->
-            <div class="flex flex-col gap-1">
-                <flux:label>{{ __('Student Group') }}</flux:label>
-                <flux:select wire:model.live="selectedGroup" class="w-full">
-                    <option value="">-- {{ __('All Groups') }} --</option>
-                    @foreach ($groups as $grp)
-                        <option value="{{ $grp->id }}">{{ $grp->name }}</option>
-                    @endforeach
-                </flux:select>
-            </div>
-
-            <!-- Activity Name -->
-            <div class="flex flex-col gap-1">
-                <flux:label>{{ __('Activity Name') }}</flux:label>
-                <flux:select wire:model.live="selectedActivityName" class="w-full">
-                    <option value="">-- {{ __('All Activities') }} --</option>
-                    @foreach ($activityNamesList as $actName)
-                        <option value="{{ $actName->id }}">{{ $actName->activity_name }}</option>
-                    @endforeach
-                </flux:select>
-            </div>
-
-            <!-- Supervisor Teacher -->
-            @if ($canSelectSupervisor)
+                <!-- Batch No -->
                 <div class="flex flex-col gap-1">
-                    <flux:label>{{ __('Supervisor Teacher') }}</flux:label>
-                    <flux:select wire:model.live="selectedSupervisorId" class="w-full">
-                        <option value="">-- {{ __('All Supervisors') }} --</option>
-                        @foreach ($supervisors as $supervisor)
-                            <option value="{{ $supervisor->user_id }}">{{ $supervisor->full_name }}</option>
+                    <flux:label>{{ __('Batch Number') }}</flux:label>
+                    <flux:select wire:model.live="selectedBatch" class="w-full">
+                        <option value="">-- {{ __('All Batches') }} --</option>
+                        @foreach ($batches as $batch)
+                            <option value="{{ $batch }}">{{ $batch }}</option>
                         @endforeach
                     </flux:select>
                 </div>
-            @else
+
+                <!-- Student Group -->
                 <div class="flex flex-col gap-1">
-                    <flux:label>{{ __('Supervisor Teacher') }}</flux:label>
-                    <flux:input type="text" value="{{ auth()->user()->name }}" disabled
-                        class="w-full bg-zinc-50 dark:bg-zinc-900 cursor-not-allowed opacity-75" />
+                    <flux:label>{{ __('Student Group') }}</flux:label>
+                    <flux:select wire:model.live="selectedGroup" class="w-full">
+                        <option value="">-- {{ __('All Groups') }} --</option>
+                        @foreach ($groups as $grp)
+                            <option value="{{ $grp->id }}">{{ $grp->name }}</option>
+                        @endforeach
+                    </flux:select>
+                </div>
+
+                <!-- Activity Name -->
+                <div class="flex flex-col gap-1">
+                    <flux:label>{{ __('Activity Name') }}</flux:label>
+                    <flux:select wire:model.live="selectedActivityName" class="w-full">
+                        <option value="">-- {{ __('All Activities') }} --</option>
+                        @foreach ($activityNamesList as $actName)
+                            <option value="{{ $actName->id }}">{{ $actName->activity_name }}</option>
+                        @endforeach
+                    </flux:select>
+                </div>
+
+                <!-- Supervisor Teacher -->
+                @if ($canSelectSupervisor)
+                    <div class="flex flex-col gap-1">
+                        <flux:label>{{ __('Supervisor Teacher') }}</flux:label>
+                        <flux:select wire:model.live="selectedSupervisorId" class="w-full">
+                            <option value="">-- {{ __('All Supervisors') }} --</option>
+                            @foreach ($supervisors as $supervisor)
+                                <option value="{{ $supervisor->user_id }}">{{ $supervisor->full_name }}</option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+                @else
+                    <div class="flex flex-col gap-1">
+                        <flux:label>{{ __('Supervisor Teacher') }}</flux:label>
+                        <flux:input type="text" value="{{ auth()->user()->name }}" disabled
+                            class="w-full bg-zinc-50 dark:bg-zinc-900 cursor-not-allowed opacity-75" />
+                    </div>
+                @endif
+
+                <!-- Report Status -->
+                <div class="flex flex-col gap-1">
+                    <flux:label>{{ __('Report Status') }}</flux:label>
+                    <flux:select wire:model.live="selectedReportStatus" class="w-full">
+                        <option value="">-- {{ __('All Statuses') }} --</option>
+                        <option value="unreported">{{ __('Unreported') }}</option>
+                        <option value="reported">{{ __('Reported') }}</option>
+                    </flux:select>
+                </div>
+            </div>
+
+            @if ($selectedBatch !== '' || $selectedGroup !== '' || $selectedActivityName !== '' || $selectedReportStatus !== '' || ($canSelectSupervisor && $selectedSupervisorId !== ''))
+                <div class="flex items-center justify-end">
+                    <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark">
+                        {{ __('Clear Filters') }}
+                    </flux:button>
                 </div>
             @endif
-
-            <!-- Report Status -->
-            <div class="flex flex-col gap-1">
-                <flux:label>{{ __('Report Status') }}</flux:label>
-                <flux:select wire:model.live="selectedReportStatus" class="w-full">
-                    <option value="">-- {{ __('All Statuses') }} --</option>
-                    <option value="unreported">{{ __('Unreported') }}</option>
-                    <option value="reported">{{ __('Reported') }}</option>
-                </flux:select>
-            </div>
         </div>
     </div>
 

@@ -15,12 +15,14 @@ class SavedReports extends Component
     public $dateFrom = '';
     public $dateTo = '';
     public $isReadFilter = '';
+    public $creatorId = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
         'isReadFilter' => ['except' => ''],
+        'creatorId' => ['except' => ''],
     ];
 
     public function updatingSearch()
@@ -29,6 +31,11 @@ class SavedReports extends Component
     }
 
     public function updatingIsReadFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCreatorId()
     {
         $this->resetPage();
     }
@@ -49,14 +56,19 @@ class SavedReports extends Component
         }
     }
 
+    public function clearFilters()
+    {
+        $this->reset(['search', 'dateFrom', 'dateTo', 'isReadFilter', 'creatorId']);
+        $this->resetPage();
+    }
+
+
     public function render()
     {
-
         $user = auth()->user();
         $query = Report::query()->with(['employee', 'addressedToEmployee']);
 
         if (!$user->isSuperAdmin()) {
-
             $employeeId = $user->employee?->id;
 
             if ($employeeId) {
@@ -85,10 +97,17 @@ class SavedReports extends Component
             $query->where('is_read', $this->isReadFilter === 'read');
         }
 
+        if ($this->creatorId !== '') {
+            $query->where('employee_id', $this->creatorId);
+        }
+
         $reports = $query->orderByDesc('id')->paginate(10);
+
+        $allEmployees = \App\Models\Employee::where('activation', 1)->orderBy('full_name')->get();
 
         return view('livewire.org-app.reports.saved-reports', [
             'reports' => $reports,
+            'allEmployees' => $allEmployees,
         ]);
     }
 }

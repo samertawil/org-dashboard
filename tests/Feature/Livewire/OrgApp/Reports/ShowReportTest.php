@@ -156,3 +156,54 @@ it('restricts show report page to creator, recipient, or admin', function () {
     Livewire::test(ShowReport::class, ['report' => $report])
         ->assertStatus(200);
 });
+
+it('only marks the report as read when viewed by the addressed employee', function () {
+    $creatorUser = User::factory()->create(['id' => 30]);
+    $creatorEmployee = Employee::create([
+        'user_id' => $creatorUser->id,
+        'employee_number' => 'EMP330',
+        'full_name' => 'Creator Employee Show',
+        'gender' => 2,
+        'activation' => 1,
+    ]);
+
+    $recipientUser = User::factory()->create(['id' => 31]);
+    $recipientEmployee = Employee::create([
+        'user_id' => $recipientUser->id,
+        'employee_number' => 'EMP331',
+        'full_name' => 'Recipient Employee Show',
+        'gender' => 2,
+        'activation' => 1,
+    ]);
+
+    $adminUser = User::factory()->create(['id' => 1]); // Super admin
+
+    $report = Report::create([
+        'report_name' => 'Read Status Report',
+        'report_date' => now(),
+        'date_from' => now()->subDays(5),
+        'date_to' => now(),
+        'employee_id' => $creatorEmployee->id,
+        'addressed_to_employees' => $recipientEmployee->id,
+        'addressed_to_dept_types' => ['management'],
+        'report_period_type' => $this->periodType->id,
+        'report_main_type' => $this->mainType->id,
+        'is_read' => false,
+    ]);
+
+    // 1. Unrelated super admin views - should NOT mark as read
+    $this->actingAs($adminUser);
+    Livewire::test(ShowReport::class, ['report' => $report]);
+    expect($report->fresh()->is_read)->toBeFalse();
+
+    // 2. Creator views - should NOT mark as read
+    $this->actingAs($creatorUser);
+    Livewire::test(ShowReport::class, ['report' => $report]);
+    expect($report->fresh()->is_read)->toBeFalse();
+
+    // 3. Recipient views - SHOULD mark as read
+    $this->actingAs($recipientUser);
+    Livewire::test(ShowReport::class, ['report' => $report]);
+    expect($report->fresh()->is_read)->toBeTrue();
+});
+

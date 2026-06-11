@@ -21,11 +21,11 @@ class ShowReport extends Component
     {
         $user = auth()->user();
         $isAuthorized = false;
+        $employeeId = $user->employee?->id;
 
         if ($user->isSuperAdmin()) {
             $isAuthorized = true;
         } else {
-            $employeeId = $user->employee?->id;
             if ($employeeId && ($report->employee_id === $employeeId || $report->addressed_to_employees === $employeeId)) {
                 $isAuthorized = true;
             }
@@ -38,8 +38,8 @@ class ShowReport extends Component
         // Eager load relations
         $this->report = $report->load(['bodies', 'employee', 'addressedToEmployee', 'periodType', 'mainType', 'requiredFrom']);
 
-        // Mark report as read if it is not already read
-        if (!$this->report->is_read) {
+        // Mark report as read if it is not already read and current user is the addressed employee
+        if (!$this->report->is_read && $employeeId && $this->report->addressed_to_employees === $employeeId) {
             $this->report->update(['is_read' => true]);
         }
 

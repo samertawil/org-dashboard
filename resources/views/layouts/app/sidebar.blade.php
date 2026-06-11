@@ -8,7 +8,7 @@
 @php
     //  $routesToHibernate = [ 'student.setup.map'];
     // $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
-    $routesToHibernate = [''];
+    $routesToHibernate = ['reports.education.director.dashboard'];
 
     $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
 @endphp
@@ -705,7 +705,7 @@
     {{ $slot }}
 
     <script>
-        document.addEventListener('livewire:navigated', () => {
+        function checkAndCollapseSidebar() {
             if (window.innerWidth < 1024) return;
 
             const currentRoute = document.querySelector('meta[name="current-route"]')?.content;
@@ -734,7 +734,13 @@
                     }
                 }, 100);
             }
-        });
+        }
+
+        // Run on Livewire navigation (SPA-style)
+        document.addEventListener('livewire:navigated', checkAndCollapseSidebar);
+
+        // Run on direct/full page load
+        document.addEventListener('DOMContentLoaded', checkAndCollapseSidebar);
     </script>
 
     <livewire:org-app.educational-activity-schedules.show-schedule-modal />

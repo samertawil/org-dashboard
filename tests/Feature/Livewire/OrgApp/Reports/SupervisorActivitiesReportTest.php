@@ -366,5 +366,26 @@ it('filters activities based on report status (reported / unreported)', function
         });
 });
 
+it('can clear all filters', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    Livewire::test(SupervisorActivitiesReport::class)
+        ->set('selectedBatch', 'B-1')
+        ->set('selectedGroup', '12')
+        ->set('selectedActivityName', 'Reading')
+        ->set('selectedReportStatus', 'reported')
+        ->set('selectedSupervisorId', '15')
+        ->set('selectedActivities', ['1_2'])
+        ->call('clearFilters')
+        ->assertSet('selectedBatch', '')
+        ->assertSet('selectedGroup', '')
+        ->assertSet('selectedActivityName', '')
+        ->assertSet('selectedReportStatus', '')
+        ->assertSet('selectedSupervisorId', '')
+        ->assertSet('selectedActivities', []);
+});
+
+
 
 
