@@ -29,10 +29,24 @@ class SupervisorActivitiesReport extends Component
     // Selection state
     public array $selectedActivities = [];
 
+    protected $queryString = [
+        'dateFrom' => ['except' => ''],
+        'dateTo' => ['except' => ''],
+        'selectedBatch' => ['except' => ''],
+        'selectedGroup' => ['except' => ''],
+        'selectedSupervisorId' => ['except' => ''],
+        'selectedActivityName' => ['except' => ''],
+        'selectedReportStatus' => ['except' => ''],
+    ];
+
     public function mount()
     {
-        $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateTo = Carbon::now()->format('Y-m-d');
+        if (empty($this->dateFrom)) {
+            $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
+        }
+        if (empty($this->dateTo)) {
+            $this->dateTo = Carbon::now()->format('Y-m-d');
+        }
 
         $user = auth()->user();
         $isAdmin = $user->isSuperAdmin() || Gate::allows('reports.all') || Gate::allows('select.any.student');
@@ -40,22 +54,28 @@ class SupervisorActivitiesReport extends Component
         if ($isAdmin) {
             $this->canSelectSupervisor = true;
         } else {
-            $this->selectedSupervisorId = $user->id;
+            if (empty($this->selectedSupervisorId)) {
+                $this->selectedSupervisorId = $user->id;
+            }
             $this->canSelectSupervisor = false;
 
             $groupIds = $this->accessibleGroupIds;
-            $this->selectedBatch = StudentGroup::whereIn('id', is_array($groupIds) ? $groupIds : [])
-                ->whereNotNull('batch_no')
-                ->orderByDesc('batch_no')
-                ->value('batch_no') ?? '';
-            $this->selectedGroup = is_array($groupIds) && count($groupIds) === 1 ? (string) $groupIds[0] : '';
+            if (empty($this->selectedBatch)) {
+                $this->selectedBatch = StudentGroup::whereIn('id', is_array($groupIds) ? $groupIds : [])
+                    ->whereNotNull('batch_no')
+                    ->orderByDesc('batch_no')
+                    ->value('batch_no') ?? '';
+            }
+            if (empty($this->selectedGroup)) {
+                $this->selectedGroup = is_array($groupIds) && count($groupIds) === 1 ? (string) $groupIds[0] : '';
+            }
         }
     }
 
     public function clearFilters()
     {
-        $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->dateTo = Carbon::now()->format('Y-m-d');
+        $this->dateFrom = '';
+        $this->dateTo = '';
         $this->selectedBatch = '';
         $this->selectedGroup = '';
         $this->selectedActivityName = '';
@@ -89,7 +109,22 @@ class SupervisorActivitiesReport extends Component
         $this->selectedGroup = '';
     }
 
-    private function getGroupedActivities(?array $restrictToKeys = null)
+    public function updated($propertyName)
+    {
+        if (in_array($propertyName, [
+            'dateFrom',
+            'dateTo',
+            'selectedBatch',
+            'selectedGroup',
+            'selectedActivityName',
+            'selectedSupervisorId',
+            'selectedReportStatus'
+        ])) {
+            $this->selectedActivities = [];
+        }
+    }
+
+    private function getGroupedActivities(?array $restrictToScheduleIds = null)
     {
         $user = auth()->user();
         $isSupervisor = TeacherStudentGroup::where('teacher_id', $user->id)
@@ -132,24 +167,10 @@ class SupervisorActivitiesReport extends Component
             ->whereIn('group_id', $allowedGroupIds)
             ->with(['activityNameStatus', 'activityDomain', 'activityDetail', 'group.teacherAssignments.teacher', 'employee', 'periodGroups']);
 
-        if ($restrictToKeys !== null) {
-            // When restricting to specific compound keys, skip all date/filter conditions
-            // because the compound key (group_id + activity_name) already uniquely identifies the set
-            $schedulesQuery->where(function ($q) use ($restrictToKeys) {
-                foreach ($restrictToKeys as $key) {
-                    $parts = explode('_', $key, 2);
-                    if (count($parts) === 2) {
-                        $q->orWhere(function ($sub) use ($parts) {
-                            $sub->where('group_id', $parts[0])
-                                ->where('activity_name', $parts[1]);
-                        });
-                    }
-                }
-            });
+        if ($restrictToScheduleIds !== null) {
+            $schedulesQuery->whereIn('id', $restrictToScheduleIds);
         } else {
-            // Apply standard filters only when not restricting to specific keys.
-            // Use whereDate() with plain date strings to avoid timezone shifting issues.
-            // Carbon::parse()->startOfDay() sends UTC timestamps that can mismatch local DB values.
+            // Apply standard filters to match the active page filters.
             if ($this->dateFrom) {
                 $schedulesQuery->whereDate('period_start', '>=', $this->dateFrom);
             }
@@ -330,7 +351,7 @@ class SupervisorActivitiesReport extends Component
         unset($act);
 
         // Apply Report Status Filter (only when not restricting to specific keys)
-        if ($restrictToKeys === null) {
+        if ($restrictToScheduleIds === null) {
             if ($this->selectedReportStatus === 'reported') {
                 $groupedActivities = array_filter($groupedActivities, fn($act) => $act['is_reported']);
             } elseif ($this->selectedReportStatus === 'unreported') {
@@ -347,9 +368,82 @@ class SupervisorActivitiesReport extends Component
             return;
         }
 
+        $selectedScheduleIds = [];
+        $selectedKeys = [];
+        $fallbackKeys = [];
+
+        foreach ($this->selectedActivities as $selected) {
+            if (str_contains($selected, '|')) {
+                $parts = explode('|', $selected, 2);
+                $compoundKey = $parts[0];
+                $ids = array_filter(explode(',', $parts[1]));
+                $selectedKeys[] = $compoundKey;
+                $selectedScheduleIds = array_merge($selectedScheduleIds, $ids);
+            } else {
+                $fallbackKeys[] = $selected;
+                $selectedKeys[] = $selected;
+            }
+        }
+
+        if (!empty($fallbackKeys)) {
+            $user = auth()->user();
+            $isAdmin = $user->isSuperAdmin() || Gate::allows('reports.all') || Gate::allows('select.any.student');
+            
+            if ($isAdmin) {
+                if ($this->selectedSupervisorId) {
+                    $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $this->selectedSupervisorId)
+                        ->where('job_title', 167)
+                        ->whereHas('studentGroup', function ($q) {
+                            $q->where('activation', 1);
+                        })
+                        ->pluck('student_group_id')
+                        ->unique()
+                        ->toArray();
+                } else {
+                    $allowedGroupIds = StudentGroup::where('activation', 1)->pluck('id')->toArray();
+                }
+            } else {
+                $allowedGroupIds = TeacherStudentGroup::where('teacher_id', $user->id)
+                    ->where('job_title', 167)
+                    ->whereHas('studentGroup', function ($q) {
+                        $q->where('activation', 1);
+                    })
+                    ->pluck('student_group_id')
+                    ->unique()
+                    ->toArray();
+            }
+
+            $fallbackQuery = ActivitySchedule::query()
+                ->whereIn('group_id', $allowedGroupIds);
+
+            $fallbackQuery->where(function ($q) use ($fallbackKeys) {
+                foreach ($fallbackKeys as $key) {
+                    $parts = explode('_', $key, 2);
+                    if (count($parts) === 2) {
+                        $q->orWhere(function ($sub) use ($parts) {
+                            $sub->where('group_id', $parts[0])
+                                ->where('activity_name', $parts[1]);
+                        });
+                    }
+                }
+            });
+
+            if ($this->dateFrom) {
+                $fallbackQuery->whereDate('period_start', '>=', $this->dateFrom);
+            }
+            if ($this->dateTo) {
+                $fallbackQuery->whereDate('period_start', '<=', $this->dateTo);
+            }
+
+            $fallbackIds = $fallbackQuery->pluck('id')->toArray();
+            $selectedScheduleIds = array_merge($selectedScheduleIds, $fallbackIds);
+        }
+
+        $selectedKeys = array_values(array_unique($selectedKeys));
+        $selectedScheduleIds = array_values(array_unique($selectedScheduleIds));
+
         // Fetch data for selected activities only, bypassing date/batch/group filters
-        // (restrictToKeys path skips all date filters to avoid timezone issues)
-        $grouped = $this->getGroupedActivities($this->selectedActivities);
+        $grouped = $this->getGroupedActivities($selectedScheduleIds);
 
         $draftItems           = [];
         $allScheduleIds       = [];
@@ -357,7 +451,7 @@ class SupervisorActivitiesReport extends Component
         $allActivityIds       = [];
         $allGroupIds          = [];
 
-        foreach ($this->selectedActivities as $key) {
+        foreach ($selectedKeys as $key) {
             if (!isset($grouped[$key])) {
                 continue;
             }
@@ -419,8 +513,7 @@ class SupervisorActivitiesReport extends Component
             $allGroupIds[]    = $item['group_id'];
         }
 
-        // Store draft in session and redirect to the general report creation page
-        session()->put('report_draft', [
+        $dataToDump = [
             'source'                                       => 'supervisor_activities',
             'items'                                        => $draftItems,
             'date_from'                                    => $this->dateFrom,
@@ -430,7 +523,9 @@ class SupervisorActivitiesReport extends Component
             'covered_educational_activities_ids'           => array_values(array_unique($allActivityIds)),
             'covered_educational_activity_schedules_ids'   => array_values(array_unique($allScheduleIds)),
             'covered_educational_activity_details_ids'     => array_values(array_unique($allDetailIds)),
-        ]);
+        ];
+        // Store draft in session and redirect to the general report creation page
+        session()->put('report_draft', $dataToDump);
 
         $this->redirect(route('reports.create'), navigate: true);
     }

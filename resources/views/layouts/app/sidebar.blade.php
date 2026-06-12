@@ -393,11 +393,17 @@
                                     </flux:sidebar.item>
                                 @endif
 
-                                <flux:sidebar.item icon="clipboard-document-list"
-                                    :href="route('reports.saved-reports')"
+                                <flux:sidebar.item icon="clipboard-document-list" :href="route('reports.saved-reports')"
                                     :current="request()->routeIs('reports.saved-reports')" wire:navigate>
                                     {{ __('Saved Reports') }}
                                 </flux:sidebar.item>
+
+                                <flux:sidebar.item icon="clipboard-document-list"
+                                    :href="route('reports.education.director.dashboard')"
+                                    :current="request()->routeIs('reports.education.director.dashboard')" wire:navigate>
+                                    {{ __('director Dashboard') }}
+                                </flux:sidebar.item>
+
                                 @can('survey-questions.show')
                                     <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"
                                         :current="request()->routeIs('survey-questions.show')" wire:navigate>

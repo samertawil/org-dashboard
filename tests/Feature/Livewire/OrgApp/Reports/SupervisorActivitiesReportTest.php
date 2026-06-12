@@ -386,6 +386,142 @@ it('can clear all filters', function () {
         ->assertSet('selectedActivities', []);
 });
 
+it('openCreateReport ignores group, batch and activity name filters when fetching selected activities', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $group = StudentGroup::create([
+        'name'       => 'Group Filter Ignore',
+        'batch_no'   => 'B-Ignore',
+        'activation' => 1,
+    ]);
+
+    $activityName = EducationalActivityName::create([
+        'activity_name' => 'Ignore Filter Activity',
+        'activation'    => 1,
+    ]);
+
+    $schedule = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName->id,
+        'period_start'  => now(),
+        'period_end'    => now()->addHour(),
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule->id,
+        'consistent'              => 4,
+        'what_learned'            => 'Ignore what learned',
+        'teacher_report_detail'   => 'Ignore notes',
+    ]);
+
+    $compoundKey = $group->id . '_' . $activityName->id;
+
+    // Test that even if selectedGroup or selectedActivityName or selectedBatch is set to something else,
+    // openCreateReport still successfully queries the selected activity and stores it in the draft.
+    Livewire::test(SupervisorActivitiesReport::class)
+        ->set('selectedBatch', 'B-Different')
+        ->set('selectedGroup', '999')
+        ->set('selectedActivityName', '999')
+        ->set('selectedActivities', [$compoundKey])
+        ->call('openCreateReport')
+        ->assertRedirect(route('reports.create'));
+
+    expect(session()->has('report_draft'))->toBeTrue();
+    $draft = session('report_draft');
+    expect($draft['items'])->toHaveCount(1);
+    expect($draft['items'][0]['title'])->toContain('Ignore Filter Activity');
+});
+
+it('openCreateReport extracts exact schedule IDs from checkbox compound value and ignores changed date filters', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $group = StudentGroup::create([
+        'name'       => 'Test Group Schedule IDs',
+        'batch_no'   => 'B-IDs',
+        'activation' => 1,
+    ]);
+
+    $activityName = EducationalActivityName::create([
+        'activity_name' => 'Specific Activity',
+        'activation'    => 1,
+    ]);
+
+    // Schedule 1: within the initial range
+    $schedule1 = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName->id,
+        'period_start'  => '2026-06-05 10:00:00',
+        'period_end'    => '2026-06-05 11:00:00',
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule1->id,
+        'consistent'              => 4,
+        'what_learned'            => 'CPR Lesson 1',
+        'teacher_report_detail'   => 'Attentive students',
+    ]);
+
+    // Schedule 2: outside the initial range
+    $schedule2 = ActivitySchedule::create([
+        'group_id'      => $group->id,
+        'activity_name' => (string) $activityName->id,
+        'period_start'  => '2026-06-25 10:00:00',
+        'period_end'    => '2026-06-25 11:00:00',
+        'activation'    => 1,
+    ]);
+
+    EducationalActivityDetail::create([
+        'educational_activity_id' => $schedule2->id,
+        'consistent'              => 3,
+        'what_learned'            => 'CPR Lesson 2',
+        'teacher_report_detail'   => 'Second session notes',
+    ]);
+
+    $compoundKey = $group->id . '_' . $activityName->id;
+    // Checkbox value contains only the first schedule
+    $checkboxValue = $compoundKey . '|' . $schedule1->id;
+
+    Livewire::test(SupervisorActivitiesReport::class)
+        // User sets date filters that only cover Schedule 2 (June 20th - June 30th)
+        ->set('dateFrom', '2026-06-20')
+        ->set('dateTo', '2026-06-30')
+        // But the checked activity checkbox has the IDs for Schedule 1 (which was checked earlier)
+        ->set('selectedActivities', [$checkboxValue])
+        ->call('openCreateReport')
+        ->assertRedirect(route('reports.create'));
+
+    expect(session()->has('report_draft'))->toBeTrue();
+    $draft = session('report_draft');
+    expect($draft['items'])->toHaveCount(1);
+    
+    // Verify that ONLY Schedule 1's content and metrics were transferred,
+    // and Schedule 2's content (CPR Lesson 2) was NOT included.
+    $item = $draft['items'][0];
+    expect($item['content'])->toContain('CPR Lesson 1');
+    expect($item['content'])->not->toContain('CPR Lesson 2');
+    expect($item['content'])->toContain('عدد الاطفال المنسجمين بالنشاط هو 4');
+});
+
+it('clears selectedActivities when filters are updated', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    $component = Livewire::test(SupervisorActivitiesReport::class)
+        ->set('selectedActivities', ['4_197|23,24']);
+
+    expect($component->get('selectedActivities'))->toBe(['4_197|23,24']);
+
+    // Update a filter
+    $component->set('dateFrom', '2026-06-01');
+
+    // It should be cleared
+    expect($component->get('selectedActivities'))->toBe([]);
+});
+
 
 
 

@@ -59,14 +59,81 @@
                 </div>
 
                 <!-- Activity Name -->
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1 min-w-[200px]">
                     <flux:label>{{ __('Activity Name') }}</flux:label>
-                    <flux:select wire:model.live="selectedActivityName" class="w-full">
-                        <option value="">-- {{ __('All Activities') }} --</option>
-                        @foreach ($activityNamesList as $actName)
-                            <option value="{{ $actName->id }}">{{ $actName->activity_name }}</option>
-                        @endforeach
-                    </flux:select>
+                    <div class="relative w-full" x-data="{
+                        open: false,
+                        search: '',
+                        selectedId: @entangle('selectedActivityName').live,
+                        selectedLabel: '',
+                        options: [
+                            @foreach ($activityNamesList as $actName)
+                                { id: '{{ $actName->id }}', name: '{{ addslashes($actName->activity_name) }}' },
+                            @endforeach
+                        ],
+                        get filteredOptions() {
+                            if (!this.search) return this.options;
+                            return this.options.filter(opt => opt.name.toLowerCase().includes(this.search.toLowerCase()));
+                        },
+                        select(id, name) {
+                            this.selectedId = id;
+                            this.selectedLabel = name;
+                            this.open = false;
+                            this.search = '';
+                        },
+                        init() {
+                            let updateLabel = () => {
+                                let selected = this.options.find(opt => opt.id == this.selectedId);
+                                this.selectedLabel = selected ? selected.name : '';
+                            };
+                            updateLabel();
+                            this.$watch('selectedId', () => updateLabel());
+                        }
+                    }" @click.outside="open = false" x-init="init()">
+                        
+                        <!-- Trigger Button -->
+                        <button type="button" @click="open = !open" 
+                            class="flex h-10 w-full items-center justify-between rounded-lg border border-zinc-200 border-b-zinc-300/80 bg-white dark:bg-zinc-800 dark:border-zinc-700 px-3 py-2 text-left text-base sm:text-sm leading-[1.375rem] text-zinc-700 dark:text-zinc-300 shadow-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            <span class="truncate pr-2" x-text="selectedLabel || '-- {{ __('All Activities') }} --'"></span>
+                            <svg class="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" x-transition 
+                            class="absolute left-0 right-0 z-50 mt-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-2 shadow-md max-h-72 flex flex-col"
+                            style="display: none;">
+                            
+                            <!-- Search Field -->
+                            <div class="relative mb-2 shrink-0">
+                                <input type="text" x-model="search" placeholder="{{ __('Search...') }}"
+                                    class="w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 py-1.5 px-3 text-sm text-zinc-700 dark:text-zinc-300 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                    @keydown.escape="open = false">
+                            </div>
+
+                            <!-- Options List -->
+                            <div class="overflow-y-auto space-y-1 flex-1">
+                                <button type="button" @click="select('', '')"
+                                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
+                                    -- {{ __('All Activities') }} --
+                                </button>
+                                <template x-for="opt in filteredOptions" :key="opt.id">
+                                    <button type="button" @click="select(opt.id, opt.name)"
+                                        class="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/50 dark:hover:text-indigo-400"
+                                        :class="selectedId == opt.id ? 'bg-indigo-50 text-indigo-600 font-medium dark:bg-indigo-900/50 dark:text-indigo-400' : ''">
+                                        <span class="truncate pr-2" x-text="opt.name"></span>
+                                        <svg x-show="selectedId == opt.id" class="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </button>
+                                </template>
+                                <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-zinc-400 italic">
+                                    {{ __('No results found.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Supervisor Teacher -->
@@ -119,7 +186,7 @@
         </div>
 
         @forelse($activities as $act)
-            <div
+            <div wire:key="activity-card-{{ $act['compound_key'] }}-{{ implode('-', $act['schedule_ids']) }}"
                 class="{{ $act['is_reported'] ? 'bg-emerald-50/20 dark:bg-emerald-950/5 border-emerald-200 dark:border-emerald-800/30' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700' }} rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 print:border-b print:pb-6 print:mb-6 print:shadow-none">
 
                 <!-- Card Header (Metadata & KPIs) -->
@@ -129,7 +196,7 @@
                         <!-- Checkbox selection -->
                         @if (!$act['is_reported'])
                             <div class="pt-1 print:hidden">
-                                <flux:checkbox wire:model.live="selectedActivities" value="{{ $act['compound_key'] }}" />
+                                <flux:checkbox wire:model.live="selectedActivities" value="{{ $act['compound_key'] }}|{{ implode(',', $act['schedule_ids']) }}" />
                             </div>
                         @else
                             <div class="pt-1 print:hidden text-emerald-600 dark:text-emerald-400" title="{{ __('Report Submitted') }}">

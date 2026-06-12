@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-6" x-data x-on:scroll-to-top.window="window.scrollTo({ top: 0, behavior: 'smooth' })">
 
     {{-- ══ Page Header ══════════════════════════════════════════════════ --}}
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -241,13 +241,16 @@
                         {{-- Content --}}
                         <div class="flex flex-col gap-1">
                             <div class="flex items-center justify-between">
-                                <flux:label>{{ __('Summary Content') }} <span class="text-red-500">*</span></flux:label>
+                                <flux:label>{{ __('Summary Content') }} <span class="text-red-500">*</span>
+                                </flux:label>
                                 @if (config('services.gemini.key'))
-                                    <button type="button" wire:click="summarizeItemWithAI({{ $index }})" 
+                                    <button type="button" wire:click="summarizeItemWithAI({{ $index }})"
                                         wire:loading.attr="disabled"
                                         class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 disabled:opacity-50 transition-colors">
-                                        <flux:icon name="sparkles" class="size-3.5" wire:loading.remove wire:target="summarizeItemWithAI({{ $index }})" />
-                                        <flux:icon name="arrow-path" class="size-3.5 animate-spin text-zinc-500" wire:loading wire:target="summarizeItemWithAI({{ $index }})" />
+                                        <flux:icon name="sparkles" class="size-3.5" wire:loading.remove
+                                            wire:target="summarizeItemWithAI({{ $index }})" />
+                                        <flux:icon name="arrow-path" class="size-3.5 animate-spin text-zinc-500"
+                                            wire:loading wire:target="summarizeItemWithAI({{ $index }})" />
                                         <span>{{ __('AI Summarize') === 'AI Summarize' ? 'تلخيص ذكي (AI)' : __('AI Summarize') }}</span>
                                     </button>
                                 @endif
@@ -322,7 +325,7 @@
         </flux:card>
 
         {{-- ══ Footer Actions ════════════════════════════════════════════════ --}}
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-1">
             <p class="text-xs text-zinc-400 hidden sm:block">
                 {{ __('Report will be emailed to the addressed employee upon saving.') }}
             </p>
@@ -339,6 +342,6 @@
                 </flux:button>
             </div>
         </div>
-
+        @include('layouts._show_all_input_error')
     </form>
 </div>
