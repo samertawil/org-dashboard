@@ -5,12 +5,12 @@
             <flux:subheading>{{ __('Manage your educational activity reports.') }}</flux:subheading>
         </div>
 
-        @can('create', App\Models\EducationalActivityDetail::class)
+        @if ($canCreateDetail)
             <flux:button href="{{ route('educational-activity-detail.create') }}" wire:navigate variant="primary"
                 icon="plus">
                 {{ __('Create New') }}
             </flux:button>
-        @endcan
+        @endif
     </div>
 
     {{-- Success Message --}}
@@ -127,31 +127,31 @@
                         </div>
                         <div class="flex items-center gap-1.5">
                             @if ($detail->educationalActivity)
-                                @can('view', $detail->educationalActivity)
+                                @if ($isSuperAdmin || $canViewAllStudents || $detail->educationalActivity->employee_id == $employeeId || in_array($detail->educationalActivity->group_id, $userGroupIds))
                                     <flux:button
                                         x-on:click="$dispatch('open-schedule-details', { id: {{ $detail->educational_activity_id }} })"
                                         size="sm" variant="ghost" icon="eye"
                                         class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
-                                @endcan
+                                @endif
                             @endif
-                            @can('update', $detail)
+                            @if ($canUpdateDetail && !in_array($detail->id, $lockedDetailIds))
                                 <flux:button href="{{ route('educational-activity-detail.edit', $detail->id) }}"
                                     wire:navigate size="sm" variant="ghost" icon="pencil-square"
                                     class="text-blue-500 hover:text-blue-700" title="{{ __('Edit') }}" />
-                            @endcan
-                            @can('create', App\Models\EducationalActivityDetail::class)
+                            @endif
+                            @if ($canCreateDetail)
                                 <flux:button href="{{ route('educational-activity-detail.gallery', $detail->id) }}"
                                     target="_blank" size="sm" variant="ghost" icon="photo"
                                     class="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'text-blue-500 hover:text-blue-700' : '' }}"
                                     style="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'color: #3b82f6 !important;' : '' }}"
                                     title="{{ __('Gallery') }}" />
-                            @endcan
-                            @can('delete', $detail)
+                            @endif
+                            @if ($canDeleteDetail && !in_array($detail->id, $lockedDetailIds))
                                 <flux:button wire:click="delete({{ $detail->id }})"
                                     wire:confirm="{{ __('Are you sure you want to delete this record?') }}" size="sm"
                                     variant="ghost" icon="trash" class="text-red-500 hover:text-red-700"
                                     title="{{ __('Delete') }}" />
-                            @endcan
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -237,32 +237,32 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     @if ($detail->educationalActivity)
-                                        @can('view', $detail->educationalActivity)
+                                        @if ($isSuperAdmin || $canViewAllStudents || $detail->educationalActivity->employee_id == $employeeId || in_array($detail->educationalActivity->group_id, $userGroupIds))
                                             <flux:button
                                                 x-on:click="$dispatch('open-schedule-details', { id: {{ $detail->educational_activity_id }} })"
                                                 size="sm" variant="ghost" icon="eye"
                                                 class="text-zinc-500 hover:text-zinc-700" title="{{ __('View') }}" />
-                                        @endcan
+                                        @endif
                                     @endif
-                                    @can('update', $detail)
+                                    @if ($canUpdateDetail && !in_array($detail->id, $lockedDetailIds))
                                         <flux:button href="{{ route('educational-activity-detail.edit', $detail->id) }}"
                                             wire:navigate size="sm" variant="ghost" icon="pencil-square"
                                             class="text-blue-500 hover:text-blue-700" title="{{ __('Edit') }}" />
-                                    @endcan
-                                    <flux:button
-                                        @can('create', App\Models\EducationalActivityDetail::class)
-                                        href="{{ route('educational-activity-detail.gallery', $detail->id) }}"
-                                        target="_blank" size="sm" variant="ghost" icon="photo"
-                                        class="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'text-blue-500 hover:text-blue-700' : '' }}"
-                                        style="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'color: #3b82f6 !important;' : '' }}"
-                                        title="{{ __('Gallery') }}" />
-                                    @endcan
-                                        @can('delete', $detail)
+                                    @endif
+                                    @if ($canCreateDetail)
+                                        <flux:button
+                                            href="{{ route('educational-activity-detail.gallery', $detail->id) }}"
+                                            target="_blank" size="sm" variant="ghost" icon="photo"
+                                            class="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'text-blue-500 hover:text-blue-700' : '' }}"
+                                            style="{{ is_array($detail->attchments) && count($detail->attchments) > 0 ? 'color: #3b82f6 !important;' : '' }}"
+                                            title="{{ __('Gallery') }}" />
+                                    @endif
+                                    @if ($canDeleteDetail && !in_array($detail->id, $lockedDetailIds))
                                         <flux:button wire:click="delete({{ $detail->id }})"
                                             wire:confirm="{{ __('Are you sure you want to delete this record?') }}"
                                             size="sm" variant="ghost" icon="trash"
                                             class="text-red-500 hover:text-red-700" title="{{ __('Delete') }}" />
-                                    @endcan
+                                    @endif
                                         </div>
                             </td>
                         </tr>
@@ -293,20 +293,20 @@
                     <flux:heading level="2" size="lg">{{ __('Educational Activity Detail') }}
                     </flux:heading>
                     <div class="flex gap-2">
-                        @can('update', $detail)
+                        @if ($canUpdateDetail && !in_array($selectedDetail->id, $lockedDetailIds))
                             <flux:button href="{{ route('educational-activity-detail.edit', $selectedDetail->id) }}"
                                 wire:navigate variant="ghost" size="sm" icon="pencil-square"
                                 class="text-blue-500 hover:text-blue-700" title="{{ __('Edit') }}">
                                 {{ __('Edit') }}
                             </flux:button>
-                        @endcan
-                        @can('create', App\Models\EducationalActivityDetail::class)
+                        @endif
+                        @if ($canCreateDetail)
                             <flux:button href="{{ route('educational-activity-detail.gallery', $selectedDetail->id) }}"
                                 target="_blank" variant="ghost" size="sm" icon="photo"
                                 class="text-indigo-600 hover:text-indigo-700" title="{{ __('Gallery') }}">
                                 {{ __('Gallery') }}
                             </flux:button>
-                        @endcan
+                        @endif
                     </div>
                 </div>
 

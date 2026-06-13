@@ -7,6 +7,11 @@ use App\Models\Student;
 use App\Models\StudentGroup;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyTable;
+use App\Reposotries\StudentGroupRepo;
+use App\Reposotries\SurveyTableRepo;
+use App\Reposotries\employeeRepo;
+use App\Reposotries\StatusRepo;
+use App\Services\SupervisorService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -30,6 +35,10 @@ class EducationDirectorDashboard extends Component
     // Section 6 – Survey Assessment Stats (pre/post per batch)
     public $surveyBatchNo = '';
 
+    // Supervisor Selector for Admins
+    public $selectedSupervisorId = '';
+    public $canSelectSupervisor = false;
+
     public function updatingReportSearchGroup()
     {
         $this->resetPage('reportsPage');
@@ -42,33 +51,115 @@ class EducationDirectorDashboard extends Component
 
     public function mount()
     {
-        if (Gate::denies('manager.reports.all') && Gate::denies('select.any.student') && !auth()->user()->isSuperAdmin()) {
+        $user = auth()->user();
+        $isSupervisor = SupervisorService::isSupervisor($user);
+        $isAdmin = $user->isSuperAdmin() || Gate::allows('manager.reports.all') || Gate::allows('select.any.student');
+
+        if (!$isSupervisor && !$isAdmin) {
             abort(403, 'You do not have the necessary permissions.');
         }
 
-        $highestBatch = StudentGroup::where('activation', 1)
+        if ($isAdmin) {
+            $this->canSelectSupervisor = true;
+            if (request()->routeIs('reports.supervisor.dashboard')) {
+                // Admin visiting supervisor dashboard route: default to the first supervisor
+                $firstSupervisor = \App\Models\Employee::whereIn('user_id', function ($query) {
+                    $query->select('teacher_id')
+                        ->from('teacher_student_group')
+                        ->where('job_title', 167);
+                })->orderBy('full_name')->first();
+                
+                if ($firstSupervisor) {
+                    $this->selectedSupervisorId = $firstSupervisor->user_id;
+                } else {
+                    $this->selectedSupervisorId = $user->id; // fallback
+                }
+            } else {
+                // Admin visiting director dashboard route: default to All (empty)
+                $this->selectedSupervisorId = '';
+            }
+        } else {
+            $this->canSelectSupervisor = false;
+            $this->selectedSupervisorId = $user->id;
+        }
+
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        $groupsCollection = StudentGroupRepo::studentGroups();
+        if (!empty($supervisedGroupIds)) {
+            $groupsCollection = $groupsCollection->whereIn('id', $supervisedGroupIds);
+        }
+
+        $highestBatch = $groupsCollection
+            ->where('activation', 1)
             ->whereNotNull('batch_no')
-            ->where('batch_no', '!=', '')
+            ->filter(fn($g) => $g->batch_no !== '')
             ->max('batch_no') ?? '';
 
         $this->selectedBatchNo = $highestBatch;
         $this->reportSearchBatch = $highestBatch;
         $this->surveyBatchNo = $highestBatch;
 
-        $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateFrom = Carbon::now()->format('Y-m-d');
         $this->dateTo = Carbon::now()->format('Y-m-d');
+    }
+
+    public function updatedSelectedSupervisorId()
+    {
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        $groupsCollection = StudentGroupRepo::studentGroups();
+        if (!empty($supervisedGroupIds)) {
+            $groupsCollection = $groupsCollection->whereIn('id', $supervisedGroupIds);
+        }
+        $highestBatch = $groupsCollection
+            ->where('activation', 1)
+            ->whereNotNull('batch_no')
+            ->filter(fn($g) => $g->batch_no !== '')
+            ->max('batch_no') ?? '';
+
+        $this->selectedBatchNo = $highestBatch;
+        $this->reportSearchBatch = $highestBatch;
+        $this->surveyBatchNo = $highestBatch;
+        $this->selectedGroupId = '';
+        $this->reportSearchGroup = '';
+        $this->resetPage('reportsPage');
     }
 
     public function clearFilters()
     {
-        $this->dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->dateFrom = Carbon::now()->format('Y-m-d');
         $this->dateTo = Carbon::now()->format('Y-m-d');
         $this->selectedGroupId = '';
         $this->selectedBatchNo = '';
+        if ($this->canSelectSupervisor) {
+            $this->selectedSupervisorId = '';
+        }
+    }
+
+    private function getSupervisedGroupIds()
+    {
+        if (empty($this->selectedSupervisorId)) {
+            return null;
+        }
+        return SupervisorService::getSupervisedGroupIds($this->selectedSupervisorId, true);
     }
 
     public function getMetricsProperty()
     {
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        if ($supervisedGroupIds !== null && empty($supervisedGroupIds)) {
+            return [
+                'total_executed' => 0,
+                'executed_educational' => 0,
+                'executed_psychological' => 0,
+                'executed_values' => 0,
+                'total_attendance' => 0,
+                'avg_daily_attendance' => 0,
+                'weekly_attendance_rate' => 0,
+                'weekly_harmony_rate' => 0,
+                'total_images_count' => 0,
+            ];
+        }
+
         $schedulesQuery = ActivitySchedule::query()
             ->whereDate('period_start', '>=', $this->dateFrom)
             ->whereDate('period_start', '<=', $this->dateTo)
@@ -78,6 +169,8 @@ class EducationDirectorDashboard extends Component
 
         if ($this->selectedGroupId) {
             $schedulesQuery->where('group_id', $this->selectedGroupId);
+        } elseif ($supervisedGroupIds !== null) {
+            $schedulesQuery->whereIn('group_id', $supervisedGroupIds);
         }
 
         $schedules = $schedulesQuery->with('activityDetail')->get();
@@ -188,12 +281,19 @@ class EducationDirectorDashboard extends Component
 
     public function getChartData()
     {
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        if ($supervisedGroupIds !== null && empty($supervisedGroupIds)) {
+            return ['labels' => [], 'series' => []];
+        }
+
         $attendanceQuery = DB::table('student_daily_attendances')
             ->whereDate('attendance_date', '>=', $this->dateFrom)
             ->whereDate('attendance_date', '<=', $this->dateTo);
 
         if ($this->selectedGroupId) {
             $attendanceQuery->where('student_group_id', $this->selectedGroupId);
+        } elseif ($supervisedGroupIds !== null) {
+            $attendanceQuery->whereIn('student_group_id', $supervisedGroupIds);
         }
 
         $attendanceData = $attendanceQuery
@@ -227,6 +327,23 @@ class EducationDirectorDashboard extends Component
 
     public function getSurveyMetricsProperty()
     {
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        if ($supervisedGroupIds !== null && empty($supervisedGroupIds)) {
+            return [
+                'total_registered' => ['count' => 0, 'pct' => 0],
+                'age_6_9' => ['count' => 0, 'pct' => 0],
+                'age_10_12' => ['count' => 0, 'pct' => 0],
+                'male' => ['count' => 0, 'pct' => 0],
+                'female' => ['count' => 0, 'pct' => 0],
+                'elearning' => ['count' => 0, 'pct' => 0],
+                'face_to_face' => ['count' => 0, 'pct' => 0],
+                'war_injured' => ['count' => 0, 'pct' => 0],
+                'displaced' => ['count' => 0, 'pct' => 0],
+                'orphan' => ['count' => 0, 'pct' => 0],
+                'health_issues' => ['count' => 0, 'pct' => 0],
+            ];
+        }
+
         $surveyQuery = DB::table('survey_answers')
             ->join('students', 'survey_answers.account_id', '=', 'students.identity_number')
             ->join('student_groups', 'students.student_groups_id', '=', 'student_groups.id')
@@ -234,6 +351,8 @@ class EducationDirectorDashboard extends Component
 
         if ($this->selectedGroupId) {
             $surveyQuery->where('students.student_groups_id', $this->selectedGroupId);
+        } elseif ($supervisedGroupIds !== null) {
+            $surveyQuery->whereIn('students.student_groups_id', $supervisedGroupIds);
         }
 
         if ($this->selectedBatchNo) {
@@ -369,37 +488,43 @@ class EducationDirectorDashboard extends Component
         ];
     }
 
-    /**
-     * القسم السادس: إحصائيات التقييم القبلي والبعدي مجمعةً حسب الدفعة.
-     * يُرجع مصفوفة من الصفوف، كل صف يمثل زوج (نوع التقييم × الفئة العمرية).
-     * لكل زوج: العدد المستهدف، المستجيبون للتقييم القبلي ونسبتهم،
-     *           والمستجيبون للتقييم البعدي ونسبتهم.
-     */
     public function getSurveyAssessmentStatsProperty(): array
     {
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        if ($supervisedGroupIds !== null && empty($supervisedGroupIds)) {
+            return [];
+        }
+
         $isSqlite = DB::connection()->getDriverName() === 'sqlite';
 
-        // ── 1. جلب جميع استبيانات القبلي والبعدي مجمعةً حسب (section × target × age range)
-        $surveys = SurveyTable::with(['sectionRel', 'targetRel'])
+        // Use cache repository to completely avoid survey_table queries
+        $surveys = SurveyTableRepo::surveys()
             ->whereNotNull('survey_for_section')
             ->whereNotNull('survey_target')
-            ->orderBy('survey_for_section')
-            ->orderBy('survey_target')
-            ->orderBy('from_age')
-            ->get();
+            ->sortBy(function ($survey) {
+                return sprintf(
+                    '%010d-%010d-%010d',
+                    $survey->survey_for_section,
+                    $survey->survey_target,
+                    $survey->from_age ?? 0
+                );
+            });
+
+        $statuses = StatusRepo::statuses()->keyBy('id');
+        foreach ($surveys as $survey) {
+            $survey->setRelation('sectionRel', $statuses->get($survey->survey_for_section));
+            $survey->setRelation('targetRel', $statuses->get($survey->survey_target));
+        }
 
         if ($surveys->isEmpty()) {
             return [];
         }
 
-        // ── 2. تجميع الاستبيانات حسب (short_name × target × age range)
-        //    نستخدم الاسم المختصر كجزء من المفتاح حتى يجتمع القبلي والبعدي في صف واحد
         $groupedSurveys = [];
         foreach ($surveys as $survey) {
             $sectionName = $survey->sectionRel?->status_name ?? (string) $survey->survey_for_section;
             $shortName   = $this->abbreviateSurveyName($sectionName);
 
-            // المفتاح: الاسم المختصر + الفئة المستهدفة + نطاق العمر
             $key = $shortName . '||' . $survey->survey_target
                 . '||' . ($survey->from_age ?? 'null') . '||' . ($survey->to_age ?? 'null');
 
@@ -409,8 +534,8 @@ class EducationDirectorDashboard extends Component
                     'target_name'  => $survey->targetRel?->status_name ?? $survey->survey_target,
                     'from_age'     => $survey->from_age,
                     'to_age'       => $survey->to_age,
-                    'pre_survey'   => null,  // survey_for_section للقبلي (semester=1)
-                    'post_survey'  => null,  // survey_for_section للبعدي (semester=2)
+                    'pre_survey'   => null,
+                    'post_survey'  => null,
                     'pre_name'     => null,
                     'post_name'    => null,
                 ];
@@ -425,26 +550,28 @@ class EducationDirectorDashboard extends Component
             }
         }
 
-        // ── 3. تحديد المجموعات (student_groups) المفلترة حسب الدفعة
-        $groupQuery = StudentGroup::where('activation', 1);
-        if ($this->surveyBatchNo) {
-            $groupQuery->where('batch_no', $this->surveyBatchNo);
+        $filteredGroups = StudentGroupRepo::studentGroups()
+            ->where('activation', 1);
+
+        if ($supervisedGroupIds !== null) {
+            $filteredGroups = $filteredGroups->whereIn('id', $supervisedGroupIds);
         }
-        $filteredGroups = $groupQuery->get();
+
+        if ($this->surveyBatchNo) {
+            $filteredGroups = $filteredGroups->where('batch_no', $this->surveyBatchNo);
+        }
         $filteredGroupIds = $filteredGroups->pluck('id')->toArray();
 
         if (empty($filteredGroupIds)) {
             return [];
         }
 
-        // ── 4. حساب إحصائيات كل مجموعة
         $results = [];
 
         foreach ($groupedSurveys as $key => $info) {
             $fromAge = $info['from_age'];
             $toAge   = $info['to_age'];
 
-            // ── 4a. إجمالي الطلاب المستهدفين ضمن نطاق العمر في المجموعات المفلترة
             $totalQuery = Student::whereIn('students.student_groups_id', $filteredGroupIds)
                 ->join('student_groups', 'students.student_groups_id', '=', 'student_groups.id');
 
@@ -464,7 +591,6 @@ class EducationDirectorDashboard extends Component
 
             $targetCount = $totalQuery->count();
 
-            // ── 4b. دالة مساعدة لحساب المستجيبين لاستبيان معين
             $countRespondents = function (?int $surveySection) use ($filteredGroupIds, $fromAge, $toAge, $isSqlite): int {
                 if ($surveySection === null) {
                     return 0;
@@ -517,9 +643,6 @@ class EducationDirectorDashboard extends Component
         return $results;
     }
 
-    /**
-     * تحويل اسم الاستبيان الطويل إلى تسمية مختصرة بناءً على الكلمات المفتاحية.
-     */
     private function abbreviateSurveyName(string $name): string
     {
         if (str_contains($name, 'دعم نفسي')) {
@@ -542,7 +665,11 @@ class EducationDirectorDashboard extends Component
 
     public function getSupervisorReportsProperty()
     {
-        // Fetch all reports addressed to the director (or visible to all if superadmin)
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
+        if ($supervisedGroupIds !== null && empty($supervisedGroupIds)) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+        }
+
         $query = DB::table('reports')
             ->leftJoin('employees', 'reports.employee_id', '=', 'employees.id')
             ->select(
@@ -557,15 +684,36 @@ class EducationDirectorDashboard extends Component
                 'reports.covered_educational_activity_schedules_ids',
                 'reports.is_read',
                 'employees.full_name as submitter_name'
-            )
-            ->orderByDesc('reports.id');
+            );
 
-        // Filter by selected group if set
+        if ($supervisedGroupIds !== null) {
+            $selectedSupervisorUser = \App\Models\User::find($this->selectedSupervisorId ?: auth()->id());
+            $supervisorEmployee = employeeRepo::employees()
+                ->firstWhere('user_id', $selectedSupervisorUser?->id);
+            $supervisorEmployeeId = $supervisorEmployee?->id;
+
+            if ($supervisorEmployeeId) {
+                $query->where(function($q) use ($supervisorEmployeeId, $supervisedGroupIds) {
+                    $q->where('reports.employee_id', $supervisorEmployeeId);
+                    foreach ($supervisedGroupIds as $groupId) {
+                        $q->orWhereJsonContains('reports.student_group_ids', (int) $groupId);
+                    }
+                });
+            } else {
+                $query->where(function($q) use ($supervisedGroupIds) {
+                    foreach ($supervisedGroupIds as $groupId) {
+                        $q->orWhereJsonContains('reports.student_group_ids', (int) $groupId);
+                    }
+                });
+            }
+        }
+
+        $query->orderByDesc('reports.id');
+
         if ($this->reportSearchGroup) {
             $query->whereJsonContains('reports.student_group_ids', (int) $this->reportSearchGroup);
         }
 
-        // Filter by batch_no if set
         if ($this->reportSearchBatch) {
             $query->where('reports.batch_no', $this->reportSearchBatch);
         }
@@ -574,15 +722,12 @@ class EducationDirectorDashboard extends Component
 
         $allRows = [];
 
-        // Enrich and split each report per body
         foreach ($rawReports as $report) {
-            // Get report bodies
             $bodies = DB::table('report_body')
                 ->where('report_id', $report->id)
                 ->orderBy('item_order')
                 ->get()
                 ->map(function ($body) {
-                    // Parse attachments (double-encoded JSON)
                     $rawAtts = $body->attachments;
                     $atts = [];
                     if ($rawAtts) {
@@ -604,11 +749,9 @@ class EducationDirectorDashboard extends Component
                     return $body;
                 });
 
-            // Decode covered activities and schedules
             $activityIds = json_decode($report->covered_educational_activities_ids ?? '[]', true);
             $schedIds = json_decode($report->covered_educational_activity_schedules_ids ?? '[]', true);
 
-            // Fallback for older reports
             if (empty($activityIds) && !empty($schedIds)) {
                 $activityIds = DB::table('educational_activity_schedules')
                     ->whereIn('id', $schedIds)
@@ -618,7 +761,6 @@ class EducationDirectorDashboard extends Component
                     ->toArray();
             }
 
-            // Resolve activity names and domains
             $activitiesMap = [];
             if (!empty($activityIds)) {
                 $activitiesMap = DB::table('educational_activity_names')
@@ -630,11 +772,10 @@ class EducationDirectorDashboard extends Component
                     ->all();
             }
 
-            // Resolve group names from student_group_ids
             $groupIds = json_decode($report->student_group_ids ?? '[]', true);
             $groupNames = [];
             if (!empty($groupIds)) {
-                $groupNames = DB::table('student_groups')
+                $groupNames = StudentGroupRepo::studentGroups()
                     ->whereIn('id', $groupIds)
                     ->pluck('name')
                     ->toArray();
@@ -665,7 +806,6 @@ class EducationDirectorDashboard extends Component
                         $activityName = $activitiesMap[$actId]->activity_name;
                         $domainName   = $activitiesMap[$actId]->domain_name;
                     } else {
-                        // Fallback: if we don't have a specific actId for this index, use the first activity
                         if (!empty($activitiesMap)) {
                             $firstAct = reset($activitiesMap);
                             $activityName = $firstAct->activity_name;
@@ -692,18 +832,82 @@ class EducationDirectorDashboard extends Component
         );
     }
 
+    public function getLateTeachersProperty(): array
+    {
+        $user = auth()->user();
+        if (!\App\Services\SupervisorService::isSupervisor($user)) {
+            return [];
+        }
+
+        $supervisedGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user, true);
+        if (empty($supervisedGroupIds)) {
+            return [];
+        }
+
+        $delayedSchedules = \App\Models\ActivitySchedule::query()
+            ->whereIn('group_id', $supervisedGroupIds)
+            ->active()
+            ->pending()
+            ->where('period_end', '<', now()->startOfDay())
+            ->with(['employee'])
+            ->get();
+
+        return $delayedSchedules->groupBy('employee_id')->map(function ($schedules) {
+            $firstSchedule = $schedules->first();
+            $employeeName = $firstSchedule->employee?->full_name ?? __('Unknown Teacher');
+            return [
+                'employee_name' => $employeeName,
+                'delayed_count' => $schedules->count(),
+            ];
+        })->sortByDesc('delayed_count')->values()->toArray();
+    }
+
     public function render()
     {
-        $groups = StudentGroup::where('activation', 1)->orderBy('id', 'desc')->get();
-        $batches = StudentGroup::where('activation', 1)
-            ->whereNotNull('batch_no')
-            ->where('batch_no', '!=', '')
-            ->distinct()
-            ->orderBy('batch_no', 'asc')
-            ->pluck('batch_no');
+        $supervisedGroupIds = $this->getSupervisedGroupIds();
 
-        // Populate public property so it can be entangled
+        if ($supervisedGroupIds !== null) {
+            $groups = StudentGroupRepo::studentGroups()
+                ->whereIn('id', $supervisedGroupIds)
+                ->where('activation', 1)
+                ->sortByDesc('id')
+                ->values();
+            
+            $batches = StudentGroupRepo::studentGroups()
+                ->whereIn('id', $supervisedGroupIds)
+                ->where('activation', 1)
+                ->whereNotNull('batch_no')
+                ->filter(fn($g) => $g->batch_no !== '')
+                ->pluck('batch_no')
+                ->unique()
+                ->sort()
+                ->values();
+        } else {
+            $groups = StudentGroupRepo::studentGroups()
+                ->where('activation', 1)
+                ->sortByDesc('id')
+                ->values();
+            
+            $batches = StudentGroupRepo::studentGroups()
+                ->where('activation', 1)
+                ->whereNotNull('batch_no')
+                ->filter(fn($g) => $g->batch_no !== '')
+                ->pluck('batch_no')
+                ->unique()
+                ->sort()
+                ->values();
+        }
+
         $this->chartData = $this->getChartData();
+
+        $supervisors = [];
+        if ($this->canSelectSupervisor) {
+            $supervisors = \App\Models\Employee::whereIn('user_id', function ($query) {
+                $query->select('teacher_id')
+                    ->from('teacher_student_group')
+                    ->where('job_title', 167);
+            })->orderBy('full_name')->get();
+        }
 
         return view('livewire.org-app.reports.education-director-dashboard', [
             'metrics'               => $this->metrics,
@@ -712,6 +916,8 @@ class EducationDirectorDashboard extends Component
             'batches'               => $batches,
             'supervisorReports'     => $this->supervisorReports,
             'surveyAssessmentStats' => $this->surveyAssessmentStats,
+            'supervisors'           => $supervisors,
+            'lateTeachers'          => $this->lateTeachers,
         ]);
     }
 }

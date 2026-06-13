@@ -8,7 +8,7 @@
 @php
     //  $routesToHibernate = [ 'student.setup.map'];
     // $routesToHibernate = ['*.index', 'student.group.schedule*', 'activity.index', 'sector.show*'];
-    $routesToHibernate = ['reports.education.director.dashboard'];
+    $routesToHibernate = ['reports.education.director.dashboard', 'reports.supervisor.dashboard'];
 
     $shouldHibernate = collect($routesToHibernate)->contains(fn($pattern) => request()->routeIs($pattern));
 @endphp
@@ -401,8 +401,18 @@
                                 <flux:sidebar.item icon="clipboard-document-list"
                                     :href="route('reports.education.director.dashboard')"
                                     :current="request()->routeIs('reports.education.director.dashboard')" wire:navigate>
-                                    {{ __('director Dashboard') }}
+                                    {{ __('Director Dashboard') }}
                                 </flux:sidebar.item>
+
+                                @if (auth()->user()->isSuperAdmin() ||
+                                        Gate::allows('manager.reports.all') ||
+                                        \App\Services\SupervisorService::isSupervisor(auth()->user()))
+                                    <flux:sidebar.item icon="clipboard-document-list"
+                                        :href="route('reports.supervisor.dashboard')"
+                                        :current="request()->routeIs('reports.supervisor.dashboard')" wire:navigate>
+                                        {{ __('Supervisor Dashboard') }}
+                                    </flux:sidebar.item>
+                                @endif
 
                                 @can('survey-questions.show')
                                     <flux:sidebar.item icon="queue-list" :href="route('survey-questions.show')"

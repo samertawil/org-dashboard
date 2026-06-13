@@ -5,6 +5,7 @@ namespace App\Reposotries;
 use App\Models\ActivitySchedule;
 use App\Models\EducationalActivityDetail;
 use Illuminate\Support\Facades\Gate;
+use App\Services\SupervisorService;
 
 class EducationalActivityDetailRepo
 {
@@ -24,9 +25,8 @@ class EducationalActivityDetailRepo
             return $query;
         }
 
-        $teacherGroups = $user->teacher()->select('student_group_id', 'job_title')->get();
-        $groupIds167 = $teacherGroups->where('job_title', 167)->pluck('student_group_id')->toArray();
-        $groupIds166 = $teacherGroups->where('job_title', 166)->pluck('student_group_id')->toArray();
+        $groupIds167 = SupervisorService::getSupervisedGroupIds($user);
+        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->unique()->toArray();
         $employeeId = $user->employee?->id;
 
         return $query->where(function ($q) use ($groupIds167, $groupIds166, $employeeId) {
@@ -60,16 +60,19 @@ class EducationalActivityDetailRepo
     public static function getTeacherDetailsQuery()
     {
         $user = auth()->user();
-        $query = EducationalActivityDetail::query()->with(['educationalActivity.periodGroups', 'status']);
+        $query = EducationalActivityDetail::query()->with([
+            'educationalActivity.periodGroups',
+            'educationalActivity.activityNameStatus',
+            'status'
+        ]);
 
         if ($user->isSuperAdmin() || Gate::allows('select.any.educational-activity-detail') || Gate::allows('select.any.student')) {
 
             return $query;
         }
 
-        $teacherGroups = $user->teacher()->select('student_group_id', 'job_title')->get();
-        $groupIds167 = $teacherGroups->where('job_title', 167)->pluck('student_group_id')->toArray();
-        $groupIds166 = $teacherGroups->where('job_title', 166)->pluck('student_group_id')->toArray();
+        $groupIds167 = SupervisorService::getSupervisedGroupIds($user);
+        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->unique()->toArray();
         $employeeId = $user->employee?->id;
 
         return $query->whereHas('educationalActivity', function ($q) use ($groupIds167, $groupIds166, $employeeId) {

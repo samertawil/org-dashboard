@@ -144,7 +144,7 @@ class Index extends Component
                 ->with(['creator', 'surveyfor', 'student'])
                 // Permission-based filtering
                 ->when($teacherGroupIds !== null, function ($q) use ($employee, $teacherGroupIds) {
-                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds(auth()->user());
+                    $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds(auth()->user());
 
                     $q->whereHas('student', function ($sub) use ($teacherGroupIds) {
                         $sub->whereIn('student_groups_id', $teacherGroupIds);
@@ -224,7 +224,7 @@ class Index extends Component
             ->select('survey_answers.*')
             // Permission-based filtering
             ->when($teacherGroupIds !== null, function ($q) use ($employee, $teacherGroupIds) {
-                $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds(auth()->user());
+                $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds(auth()->user());
 
                 $q->whereHas('student', function ($sub) use ($teacherGroupIds) {
                     $sub->whereIn('student_groups_id', $teacherGroupIds);
@@ -336,9 +336,7 @@ class Index extends Component
         }
 
         // Supervisors (job_title=167) can query all employees in their groups
-        return TeacherStudentGroup::where('teacher_id', $user->id)
-            ->where('job_title', 167)
-            ->exists();
+        return \App\Services\SupervisorService::isSupervisor($user);
     }
 
     public function render()
@@ -369,9 +367,7 @@ class Index extends Component
         if ($user->isSuperAdmin() || Gate::allows('select.any.student')) {
             $employees = TeacherStudentGroup::employeesForEducationalTasks();
         } else {
-            $supervisorGroupIds = TeacherStudentGroup::where('teacher_id', $user->id)
-                ->where('job_title', 167)
-                ->pluck('student_group_id');
+            $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user);
 
             $employees = Employee::whereIn('user_id', function ($query) use ($supervisorGroupIds) {
                 $query->select('teacher_id')

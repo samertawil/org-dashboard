@@ -10,41 +10,47 @@ use Livewire\Component;
 
 class GroupsAttendance extends Component
 {
-    public $dateFrom = '2024-01-01';
+    public $dateFrom;
     public $dateTo;
+    public bool $isLazy = false;
+    public bool $loadData = false;
 
-    public function mount()
+    public function mount($dateFrom = null, $dateTo = null)
     {
-
-        $this->dateTo = Carbon::now()->format('Y-m-d');
+        $this->dateFrom = $dateFrom ?? Carbon::now()->format('Y-m-d');
+        $this->dateTo = $dateTo ?? Carbon::now()->format('Y-m-d');
     }
 
     public function render()
     {
         if (Gate::allows('reports.all') || Gate::allows('reports.groups.attendance') || Gate::allows('student.group.date.students')) {
-            $groups = StudentGroupRepo::activateEducationPointsWithEmployee()
-                ->map(function ($group) {
-                    // Calculate attendance within the date range
-                    $attendanceQuery = StudentDailyAttendance::where('student_group_id', $group->id);
+            $groups = collect();
 
-                    if ($this->dateFrom) {
-                        $attendanceQuery->whereDate('attendance_date', '>=', $this->dateFrom);
-                    }
-                    if ($this->dateTo) {
-                        $attendanceQuery->whereDate('attendance_date', '<=', $this->dateTo);
-                    }
+            if (!($this->isLazy && !$this->loadData)) {
+                $groups = StudentGroupRepo::activateEducationPointsWithEmployee()
+                    ->map(function ($group) {
+                        // Calculate attendance within the date range
+                        $attendanceQuery = StudentDailyAttendance::where('student_group_id', $group->id);
 
-                    $attendances = $attendanceQuery->get();
+                        if ($this->dateFrom) {
+                            $attendanceQuery->whereDate('attendance_date', '>=', $this->dateFrom);
+                        }
+                        if ($this->dateTo) {
+                            $attendanceQuery->whereDate('attendance_date', '<=', $this->dateTo);
+                        }
 
-                    return [
-                        'name' => $group->name,
-                        'region' => $group->region?->region_name ?? '-',
-                        'city' => $group->city?->city_name ?? '-',
-                        'neighbourhood' => $group->neighbourhood?->neighbourhood_name ?? '-',
-                        'present_count' => $attendances->where('status', 'present')->count(),
-                        'absent_count' => $attendances->where('status', 'absent')->count(),
-                    ];
-                });
+                        $attendances = $attendanceQuery->get();
+
+                        return [
+                            'name' => $group->name,
+                            'region' => $group->region?->region_name ?? '-',
+                            'city' => $group->city?->city_name ?? '-',
+                            'neighbourhood' => $group->neighbourhood?->neighbourhood_name ?? '-',
+                            'present_count' => $attendances->where('status', 'present')->count(),
+                            'absent_count' => $attendances->where('status', 'absent')->count(),
+                        ];
+                    });
+            }
 
             return view('livewire.org-app.reports.groups-attendance', [
                 'groups' => $groups

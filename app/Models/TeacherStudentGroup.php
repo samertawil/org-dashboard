@@ -47,12 +47,14 @@ class TeacherStudentGroup extends Model
 
     public static function employeesForEducationalTasks()
     {
-        return Employee::whereIn('user_id', function ($query) {
-            $query->select('teacher_id')
-                ->from('teacher_student_group')
-                ->whereNotNull('teacher_id');
-        })
-        ->orderBy('full_name')
-        ->get();
+        return \Illuminate\Support\Facades\Cache::remember('employees-for-educational-tasks', 3600, function () {
+            return Employee::whereIn('user_id', function ($query) {
+                $query->select('teacher_id')
+                    ->from('teacher_student_group')
+                    ->whereNotNull('teacher_id');
+            })
+            ->orderBy('full_name')
+            ->get();
+        });
     }
 }

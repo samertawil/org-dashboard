@@ -1,11 +1,33 @@
 <div class="flex flex-col gap-6" dir="rtl">
+    @php
+        $selectedSupervisorName = '';
+        if ($selectedSupervisorId) {
+            $selectedSupervisor = collect($supervisors)->firstWhere('user_id', $selectedSupervisorId);
+            if ($selectedSupervisor) {
+                $selectedSupervisorName = $selectedSupervisor->full_name;
+            } else {
+                $selectedSupervisorName = auth()->user()->employee?->full_name ?? auth()->user()->name;
+            }
+        }
+    @endphp
+
     <!-- Header & Actions -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden" dir="ltr">
         <div class="flex flex-col gap-1 text-left">
-            <flux:heading level="1" size="xl" class="font-bold text-zinc-900 dark:text-zinc-100">Education
-                Director Dashboard</flux:heading>
-            <flux:subheading class="text-zinc-500 dark:text-zinc-400">Monitor the educational process and key indicators
-                of the center</flux:subheading>
+            <flux:heading level="1" size="xl" class="font-bold text-zinc-900 dark:text-zinc-100">
+                @if($selectedSupervisorId)
+                    Supervisor Dashboard{{ $selectedSupervisorName ? ' - ' . $selectedSupervisorName : '' }}
+                @else
+                    Education Director Dashboard
+                @endif
+            </flux:heading>
+            <flux:subheading class="text-zinc-500 dark:text-zinc-400">
+                @if($selectedSupervisorId)
+                    Monitor the educational process and key indicators for the selected supervisor
+                @else
+                    Monitor the educational process and key indicators of the center
+                @endif
+            </flux:subheading>
         </div>
         <div class="flex gap-2 w-full sm:w-auto">
             <flux:button onclick="window.print()" icon="printer" variant="primary"
@@ -17,7 +39,13 @@
 
     <!-- Print Header -->
     <div class="hidden print:block text-center mb-8 border-b pb-4" dir="ltr">
-        <h1 class="text-2xl font-bold text-zinc-950">Education Director Dashboard</h1>
+        <h1 class="text-2xl font-bold text-zinc-950">
+            @if($selectedSupervisorId)
+                Supervisor Dashboard{{ $selectedSupervisorName ? ' - ' . $selectedSupervisorName : '' }}
+            @else
+                Education Director Dashboard
+            @endif
+        </h1>
         <p class="text-sm text-zinc-500 mt-2">
             From Date: {{ $dateFrom ?: '-' }} &nbsp;&bull;&nbsp; To Date: {{ $dateTo ?: '-' }}
         </p>
@@ -34,14 +62,27 @@
     <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm print:hidden"
         dir="ltr">
         <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                 <!-- Date From -->
                 <flux:input type="date" wire:model.live.debounce.500ms="dateFrom" label="From Date"
-                    class="w-full text-left" />
+                     class="w-full text-left" />
 
                 <!-- Date To -->
                 <flux:input type="date" wire:model.live.debounce.500ms="dateTo" label="To Date"
-                    class="w-full text-left" />
+                     class="w-full text-left" />
+
+                @if ($canSelectSupervisor)
+                    <!-- Supervisor Selection -->
+                    <div class="flex flex-col gap-1">
+                        <flux:label class="text-left">Supervisor</flux:label>
+                        <flux:select wire:model.live="selectedSupervisorId" class="w-full text-left">
+                            <option value="">-- All (Director View) --</option>
+                            @foreach ($supervisors as $sup)
+                                <option value="{{ $sup->user_id }}">{{ $sup->full_name }}</option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+                @endif
 
                 <!-- Student Center (Group) -->
                 <div class="flex flex-col gap-1">
@@ -57,9 +98,10 @@
                 <!-- Clear Filters Button -->
                 <div class="flex items-end justify-start">
                     @if (
-                        $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') ||
+                        $dateFrom !== \Carbon\Carbon::now()->format('Y-m-d') ||
                             $dateTo !== \Carbon\Carbon::now()->format('Y-m-d') ||
                             $selectedGroupId !== '' ||
+                            $selectedSupervisorId !== '' ||
                             $selectedBatchNo !== '')
                         <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark"
                             class="text-rose-600 hover:text-rose-700 dark:text-rose-400">
@@ -74,7 +116,7 @@
     <!-- Main Content Sections Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
         <!-- Backdrop Loading Overlay -->
-        <div wire:loading.delay wire:target="dateFrom,dateTo,selectedGroupId"
+        <div wire:loading.delay wire:target="dateFrom,dateTo,selectedGroupId,selectedSupervisorId"
             class="absolute inset-0 z-10 bg-white/50 dark:bg-zinc-800/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
             <flux:icon name="arrow-path" class="size-8 animate-spin text-indigo-600 dark:text-indigo-400" />
         </div>
@@ -1172,6 +1214,75 @@
             @endif
         </flux:card>
     </div>
+
+    {{-- Coordinator Report (Late Teachers) --}}
+    @if (\App\Services\SupervisorService::isSupervisor(auth()->user()))
+        <div class="mt-6" dir="rtl">
+            <flux:card class="p-6 overflow-hidden">
+                <div class="flex items-center gap-3 border-b pb-4 mb-6 dark:border-zinc-700">
+                    <div class="size-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                        <flux:icon name="exclamation-triangle" class="size-5" />
+                    </div>
+                    <div class="text-right">
+                        <flux:heading size="lg" class="font-bold">المعلمون المتأخرون عن تقديم التقارير</flux:heading>
+                        <flux:subheading>أسماء المعلمين وعدد التقارير المتأخرة المطلوبة منهم</flux:subheading>
+                    </div>
+                </div>
+
+                @if (empty($lateTeachers))
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <div class="size-16 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-4">
+                            <flux:icon name="check-circle" class="size-8 text-emerald-500" />
+                        </div>
+                        <p class="text-zinc-500 dark:text-zinc-400 font-medium">كل المعلمين قاموا بتسليم جميع التقارير المطلوبة</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-zinc-200 dark:border-zinc-700 text-xs">
+                                    <th class="pb-3 pt-1 px-3 font-bold text-zinc-700 dark:text-zinc-300">اسم المعلم</th>
+                                    <th class="pb-3 pt-1 px-3 font-bold text-zinc-700 dark:text-zinc-300 text-center">عدد التقارير المتأخرة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+                                @foreach ($lateTeachers as $teacher)
+                                    <tr class="hover:bg-amber-50/10 dark:hover:bg-amber-950/5 transition-colors">
+                                        <td class="py-3.5 px-3 font-semibold text-zinc-900 dark:text-zinc-100">
+                                            {{ $teacher['employee_name'] }}
+                                        </td>
+                                        <td class="py-3.5 px-3 text-center">
+                                            <flux:badge size="sm" color="red" class="font-bold rounded-full">
+                                                {{ $teacher['delayed_count'] }}
+                                            </flux:badge>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </flux:card>
+        </div>
+    @endif
+
+    {{-- Manager Report (Lazy-loaded Educational Tasks Stats for Highest Batch) --}}
+    @if (auth()->user()->can('select.any.student'))
+        <div class="mt-6" dir="rtl">
+            @livewire('org-app.reports.educational-tasks-stats', ['onlyHighestBatch' => true, 'lazy' => true])
+        </div>
+    @endif
+
+    {{-- Groups Attendance (Lazy-loaded with Date Filters inherited from Dashboard) --}}
+    @if (\Illuminate\Support\Facades\Gate::allows('reports.all') || \Illuminate\Support\Facades\Gate::allows('reports.groups.attendance') || \Illuminate\Support\Facades\Gate::allows('student.group.date.students'))
+        <div class="mt-6" dir="rtl">
+            @livewire('org-app.reports.groups-attendance', [
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+                'isLazy' => true
+            ], key('groups-attendance-' . $dateFrom . '-' . $dateTo))
+        </div>
+    @endif
 
     @assets
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

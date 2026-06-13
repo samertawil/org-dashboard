@@ -11,6 +11,10 @@ use Livewire\Component;
 
 class EducationalTasksStats extends Component
 {
+    public bool $lazy = false;
+    public bool $loadData = false;
+    public bool $onlyHighestBatch = false;
+
     /**
      * Build a batch → month → group statistics tree.
      * Structure:
@@ -22,10 +26,26 @@ class EducationalTasksStats extends Component
     #[Computed]
     public function statistics(): array
     {
-        // Load all active schedules with their group and activityDetail in one query
-        $schedules = ActivitySchedule::with(['group', 'activityDetail'])
-            ->active()
-            ->get();
+        if ($this->lazy && !$this->loadData) {
+            return [];
+        }
+
+        $query = ActivitySchedule::with(['group', 'activityDetail'])
+            ->active();
+
+        if ($this->onlyHighestBatch) {
+            $highestBatch = \App\Models\StudentGroup::where('activation', 1)
+                ->whereNotNull('batch_no')
+                ->where('batch_no', '<>', '')
+                ->max('batch_no');
+            if ($highestBatch) {
+                $query->whereHas('group', function ($q) use ($highestBatch) {
+                    $q->where('batch_no', $highestBatch);
+                });
+            }
+        }
+
+        $schedules = $query->get();
 
         $tree = [];
 

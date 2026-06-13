@@ -1,107 +1,76 @@
-<div class="flex flex-col gap-6">
-    <!-- Header & Actions -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
-        <div class="flex flex-col gap-1">
-            <flux:heading level="1" size="xl">{{ __('Groups Attendance Summary') }}</flux:heading>
-            <flux:subheading>{{ __('Attendance statistics for all student groups.') }}</flux:subheading>
-        </div>
-        <div class="flex gap-2 w-full sm:w-auto">
-            <span title="{{ __('Generate a physical or PDF version of this report') }}" class="w-full">
-                <flux:button onclick="window.print()" icon="printer" variant="primary" class="w-full">
-                    {{ __('Print Report') }}
+<div class="w-full">
+    @if ($isLazy && !$loadData)
+        <flux:card class="p-6 overflow-hidden text-right" dir="rtl">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
+                        <flux:icon name="users" class="size-5" />
+                    </div>
+                    <div class="text-right">
+                        <flux:heading size="lg" class="font-bold">القسم الثامن: إحصائيات حضور المجموعات</flux:heading>
+                        <flux:subheading>إحصائيات الحضور والغياب الإجمالية للمجموعات خلال الفترة الزمنية</flux:subheading>
+                    </div>
+                </div>
+                <flux:button wire:click="$set('loadData', true)" variant="primary" class="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto font-medium">
+                    <span wire:loading.remove wire:target="loadData">عرض حضور المجموعات</span>
+                    <span wire:loading wire:target="loadData" class="flex items-center gap-2">
+                        <flux:icon name="arrow-path" class="size-4 animate-spin text-white" />
+                        جاري التحميل...
+                    </span>
                 </flux:button>
-            </span>
-        </div>
-    </div>
-
-    <!-- Print Header -->
-    <div class="hidden print:block text-center mb-8">
-        <h1 class="text-2xl font-bold">{{ __('Groups Attendance Summary') }}</h1>
-        <p class="text-sm text-gray-500">{{ __('From') }}: {{ $dateFrom }} - {{ __('To') }}:
-            {{ $dateTo }}</p>
-    </div>
-
-    <!-- Filters -->
-    <div
-        class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm print:hidden">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <flux:input type="date" wire:model.live.debounce.700ms="dateFrom" label="{{ __('Date From') }}" />
-            <flux:input type="date" wire:model.live.debounce.700ms="dateTo" label="{{ __('Date To') }}" />
-        </div>
-    </div>
-
-    <!-- Report Container -->
-    <div
-        class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-        {{-- Mobile Cards View (Hidden on MD and up) --}}
-        <div class="md:hidden divide-y divide-zinc-200 dark:divide-zinc-700 print:hidden">
-            @forelse($groups as $group)
-                <div class="p-4 space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ $group['name'] }}</span>
-                        <div class="flex gap-2">
-                            <flux:badge color="green" size="sm">{{ $group['present_count'] }}
-                                {{ __('Present') }}</flux:badge>
-                            <flux:badge color="red" size="sm">{{ $group['absent_count'] }} {{ __('Absent') }}
-                            </flux:badge>
+            </div>
+        </flux:card>
+    @else
+        <div class="flex flex-col gap-6">
+            @if ($isLazy)
+                <flux:card class="p-6">
+                    <div class="flex items-center gap-3 border-b pb-4 mb-6 dark:border-zinc-700 text-right" dir="rtl">
+                        <div class="size-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
+                            <flux:icon name="users" class="size-5" />
+                        </div>
+                        <div class="text-right">
+                            <flux:heading size="lg" class="font-bold">القسم الثامن: إحصائيات حضور المجموعات</flux:heading>
+                            <flux:subheading>إحصائيات الحضور والغياب الإجمالية للمجموعات خلال الفترة الزمنية</flux:subheading>
                         </div>
                     </div>
-
+                    @include('livewire.org-app.reports.parts.groups-attendance-content')
+                </flux:card>
+            @else
+                <!-- Header & Actions -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
+                    <div class="flex flex-col gap-1">
+                        <flux:heading level="1" size="xl">{{ __('Groups Attendance Summary') }}</flux:heading>
+                        <flux:subheading>{{ __('Attendance statistics for all student groups.') }}</flux:subheading>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <span title="{{ __('Generate a physical or PDF version of this report') }}" class="w-full">
+                            <flux:button onclick="window.print()" icon="printer" variant="primary" class="w-full">
+                                {{ __('Print Report') }}
+                            </flux:button>
+                        </span>
+                    </div>
                 </div>
-            @empty
-                <div class="p-8 text-center text-sm text-zinc-500 italic">
-                    {{ __('No groups found.') }}
+
+                <!-- Print Header -->
+                <div class="hidden print:block text-center mb-8">
+                    <h1 class="text-2xl font-bold">{{ __('Groups Attendance Summary') }}</h1>
+                    <p class="text-sm text-gray-500">{{ __('From') }}: {{ $dateFrom }} - {{ __('To') }}:
+                        {{ $dateTo }}</p>
                 </div>
-            @endforelse
+
+                <!-- Filters -->
+                <div
+                    class="bg-white dark:bg-zinc-800 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-sm print:hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <flux:input type="date" wire:model.live.debounce.700ms="dateFrom" label="{{ __('Date From') }}" />
+                        <flux:input type="date" wire:model.live.debounce.700ms="dateTo" label="{{ __('Date To') }}" />
+                    </div>
+                </div>
+
+                @include('livewire.org-app.reports.parts.groups-attendance-content')
+            @endif
         </div>
-
-        {{-- Desktop Table View (Hidden on small screens, shown on print) --}}
-        <div class="hidden md:block print:block overflow-x-auto">
-            <table class="w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                <thead class="bg-zinc-50 dark:bg-zinc-900">
-                    <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Group Name') }}
-                        </th>
-
-                        <th scope="col"
-                            class="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Present') }}
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                            {{ __('Absent') }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @forelse($groups as $group)
-                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-white">
-                                {{ $group['name'] }}
-                            </td>
-
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-green-600 dark:text-green-400">
-                                {{ $group['present_count'] }}
-                            </td>
-                            <td
-                                class="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-red-600 dark:text-red-400">
-                                {{ $group['absent_count'] }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-sm text-zinc-500">
-                                {{ __('No groups found.') }}
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    @endif
 
     <style>
         @media print {

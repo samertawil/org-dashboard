@@ -15,6 +15,7 @@ class EmployeeObserver
             $employee->user->update(['activation' => 0]);
         }
         Cache::forget('Employee-all');
+        Cache::forget('employees-for-educational-tasks');
     }
 
     /**
@@ -27,6 +28,7 @@ class EmployeeObserver
         }
         
         Cache::forget('Employee-all');
+        Cache::forget('employees-for-educational-tasks');
     }
 
     /**
@@ -39,6 +41,7 @@ class EmployeeObserver
             $employee->user->update(['activation' => 0]);
         }
         Cache::forget('Employee-all');
+        Cache::forget('employees-for-educational-tasks');
 
     }
 

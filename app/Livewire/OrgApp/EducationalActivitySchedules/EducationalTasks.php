@@ -8,6 +8,7 @@ use App\Models\EducationalActivityDetail;
 use App\Reposotries\StudentGroupRepo;
 use App\Reposotries\EducationalActivityDetailRepo;
 use App\Reposotries\EducationalActivityNameRepo;
+use App\Services\SupervisorService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -100,7 +101,21 @@ class EducationalTasks extends Component
     #[Computed]
     public function employees()
     {
-        return TeacherStudentGroup::employeesForEducationalTasks();
+        $user = auth()->user();
+        if ($user && ($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
+            return TeacherStudentGroup::employeesForEducationalTasks();
+        }
+
+        if ($user && SupervisorService::isSupervisor($user)) {
+            $supervised = SupervisorService::getSupervisedEmployees($user);
+            $currentUserEmployee = $user->employee;
+            if ($currentUserEmployee && !$supervised->contains('id', $currentUserEmployee->id)) {
+                $supervised->push($currentUserEmployee);
+            }
+            return $supervised->sortBy('full_name')->values();
+        }
+
+        return collect();
     }
 
     #[Computed]
@@ -114,6 +129,14 @@ class EducationalTasks extends Component
     #[Computed]
     public function groups()
     {
+        $user = auth()->user();
+        if ($user && ($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
+            return StudentGroupRepo::activateEducationPointsWithEmployee();
+        }
+
+        if ($user && SupervisorService::isSupervisor($user)) {
+            return SupervisorService::getSupervisedGroups($user, true);
+        }
 
         return StudentGroupRepo::activateEducationPointsWithEmployee();
     }
@@ -252,7 +275,7 @@ class EducationalTasks extends Component
     public function isManager(): bool
     {
         $user = auth()->user();
-        return $user && ($user->isSuperAdmin() || Gate::allows('select.any.student'));
+        return $user && ($user->isSuperAdmin() || Gate::allows('select.any.student') || SupervisorService::isSupervisor($user));
     }
 
     #[Title('Educational Activity Tasks')]

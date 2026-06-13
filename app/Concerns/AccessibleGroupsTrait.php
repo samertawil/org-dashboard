@@ -5,6 +5,7 @@ namespace App\Concerns;
 use App\Reposotries\StudentGroupRepo;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use App\Services\SupervisorService;
 
 trait AccessibleGroupsTrait
 {
@@ -14,6 +15,10 @@ trait AccessibleGroupsTrait
     #[Computed()]
     public function accessibleGroups()
     {
+        $user = auth()->user();
+        if (SupervisorService::isSupervisor($user) && !($user->isSuperAdmin() || Gate::allows('select.any.student'))) {
+            return SupervisorService::getSupervisedGroups($user, true);
+        }
         return StudentGroupRepo::educationPoints();
     }
 

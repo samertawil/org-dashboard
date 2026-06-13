@@ -38,12 +38,6 @@ class ActivitySchedulePolicy
         }
 
         // Use the same filtering logic as EducationalActivityDetailRepo::getTeacherSchedulesQuery()
-        // job_title 167 → group membership is enough
-        // job_title 166 → group membership AND employee_id must match
-        $groupIds167 = $user->teacher()->where('job_title', 167)->pluck('student_group_id')->toArray();
-        $groupIds166 = $user->teacher()->where('job_title', 166)->pluck('student_group_id')->toArray();
-        $employeeId  = $user->employee?->id;
-
         $allowed = EducationalActivityDetailRepo::getTeacherSchedulesQuery()
             ->where('id', $activitySchedule->id)
             ->exists();

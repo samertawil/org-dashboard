@@ -1,0 +1,1 @@
+activity-card-<?php echo e($act['compound_key']); ?>-<?php echo e(implode('-', $act['schedule_ids'])); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/06322e6cc5edf87dab5801659913c953.blade.php ENDPATH**/ ?>

@@ -1,0 +1,1 @@
+activity-card-{{ $act['compound_key'] }}-{{ implode('-', $act['schedule_ids']) }}

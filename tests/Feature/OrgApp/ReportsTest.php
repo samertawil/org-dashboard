@@ -81,3 +81,29 @@ it('renders groups attendance report', function () {
         ->assertStatus(200)
         ->assertSee('Reporting Group');
 });
+
+it('supports lazy loading of groups attendance', function () {
+    StudentGroup::create([
+        'name' => 'Reporting Group Lazy',
+        'max_students' => 20,
+        'activation' => 1,
+        'batch_no' => '1',
+        'start_date' => now()->subDay()->toDateString(),
+        'end_date' => now()->addDay()->toDateString(),
+    ]);
+
+    // When isLazy is true and loadData is false, it should show the trigger button but not the group names
+    Livewire::test(GroupsAttendance::class, ['isLazy' => true, 'loadData' => false])
+        ->assertStatus(200)
+        ->assertSee('عرض حضور المجموعات')
+        ->assertDontSee('Reporting Group Lazy')
+        ->assertViewHas('groups', function ($groups) {
+            return $groups->isEmpty();
+        })
+        // Set loadData to true
+        ->set('loadData', true)
+        ->assertSee('Reporting Group Lazy')
+        ->assertViewHas('groups', function ($groups) {
+            return $groups->isNotEmpty();
+        });
+});

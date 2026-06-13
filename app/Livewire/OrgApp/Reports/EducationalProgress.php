@@ -40,42 +40,34 @@ class EducationalProgress extends Component
 
     public function render()
     {
-        if (Gate::denies('reports.educational.progress')) {
+        $user = auth()->user();
+        if (Gate::denies('reports.educational.progress') && !\App\Services\SupervisorService::isSupervisor($user)) {
             abort(403, 'You do not have the necessary permissions.');
         }
 
+        $isAdmin = $user->isSuperAdmin() || Gate::allows('select.any.student') || Gate::allows('reports.educational.progress');
+        
+        $supervisedGroupIds = null;
+        if (\App\Services\SupervisorService::isSupervisor($user) && !$isAdmin) {
+            $supervisedGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user, true);
+        }
+
         // Fetch distinct available batch numbers from active student groups
-        $batches = StudentGroup::where('activation', 1)
-            ->whereNotNull('batch_no')
-            ->distinct()
+        $batchesQuery = StudentGroup::where('activation', 1)
+            ->whereNotNull('batch_no');
+        if ($supervisedGroupIds !== null) {
+            $batchesQuery->whereIn('id', $supervisedGroupIds);
+        }
+        $batches = $batchesQuery->distinct()
             ->pluck('batch_no')
             ->sort()
             ->values();
 
-        // 1. Base Query for Students
-        $studentQuery = Student::query()
-            ->where('activation', 1);
-
-        if ($this->selectedRegion) {
-            $studentQuery->whereHas('studentGroup', function ($q) {
-                $q->where('region_id', $this->selectedRegion);
-            });
-        }
-
-        if ($this->selectedBatch) {
-            $studentQuery->whereHas('studentGroup', function ($q) {
-                $q->where('batch_no', $this->selectedBatch);
-            });
-        }
-
-        if ($this->selectedGroup) {
-            $studentQuery->where('student_groups_id', $this->selectedGroup);
-        }
-
-        $students = $studentQuery->with(['studentGroup', 'region'])->get();
-
         // 2. Base Query for Groups (to filter charts if needed and calculate total capacity)
         $groupQuery = StudentGroup::query()->where('activation', 1);
+        if ($supervisedGroupIds !== null) {
+            $groupQuery->whereIn('id', $supervisedGroupIds);
+        }
         if ($this->selectedRegion) {
             $groupQuery->where('region_id', $this->selectedRegion);
         }
@@ -86,9 +78,20 @@ class EducationalProgress extends Component
             $groupQuery->where('id', $this->selectedGroup);
         }
         $groups = $groupQuery->get();
+        $groupIds = $groups->pluck('id')->toArray();
+
+        // 1. Base Query for Students
+        $studentQuery = Student::query()
+            ->where('activation', 1)
+            ->whereIn('student_groups_id', $groupIds);
+
+        $students = $studentQuery->with(['studentGroup', 'region'])->get();
 
         // Get groups filtered by region & batch for the dropdown selection
         $dropdownGroupsQuery = StudentGroup::where('activation', 1);
+        if ($supervisedGroupIds !== null) {
+            $dropdownGroupsQuery->whereIn('id', $supervisedGroupIds);
+        }
         if ($this->selectedRegion) {
             $dropdownGroupsQuery->where('region_id', $this->selectedRegion);
         }
@@ -172,11 +175,14 @@ class EducationalProgress extends Component
         ];
 
         // Fetch only regions that have active student groups
-        $activeRegions = Region::whereIn('id', function ($q) {
+        $activeRegions = Region::whereIn('id', function ($q) use ($supervisedGroupIds) {
             $q->select('region_id')
                 ->from('student_groups')
                 ->where('activation', 1)
                 ->whereNotNull('region_id');
+            if ($supervisedGroupIds !== null) {
+                $q->whereIn('id', $supervisedGroupIds);
+            }
         })->get();
 
         return view('livewire.org-app.reports.educational-progress', [

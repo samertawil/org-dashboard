@@ -17,6 +17,7 @@ class TeacherStudentGroupObserver
         if ($employee) {
             Cache::forget("employee-groups-{$employee->id}");
         }
+        Cache::forget('employees-for-educational-tasks');
     }
 
     /**

@@ -18,6 +18,7 @@ beforeEach(function () {
 
     // Set fixed test now to avoid day/night time dependency in status checks
     \Illuminate\Support\Carbon::setTestNow('2026-06-08 10:00:00');
+    \Illuminate\Support\Facades\Cache::flush();
 
     // Seed statuses
     \App\Models\Status::forceCreate([

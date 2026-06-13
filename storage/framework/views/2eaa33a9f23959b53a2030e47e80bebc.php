@@ -1,0 +1,1 @@
+task-mobile-<?php echo e($task->id); ?><?php /**PATH C:\xampp\htdocs\feras\org-dashboard\storage\framework\views/7cd11d2701e771b1eb1ee212e7d52bcc.blade.php ENDPATH**/ ?>

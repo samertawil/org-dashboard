@@ -212,7 +212,10 @@ class Index extends Component
             ->when(
                 $teacherGroupIds !== null,
                 function ($q) use ($user, $employee, $teacherGroupIds) {
-                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+
+
+
+                    $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user);
 
                     $q->whereIn('group_id', $teacherGroupIds)
                         ->where(function ($query) use ($supervisorGroupIds, $employee) {
@@ -330,7 +333,7 @@ class Index extends Component
             ->when(
                 $teacherGroupIds !== null,
                 function ($q) use ($user, $employee) {
-                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+                    $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user);
 
                     $q->where(function ($query) use ($supervisorGroupIds, $employee) {
                         $query->whereIn('group_id', $supervisorGroupIds)
@@ -420,7 +423,7 @@ class Index extends Component
             ->when(
                 $teacherGroupIds !== null,
                 function ($q) use ($user, $employee, $teacherGroupIds) {
-                    $supervisorGroupIds = TeacherStudentGroup::supervisorGroupIds($user);
+                    $supervisorGroupIds = \App\Services\SupervisorService::getSupervisedGroupIds($user);
 
                     $q->whereIn('group_id', $teacherGroupIds)
                         ->where(function ($query) use ($supervisorGroupIds, $employee) {

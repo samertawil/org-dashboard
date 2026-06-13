@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     Carbon::setTestNow('2026-06-08 10:00:00');
+    \Illuminate\Support\Facades\Cache::flush();
 
     // Define standard gates
     Gate::define('manager.reports.all', fn() => false);
@@ -386,6 +387,7 @@ it('calculates Section 4 survey 120 metrics correctly and filters by group but i
 
     // Test 1: Without group or batch filter, should aggregate both (2 students)
     Livewire::test(EducationDirectorDashboard::class)
+        ->set('selectedBatchNo', '')
         ->assertViewHas('surveyMetrics', function ($sm) {
             return $sm['total_registered']['count'] === 2 &&
                    $sm['age_6_9']['count'] === 1 && // Student A (8)
@@ -402,6 +404,7 @@ it('calculates Section 4 survey 120 metrics correctly and filters by group but i
 
     // Test 2: With group filter (Group A only), should only show Student A metrics
     Livewire::test(EducationDirectorDashboard::class)
+        ->set('selectedBatchNo', '')
         ->set('selectedGroupId', $groupA->id)
         ->assertViewHas('surveyMetrics', function ($sm) {
             return $sm['total_registered']['count'] === 1 &&
@@ -441,6 +444,7 @@ it('calculates Section 4 survey 120 metrics correctly and filters by group but i
 
     // Test 5: Date filters shouldn't affect the survey metrics
     Livewire::test(EducationDirectorDashboard::class)
+        ->set('selectedBatchNo', '')
         ->set('dateFrom', '2030-01-01')
         ->set('dateTo', '2030-12-31')
         ->assertViewHas('surveyMetrics', function ($sm) {
@@ -499,6 +503,7 @@ it('splits supervisor reports with multiple bodies and covered activities into s
         'report_date' => '2026-06-08',
         'date_from' => '2026-06-01',
         'date_to' => '2026-06-15',
+        'batch_no' => 'B1',
         'student_group_ids' => json_encode([$group->id]),
         'covered_educational_activities_ids' => json_encode([$act1->id, $act2->id]),
         'covered_educational_activity_schedules_ids' => json_encode([]),
@@ -556,4 +561,82 @@ it('splits supervisor reports with multiple bodies and covered activities into s
             return $firstMatch && $secondMatch;
         });
 });
+
+it('calculates late teachers list for supervisor (coordinator) correctly', function () {
+    // 1. Seed supervisor & teacher statuses (167 & 166)
+    Status::forceCreate([
+        'id' => 167,
+        'status_name' => 'Supervisor',
+        'p_id_sub' => 165,
+    ]);
+    Status::forceCreate([
+        'id' => 166,
+        'status_name' => 'Teacher',
+        'p_id_sub' => 165,
+    ]);
+
+    // 2. Create Supervisor and Teacher
+    $supervisorUser = User::factory()->create(['id' => 10]);
+    $teacherUser = User::factory()->create(['id' => 11]);
+
+    $teacherEmployee = \App\Models\Employee::create([
+        'user_id' => $teacherUser->id,
+        'employee_number' => 'EMP166',
+        'full_name' => 'Late Teacher Name',
+        'gender' => 2,
+        'activation' => 1,
+    ]);
+
+    // 3. Create Group
+    $group = StudentGroup::create([
+        'name' => 'Supervisor Group A',
+        'batch_no' => 'B1',
+        'activation' => 1,
+    ]);
+
+    // Link supervisor to Group
+    \App\Models\TeacherStudentGroup::create([
+        'teacher_id' => $supervisorUser->id,
+        'student_group_id' => $group->id,
+        'job_title' => 167,
+    ]);
+
+    // 4. Create delayed schedule (no activity detail, end in past)
+    $actName = EducationalActivityName::create([
+        'activity_name' => 'Late Activity',
+        'activation' => 1,
+    ]);
+
+    ActivitySchedule::create([
+        'group_id' => $group->id,
+        'activity_name' => $actName->id,
+        'educational_activity_domain' => 187,
+        'target_category' => 'children',
+        'period_start' => '2026-06-01 09:00:00',
+        'period_end' => '2026-06-01 10:00:00', // Past date
+        'educational_period_groups' => 200,
+        'activation' => 1,
+        'employee_id' => $teacherEmployee->id,
+    ]);
+
+    // Acting as Supervisor
+    $this->actingAs($supervisorUser);
+
+    Livewire::test(EducationDirectorDashboard::class)
+        ->assertViewHas('lateTeachers', function ($lateTeachers) {
+            return count($lateTeachers) === 1 &&
+                   $lateTeachers[0]['employee_name'] === 'Late Teacher Name' &&
+                   $lateTeachers[0]['delayed_count'] === 1;
+        });
+});
+
+it('can mount educational tasks stats', function () {
+    User::where('id', 1)->delete();
+    $adminUser = User::factory()->create(['id' => 1, 'activation' => 1]);
+    $this->actingAs($adminUser);
+
+    Livewire::test(\App\Livewire\OrgApp\Reports\EducationalTasksStats::class)
+        ->assertStatus(200);
+});
+
 
