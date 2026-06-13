@@ -20,6 +20,14 @@ class EducationalProgress extends Component
     public array $groupChartData = ['labels' => [], 'series' => []];
     public array $ageChartData = ['labels' => [], 'series' => []];
 
+    public function mount(): void
+    {
+        $this->selectedBatch = StudentGroup::where('activation', 1)
+            ->whereNotNull('batch_no')
+            ->where('batch_no', '!=', '')
+            ->max('batch_no');
+    }
+
     public function updatedSelectedBatch(): void
     {
         $this->selectedGroup = '';

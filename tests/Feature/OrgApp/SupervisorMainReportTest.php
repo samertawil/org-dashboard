@@ -195,6 +195,7 @@ it('CreateReport saves report, report bodies, and sends email', function () {
     // Verify ReportBody
     $this->assertDatabaseHas('report_body', ['report_id' => $report->id]);
     $body = ReportBody::where('report_id', $report->id)->first();
+    expect($body->title)->toBe('Creative Writing — Group X');
     expect($body->attachments)->toHaveCount(1);
     expect($body->attachments[0]['name'])->toBe('img1.png');
 

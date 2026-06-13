@@ -30,16 +30,6 @@ class EducationDirectorDashboard extends Component
     // Section 6 – Survey Assessment Stats (pre/post per batch)
     public $surveyBatchNo = '';
 
-    public function updatingReportSearchGroup()
-    {
-        $this->resetPage('reportsPage');
-    }
-
-    public function updatingReportSearchBatch()
-    {
-        $this->resetPage('reportsPage');
-    }
-
     public function mount()
     {
         if (Gate::denies('manager.reports.all') && Gate::denies('select.any.student') && !auth()->user()->isSuperAdmin()) {
@@ -570,7 +560,7 @@ class EducationDirectorDashboard extends Component
             $query->where('reports.batch_no', $this->reportSearchBatch);
         }
 
-        $rawReports = $query->paginate(10, ['*'], 'reportsPage');
+        $rawReports = $query->get();
 
         $allRows = [];
 
@@ -680,16 +670,7 @@ class EducationDirectorDashboard extends Component
             }
         }
 
-        return new \Illuminate\Pagination\LengthAwarePaginator(
-            $allRows,
-            $rawReports->total(),
-            $rawReports->perPage(),
-            $rawReports->currentPage(),
-            [
-                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
-                'pageName' => 'reportsPage',
-            ]
-        );
+        return collect($allRows);
     }
 
     public function render()

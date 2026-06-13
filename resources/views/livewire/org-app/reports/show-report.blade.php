@@ -137,7 +137,10 @@
                         <span class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-2">{{ __('Covered Student Groups') }}</span>
                         <ul class="space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300 list-disc list-inside bg-zinc-50 dark:bg-zinc-800/40 p-4 rounded-xl border border-zinc-150 dark:border-zinc-750">
                             @foreach ($coveredGroups as $groupName)
-                                <li>{{ $groupName }}</li>
+                                @php
+                                    $isGrpArabic = preg_match('/\p{Arabic}/u', $groupName);
+                                @endphp
+                                <li dir="{{ $isGrpArabic ? 'rtl' : 'ltr' }}" class="{{ $isGrpArabic ? 'text-right' : 'text-left' }}">{{ $groupName }}</li>
                             @endforeach
                         </ul>
                     </div>
@@ -148,7 +151,10 @@
                         <span class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-2">{{ __('Covered Educational Activities') }}</span>
                         <ul class="space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300 list-disc list-inside bg-zinc-50 dark:bg-zinc-800/40 p-4 rounded-xl border border-zinc-150 dark:border-zinc-750">
                             @foreach ($coveredActivities as $actName)
-                                <li>{{ $actName }}</li>
+                                @php
+                                    $isActArabic = preg_match('/\p{Arabic}/u', $actName);
+                                @endphp
+                                <li dir="{{ $isActArabic ? 'rtl' : 'ltr' }}" class="{{ $isActArabic ? 'text-right' : 'text-left' }}">{{ $actName }}</li>
                             @endforeach
                         </ul>
                     </div>
@@ -169,23 +175,33 @@
         <div class="space-y-6">
             @forelse ($report->bodies as $body)
                 <flux:card class="border-l-4 border-l-indigo-400 p-6 space-y-4 print-avoid-break">
+                    @php
+                        $itemTitle = $body->title ?: __('Untitled Item');
+                        $isTitleArabic = preg_match('/\p{Arabic}/u', $itemTitle);
+                    @endphp
                     <div class="flex items-center justify-between mb-2 pb-3 border-b border-zinc-200 dark:border-zinc-700">
-                        <div class="flex items-center gap-2">
+                        <div dir="{{ $isTitleArabic ? 'rtl' : 'ltr' }}" class="flex items-center gap-2">
                             <flux:badge color="indigo" size="sm">{{ $body->item_order }}</flux:badge>
                             <h3 class="text-base font-bold text-zinc-850 dark:text-zinc-150">
-                                {{ $body->title ?: __('Untitled Item') }}
+                                {{ $itemTitle }}
                             </h3>
                         </div>
                     </div>
 
                     {{-- Content --}}
-                    <div class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                    @php
+                        $isContentArabic = preg_match('/\p{Arabic}/u', $body->content);
+                    @endphp
+                    <div dir="{{ $isContentArabic ? 'rtl' : 'ltr' }}" class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap {{ $isContentArabic ? 'text-right' : 'text-left' }}">
                         {{ $body->content }}
                     </div>
 
                     {{-- Observation --}}
                     @if ($body->observation)
-                        <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-sm text-amber-800 dark:text-amber-300 space-y-1">
+                        @php
+                            $isObsArabic = preg_match('/\p{Arabic}/u', $body->observation);
+                        @endphp
+                        <div dir="{{ $isObsArabic ? 'rtl' : 'ltr' }}" class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-sm text-amber-800 dark:text-amber-300 space-y-1 {{ $isObsArabic ? 'text-right' : 'text-left' }}">
                             <strong class="text-xs uppercase tracking-wider block font-bold text-amber-900 dark:text-amber-400">{{ __('Observation') }}</strong>
                             <div>{{ $body->observation }}</div>
                         </div>
@@ -200,6 +216,9 @@
                                     @php
                                         $url = is_array($att) ? ($att['url'] ?? $att['path'] ?? '') : $att;
                                         $name = is_array($att) ? ($att['name'] ?? __('File')) : __('File');
+                                        if ($url && !str_starts_with($url, 'http') && !str_contains($url, 'storage')) {
+                                            $url = 'storage/' . ltrim($url, '/');
+                                        }
                                     @endphp
                                     @if ($url)
                                         <a href="{{ asset($url) }}" target="_blank" class="border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 flex flex-col items-center gap-1.5 bg-white dark:bg-zinc-900 hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors shadow-xs">

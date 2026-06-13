@@ -1,0 +1,318 @@
+[2026-06-12 11:36:00] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/educational-tasks","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:35:59.307Z"} 
+[2026-06-12 11:36:57] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/supervisor-activities-report","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:36:56.421Z"} 
+[2026-06-12 11:37:59] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:37:58.141Z"} 
+[2026-06-12 11:38:20] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/educational-tasks","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:38:19.220Z"} 
+[2026-06-12 11:38:37] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/supervisor-activities-report","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:38:36.928Z"} 
+[2026-06-12 11:41:00] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:40:57.764Z"} 
+[2026-06-12 11:41:12] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('search', ''); $set('filterDate', '')"  http://127.0.0.1:8000/dashboard/educational-activity-detail http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/educational-activity-detail null null null null null null null null null null null null null null null null null null null null null null null {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:08.635Z"} 
+[2026-06-12 11:41:12] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('filterDate', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:08.636Z"} 
+[2026-06-12 11:41:12] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('filterDate', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:08.637Z"} 
+[2026-06-12 11:41:25] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('search', ''); $set('filterDate', '')"  http://127.0.0.1:8000/dashboard/educational-activity-detail http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/educational-activity-detail null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:22.721Z"} 
+[2026-06-12 11:41:25] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('filterDate', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:22.721Z"} 
+[2026-06-12 11:41:25] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('filterDate', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/educational-activity-detail","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:41:22.721Z"} 
+[2026-06-12 11:42:29] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:42:28.435Z"} 
+[2026-06-12 11:42:42] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:42:41.490Z"} 
+[2026-06-12 11:53:04] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:53:03.099Z"} 
+[2026-06-12 11:54:29] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:54:29.170Z"} 
+[2026-06-12 11:59:13] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:59:12.833Z"} 
+[2026-06-12 11:59:16] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:59:16.127Z"} 
+[2026-06-12 11:59:27] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/educational-tasks","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T08:59:26.414Z"} 
+[2026-06-12 12:01:02] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:01.525Z"} 
+[2026-06-12 12:01:07] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:07.287Z"} 
+[2026-06-12 12:01:21] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:20.735Z"} 
+[2026-06-12 12:01:24] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:24.136Z"} 
+[2026-06-12 12:01:53] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/users/index","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:52.130Z"} 
+[2026-06-12 12:01:57] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '')"  http://127.0.0.1:8000/dashboard/users/index http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/users/index null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null {"url":"http://127.0.0.1:8000/dashboard/users/index","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.599Z"} 
+[2026-06-12 12:01:57] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '')"  http://127.0.0.1:8000/dashboard/users/index http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/users/index null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null {"url":"http://127.0.0.1:8000/dashboard/users/index","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.599Z"} 
+[2026-06-12 12:01:57] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=%D9%90","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.605Z"} 
+[2026-06-12 12:01:57] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=%D9%90","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.605Z"} 
+[2026-06-12 12:01:57] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=%D9%90","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.606Z"} 
+[2026-06-12 12:01:57] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=%D9%90","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:54.606Z"} 
+[2026-06-12 12:02:01] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '')"  http://127.0.0.1:8000/dashboard/users/index http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/users/index null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null null {"url":"http://127.0.0.1:8000/dashboard/users/index","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:58.818Z"} 
+[2026-06-12 12:02:01] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=a","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:58.824Z"} 
+[2026-06-12 12:02:01] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('search', ''); $set('searchEmail', ''); $set('searchActivation', ''); $set('searchRole', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:64)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/users/index?search=a","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:01:58.824Z"} 
+[2026-06-12 12:02:15] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:02:14.537Z"} 
+[2026-06-12 12:02:35] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:02:34.324Z"} 
+[2026-06-12 12:02:49] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:02:48.953Z"} 
+[2026-06-12 12:04:56] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:04:56.128Z"} 
+[2026-06-12 12:05:21] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:05:20.710Z"} 
+[2026-06-12 12:08:01] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/14/show","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:08:01.202Z"} 
+[2026-06-12 12:09:13] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/14/show","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:09:12.567Z"} 
+[2026-06-12 12:09:18] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/14/show","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:09:17.439Z"} 
+[2026-06-12 12:10:08] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:10:08.058Z"} 
+[2026-06-12 12:10:15] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/14/show","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:10:14.491Z"} 
+[2026-06-12 12:10:41] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/saved-reports","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:10:41.207Z"} 
+[2026-06-12 12:17:43] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:17:43.321Z"} 
+[2026-06-12 12:18:02] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:18:01.746Z"} 
+[2026-06-12 12:18:50] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:18:49.767Z"} 
+[2026-06-12 12:18:54] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:18:54.187Z"} 
+[2026-06-12 12:19:53] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:19:52.719Z"} 
+[2026-06-12 12:19:57] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:19:57.437Z"} 
+[2026-06-12 12:21:05] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:21:04.447Z"} 
+[2026-06-12 12:21:36] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:21:35.683Z"} 
+[2026-06-12 12:21:59] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/supervisor-activities-report","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:21:58.628Z"} 
+[2026-06-12 12:22:26] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:22:25.686Z"} 
+[2026-06-12 12:23:34] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:23:34.044Z"} 
+[2026-06-12 12:24:42] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:24:41.963Z"} 
+[2026-06-12 12:25:07] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '')"  http://127.0.0.1:8000/dashboard/reports/education-director-dashboard http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/reports/education-director-dashboard null null null {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:07.384Z"} 
+[2026-06-12 12:25:07] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:07.414Z"} 
+[2026-06-12 12:25:07] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:07.414Z"} 
+[2026-06-12 12:25:16] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '')"  http://127.0.0.1:8000/dashboard/reports/education-director-dashboard http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/reports/education-director-dashboard null null null null {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:15.675Z"} 
+[2026-06-12 12:25:16] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:15.698Z"} 
+[2026-06-12 12:25:16] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T09:25:15.698Z"} 
+[2026-06-12 15:12:08] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:12:07.883Z"} 
+[2026-06-12 15:34:00] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/survey-statistics","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:34:00.280Z"} 
+[2026-06-12 15:34:11] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:34:10.402Z"} 
+[2026-06-12 15:39:44] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:39:44.362Z"} 
+[2026-06-12 15:40:05] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:40:04.707Z"} 
+[2026-06-12 15:40:30] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:40:29.617Z"} 
+[2026-06-12 15:41:09] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/survey-statistics","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:41:08.850Z"} 
+[2026-06-12 15:41:49] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:41:48.696Z"} 
+[2026-06-12 15:42:59] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:42:59.131Z"} 
+[2026-06-12 15:44:18] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:44:17.465Z"} 
+[2026-06-12 15:46:26] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:46:25.575Z"} 
+[2026-06-12 15:46:58] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:46:57.721Z"} 
+[2026-06-12 15:47:59] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:47:59.012Z"} 
+[2026-06-12 15:53:10] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:53:10.321Z"} 
+[2026-06-12 15:54:17] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:54:17.239Z"} 
+[2026-06-12 15:54:39] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T12:54:39.543Z"} 
+[2026-06-12 16:08:12] local.DEBUG: Drawing Markers: 1 8 {"url":"http://127.0.0.1:8000/dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T13:08:12.188Z"} 
+[2026-06-12 16:08:12] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T13:08:12.276Z"} 
+[2026-06-12 18:10:48] local.DEBUG: Drawing Markers: 1 8 {"url":"http://127.0.0.1:8000/dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:10:47.813Z"} 
+[2026-06-12 18:10:48] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:10:47.914Z"} 
+[2026-06-12 18:11:25] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:11:24.370Z"} 
+[2026-06-12 18:13:57] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:13:57.335Z"} 
+[2026-06-12 18:15:10] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:15:10.055Z"} 
+[2026-06-12 18:16:45] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:16:44.466Z"} 
+[2026-06-12 18:17:30] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '')"  http://127.0.0.1:8000/dashboard/reports/education-director-dashboard http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/reports/education-director-dashboard null null null {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:17:30.110Z"} 
+[2026-06-12 18:17:30] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:17:30.136Z"} 
+[2026-06-12 18:17:30] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:17:30.147Z"} 
+[2026-06-12 18:17:30] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:17:30.219Z"} 
+[2026-06-12 18:28:06] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '')"  http://127.0.0.1:8000/dashboard/reports/education-director-dashboard http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/reports/education-director-dashboard null null null {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:28:06.003Z"} 
+[2026-06-12 18:28:06] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:28:06.035Z"} 
+[2026-06-12 18:28:06] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:28:06.035Z"} 
+[2026-06-12 18:28:06] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:28:06.119Z"} 
+[2026-06-12 18:32:08] local.WARNING: Alpine Expression Error: $set is not defined
+
+Expression: "argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '')"  http://127.0.0.1:8000/dashboard/reports/education-director-dashboard http://127.0.0.1:8000 http: 127.0.0.1:8000 127.0.0.1 8000 /dashboard/reports/education-director-dashboard null null null {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:32:05.800Z"} 
+[2026-06-12 18:32:08] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:32:05.840Z"} 
+[2026-06-12 18:32:08] local.ERROR: Uncaught ReferenceError: $set is not defined http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae 1330 7 ReferenceError $set is not defined ReferenceError: $set is not defined
+    at [Alpine] argumentsToArray('reportSearchGroup', ''); $set('reportSearchBatch', '') (eval at safeAsyncFunction (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:75)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1309:14)
+    at Object.evaluate (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:1343:34)
+    at Directive.parseOutMethodsAndParams (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5783:29)
+    at get methods (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5764:19)
+    at getTargets (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14665:18)
+    at http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:14515:33
+    at Array.<anonymous> (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:5702:9)
+    at trigger2 (http://127.0.0.1:8000/livewire-8c4fa514/livewire.js?id=cfc5c1ae:4294:34) {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:32:05.840Z"} 
+[2026-06-12 18:32:08] local.DEBUG: ServiceWorker registration successful with scope: http://127.0.0.1:8000/ {"url":"http://127.0.0.1:8000/dashboard/reports/education-director-dashboard","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36","timestamp":"2026-06-12T15:32:06.698Z"} 

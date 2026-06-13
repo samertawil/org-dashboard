@@ -11,6 +11,7 @@ class ReportBody extends Model
     protected $fillable = [
         'report_id',
         'item_order',
+        'title',
         'content',
         'observation',
         'status_id',

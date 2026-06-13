@@ -448,3 +448,112 @@ it('calculates Section 4 survey 120 metrics correctly and filters by group but i
         });
 });
 
+it('splits supervisor reports with multiple bodies and covered activities into separate rows', function () {
+    $adminUser = User::factory()->create(['id' => 1]);
+    $this->actingAs($adminUser);
+
+    // Create statuses to satisfy report constraints
+    $periodType = Status::create(['status_name' => 'Monthly', 'p_id_sub' => 192]);
+    $mainType = Status::create(['status_name' => 'Educational', 'p_id_sub' => 197]);
+
+    // Create employees
+    $empA = \App\Models\Employee::create([
+        'employee_number' => 'EMP001',
+        'full_name' => 'First Employee',
+        'gender' => 2,
+        'activation' => 1,
+    ]);
+
+    $empB = \App\Models\Employee::create([
+        'employee_number' => 'EMP002',
+        'full_name' => 'Second Employee',
+        'gender' => 3,
+        'activation' => 1,
+    ]);
+
+    // Create 2 activities
+    $act1 = EducationalActivityName::create([
+        'activity_name' => 'Activity One',
+        'activity_domain' => 187, // Education
+        'activation' => 1,
+    ]);
+
+    $act2 = EducationalActivityName::create([
+        'activity_name' => 'Activity Two',
+        'activity_domain' => 188, // Psychological
+        'activation' => 1,
+    ]);
+
+    // Create a group
+    $group = StudentGroup::create([
+        'name' => 'Test Group',
+        'batch_no' => 'B1',
+        'activation' => 1,
+    ]);
+
+    // Create a report with 2 covered activities
+    $reportId = DB::table('reports')->insertGetId([
+        'report_name' => 'Multi-body Report Test',
+        'report_period_type' => $periodType->id,
+        'report_main_type' => $mainType->id,
+        'report_date' => '2026-06-08',
+        'date_from' => '2026-06-01',
+        'date_to' => '2026-06-15',
+        'student_group_ids' => json_encode([$group->id]),
+        'covered_educational_activities_ids' => json_encode([$act1->id, $act2->id]),
+        'covered_educational_activity_schedules_ids' => json_encode([]),
+        'employee_id' => $empA->id,
+        'addressed_to_employees' => $empB->id,
+        'addressed_to_dept_types' => json_encode(['director']),
+    ]);
+
+    // Insert 2 bodies for the report
+    DB::table('report_body')->insert([
+        [
+            'report_id' => $reportId,
+            'item_order' => 1,
+            'title' => 'Custom Title One',
+            'content' => 'Content of Activity One',
+            'observation' => 'Observation One',
+            'attachments' => json_encode([]),
+        ],
+        [
+            'report_id' => $reportId,
+            'item_order' => 2,
+            'title' => 'Custom Title Two',
+            'content' => 'Content of Activity Two',
+            'observation' => 'Observation Two',
+            'attachments' => json_encode([]),
+        ],
+    ]);
+
+    // Test that the component splits this report into 2 rows in the supervisorReports collection
+    Livewire::test(EducationDirectorDashboard::class)
+        ->assertViewHas('supervisorReports', function ($reports) use ($act1, $act2) {
+            if ($reports->count() !== 2) {
+                return false;
+            }
+
+            $firstRow = $reports->first();
+            $secondRow = $reports->last();
+
+            // First row checks
+            $firstBody = $firstRow->bodies->first();
+            $firstMatch = $firstRow->activity_name === 'Activity One' &&
+                          $firstRow->domain_name === 'التعليم' &&
+                          $firstBody->title === 'Custom Title One' &&
+                          $firstBody->content === 'Content of Activity One' &&
+                          $firstBody->observation === 'Observation One';
+
+            // Second row checks
+            $secondBody = $secondRow->bodies->first();
+            $secondMatch = $secondRow->activity_name === 'Activity Two' &&
+                           $secondRow->domain_name === 'الدعم النفسي' &&
+                           $secondBody->title === 'Custom Title Two' &&
+                           $secondBody->content === 'Content of Activity Two' &&
+                           $secondBody->observation === 'Observation Two';
+
+            return $firstMatch && $secondMatch;
+        });
+});
+

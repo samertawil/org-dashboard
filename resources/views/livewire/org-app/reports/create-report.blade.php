@@ -280,6 +280,9 @@
                                         @php
                                             $url = is_array($att) ? $att['url'] ?? ($att['path'] ?? '') : $att;
                                             $name = is_array($att) ? $att['name'] ?? __('File') : __('File');
+                                            if ($url && !str_starts_with($url, 'http') && !str_contains($url, 'storage')) {
+                                                $url = 'storage/' . ltrim($url, '/');
+                                            }
                                         @endphp
                                         @if ($url)
                                             <label

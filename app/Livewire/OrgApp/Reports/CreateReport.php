@@ -214,6 +214,7 @@ class CreateReport extends Component
                 ReportBody::create([
                     'report_id'               => $report->id,
                     'item_order'              => $index + 1,
+                    'title'                   => $item['title'] ?: null,
                     'content'                 => $item['content'],
                     'observation'             => $item['observation'] ?: null,
                     'status_id'               => null,
