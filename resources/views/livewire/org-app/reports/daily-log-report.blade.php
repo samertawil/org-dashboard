@@ -405,8 +405,8 @@
                                 <div class="p-3 flex-1 space-y-2">
                                     {{-- Activity Name --}}
                                     <h4 class="text-sm font-bold text-zinc-900 dark:text-white leading-tight truncate"
-                                        title="{{ $schedule->activity_name }}">
-                                        {{ $schedule->activity_name ?? '-' }}
+                                        title="{{ $schedule->activityNameStatus->activity_name ?? $schedule->activity_name }}">
+                                        {{ $schedule->activityNameStatus->activity_name ?? $schedule->activity_name ?? '-' }}
                                     </h4>
 
                                     {{-- Schedule Info Grid --}}

@@ -90,6 +90,7 @@ class DailyLogReport extends Component
             ->with([
                 'status',
                 'educationalActivity.activityDomain',
+                'educationalActivity.activityNameStatus',
                 'educationalActivity.periodGroups',
                 'educationalActivity.group',
                 'educationalActivity.employee',
